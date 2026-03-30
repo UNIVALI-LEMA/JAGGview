@@ -1,4 +1,4 @@
-si_prefixes <- function(number, decimals = 2) {
+international_system_prefixes <- function(number, decimals = 2) {
   value <- ifelse(
     abs(number) >= 1e6, number / 1e6,
     ifelse(
