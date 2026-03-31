@@ -114,7 +114,7 @@ kobe_plotly <- function(df) {
             y1 = df$col04$ymax,
             x0 = df$col04$xmin,
             x1 = df$col04$xmax,
-            fillcolor = "#00FF00",
+            fillcolor = df$col04$col,
             layer = "below"
           )
         ),

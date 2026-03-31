@@ -1,5 +1,5 @@
 hindcast_plotly <- function(lista_dfs, combinacoes) {
-  n_cores <- length(unique(lista_dfs$dados$retro))
+  n_cores <- length(unique(lista_dfs$data$retro))
 
   my_palette <- colorRampPalette(jet_colors)(n_cores)
 
@@ -8,19 +8,19 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
     sc <- combinacoes$Scenario[i]
     idx <- combinacoes$Index[i]
 
-    dados <- lista_dfs$dados %>%
+    data <- lista_dfs$data %>%
       filter(Scenario == sc, Index == idx)
 
-    dados_hindcast_1 <- lista_dfs$dados_hindcast_1 %>%
+    hindcast_data_1 <- lista_dfs$hindcast_data_1 %>%
       filter(Scenario == sc, Index == idx)
 
-    dados_hindcast_2 <- lista_dfs$dados_hindcast_2 %>%
+    hindcast_data_2 <- lista_dfs$hindcast_data_2 %>%
       filter(Scenario == sc, Index == idx)
 
-    dados_mase <- lista_dfs$dados_mase %>%
+    mase_data <- lista_dfs$mase_data %>%
       filter(Scenario == sc, Index == idx)
 
-    if(nrow(dados) == 0) {
+    if(nrow(data) == 0) {
       return(
           empty_plotly("There is no data for this combination of Scenario and Index")
         )
@@ -28,7 +28,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
 
     plot_ly(colors = my_palette) %>%
     add_ribbons(
-      data = dados %>% filter(retro.peels == 0, year >= 2014),
+      data = data %>% filter(retro.peels == 0, year >= 2014),
       x = ~year,
       ymin = ~hat.lci,
       ymax = ~hat.uci,
@@ -40,7 +40,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
       )
     ) %>%
       add_ribbons(
-        data = dados %>% filter(retro.peels == 0, year %in% 1979:2014),
+        data = data %>% filter(retro.peels == 0, year %in% 1979:2014),
         x = ~year,
         ymin = ~hat.lci,
         ymax = ~hat.uci,
@@ -52,7 +52,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         )
       ) %>%
       add_lines(
-        data = dados %>% filter(hindcast == FALSE),
+        data = data %>% filter(hindcast == FALSE),
         x = ~year,
         y = ~hat,
         color = ~as.factor(retro),
@@ -66,7 +66,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         inherit = FALSE
       ) %>%
       add_lines(
-        data = dados_hindcast_2,
+        data = hindcast_data_2,
         x = ~year,
         y = ~hat,
         line = list(width = 2, color = "black"),
@@ -77,7 +77,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         )
       ) %>%
       add_markers(
-        data = dados %>% filter(retro.peels == 0, year < 2015),
+        data = data %>% filter(retro.peels == 0, year < 2015),
         x = ~year,
         y = ~obs,
         marker = list(
@@ -94,7 +94,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         )
       ) %>%
       add_markers(
-        data = dados_hindcast_1,
+        data = hindcast_data_1,
         x = ~year,
         y = ~obs,
         color = ~as.factor(retro),
@@ -112,7 +112,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         )
       ) %>%
       add_markers(
-        data = dados_hindcast_1,
+        data = hindcast_data_1,
         x = ~year,
         y = ~hat,
         color = ~as.factor(retro),
@@ -130,7 +130,7 @@ hindcast_plotly <- function(lista_dfs, combinacoes) {
         )
       ) %>%
       add_text(
-        data = dados_mase,
+        data = mase_data,
         x = ~x,
         y = ~y,
         hoverinfo = "none",

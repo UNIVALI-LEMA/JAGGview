@@ -1,22 +1,22 @@
 retrospective_analysis_correlation_plotly <- function(lista_dfs, var, title_y, title_x) {
-  n_cores <- length(unique(lista_dfs$dados_surplus$id))
+  n_cores <- length(unique(lista_dfs$surplus_data$id))
 
   my_palette <- colorRampPalette(jet_colors)(n_cores)
   
-  lista_plots_plotly <- lapply(unique(lista_dfs$dados_surplus$Scenario), function(sc){
-    dados_surplus <- lista_dfs$dados_surplus %>%
+  lista_plots_plotly <- lapply(unique(lista_dfs$surplus_data$Scenario), function(sc){
+    surplus_data <- lista_dfs$surplus_data %>%
       filter(Scenario == sc)
 
-    max_y <- max(dados_surplus$SP)
+    max_y <- max(surplus_data$SP)
 
-    max_x <- max(dados_surplus$SB_i) * 0.8
+    max_x <- max(surplus_data$SB_i) * 0.8
 
-    dados_rho <- lista_dfs$dados_rho %>%
+    rho_data <- lista_dfs$rho_data %>%
       filter(Scenario == sc, Index == var)
 
     plot_ly(colors = my_palette) %>% 
       add_lines(
-        data = dados_surplus,
+        data = surplus_data,
         x = ~SB_i,
         y = ~SP,
         color = ~as.factor(id),
@@ -29,7 +29,7 @@ retrospective_analysis_correlation_plotly <- function(lista_dfs, var, title_y, t
         )
       ) %>%
       add_text(
-        data = dados_rho,
+        data = rho_data,
         x = max_x,
         y = max_y,
         text = ~paste0("ρ= ", mil_milhao(rho, decimals = 3)),

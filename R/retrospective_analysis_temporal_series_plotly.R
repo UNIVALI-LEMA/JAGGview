@@ -1,20 +1,20 @@
 retrospective_analysis_temporal_series_plotly <- function(lista_dfs, var, title_y) {
-  n_cores <- length(unique(lista_dfs$dados$id))
+  n_cores <- length(unique(lista_dfs$data$id))
 
   my_palette <- colorRampPalette(jet_colors)(n_cores)
   
-  lista_plots_plotly <- lapply(unique(lista_dfs$dados$Scenario), function(sc){
-    dados <- lista_dfs$dados %>%
+  lista_plots_plotly <- lapply(unique(lista_dfs$data$Scenario), function(sc){
+    data <- lista_dfs$data %>%
       filter(Scenario == sc, Index == var)
 
-    max_y <- max(dados$uci)
+    max_y <- max(data$uci)
 
-    dados_rho <- lista_dfs$dados_rho %>%
+    rho_data <- lista_dfs$rho_data %>%
       filter(Scenario == sc, Index == var)
 
     plot_ly(colors = my_palette) %>% 
       add_ribbons(
-        data = dados %>% filter(id == "Ref"),
+        data = data %>% filter(id == "Ref"),
         x = ~Year,
         ymin = ~lci,
         ymax = ~uci,
@@ -26,7 +26,7 @@ retrospective_analysis_temporal_series_plotly <- function(lista_dfs, var, title_
         )
       ) %>%
       add_lines(
-        data = dados %>% filter(teste == TRUE),
+        data = data %>% filter(teste == TRUE),
         x = ~Year,
         y = ~mu,
         color = ~as.factor(id),
@@ -39,7 +39,7 @@ retrospective_analysis_temporal_series_plotly <- function(lista_dfs, var, title_
         )
       ) %>%
       add_text(
-        data = dados_rho,
+        data = rho_data,
         x = ~x,
         y = max_y,
         text = ~paste0("ρ= ", mil_milhao(rho, decimals = 3))
