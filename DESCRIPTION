@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: 
     c(
         person("Thiago", "Pacheco", , "thiago_pacheco@edu.univali.br", role = c("aut", "cre")),
-        person("Rodrigo", "Sant'Ana", , "rsantana@univali.br", role = c("aut", "cre"))
+        person("Rodrigo", "Sant'Ana", , "rsantana@univali.br", role = c("aut"))
     )
 Description: Static and shiny application for visualizing results from models implemented 
     with JABBA, focusing on fit diagnostics, run tests, CPUE conflicts, process error, priors 
@@ -17,3 +17,8 @@ RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Imports: 
+    dplyr,
+    ggplot2,
+    stats,
+    tidyr

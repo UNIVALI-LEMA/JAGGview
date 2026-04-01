@@ -1,0 +1,216 @@
+#' Prepare fitted index data and confidence intervals
+#'
+#' Processes model outputs to generate formatted data for fitted indices,
+#' including mean values and confidence intervals (80% and 95%).
+#'
+#' This function extracts index and uncertainty information from a list
+#' of model results, computes upper and lower confidence bounds, and
+#' organizes the data for downstream visualization.
+#'
+#' @param list_models A list containing model outputs as returned by JABBA
+#'   or similar stock assessment models.
+#'
+#' @return A named list with three elements:
+#' \describe{
+#'   \item{Li_Ui}{A data frame containing mean values and lower (Li) and
+#'   upper (Ui) confidence bounds.}
+#'   \item{CI_80}{A data frame containing fitted values and 80\% confidence
+#'   intervals.}
+#'   \item{CI_95}{A data frame containing fitted values and 95\% confidence
+#'   intervals.}
+#' }
+#'
+#' @details
+#' The function internally processes scenario-based outputs, replaces
+#' missing values based on reference data, reshapes the data into long
+#' format, and computes confidence intervals assuming normality.
+#'
+#' @examples
+#' \dontrun{
+#' result <- fits_data(list_models)
+#' names(result)
+#' }
+#'
+#' @export
+#' @importFrom tidyr pivot_longer 
+#' @importFrom dplyr %>% select filter full_join 
+#' @importFrom stats complete.cases
+fits_data <- function(list_models) {
+  ###@> Index...
+  tmp01 <- .process_scenarios(list_models, vars = "I")
+  
+  ###@> SE...
+  tmp02 <- .process_scenarios(list_models, vars = "SE2")
+
+  ##@> Replacing NA...
+  tmp02 <- .replace_na_with_na(tmp02, tmp01)
+
+  ####@> Merging tmp01 and tmp02...
+  tmp01 <- pivot_longer(
+    data = tmp01, names_to = "Index", values_to = "Mean", 3:ncol(tmp01)
+  )
+  tmp02 <- pivot_longer(
+    data = tmp02, names_to = "Index", values_to = "SE", 3:ncol(tmp02)
+  )
+  tmp00 <- full_join(tmp01, tmp02)
+
+  ####@> Estimating Upper and Lower errors...
+  tmp00$error <- with(tmp00, (1.96 * sqrt(SE)))
+  tmp00$Ui <- with(tmp00, Mean + error)
+  tmp00$Li <- with(tmp00, Mean - error)
+  tmp00 <- tmp00[complete.cases(tmp00),]
+
+  ####@> Organizing the structure...
+  tmp00$Index <- factor(
+    x = tmp00$Index, 
+    levels = c("Joint_LL_R2_Early","Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
+  )
+
+  tmp00 <- tmp00 %>%
+    select(-SE) %>%
+    filter(Index != is.na(Index))
+
+  ####@> Fit (CI 80%)...
+  tmp03 <- .process_cpues(list_models, vars = "ppd")
+  tmp03$Index[is.na(tmp03$Index)] <- "Joint_LL_R02_DLN"
+
+  tmp03$Index <- factor(
+    x = tmp03$Index, 
+    levels = c("Joint_LL_R2_Early", "Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
+  )
+
+  tmp03 <- tmp03 %>% 
+    select(-c(se, obserror)) %>%
+    filter(Index != is.na(Index))
+
+  ####@> Fit (CI 95%)...
+  tmp04 <- .process_cpues(list_models, vars = "hat")
+  tmp04$Index[is.na(tmp04$Index)] <- "Joint_LL_R02_DLN"
+
+  tmp04$Index <- factor(
+    x = tmp04$Index, 
+    levels = c("Joint_LL_R2_Early", "Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
+  )
+
+  tmp04 <- tmp04 %>% 
+    select(-c(se, obserror, mu)) %>%
+    filter(Index != is.na(Index))
+
+  list(
+    Li_Ui = tmp00,
+    CI_80 = tmp03,
+    CI_95 = tmp04
+  )
+}
+
+#' Plot fitted indices with confidence intervals
+#'
+#' Creates a ggplot2-based visualization of fitted abundance indices,
+#' including mean values and confidence intervals (80% and 95%).
+#'
+#' @param df_lists A named list of data frames as returned by
+#'   \code{fits_data()}. It must contain the elements \code{Li_Ui},
+#'   \code{CI_80}, and \code{CI_95}.
+#' @param palette A character vector of colors used for plotting.
+#' @param title_y A character string for the y-axis label.
+#'   Defaults to "Abundance index".
+#'
+#' @return A ggplot object displaying fitted indices with uncertainty
+#'   ribbons, error bars, and observed values, faceted by scenario and index.
+#'
+#' @details
+#' The plot includes ribbons representing 80\% and 95\% confidence
+#' intervals, a fitted line, observed points with error bars, and
+#' faceting by scenario and index.
+#'
+#' @examples
+#' \dontrun{
+#' df <- fits_data(list_models)
+#' fits_ggplot(df, palette = c("blue"))
+#' }
+#'
+#' @export
+#' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
+#' scale_y_continuous labs geom_point aes
+fits_ggplot <- function(df_lists, palette, title_y = "Abundance index") {
+  ggplot() +
+    geom_ribbon(data = df_lists$CI_80,
+        aes(x = Year, ymin = lci, ymax = uci),
+        alpha = 0.3, fill = palette[1]) +
+    geom_ribbon(data = df_lists$CI_95,
+        aes(x = Year, ymin = lci, ymax = uci),
+        alpha = 0.3, fill = palette[1]) +
+    geom_line(data = df_lists$CI_80,
+        aes(x = Year, y = mu)) +
+    geom_errorbar(data = df_lists$Li_Ui,
+                  aes(x = Year, ymin = Li, ymax = Ui)) +
+    geom_point(data = df_lists$Li_Ui,
+        aes(x = Year, y = Mean),
+        pch = 21, fill = "white", size = 1.5) +
+    facet_grid(Scenario ~ Index, scales = "free") +
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 4, 0.5)) +
+    labs(x = "Year", y = title_y) +
+    .my_theme()
+}
+
+#' Extract and combine scenario-level data
+#'
+#' Internal helper that extracts scenario-specific variables from a list
+#' of model outputs and combines them into a single data frame.
+#'
+#' @param fit_list A list of model outputs.
+#' @param vars A character string indicating which variable to extract.
+#'   Supported values are "I" (index) and "SE2" (variance).
+#'
+#' @return A data frame containing year, scenario, and extracted variables.
+#'
+#' @keywords internal
+#' @importFrom dplyr bind_rows
+.process_scenarios <- function(fit_list, vars) {
+  temp00 <- lapply(fit_list, function(fit) {
+    cbind.data.frame(
+      Year = fit$yr,
+      Scenario = fit$scenario,
+      if(vars == "I") {
+        fit$settings$I
+      } else {
+        fit$settings$SE2
+      }
+    )
+  })
+  temp01 <- lapply(fit_list, function(fit) {
+    c("Year", "Scenario", unique(fit$diags$name))
+  })
+  tmp01 <- mapply(.rename_columns, temp00, temp01, SIMPLIFY = FALSE)
+  result <- bind_rows(tmp01)
+  return(result)
+}
+
+#' Extract and combine CPUE data
+#'
+#' Internal helper that extracts CPUE-related outputs from a list of
+#' model results, converts array-based data into data frames, and
+#' combines them into a single structure.
+#'
+#' @param fit_list A list of model outputs.
+#' @param vars A character string indicating which CPUE output to extract.
+#'   Supported values are "ppd" and "hat".
+#'
+#' @return A data frame containing combined CPUE data across scenarios.
+#'
+#' @keywords internal
+#' @importFrom dplyr bind_rows
+.process_cpues <- function(fit_list, vars) {
+  temp00 <- lapply(fit_list, function(fit) {
+    cbind.data.frame(
+      Scenario = fit$scenario,
+      if(vars == "ppd") {
+          .array_to_dataframe(fit$cpue.ppd)
+      } else {
+          .array_to_dataframe(fit$cpue.hat)
+      }
+    )
+  })
+  result <- bind_rows(temp00)
+  return(result)
+}
