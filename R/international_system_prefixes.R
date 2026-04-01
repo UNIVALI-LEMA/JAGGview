@@ -48,5 +48,17 @@ international_system_prefixes <- function(number, decimals = 2) {
     )
   )
   
-  paste0(trimws(format_number(value, decimals = decimals)), suffix)
+  paste0(trimws(.format_number(value, decimals = decimals)), suffix)
+}
+
+.format_number <- function(
+  number, decimals = 2, big.mark = ",", decimal.mark = "."
+) {
+  format(
+    round(number, decimals),
+    big.mark = big.mark,
+    decimal.mark = decimal.mark,
+    nsmall = decimals,
+    scientific = FALSE
+  )
 }
