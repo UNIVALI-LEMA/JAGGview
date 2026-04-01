@@ -20,5 +20,6 @@ Config/testthat/edition: 3
 Imports: 
     dplyr,
     ggplot2,
+    JABBA,
     stats,
     tidyr
