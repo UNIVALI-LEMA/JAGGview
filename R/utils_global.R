@@ -4,5 +4,5 @@ utils::globalVariables(c(
   "y", "Value", "my_pal", ".", "lcl", "ucl", "ymin", 
   "ymax", "pvalue", "Stastistic", "K", "Scenario", 
   "limit", "psi", "r", "value_1", "value_2", 
-  "variable", ""
+  "variable", "id", "SB_i", "SP", "rho", ""
 ))
