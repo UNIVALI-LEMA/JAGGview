@@ -7,5 +7,6 @@ utils::globalVariables(c(
   "variable", "id", "SB_i", "SP", "rho", "MASE", 
   "hat", "hat.lci", "hat.uci", "hindcast", "level", 
   "name", "obs", "retro", "retro.peels", "year", 
-  "Bdev", "lcl2", "run", "ucl2", ""
+  "Bdev", "lcl2", "run", "ucl2", "Bratio", "Fratio",
+  "harvest", "stock", "xmax", "xmin", ""
 ))
