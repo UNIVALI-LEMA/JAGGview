@@ -8,7 +8,7 @@ retrospective_analysis_data(hc_raw_data)
 }
 \arguments{
 \item{hc_raw_data}{A list containing retrospective model outputs as
-returned by the JABBA function \code{JABBA::hindcast_jabba()}}
+returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
 }
 \value{
 A named list with three elements:
