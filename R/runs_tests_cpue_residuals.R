@@ -4,8 +4,8 @@
 #' structures for CPUE indices, including confidence limits and LOESS
 #' smoothing.
 #'
-#' @param list_models A list of model outputs as returned by JABBA
-#'   or similar stock assessment models.
+#' @param list_models A list containing model outputs as returned by the 
+#' JABBA function \code{JABBA::fit_jabba()}.
 #'
 #' @return A named list with three elements:
 #' \describe{
@@ -13,7 +13,7 @@
 #'   LOESS values, and confidence bands.}
 #'   \item{SE3}{A data frame containing runs test results, including
 #'   lower and upper confidence limits and p-values.}
-#'   \item{dados_RMSE}{A data frame with RMSE-related diagnostics.}
+#'   \item{RMSE_data}{A data frame with RMSE-related diagnostics.}
 #' }
 #'
 #' @details
@@ -24,13 +24,15 @@
 #'
 #' @examples
 #' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_models <- list(fit.S01, fit.S02)
 #' df <- runs_tests_data(list_models)
-#' names(df)
+#' df
 #' }
 #'
 #' @export
-#' @importFrom dplyr mutate
-#' @importFrom dplyr %>% filter left_join
+#' @importFrom dplyr %>% mutate filter left_join select
 #' @importFrom JABBA jbruns_sig3
 #' @importFrom stats loess predict complete.cases
 runs_tests_data <- function(list_models) {
@@ -96,12 +98,12 @@ runs_tests_data <- function(list_models) {
   tmp05$upper <- pred$fit + 1.96 * pred$se.fit
   tmp05$lower <- pred$fit - 1.96 * pred$se.fit
 
-  dados_RMSE <- .cpue_conflicts_data(list_models)
+  RMSE_data <- .cpue_conflicts_data(list_models)
 
   list(
     cpue_residuals = tmp05,
     SE3 = out.test,
-    dados_RMSE = dados_RMSE
+    RMSE_data = RMSE_data
   )
 }
 
@@ -171,12 +173,12 @@ cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
                pch = 21, size = 2) +
     geom_smooth(data = df_lists$cpue_residuals, 
       aes(x = Year, y = Res), se = TRUE, colour = "black") +
-    geom_text(data = df_lists$dados_RMSE,
+    geom_text(data = df_lists$RMSE_data,
               aes(x = x, y = y, label = paste0("RMSE = ", Value, " %"))) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
     scale_y_continuous(expand = c(0, 0), limits = c(-1, 1)) +
-    scale_fill_manual(values = my_pal) +
-    scale_colour_manual(values = my_pal) +
+    scale_fill_manual(values = palette) +
+    scale_colour_manual(values = palette) +
     labs(x = "Year", y = title_y, fill = "", colour = "") +
     .my_theme() +
     theme(legend.position = "top")

@@ -7,8 +7,8 @@
 runs_tests_data(list_models)
 }
 \arguments{
-\item{list_models}{A list of model outputs as returned by JABBA
-or similar stock assessment models.}
+\item{list_models}{A list containing model outputs as returned by the
+JABBA function \code{JABBA::fit_jabba()}.}
 }
 \value{
 A named list with three elements:
@@ -17,7 +17,7 @@ A named list with three elements:
 LOESS values, and confidence bands.}
 \item{SE3}{A data frame containing runs test results, including
 lower and upper confidence limits and p-values.}
-\item{dados_RMSE}{A data frame with RMSE-related diagnostics.}
+\item{RMSE_data}{A data frame with RMSE-related diagnostics.}
 }
 }
 \description{
@@ -33,8 +33,11 @@ from the fitted model.
 }
 \examples{
 \dontrun{
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_models <- list(fit.S01, fit.S02)
 df <- runs_tests_data(list_models)
-names(df)
+df
 }
 
 }

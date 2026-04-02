@@ -7,16 +7,16 @@
 #' of model results, computes upper and lower confidence bounds, and
 #' organizes the data for downstream visualization.
 #'
-#' @param list_models A list containing model outputs as returned by JABBA
-#'   or similar stock assessment models.
+#' @param list_models A list containing model outputs as returned by the 
+#' JABBA function \code{JABBA::fit_jabba()}.
 #'
 #' @return A named list with three elements:
 #' \describe{
 #'   \item{Li_Ui}{A data frame containing mean values and lower (Li) and
 #'   upper (Ui) confidence bounds.}
-#'   \item{CI_80}{A data frame containing fitted values and 80\% confidence
+#'   \item{CI_80}{A data frame containing fitted values and 80% confidence
 #'   intervals.}
-#'   \item{CI_95}{A data frame containing fitted values and 95\% confidence
+#'   \item{CI_95}{A data frame containing fitted values and 95% confidence
 #'   intervals.}
 #' }
 #'
@@ -27,8 +27,11 @@
 #'
 #' @examples
 #' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_models <- list(fit.S01, fit.S02)
 #' result <- fits_data(list_models)
-#' names(result)
+#' result
 #' }
 #'
 #' @export
