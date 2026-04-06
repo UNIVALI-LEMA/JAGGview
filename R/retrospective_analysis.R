@@ -130,11 +130,11 @@ retrospective_analysis_data <- function(hc_raw_data) {
 #'
 #' @param df_lists A named list as returned by
 #'   \code{retrospective_analysis_data()}.
-#' @param var A character string specifying the variable to plot.
+#' @param variable A character string specifying the variable to plot.
 #'   Supported values include "B", "F", "BBmsy", "FFmsy",
 #'   "procB", and "MSY".
 #' @param title_y A character string for the y-axis label. If \code{NULL},
-#'   a default label is assigned based on \code{var}.
+#'   a default label is assigned based on \code{variable}.
 #'
 #' @return A ggplot object displaying retrospective trajectories,
 #'   confidence intervals (when applicable), and rho annotations.
@@ -148,16 +148,16 @@ retrospective_analysis_data <- function(hc_raw_data) {
 #' @examples
 #' \dontrun{
 #' df <- retrospective_analysis_data(hc_raw_data)
-#' retrospective_analysis_ggplot(df, var = "B")
+#' retrospective_analysis_ggplot(df, variable = "B")
 #' }
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_line aes geom_ribbon geom_text facet_wrap
 #' scale_colour_manual scale_y_continuous labs theme element_text
 #' @importFrom JABBA ss3col
-retrospective_analysis_ggplot <- function(df_lists, var, title_y = NULL) {
+retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
 
-  if (var != "MSY") {
+  if (variable != "MSY") {
     data <- df_lists$data
     title_x <- "Year"
   } else {
@@ -174,22 +174,22 @@ retrospective_analysis_ggplot <- function(df_lists, var, title_y = NULL) {
     MSY = "Surplus Production (t)"
   )
 
-  title_y <- labels_y[[var]]
-
-if (is.null(title_y)) title_y <- var
+  if (is.null(title_y)) {
+    title_y <- labels_y[[variable]]
+  }
   
   rho_data <- df_lists$rho_data
-  data_var <- data[data$Index == var, ]
+  data_var <- data[data$Index == variable, ]
   
   data_ref   <- data_var[data_var$id == "Ref", ]
-  if (var != "MSY") {
+  if (variable != "MSY") {
     data_lines <- data_var[data_var$teste == TRUE, ]
   } else {
     data_lines <- data_var
   }
-  rho_var    <- rho_data[rho_data$Index == var, ]
+  rho_var    <- rho_data[rho_data$Index == variable, ]
   
-  if (var == "MSY") {
+  if (variable == "MSY") {
     max_val <- .round_up_to_nearest(max(data_var$SP, na.rm = TRUE))
     min_val <- 0
   } else {
@@ -201,7 +201,7 @@ if (is.null(title_y)) title_y <- var
   
   p <- ggplot()
   
-  if (var != "MSY") {
+  if (variable != "MSY") {
     p <- p +
       geom_ribbon(
         data = data_ref,

@@ -8,5 +8,5 @@ utils::globalVariables(c(
   "hat", "hat.lci", "hat.uci", "hindcast", "level", 
   "name", "obs", "retro", "retro.peels", "year", 
   "Bdev", "lcl2", "run", "ucl2", "Bratio", "Fratio",
-  "harvest", "stock", "xmax", "xmin", ""
+  "harvest", "stock", "xmax", "xmin", ".data"
 ))

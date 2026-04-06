@@ -37,7 +37,7 @@ characterise uncertainty.
 \dontrun{
 list_models <- jbplot_ensemble()
 df <- process_error_data(list_models)
-head(df)
+df
 }
 
 }
