@@ -45,17 +45,3 @@
   return(df1)
 }
 
-#' Rename data frame columns
-#'
-#' Internal helper to assign new column names to a data frame.
-#'
-#' @param df A data frame.
-#' @param col_names A character vector with new column names.
-#'
-#' @return The data frame with renamed columns.
-#'
-#' @keywords internal
-#' @importFrom stats setNames 
-.rename_columns <- function(df, col_names) {
-  setNames(df, col_names)
-}

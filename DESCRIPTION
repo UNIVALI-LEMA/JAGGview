@@ -19,6 +19,7 @@ Suggests:
 Config/testthat/edition: 3
 Imports: 
     dplyr,
+    forcats,
     ggplot2,
     gplots,
     JABBA,

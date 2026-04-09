@@ -38,7 +38,11 @@
 #' @importFrom tidyr pivot_longer 
 #' @importFrom dplyr %>% select filter full_join 
 #' @importFrom stats complete.cases
+#' @importFrom forcats fct_relevel
 fits_data <- function(list_models) {
+  ###@> Filtering the expected data...
+  .filter_fits(list_models)
+
   ###@> Index...
   tmp01 <- .process_scenarios(list_models, vars = "I")
   
@@ -61,43 +65,46 @@ fits_data <- function(list_models) {
   tmp00$error <- with(tmp00, (1.96 * sqrt(SE)))
   tmp00$Ui <- with(tmp00, Mean + error)
   tmp00$Li <- with(tmp00, Mean - error)
+
+  index_inputseries <- .process_index(list_models)
+
+  if(any(is.na(tmp00$Index))) {
+    .fill_na_indices(tmp00, index_inputseries)
+  }
+
   tmp00 <- tmp00[complete.cases(tmp00),]
 
-  ####@> Organizing the structure...
-  tmp00$Index <- factor(
-    x = tmp00$Index, 
-    levels = c("Joint_LL_R2_Early","Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
-  )
+  tmp00 <- tmp00 %>%
+    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
 
   tmp00 <- tmp00 %>%
-    select(-SE) %>%
-    filter(Index != is.na(Index))
+    select(-SE)
 
   ####@> Fit (CI 80%)...
   tmp03 <- .process_cpues(list_models, vars = "ppd")
-  tmp03$Index[is.na(tmp03$Index)] <- "Joint_LL_R02_DLN"
 
-  tmp03$Index <- factor(
-    x = tmp03$Index, 
-    levels = c("Joint_LL_R2_Early", "Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
-  )
+  if(any(is.na(tmp03$Index))) {
+    .fill_na_indices(tmp03, index_inputseries)
+  }
+
+  tmp03 <- tmp03 %>%
+    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
 
   tmp03 <- tmp03 %>% 
-    select(-c(se, obserror)) %>%
-    filter(Index != is.na(Index))
+    select(-c(se, obserror))
 
   ####@> Fit (CI 95%)...
   tmp04 <- .process_cpues(list_models, vars = "hat")
-  tmp04$Index[is.na(tmp04$Index)] <- "Joint_LL_R02_DLN"
 
-  tmp04$Index <- factor(
-    x = tmp04$Index, 
-    levels = c("Joint_LL_R2_Early", "Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs")
-  )
+  if(any(is.na(tmp04$Index))) {
+    .fill_na_indices(tmp04, index_inputseries)
+  }
+
+  tmp04 <- tmp04 %>%
+    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
 
   tmp04 <- tmp04 %>% 
-    select(-c(se, obserror, mu)) %>%
-    filter(Index != is.na(Index))
+    select(-c(se, obserror, mu))
 
   list(
     Li_Ui = tmp00,
@@ -189,6 +196,41 @@ fits_ggplot <- function(df_lists, palette, title_y = "Abundance index") {
   return(result)
 }
 
+#' Fill missing index values
+#'
+#' Internal helper that replaces missing values in the Index column
+#' using the set of expected indices from the input series.
+#'
+#' @param data A data frame containing an Index column.
+#' @param index_inputseries A character vector with expected index names.
+#'
+#' @return The input data frame with missing Index values filled.
+#'
+#' @keywords internal
+.fill_na_indices <- function(data, index_inputseries) {
+  index_data <- unique(data$Index)
+  index_inputseries <- index_inputseries[!index_inputseries == "year"]
+  NA_index <- setdiff(index_inputseries, index_data)
+  data$Index[is.na(data$Index)] <- NA_index
+}
+
+#' Extract index names from model inputs
+#'
+#' Internal helper that extracts CPUE index names from the input series
+#' of each model in the list and returns the unique set of indices.
+#'
+#' @param fit_list A list of model outputs.
+#'
+#' @return A character vector containing unique index names across models.
+#'
+#' @keywords internal
+.process_index <- function(fit_list) {
+  temp00 <- lapply(fit_list, function(fit) {
+    names(fit$inputseries$cpue)
+  })
+  return(unique(unlist(temp00)))
+}
+
 #' Extract and combine CPUE data
 #'
 #' Internal helper that extracts CPUE-related outputs from a list of
@@ -216,4 +258,126 @@ fits_ggplot <- function(df_lists, palette, title_y = "Abundance index") {
   })
   result <- bind_rows(temp00)
   return(result)
+}
+
+#' Rename data frame columns
+#'
+#' Internal helper to assign new column names to a data frame.
+#'
+#' @param df A data frame.
+#' @param col_names A character vector with new column names.
+#'
+#' @return The data frame with renamed columns.
+#'
+#' @keywords internal
+#' @importFrom stats setNames 
+.rename_columns <- function(df, col_names) {
+  setNames(df, col_names)
+}
+
+#' Validate list of model fits
+#'
+#' Internal helper that checks whether the input is a valid list of
+#' JABBA model outputs and verifies the presence and class of
+#' required components.
+#'
+#' @param list_models A list of model outputs.
+#'
+#' @return Invisibly returns NULL if all validations pass, otherwise throws an error.
+#'
+#' @keywords internal
+.filter_fits <- function(list_models) {
+  if(.is_fit_jabba(list_models)) {
+    stop("Expected a list of valid JABBA model outputs.")
+  }
+
+  if(!all(vapply(list_models, .is_fit_jabba, logical(1)))) {
+    stop("All elements must be a valid JABBA model output.")
+  }
+
+  .validate_column(list_models, "timeseries", "array")
+  .validate_column(list_models, "settings", "list")
+  .validate_column(list_models$settings, "I", c("matrix", "array"))
+  .validate_column(list_models$settings, "SE2", c("matrix", "array"))
+  .validate_column(list_models, "cpue.ppd", "array")
+  .validate_column(list_models, "cpue.hat", "array")
+  .validate_column(list_models, "yr", "numeric")
+  .validate_column(list_models, "scenario", "character")
+}
+
+#' Check if object is a valid JABBA model fit
+#'
+#' Internal helper that verifies whether an object is a list containing
+#' all required components of a JABBA model output.
+#'
+#' @param model An object representing a model output.
+#'
+#' @return A logical value indicating whether the object is a valid JABBA fit.
+#'
+#' @keywords internal
+.is_fit_jabba <- function(model) {
+  cols_fit <- c(
+    "assessment", "scenario", "settings", "inputseries", 
+    "pars", "estimates", "yr", "catch", "est.catch",
+    "cpue.hat", "cpue.ppd", "PPC", "timeseries", "refpts", 
+    "pfunc", "diags", "residuals", "std.residuals", 
+    "stats", "pars_posterior", "refpts_posterior", "kobe", 
+    "flqs", "bppd", "kbtrj", "posteriors"#, "model"
+  )
+  is.list(model) && all(cols_fit %in% names(model))
+}
+
+#' Validate column class
+#'
+#' Internal helper that checks whether a specific column in a model
+#' object inherits from the expected class.
+#'
+#' @param model A model object.
+#' @param column A character string indicating the column name.
+#' @param class_expected A character vector of expected class names.
+#'
+#' @return A logical value indicating whether the column has the expected class.
+#'
+#' @keywords internal
+.is_column_valid <- function(model, column, class_expected) {
+  inherits(model[[column]], class_expected)
+}
+
+#' Validate column across model list
+#'
+#' Internal helper that verifies whether a specific column exists
+#' in all models and matches the expected class. If any model fails
+#' validation, an informative error is thrown.
+#'
+#' @param list_models A list of model outputs.
+#' @param column A character string indicating the column name.
+#' @param class_expected A character vector of expected class names.
+#'
+#' @return Invisibly returns NULL if validation passes, otherwise throws an error.
+#'
+#' @keywords internal
+.validate_column <- function(list_models, column, class_expected) {
+  check <- vapply(
+    list_models,
+    function(m) .is_column_valid(m, column, class_expected),
+    logical(1)
+  )
+  if(!all(check)) {
+    invalid_idx <- which(!check)
+
+    received_class <- vapply(
+      list_models[invalid_idx],
+      function(m) paste(class(m[[column]]), collapse = ", "),
+      character(1)
+    )
+
+    stop(
+      paste0(
+        "Invalid '", column, "' in model(s): ", 
+        paste(invalid_idx, collapse = ", "),
+        ". Expected class: ", paste(class_expected, collapse = ", "),
+        ". Received class: ", paste(received_class, collapse = " | ")
+      )
+    )
+  }
 }
