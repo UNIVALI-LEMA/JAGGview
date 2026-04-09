@@ -77,6 +77,13 @@
   # runs_tests_cpue_residuals
   .validate_column(list_models, "residuals", c("matrix", "array"))
   .validate_column(list_models, "stats", "data.frame")
+  # prios_posteriors
+  .validate_column(list_models$settings, "K.pr", "numeric")
+  .validate_column(list_models$settings, "r.pr", "numeric")
+  .validate_column(list_models$settings, "psi.pr", "numeric")
+  .validate_column(list_models$settings, "psi.dist", "character")
+  .validate_column(list_models$settings, "igamma", "numeric")
+  .validate_column(list_models, "pars_posterior", "data.frame")
 }
 
 #' Check if object is a valid JABBA model fit

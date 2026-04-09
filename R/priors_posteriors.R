@@ -36,6 +36,9 @@
 #' @importFrom dplyr %>% filter summarise
 #' @importFrom stats dlnorm dgamma density rlnorm sd
 priors_posteriors_data <- function(list_models) {
+  ###@> Filtering the expected data...
+  .validate_fits_input_data(list_models)
+
   #####@> Priors...
   tmp12 <- .process_priors(list_models)
 
@@ -174,6 +177,8 @@ priors_posteriors_data <- function(list_models) {
 #'   \code{priors_posteriors_data()}.
 #' @param var A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
+#' @param title_x A character string for the x-axis label. If \code{NULL},
+#'   a default label is assigned based on \code{variable}.
 #' @param palette A character vector of colors used for prior and
 #'   posterior distributions.
 #'
@@ -188,14 +193,16 @@ priors_posteriors_data <- function(list_models) {
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_models)
-#' priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4" "#34a853" "#ea4335"))
+#' priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853", "#ea4335"))
 #' }
 #'
 #' @export
 #' @importFrom dplyr %>% filter select rename pull all_of
 #' @importFrom ggplot2 ggplot geom_area aes geom_text facet_wrap 
 #' coord_cartesian labs scale_y_continuous theme element_blank
-priors_posteriors_ggplot <- function(df_lists, var, palette) {
+priors_posteriors_ggplot <- function(
+  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853", "#ea4335")
+) {
   var1 <- paste0(var, "01")
   var2 <- paste0(var, "02")
   prior <- df_lists$prior %>%
@@ -204,6 +211,16 @@ priors_posteriors_ggplot <- function(df_lists, var, palette) {
       value_1 = all_of(var1),
       value_2 = all_of(var2)
     )
+  
+  labels_x <- list(
+    K = "Carrying capacity (K)",
+    r = "Intrinsic growth rate (r)",
+    psi = "Initial biomass depletion ratio (psi)"
+  )
+
+  if (is.null(title_x)) {
+    title_x <- labels_x[[var]]
+  }
   
   posterior <- df_lists$posterior %>%
     select(c(Scenario, all_of(c(var1, var2)))) %>%
@@ -229,7 +246,7 @@ priors_posteriors_ggplot <- function(df_lists, var, palette) {
                   label = paste0("PPVR = ", K))) +
     facet_wrap(~Scenario, ncol = 3) +
     coord_cartesian(xlim = c(0, mult)) +
-    labs(x = var, y = "Density") +
+    labs(x = title_x, y = "Density") +
     scale_y_continuous(expand = c(0, 0)) +
     .my_theme() +
     theme(axis.text.y = element_blank(),

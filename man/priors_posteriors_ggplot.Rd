@@ -4,7 +4,12 @@
 \alias{priors_posteriors_ggplot}
 \title{Plot prior and posterior distributions}
 \usage{
-priors_posteriors_ggplot(df_lists, var, palette)
+priors_posteriors_ggplot(
+  df_lists,
+  var,
+  title_x = NULL,
+  palette = c("#4285f4", "#34a853", "#ea4335")
+)
 }
 \arguments{
 \item{df_lists}{A named list as returned by
@@ -12,6 +17,9 @@ priors_posteriors_ggplot(df_lists, var, palette)
 
 \item{var}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
+
+\item{title_x}{A character string for the x-axis label. If \code{NULL},
+a default label is assigned based on \code{variable}.}
 
 \item{palette}{A character vector of colors used for prior and
 posterior distributions.}
@@ -32,7 +40,7 @@ faceted views by scenario.
 \examples{
 \dontrun{
 df <- priors_posteriors_data(list_models)
-priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4" "#34a853" "#ea4335"))
+priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853", "#ea4335"))
 }
 
 }
