@@ -45,3 +45,113 @@
   return(df1)
 }
 
+#' Validate list of model fits
+#'
+#' Internal helper that checks whether the input is a valid list of
+#' JABBA model outputs and verifies the presence and class of
+#' required components.
+#'
+#' @param list_models A list of model outputs.
+#'
+#' @return Invisibly returns NULL if all validations pass, otherwise throws an error.
+#'
+#' @keywords internal
+.validate_fits_input_data <- function(list_models) {
+  if(.is_fit_jabba(list_models)) {
+    stop("Expected a list of valid JABBA model outputs.")
+  }
+
+  if(!all(vapply(list_models, .is_fit_jabba, logical(1)))) {
+    stop("All elements must be a valid JABBA model output.")
+  }
+
+  # .validate_column(list_models, "timeseries", "array")
+  # fits
+  .validate_column(list_models, "settings", "list")
+  .validate_column(list_models$settings, "I", c("matrix", "array"))
+  .validate_column(list_models$settings, "SE2", c("matrix", "array"))
+  .validate_column(list_models, "cpue.ppd", "array")
+  .validate_column(list_models, "cpue.hat", "array")
+  .validate_column(list_models, "yr", "numeric")
+  .validate_column(list_models, "scenario", "character")
+  # runs_tests_cpue_residuals
+  .validate_column(list_models, "residuals", c("matrix", "array"))
+  .validate_column(list_models, "stats", "data.frame")
+}
+
+#' Check if object is a valid JABBA model fit
+#'
+#' Internal helper that verifies whether an object is a list containing
+#' all required components of a JABBA model output.
+#'
+#' @param model An object representing a model output.
+#'
+#' @return A logical value indicating whether the object is a valid JABBA fit.
+#'
+#' @keywords internal
+.is_fit_jabba <- function(model) {
+  cols_fit <- c(
+    "assessment", "scenario", "settings", "inputseries", 
+    "pars", "estimates", "yr", "catch", "est.catch",
+    "cpue.hat", "cpue.ppd", "PPC", "timeseries", "refpts", 
+    "pfunc", "diags", "residuals", "std.residuals", 
+    "stats", "pars_posterior", "refpts_posterior", "kobe", 
+    "flqs", "bppd", "kbtrj", "posteriors"#, "model"
+  )
+  is.list(model) && all(cols_fit %in% names(model))
+}
+
+#' Validate column class
+#'
+#' Internal helper that checks whether a specific column in a model
+#' object inherits from the expected class.
+#'
+#' @param model A model object.
+#' @param column A character string indicating the column name.
+#' @param class_expected A character vector of expected class names.
+#'
+#' @return A logical value indicating whether the column has the expected class.
+#'
+#' @keywords internal
+.is_column_valid <- function(model, column, class_expected) {
+  inherits(model[[column]], class_expected)
+}
+
+#' Validate column across model list
+#'
+#' Internal helper that verifies whether a specific column exists
+#' in all models and matches the expected class. If any model fails
+#' validation, an informative error is thrown.
+#'
+#' @param list_models A list of model outputs.
+#' @param column A character string indicating the column name.
+#' @param class_expected A character vector of expected class names.
+#'
+#' @return Invisibly returns NULL if validation passes, otherwise throws an error.
+#'
+#' @keywords internal
+.validate_column <- function(list_models, column, class_expected) {
+  check <- vapply(
+    list_models,
+    function(m) .is_column_valid(m, column, class_expected),
+    logical(1)
+  )
+  if(!all(check)) {
+    invalid_idx <- which(!check)
+
+    received_class <- vapply(
+      list_models[invalid_idx],
+      function(m) paste(class(m[[column]]), collapse = ", "),
+      character(1)
+    )
+
+    stop(
+      paste0(
+        "Invalid '", column, "' in model(s): ", 
+        paste(invalid_idx, collapse = ", "),
+        ". Expected class: ", paste(class_expected, collapse = ", "),
+        ". Received class: ", paste(received_class, collapse = " | ")
+      )
+    )
+  }
+}

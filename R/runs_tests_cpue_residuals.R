@@ -35,7 +35,11 @@
 #' @importFrom dplyr %>% mutate filter left_join select
 #' @importFrom JABBA jbruns_sig3
 #' @importFrom stats loess predict complete.cases
+#' @importFrom forcats fct_relevel
 runs_tests_data <- function(list_models) {
+  ###@> Filtering the expected data...
+  .validate_fits_input_data(list_models)
+
   tmp05 <- .process_runs(list_models)
 
   #####@> Runstest...
@@ -70,19 +74,14 @@ runs_tests_data <- function(list_models) {
 
   ####@> Pivoting table...
   tmp05 <- pivot_longer(
-    tmp05, names_to = "Index", values_to = "Res",4:ncol(tmp05)
+    tmp05, names_to = "Index", values_to = "Res", 4:ncol(tmp05)
   ) %>%
     filter(complete.cases(.)) %>%
     left_join(out.test, by = c("Scenario", "Index")) %>%
     select(Year:Res, lcl, ucl) %>%
     mutate(
       class = ifelse(Res < lcl | Res > ucl, "red", "white"),
-      Index = factor(
-        Index, 
-        levels = c(
-          "Joint_LL_R2_Early", "Joint_LL_R2_DLN", "Joint_LL_R2_allCPCs"
-        )
-      )
+      Index = fct_relevel(Index) # after add the option for the user to choose the order
     ) %>%
     droplevels()
 
@@ -159,10 +158,31 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
     theme(legend.position = "none")
 }
 
+#' Plot CPUE residuals diagnostics
+#' 
+#' Creates a ggplot2- based visualization of CPUE residuals across
+#' years and scenarios, including reference lines, residual segments,
+#' smoothed trends, and RMSE annotations.
+#' 
+#' @param df_lists A named list of data frames as returned by
+#'   \code{runs_tests_data()}.
+#' @param palette A character vector of colors used for plotting. 
+#'   Defaults to the vector \code{c("#4285f4", "#34a853", "#ea4335")}
+#' @param title_y A character string for the y-axis label. 
+#'   Defaults to "Residuals"
+#' 
+#' @return A ggplot object displaying CPUE residual diagnostics.
+#' 
+#' @details 
+#' The plot includes residual segments, observed values, a smoothed trend,
+#' and RMSE annotations for each scenario.
+#' 
 #' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' geom_text facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual 
 #' labs theme
-cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
+cpue_conflicts_ggplot <- function(
+  df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Residuals"
+) {
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
@@ -184,8 +204,18 @@ cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
     theme(legend.position = "top")
 }
 
+#' Extract and combine residuals data
+#' 
+#' Internal helper that extracts residuals from each model, converts
+#' them into a data frame format, and combines them across scenarios.
+#'
+#' @param fit_list A list of model outputs.
+#'
+#' @return A data frame containing residuals by year and scenario.
+#' 
+#' @keywords internal
 #' @importFrom dplyr bind_rows
-.process_runs <- function(fit_list, vars = "runs") {
+.process_runs <- function(fit_list) {#, vars = "runs") {
   temp00 <- lapply(
     fit_list,
     function(fit) {
@@ -193,11 +223,12 @@ cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
         Year = fit$yr,
         Scenario = fit$scenario,
         Ref = 0,
-        if(vars == "runs") {
-          t(fit$residuals)
-        } else {
-          t(fit$residuals)
-        }
+        t(fit$residuals)
+        # if(vars == "runs") {
+        #   t(fit$residuals)
+        # } else {
+        #   t(fit$residuals)
+        # }
       )
     }
   )
@@ -205,6 +236,16 @@ cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
   return(result)
 }
 
+#' Prepare CPUE conflict diagnostics data
+#'
+#' Internal helper that filters model statistics to extract RMSE values
+#' and prepares them for annotation in CPUE residual diagnostics plots.
+#'
+#' @param list_models A list of model outputs.
+#'
+#' @return A data frame containing RMSE values with plotting coordinates.
+#' 
+#' @keywords internal
 #' @importFrom dplyr mutate
 #' @importFrom dplyr %>% filter
 .cpue_conflicts_data <- function(list_models) {
@@ -213,6 +254,16 @@ cpue_conflicts_ggplot <- function(df_lists, palette, title_y = "Residuals") {
     filter(Stastistic == "RMSE")
 }
 
+#' Extract and combine model statistics
+#'
+#' Internal helper that extracts summary statistics from each model
+#' and combines them into a single data frame across scenarios.
+#'
+#' @param fit_list A list of model outputs.
+#'
+#' @return A data frame containing model statistics by scenario.
+#' 
+#' @keywords internal
 #' @importFrom dplyr bind_rows
 .process_stats <- function(fit_list) {
   temp00 <- lapply(

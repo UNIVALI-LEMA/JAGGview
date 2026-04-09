@@ -4,7 +4,11 @@
 \alias{process_error_ggplot}
 \title{Plot process error trajectories}
 \usage{
-process_error_ggplot(df, palette, title_y = "Process Error on log(Biomass)")
+process_error_ggplot(
+  df,
+  palette = c("#4285f4", "#34a853", "#ea4335"),
+  title_y = "Process Error on log(Biomass)"
+)
 }
 \arguments{
 \item{df}{A data frame as returned by \code{process_error_data()}.}

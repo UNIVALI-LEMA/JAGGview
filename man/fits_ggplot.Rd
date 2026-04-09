@@ -4,7 +4,11 @@
 \alias{fits_ggplot}
 \title{Plot fitted indices with confidence intervals}
 \usage{
-fits_ggplot(df_lists, palette, title_y = "Abundance index")
+fits_ggplot(
+  df_lists,
+  palette = c("#4285f4", "#34a853", "#ea4335"),
+  title_y = "Abundance index"
+)
 }
 \arguments{
 \item{df_lists}{A named list of data frames as returned by
@@ -25,7 +29,7 @@ Creates a ggplot2-based visualization of fitted abundance indices,
 including mean values and confidence intervals (80\% and 95\%).
 }
 \details{
-The plot includes ribbons representing 80\\% and 95\\% confidence
+The plot includes ribbons representing 80\% and 95\% confidence
 intervals, a fitted line, observed points with error bars, and
 faceting by scenario and index.
 }

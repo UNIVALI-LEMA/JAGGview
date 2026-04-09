@@ -75,7 +75,9 @@ process_error_data <- function(list_models) {
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_hline geom_line facet_wrap 
 #' scale_y_continuous labs
-process_error_ggplot <- function(df, palette, title_y = "Process Error on log(Biomass)") {
+process_error_ggplot <- function(
+  df, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Process Error on log(Biomass)"
+) {
   ggplot() +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl, ymax = ucl)) +

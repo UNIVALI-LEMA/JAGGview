@@ -4,7 +4,7 @@
 \alias{runs_tests_data}
 \title{Prepare runs test diagnostics data}
 \usage{
-runs_tests_data(list_models)
+runs_tests_data(list_models, verbose = FALSE)
 }
 \arguments{
 \item{list_models}{A list containing model outputs as returned by the

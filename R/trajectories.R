@@ -68,8 +68,8 @@ trajectories_data <- function(list_models, variable) {
 #' including median trends and uncertainty intervals across scenarios.
 #'
 #' @param df A data frame as returned by \code{trajectories_data()}.
-#' @param palette A character vector of colors used for plotting.
 #' @param variable A character string indicating the variable to plot.
+#' @param palette A character vector of colors used for plotting.
 #'   Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.
 #' @param title_y A character string or expression for the y-axis label.
 #'   Defaults to a mathematical expression depending on the selected variable.
@@ -86,19 +86,21 @@ trajectories_data <- function(list_models, variable) {
 #' @examples
 #' \dontrun{
 #' df <- trajectories_data(out, variable = "BB0")
-#' trajectories_ggplot(df, palette = c("blue"), variable = "BB0")
+#' trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' df <- trajectories_data(list_models, "BB0")
-#' trajectories_ggplot(df, palette = c("#4285f4" "#34a853" "#ea4335"), variable = "BB0")
+#' trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4" "#34a853" "#ea4335"))
 #' }
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
-trajectories_ggplot <- function(df, palette, variable, title_y = NULL) {
+trajectories_ggplot <- function(
+  df, variable, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = NULL
+) {
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
