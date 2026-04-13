@@ -203,6 +203,10 @@ priors_posteriors_data <- function(list_models) {
 priors_posteriors_ggplot <- function(
   df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853", "#ea4335")
 ) {
+  if(!var %in% c("K", "r", "psi")) {
+    stop("Parameter 'var' was expecting 'K', 'r' or 'psi'.")
+  }
+
   var1 <- paste0(var, "01")
   var2 <- paste0(var, "02")
   prior <- df_lists$prior %>%

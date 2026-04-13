@@ -132,3 +132,44 @@ international_system_prefixes <- function(number, decimals = 2) {
       complete = TRUE
     )
 }
+
+#' Round values to a convenient axis limit
+#'
+#' Internal helper that rounds a numeric value to the nearest
+#' order of magnitude, either upward (for maximum values) or downward
+#' (for minimum values), useful for defining plot axis limits.
+#'
+#' @param value A numeric value.
+#' @param max A logical value indicating the rounding direction:
+#'   \itemize{
+#'     \item \code{TRUE}: round up (used for upper axis limits).
+#'     \item \code{FALSE}: round down (used for lower axis limits).
+#'   }
+#'
+#' @return A rounded numeric value.
+#' 
+#' @details
+#' When \code{max = FALSE}, positive values are adjusted to include zero
+#' when appropriate, ensuring cleaner lower bounds in plots.
+#'
+#' @keywords internal
+.round_to_nearest <- function(value, max) {
+  sign_val <- sign(value)
+  value_abs <- abs(value)
+
+  value_adj <- value_abs * 1.2
+
+  magnitude <- 10^(floor(log10(value_adj)))
+  
+  result <- ifelse(
+    max, 
+    ceiling(sign_val * value_adj / magnitude) * magnitude,
+    floor(sign_val * value_adj / magnitude) * magnitude
+  )
+
+  if(!max) {
+    result <- ifelse(result > 0, 0, result)
+  }
+  
+  return(result)
+}

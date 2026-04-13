@@ -35,67 +35,42 @@
 #' @export
 #' @importFrom dplyr %>% filter mutate
 retrospective_analysis_data <- function(hc_raw_data) {
+  ###@> Filtering the expected data...
+  .validate_hcs_input_data(hc_raw_data)
+
+  labels_index <- c(
+    "B"      = "Biomass",
+    "F"      = "Fishing Mortality",
+    "BBmsy"  = "B/Bmsy",
+    "FFmsy"  = "F/Fmsy",
+    "procB"  = "Process Error on log(Biomass)"
+  )
+
   #####@> Extracting values...
   tmp17 <- .process_retro(hc_raw_data) %>%
     filter(Index %in% c("B", "F", "BBmsy", "FFmsy", "procB")) %>%
     mutate(
-      Index2 = ifelse(
-        Index == "B", 
-        "Biomass",
-        ifelse(
-          Index == "F", 
-          "Fishing Mortality",
-          ifelse(
-            Index == "BBmsy", 
-            "B/Bmsy",
-            ifelse(
-              Index == "FFmsy", 
-              "F/Fmsy",
-              "Process Error on log(Biomass)"
-            )
-          )
-        )
-      )
+      Index2 = labels_index[Index]
     ) %>%
     mutate(
-      id = factor(
-        id,
-        c(
-          "Ref", "-2023", "-2022", "-2021", "-2020", 
-          "-2019", "-2018", "-2017", "-2016"
-        )
-      )
+      id = fct_relevel(id, sort(unique(id), decreasing = TRUE))
     ) %>%
     mutate(
+      # This version id_num when id == "Ref" generate NA warning
+      # id_num = as.integer(gsub("-", "", id)),
+      id_num = {
+        out <- rep(NA_integer_, length(id))
+        idx <- grepl("^-\\d+$", id)
+        out[idx] <- as.integer(sub("-", "", id[idx]))
+        out
+      },
       teste = ifelse(
-        id == "Ref", TRUE,
-        ifelse(
-          id == "-2023" & Year == 2023, FALSE,
-          ifelse(
-            id == "-2022" & Year >= 2022, FALSE,
-            ifelse(
-              id == "-2021" & Year >= 2021, FALSE,
-              ifelse(
-                id == "-2020" & Year >= 2020, FALSE,
-                ifelse(
-                  id == "-2019" & Year >= 2019, FALSE,
-                  ifelse(
-                    id == "-2018" & Year >= 2018, FALSE,
-                    ifelse(
-                      id == "-2017" & Year >= 2017, FALSE,
-                      ifelse(
-                        id == "-2016" & Year >= 2016, FALSE, 
-                        TRUE
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
+        id == "Ref",
+        TRUE,
+        Year < id_num
       )
-    )
+    ) %>%
+    select(-id_num)
 
   tmp18 <- .process_pfunc(hc_raw_data) %>%
     mutate(
@@ -103,16 +78,12 @@ retrospective_analysis_data <- function(hc_raw_data) {
       Index2 = "Surplus Production"
     ) %>%
       mutate(
-        id = factor(
-          id, 
-          levels = c(
-            "Ref", "-2023", "-2022", "-2021", "-2020", 
-            "-2019", "-2018", "-2017", "-2016"
-          )
-        )
+        id = fct_relevel(id, sort(unique(id), decreasing = TRUE))
     )
 
   # #####@> Extracting rhos...
+  # After change the x position to be variable to the input data, don't 
+  # need to be now, becausa only affect the dynamic plot
   temp02 <- .rho_retro(hc_raw_data) %>% mutate(x = 2010)
 
   list(
@@ -156,6 +127,9 @@ retrospective_analysis_data <- function(hc_raw_data) {
 #' scale_colour_manual scale_y_continuous labs theme element_text
 #' @importFrom JABBA ss3col
 retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
+  if(!variable %in% c("B", "F", "BBmsy", "FFmsy", "procB", "MSY")) {
+    stop("Parameter 'variable' was expecting 'B', 'F', 'BBmsy', 'FFmsy', 'procB' or 'MSY'.")
+  }
 
   if (variable != "MSY") {
     data <- df_lists$data
@@ -187,16 +161,14 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
   } else {
     data_lines <- data_var
   }
-  rho_var    <- rho_data[rho_data$Index == variable, ]
+  rho_var <- rho_data[rho_data$Index == variable, ]
   
   if (variable == "MSY") {
-    max_val <- .round_up_to_nearest(max(data_var$SP, na.rm = TRUE))
-    min_val <- 0
+    max_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE)
+    min_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE)
   } else {
-    max_val <- .round_up_to_nearest(max(data_var$uci, na.rm = TRUE))
-    min_val <- .round_up_to_nearest(min(data_var$lci, na.rm = TRUE))
-    
-    if (min_val > 0) min_val <- 0
+    max_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE)
+    min_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE)
   }
   
   p <- ggplot()
@@ -351,20 +323,4 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
   )
   result <- data.frame("Index" = vec02, "Index2" = vec03, "rho" = vec01)
   return(result)
-}
-
-#' Round values to a convenient upper bound
-#'
-#' Internal helper that rounds a numeric value up to the nearest
-#' order of magnitude, useful for defining plot axis limits.
-#'
-#' @param value A numeric value.
-#'
-#' @return A rounded numeric value.
-#'
-#' @keywords internal
-.round_up_to_nearest <- function(value) {
-  magnitude <- 10^(floor(log10(value)))
-  rounded_value <- ceiling(value / magnitude) * magnitude
-  return(rounded_value)
 }

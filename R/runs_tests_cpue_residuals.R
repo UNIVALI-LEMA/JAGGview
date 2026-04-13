@@ -87,7 +87,7 @@ runs_tests_data <- function(list_models) {
 
   ###@> Including p-value in plot...
   out.test <- out.test %>%
-      mutate(x = mean(1950:2023), y = 0.65)
+      mutate(x = mean(1950:2023), y = 0.65) # adapt to be generic
   
   loess_fit <- loess(Res ~ Year, data = tmp05)
   tmp05$fit <- predict(loess_fit)
@@ -97,7 +97,8 @@ runs_tests_data <- function(list_models) {
   tmp05$upper <- pred$fit + 1.96 * pred$se.fit
   tmp05$lower <- pred$fit - 1.96 * pred$se.fit
 
-  RMSE_data <- .cpue_conflicts_data(list_models)
+  RMSE_data <- .process_stats(list_models) %>%
+    filter(Stastistic == "RMSE")
 
   list(
     cpue_residuals = tmp05,
@@ -152,7 +153,7 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
         pch = 21, size = 2.5) +
     facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-0.8, 0.8)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(-0.8, 0.8)) + # adapt to be generic
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
@@ -183,6 +184,14 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
 cpue_conflicts_ggplot <- function(
   df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Residuals"
 ) {
+  max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
+  min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+
+  max_year <- max(df_lists$cpue_residuals$Year)
+  min_year <- min(df_lists$cpue_residuals$Year)
+  x_diff <- max_year - min_year
+  x_year <- max_year - round(x_diff/4, 0)
+  
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
@@ -194,9 +203,11 @@ cpue_conflicts_ggplot <- function(
     geom_smooth(data = df_lists$cpue_residuals, 
       aes(x = Year, y = Res), se = TRUE, colour = "black") +
     geom_text(data = df_lists$RMSE_data,
-              aes(x = x, y = y, label = paste0("RMSE = ", Value, " %"))) +
+              aes(x = x_year, 
+                  y = max_val / 1.1, 
+                  label = paste0("RMSE = ", Value, " %"))) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-1, 1)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
     scale_fill_manual(values = palette) +
     scale_colour_manual(values = palette) +
     labs(x = "Year", y = title_y, fill = "", colour = "") +
@@ -236,23 +247,22 @@ cpue_conflicts_ggplot <- function(
   return(result)
 }
 
-#' Prepare CPUE conflict diagnostics data
-#'
-#' Internal helper that filters model statistics to extract RMSE values
-#' and prepares them for annotation in CPUE residual diagnostics plots.
-#'
-#' @param list_models A list of model outputs.
-#'
-#' @return A data frame containing RMSE values with plotting coordinates.
-#' 
-#' @keywords internal
-#' @importFrom dplyr mutate
-#' @importFrom dplyr %>% filter
-.cpue_conflicts_data <- function(list_models) {
-  .process_stats(list_models) %>%
-    mutate(x = 2015, y = 0.8) %>%
-    filter(Stastistic == "RMSE")
-}
+# #' Prepare CPUE conflict diagnostics data
+# #'
+# #' Internal helper that filters model statistics to extract RMSE values
+# #' and prepares them for annotation in CPUE residual diagnostics plots.
+# #'
+# #' @param list_models A list of model outputs.
+# #'
+# #' @return A data frame containing RMSE values with plotting coordinates.
+# #' 
+# #' @keywords internal
+# #' @importFrom dplyr mutate
+# #' @importFrom dplyr %>% filter
+# .cpue_conflicts_data <- function(list_models) {
+#   .process_stats(list_models) %>%
+#     filter(Stastistic == "RMSE")
+# }
 
 #' Extract and combine model statistics
 #'

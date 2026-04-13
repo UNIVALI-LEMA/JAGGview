@@ -162,3 +162,42 @@
     )
   }
 }
+
+#' @keywords internal
+.is_hindcast_jabba <- function(obj) {
+  if(!is.list(obj)) {
+    stop()
+  }
+
+  if (length(obj) == 0) return(FALSE)
+  
+  elem <- obj[[1]]
+
+  .is_fit_jabba(elem)
+}
+
+#' @keywords internal
+.validate_hcs_input_data <- function(list_models) {
+  
+  if(.is_hindcast_jabba(list_models)) {
+    stop("Expected a list of valid JABBA model outputs.")
+  }
+
+  if(!all(vapply(list_models, .is_hindcast_jabba, logical(1)))) {
+    stop("All elements must be a valid JABBA model output.")
+  }
+
+  all(
+    vapply(
+      list_models,
+      function(hc) {
+        .validate_column(hc, "scenario", "character")
+        .validate_column(hc, "timeseries", "array")
+        .validate_column(hc, "pfunc", "data.frame")
+        .validate_column(hc, "diags", "data.frame")
+        TRUE
+      },
+      logical(1)
+    )
+  )
+}

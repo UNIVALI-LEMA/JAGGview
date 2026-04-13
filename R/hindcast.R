@@ -36,32 +36,33 @@
 #' @export
 #' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
 hindcast_data <- function(hc_raw_data) {
+  ###@> Filtering the expected data...
+  .validate_hcs_input_data(hc_raw_data)
+
   ######@> Plot hindcasting...
   hc <- .process_hindcasts(hc_raw_data)
 
+  # n_retro_peels <- length(unique(hc$retro.peels))
+
+  # year_retro_peels <- c(
+  #   "Ref",
+  #   paste0("-", sort(unique(hc$year), decreasing = TRUE))[seq_len(n_retro_peels)]
+  # )
+
+  # min_year <- min(
+  #   as.integer(gsub("-", "", year_retro_peels[year_retro_peels != "Ref"]))
+  # ) #- 1
+
+  min_year <- as.integer(gsub("-", "", min(hc$Peel))) - 1
+
+  print(min_year)
+
   #####@> Extracting data...
   tmp14 <- hc %>%
+    # mutate(retro = year_retro_peels[retro.peels + 1]) %>%
+    rename(retro = Peel) %>%
     mutate(
-      retro = case_when(
-        retro.peels == 0 ~ "Ref",
-        retro.peels == 1 ~ "-2023",
-        retro.peels == 2 ~ "-2022",
-        retro.peels == 3 ~ "-2021",
-        retro.peels == 4 ~ "-2020",
-        retro.peels == 5 ~ "-2019",
-        retro.peels == 6 ~ "-2018",
-        retro.peels == 7 ~ "-2017",
-        retro.peels == 8 ~ "-2016",
-      )
-    ) %>%
-    mutate(
-      retro = factor(
-        retro, 
-        levels = c(
-          "Ref", "-2023", "-2022", "-2021", "-2020", 
-          "-2019", "-2018", "-2017", "-2016"
-        )
-      )
+      retro = fct_relevel(retro, sort(unique(retro), decreasing = TRUE))
     ) %>%
     rename(
       Scenario = level,
@@ -70,7 +71,8 @@ hindcast_data <- function(hc_raw_data) {
   
   tmp15 <- tmp14 %>%
     filter(hindcast == TRUE) %>%
-    filter(year > 2015) %>%
+    # filter(year > 2015) %>% # or filter(year >= 2016) %>%
+    filter(year > min_year) %>%
     group_by(retro.peels) %>%
     filter(year == min(year)) %>%
     ungroup() %>%
@@ -81,11 +83,20 @@ hindcast_data <- function(hc_raw_data) {
   #####@> MASE analysis...
   mase <- .process_mase(hc_raw_data)
 
+  na_index <- mase %>%
+    filter(is.na(MASE)) %>%
+    pull(Index)
+
+  na_index <- unique(na_index)
+
+  # print(na_index)
+
   list(
-    data = tmp14,
-    hindcast_data_1 = tmp15,
-    hindcast_data_2 = tmp16,
-    mase_data = mase
+    data = tmp14 %>% filter(!Index %in% na_index),
+    hindcast_data_1 = tmp15 %>% filter(!Index %in% na_index),
+    hindcast_data_2 = tmp16 %>% filter(!Index %in% na_index),
+    mase_data = mase %>% filter(!Index %in% na_index),
+    min_year_retro = min_year
   )
 }
 
@@ -117,25 +128,26 @@ hindcast_data <- function(hc_raw_data) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line geom_point geom_text
 #' labs facet_wrap scale_fill_manual scale_colour_manual scale_y_continuous
 #' theme guides guide_legend
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
 hindcast_ggplot <- function(df_lists) {
+  max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
+  min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+  
   ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
         aes(x = year,
             ymin = hat.lci, ymax = hat.uci),
         fill = "gray80") +
-    geom_ribbon(data = filter(df_lists$data, retro.peels == 0,
-                              year %in% 1979:2014),
-                aes(x = year,
-                    ymin = hat.lci, ymax = hat.uci),
+    geom_ribbon(data = filter(df_lists$data, retro.peels == 0, year < df_lists$min_year_retro),
+                aes(x = year, ymin = hat.lci, ymax = hat.uci),
                 fill = "gray30", alpha = 0.5) +
     geom_line(data = filter(df_lists$data, hindcast == FALSE),
               aes(x = year, y = hat, colour = retro), linewidth = 1) +
     geom_line(data = df_lists$hindcast_data_2,
               aes(x = year, y = hat, group = retro.peels),
               linewidth = 1, colour = "white") +
-    geom_point(data = filter(df_lists$data, retro.peels == 0, year < 2015),
+    geom_point(data = filter(df_lists$data, retro.peels == 0, year < df_lists$min_year_retro),
                aes(x = year, y = obs), pch = 21, size = 4,
                fill = "white") +
     geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
@@ -148,10 +160,11 @@ hindcast_ggplot <- function(df_lists) {
               aes(x = x, y = y,
                   label = paste0("MASE = ", round(MASE, 3)))) +
     labs(x = "Year", y = "Index", colour = "") +
-    facet_wrap(Scenario ~ Index, ncol = 3, drop = FALSE) +
+    facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), drop = FALSE) +
+    facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(expand = c(0, 0), limits = c(0, 3)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val))
     .my_theme() +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 1))
@@ -247,6 +260,6 @@ hindcast_ggplot <- function(df_lists) {
         )
     }
   )
-  result <- bind_rows(temp00)
+  result <- bind_rows(temp00) %>% filter(Index != "joint")
   return(result)
 }
