@@ -44,7 +44,13 @@ trajectories_data <- function(model_results) {
   columns <- list(
     BB0   = "BB0",
     BBmsy = "stock",
-    FFmsy = "harvest"
+    FFmsy = "harvest",
+    Bdev  = "Bdev",
+    B = "B", # This and below are in development
+    H = "H",
+    Catch = "Catch",
+    BBfrac = "BBfrac",
+    Bref = "Bref"
   )
 
   model_results <- model_results %>%
@@ -110,33 +116,61 @@ trajectories_data <- function(model_results) {
 trajectories_ggplot <- function(
   df, variable, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = NULL
 ) {
-  if(!variable %in% c("BB0", "BBmsy", "FFmsy")) {
-    stop("Parameter 'variable' was expecting 'BB0', 'BBmsy' or 'FFmsy'.")
+  if(!variable %in% c("BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref")) {
+    stop(
+      "Parameter 'variable' was expecting 'BB0', 'BBmsy', 'FFmsy', 'Bdev', 'B', 'H', 'Catch', 
+      'BBfrac' or 'Bref'."
+    )
   }
+
+  df <- df %>%
+    filter(metric == variable)
+
+  max_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE)
+  min_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE)
 
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
-    FFmsy = expression(F/F[MSY])
+    FFmsy = expression(F/F[MSY]),
+    Bdev = "Process Error on log(Biomass)", # This and below are in development
+    B = "Biomass (t)",
+    H = "H",
+    Catch = "Catch",
+    BBfrac = "BBfrac",
+    Bref = "Bref"
   )
 
   if (is.null(title_y)) {
     title_y <- labels_y[[variable]]
   }
 
-  ggplot() +
-    geom_ribbon(data = df %>% filter(metric == variable), 
-                fill = palette[1], alpha = 0.3,
+  p <- ggplot() +
+    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl, ymax = ucl)) +
-    geom_ribbon(data = df %>% filter(metric == variable), 
-                fill = palette[1], alpha = 0.3,
-                aes(x = year, ymin = lcl2, ymax = ucl2)) +
-    geom_line(data = df %>% filter(metric == variable), 
-              aes(x = year, y = mu),
-              size = 1) +
+    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
+                aes(x = year, ymin = lcl2, ymax = ucl2))
+  
+  if (variable == "BBmsy") {
+    p <- p +
+      geom_hline(yintercept = 1, linetype = "longdash") +
+      geom_hline(yintercept = 0.4, linetype = "longdash", colour = "red")
+  }
+  else if (variable == "FFmsy") {
+    p <- p +
+      geom_hline(yintercept = 1, linetype = "longdash")
+  }
+  else if (variable == "Bdev") {
+    p <- p +
+      geom_hline(yintercept = 0, linetype = "longdash")
+  }
+  
+  p <- p +
+    geom_line(data = df, aes(x = year, y = mu), size = 1) +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0)) +
-    labs(x = "Year", y = title_y, fill = "",colour = "") +
+    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
+    labs(x = "Year", y = title_y, fill = "", colour = "") +
     .my_theme() +
     theme(legend.position = "none")
+  p
 }

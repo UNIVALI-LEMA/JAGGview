@@ -214,10 +214,36 @@
 
 #' @keywords internal
 .validate_jbplot_ensemble <- function(object_df) {
+  # After, review the function, to see what can be reduced to one function,
+  # compared to .validate_column, because the structures of the model results
+  # of the functions are different
   if(!.is_jbplot_ensemble(object_df)) {
     stop("Element must be a valid JABBA model output.")
   }
-  .is_column_valid(object_df, "BB0", "numeric")
-  .is_column_valid(object_df, "stock", "numeric")
-  .is_column_valid(object_df, "harvest", "numeric")
+
+  cols <- setdiff(names(object_df), c("year", "run", "type", "iter"))
+  check <- vapply(
+    cols,
+    function(col) .is_column_valid(object_df, col, "numeric"),
+    logical(1)
+  )
+  if(!all(check)) {
+    invalid_cols <- cols[!check]
+
+    received_class <- vapply(
+      invalid_cols,
+      function(col) paste(class(object_df[[col]]), collapse = ", "),
+      character(1)
+    )
+
+    stop(
+      paste0(
+        "Invalid column(s): ",
+        paste(invalid_cols, collapse = ", "),
+        ". Expected class: numeric",
+        ". Received class: ",
+        paste(received_class, collapse = " | ")
+      )
+    )
+  }
 }
