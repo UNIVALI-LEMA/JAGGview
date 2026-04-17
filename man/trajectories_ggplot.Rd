@@ -43,8 +43,8 @@ trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
 }
 
 \dontrun{
-df <- trajectories_data(list_models, "BB0")
-trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4" "#34a853" "#ea4335"))
+df <- trajectories_data(model_results, "BB0")
+trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4", "#34a853", "#ea4335"))
 }
 
 }

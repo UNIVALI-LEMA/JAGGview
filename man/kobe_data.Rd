@@ -4,13 +4,16 @@
 \alias{kobe_data}
 \title{Prepare data for Kobe plot visualization}
 \usage{
-kobe_data(list_models)
+kobe_data(model_results, ci_levels = c(0.5, 0.8, 0.95))
 }
 \arguments{
-\item{list_models}{A data frame containing model outputs with at
+\item{model_results}{A data frame containing model outputs with at
 least the following columns: \code{year}, \code{Scenario},
 \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by
 the JABBA function \code{JABBA::jbplot_ensemble()}.}
+
+\item{ci_levels}{A numeric vector containing the CI values between 0 and 1.
+Deafults to 0.5, 0.8, 0.95}
 }
 \value{
 A named list containing:
@@ -47,8 +50,8 @@ The output is designed to be used directly with
 }
 \examples{
 \dontrun{
-list_models <- jbplot_ensemble()
-df <- kobe_data(list_models)
+model_results <- jbplot_ensemble()
+df <- kobe_data(model_results)
 str(df)
 }
 

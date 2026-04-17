@@ -4,10 +4,12 @@
 #' required components to build a Kobe plot, including confidence
 #' contours and reference quadrants.
 #'
-#' @param list_models A data frame containing model outputs with at
+#' @param model_results A data frame containing model outputs with at
 #' least the following columns: \code{year}, \code{Scenario},
 #' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by 
 #' the JABBA function \code{JABBA::jbplot_ensemble()}.
+#' @param ci_levels A numeric vector containing the CI values between 0 and 1.
+#' Deafults to 0.5, 0.8, 0.95
 #'
 #' @return A named list containing:
 #' \describe{
@@ -38,8 +40,8 @@
 #'
 #' @examples
 #' \dontrun{
-#' list_models <- jbplot_ensemble()
-#' df <- kobe_data(list_models)
+#' model_results <- jbplot_ensemble()
+#' df <- kobe_data(model_results)
 #' str(df)
 #' }
 #'
@@ -47,15 +49,35 @@
 #' @importFrom dplyr %>% summarise arrange filter
 #' @importFrom stats median
 #' @importFrom gplots ci2d
-kobe_data <- function(list_models) {
+kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
+  ###@> Filtering the expected data...
+  .validate_jbplot_ensemble(model_results)
+
+  if (inherits(ci_levels, "numeric")) {
+    stop("Parameter 'ci_levels' was expecting a numeric vector")
+  }
+
+  if(any(is.na(ci_levels))) {
+    stop("Parameter 'ci_levels' cannot contain NA.")
+  }
+
+  if(any(ci_levels <= 0 | ci_levels >=1)) {
+    stop("Parameter 'ci_levels' was expecting numbers between 0 and 1.")
+  }
+
+  model_results <- model_results %>%
+    rename(Scenario = run) %>%
+    mutate(year = as.integer(year))
+
   #####@> Extracting data...
-  tmp11 <- list_models %>%
+  tmp11 <- model_results %>%
     summarise(
       Fratio = median(harvest),
       Bratio = median(stock),
       .by = c(year, Scenario)
     ) %>%
     arrange(Scenario, year)
+  # See if the size of the polygons in kobe plot change, or are always the same
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
     col = "yellow"
@@ -72,36 +94,48 @@ kobe_data <- function(list_models) {
     xmin = c(1, 1), xmax = c(6, 6), ymin = c(0, 0), ymax = c(1, 1), 
     col = "#00FF00"
   )
-  tmp11b <- filter(tmp11, year %in% c(1950, 1986, 2023))
-  tmp11c <- filter(list_models, year == 2023)
+
+  max_year <- max(model_results$year)
+  min_year <- min(model_results$year)
+  mid_year <- round(min_year + (max_year - min_year)/2)
+
+  # tmp11b <- filter(tmp11, year %in% c(1950, 1986, 2023)) # Maybe to transform this to generic, ask for the user
+  tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
+  tmp11c <- filter(model_results, year == max_year)          # to give the years he wants
 
   k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
-  for(i in unique(list_models$Scenario)) {
-    x <- filter(list_models, Scenario == i)
-    x <- filter(x, year == 2023)
+  for(i in unique(model_results$Scenario)) {
+    x <- filter(model_results, Scenario == i)
+    x <- filter(x, year == max_year)
     kernelF <- ci2d(
       x$stock, 
       x$harvest, 
-      nbins = 151, 
-      factor = 1.5, 
-      ci.levels = c(0.5, 0.8, 0.95),
+      nbins = 151,  # See if can be generic (seems more of a parameter)
+      factor = 1.5, # See if can be generic (seems more of a parameter)
+      # ci.levels = c(0.5, 0.8, 0.95), # See if can be generic (seems more of a parameter)
+      ci.levels = ci_levels,
       show = "none",
-      col = 1
+      col = 1       # See if can be generic 
     )
-    q50 <- kernelF$contours$"0.5"
-    q50$Scenario <- i; q50$q <- "50%"
-    q80 <- kernelF$contours$"0.8"
-    q80$Scenario <- i; q80$q <- "80%"
-    q95 <- kernelF$contours$"0.95"
-    q95$Scenario <- i; q95$q <- "95%"
-    tmp <- rbind(q50, q80, q95)
+    # See if can be generic (seems more of a parameter)
+
+    tmp00 <- lapply(
+      ci_levels, function(ci) {
+        q <- kernelF$contours[[as.character(ci)]]
+        q$Scenario <- i
+        q$q <- paste0(ci*100, "%")
+        q
+      })
+    
+    tmp <- do.call(rbind, tmp00)
+
     k.out <- rbind(
       k.out, 
       data.frame(
         x = tmp$x,
         y = tmp$y,
         Scenario = tmp$Scenario,
-        q = tmp$q
+        q = fct_relevel(tmp$q, sort(unique(tmp$q), decreasing = TRUE))
       )
     )
   }
@@ -130,7 +164,7 @@ kobe_data <- function(list_models) {
 #' The plot includes:
 #' \itemize{
 #'   \item Colored quadrants representing stock status regions.
-#'   \item Kernel density contours (50\%, 80\%, 95\%) for uncertainty.
+#'   \item Kernel density contours (50%, 80%, 95%) for uncertainty.
 #'   \item Time series trajectory of stock status.
 #'   \item Highlighted reference years.
 #'   \item Reference lines at B/Bmsy = 1 and F/Fmsy = 1.
@@ -140,7 +174,7 @@ kobe_data <- function(list_models) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- kobe_data(list_models)
+#' df <- kobe_data(model_results)
 #' kobe_ggplot(df)
 #' }
 #'
@@ -149,11 +183,18 @@ kobe_data <- function(list_models) {
 #' geom_polygon geom_path geom_point facet_wrap scale_y_continuous
 #' scale_x_continuous scale_shape_manual scale_fill_manual labs
 #' coord_cartesian theme
+#' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(df) {
+  max_x <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE)
+  max_y <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE)
+  if(max_x > 6) max_x <- 6
+  if(max_y > 6) max_y <- 6
+
+  n_levels <- length(unique(df$k.out$q))
   ggplot() +
     geom_rect(data = df$col01, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-      fill = "yellow") +
+      fill = "yellow") + # Maybe try passing the color of the data frame
     geom_rect(data = df$col02, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
       fill = "orange") +
@@ -165,10 +206,9 @@ kobe_ggplot <- function(df) {
       fill = "green") +
     geom_hline(yintercept = 1, linetype = "longdash") +
     geom_vline(xintercept = 1, linetype = "longdash") +
-    geom_polygon(
-      data = df$k.out,
-      aes(x = x, y = y, fill = factor(q, levels = c("95%", "80%", "50%"))),
-      colour = "gray30") +
+    geom_polygon(data = df$k.out,
+                 aes(x = x, y = y, fill = q),
+                 colour = "gray30") +
     geom_path(data = df$tmp11, aes(x = Bratio, y = Fratio)) +
     geom_point(data = df$tmp11b,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
@@ -177,10 +217,10 @@ kobe_ggplot <- function(df) {
     scale_y_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
     scale_x_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
     scale_shape_manual(values = c(21, 22, 23)) +
-    scale_fill_manual(values = c("cornsilk4", "grey", "cornsilk2")) +
+    scale_fill_manual(values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)) +
     labs(x = expression(B/B[MSY]), y = expression(F/F[MSY]), fill = "",
-         colour = "", shape = "") +
-    coord_cartesian(xlim = c(0, 4), ylim = c(0, 3)) +
+         shape = "") +
+    coord_cartesian(xlim = c(0, max_x), ylim = c(0, max_y)) +
     .my_theme() +
     theme(legend.position = "top")
 }

@@ -4,16 +4,13 @@
 \alias{trajectories_data}
 \title{Summarise trajectory data from model outputs}
 \usage{
-trajectories_data(list_models, variable)
+trajectories_data(model_results)
 }
 \arguments{
-\item{list_models}{A data.frame containing model outputs. Must include
+\item{model_results}{A data.frame containing model outputs. Must include
 columns \code{year}, \code{run}, and the variables used in the analysis
 (e.g., \code{BB0}, \code{stock}, \code{harvest}), returned by the JABBA
 function \code{JABBA::jbplot_ensemble()}.}
-
-\item{variable}{A character string indicating which variable to summarise.
-Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.}
 }
 \value{
 A data.frame containing:
@@ -21,10 +18,10 @@ A data.frame containing:
 \item \code{year}: Year of the observation
 \item \code{Scenario}: Scenario name
 \item \code{mu}: Median value
-\item \code{lcl}: Lower 2.5\\\% quantile
-\item \code{ucl}: Upper 97.5\\\% quantile
-\item \code{lcl2}: Lower 10\\\% quantile
-\item \code{ucl2}: Upper 90\\\% quantile
+\item \code{lcl}: Lower 2.5\% quantile
+\item \code{ucl}: Upper 97.5\% quantile
+\item \code{lcl2}: Lower 10\% quantile
+\item \code{ucl2}: Upper 90\% quantile
 }
 }
 \description{
@@ -41,8 +38,8 @@ The function maps user-friendly variable names to:
 }
 \examples{
 \dontrun{
-list_models <- jbplot_ensemble()
-df <- trajectories_data(list_models, variable = "BB0")
+model_results <- jbplot_ensemble()
+df <- trajectories_data(model_results, variable = "BB0")
 df
 }
 

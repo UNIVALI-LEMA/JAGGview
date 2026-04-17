@@ -3,22 +3,20 @@
 #' This function computes summary statistics (median and quantiles)
 #' for selected variables from model outputs, grouped by year and scenario.
 #'
-#' @param list_models A data.frame containing model outputs. Must include
+#' @param model_results A data.frame containing model outputs. Must include
 #' columns \code{year}, \code{run}, and the variables used in the analysis
 #' (e.g., \code{BB0}, \code{stock}, \code{harvest}), returned by the JABBA 
 #' function \code{JABBA::jbplot_ensemble()}.
-#' @param variable A character string indicating which variable to summarise.
-#' Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.
 #'
 #' @return A data.frame containing:
 #' \itemize{
 #'   \item \code{year}: Year of the observation
 #'   \item \code{Scenario}: Scenario name
 #'   \item \code{mu}: Median value
-#'   \item \code{lcl}: Lower 2.5\\% quantile
-#'   \item \code{ucl}: Upper 97.5\\% quantile
-#'   \item \code{lcl2}: Lower 10\\% quantile
-#'   \item \code{ucl2}: Upper 90\\% quantile
+#'   \item \code{lcl}: Lower 2.5% quantile
+#'   \item \code{ucl}: Upper 97.5% quantile
+#'   \item \code{lcl2}: Lower 10% quantile
+#'   \item \code{ucl2}: Upper 90% quantile
 #' }
 #'
 #' @details
@@ -31,34 +29,45 @@
 #'
 #' @examples
 #' \dontrun{
-#' list_models <- jbplot_ensemble()
-#' df <- trajectories_data(list_models, variable = "BB0")
+#' model_results <- jbplot_ensemble()
+#' df <- trajectories_data(model_results, variable = "BB0")
 #' df
 #' }
 #' 
 #' @export
-#' @importFrom dplyr %>% rename mutate summarise ungroup
+#' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup
 #' @importFrom stats median quantile
-trajectories_data <- function(list_models, variable) {
+trajectories_data <- function(model_results) {
+  ###@> Filtering the expected data...
+  .validate_jbplot_ensemble(model_results)
+
   columns <- list(
-    BB0 = "BB0",
+    BB0   = "BB0",
     BBmsy = "stock",
     FFmsy = "harvest"
   )
 
-  variable <- columns[[variable]]
-
-  list_models %>%
+  model_results <- model_results %>%
     rename(Scenario = run) %>%
-    mutate(year = as.integer(year)) %>%
-    summarise(
-      mu = median(.data[[variable]]),
-      lcl = quantile(.data[[variable]], probs = 0.025),
-      ucl = quantile(.data[[variable]], probs = 0.975),
-      lcl2 = quantile(.data[[variable]], probs = 0.1),
-      ucl2 = quantile(.data[[variable]], probs = 0.9),
-      .by = c(year, Scenario)
-    ) %>%
+    mutate(year = as.integer(year))
+
+  result_list <- lapply(names(columns), function(var_name) {
+
+    var_col <- columns[[var_name]]
+
+    model_results %>%
+      summarise(
+        mu   = median(.data[[var_col]]),
+        lcl  = quantile(.data[[var_col]], probs = 0.025),
+        ucl  = quantile(.data[[var_col]], probs = 0.975),
+        lcl2 = quantile(.data[[var_col]], probs = 0.1),
+        ucl2 = quantile(.data[[var_col]], probs = 0.9),
+        metric = var_name,
+        .by = c(year, Scenario)
+      )
+  })
+
+  bind_rows(result_list) %>%
     ungroup()
 }
 
@@ -91,8 +100,8 @@ trajectories_data <- function(list_models, variable) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- trajectories_data(list_models, "BB0")
-#' trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4" "#34a853" "#ea4335"))
+#' df <- trajectories_data(model_results, "BB0")
+#' trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4", "#34a853", "#ea4335"))
 #' }
 #'
 #' @export
@@ -101,6 +110,10 @@ trajectories_data <- function(list_models, variable) {
 trajectories_ggplot <- function(
   df, variable, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = NULL
 ) {
+  if(!variable %in% c("BB0", "BBmsy", "FFmsy")) {
+    stop("Parameter 'variable' was expecting 'BB0', 'BBmsy' or 'FFmsy'.")
+  }
+
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
@@ -112,16 +125,18 @@ trajectories_ggplot <- function(
   }
 
   ggplot() +
-    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
+    geom_ribbon(data = df %>% filter(metric == variable), 
+                fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl, ymax = ucl)) +
-    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
+    geom_ribbon(data = df %>% filter(metric == variable), 
+                fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl2, ymax = ucl2)) +
-    geom_line(data = df, aes(x = year, y = mu),
+    geom_line(data = df %>% filter(metric == variable), 
+              aes(x = year, y = mu),
               size = 1) +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
     scale_y_continuous(expand = c(0, 0)) +
-    labs(x = "Year", y = title_y, fill = "",
-         colour = "") +
+    labs(x = "Year", y = title_y, fill = "",colour = "") +
     .my_theme() +
     theme(legend.position = "none")
 }

@@ -201,3 +201,23 @@
     )
   )
 }
+
+#' @keywords internal
+.is_jbplot_ensemble <- function(obj) {
+  cols <- c(
+    "year", "run", "type", "iter", "stock",
+    "harvest", "B", "H", "Bdev", "Catch", 
+    "BB0", "BBfrac", "Bref"
+  )
+  is.data.frame(obj) && all(cols %in% names(obj))
+}
+
+#' @keywords internal
+.validate_jbplot_ensemble <- function(object_df) {
+  if(!.is_jbplot_ensemble(object_df)) {
+    stop("Element must be a valid JABBA model output.")
+  }
+  .is_column_valid(object_df, "BB0", "numeric")
+  .is_column_valid(object_df, "stock", "numeric")
+  .is_column_valid(object_df, "harvest", "numeric")
+}

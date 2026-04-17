@@ -21,7 +21,7 @@ uncertainty contours and temporal trajectories.
 The plot includes:
 \itemize{
 \item Colored quadrants representing stock status regions.
-\item Kernel density contours (50\\%, 80\\%, 95\\%) for uncertainty.
+\item Kernel density contours (50\%, 80\%, 95\%) for uncertainty.
 \item Time series trajectory of stock status.
 \item Highlighted reference years.
 \item Reference lines at B/Bmsy = 1 and F/Fmsy = 1.
@@ -31,7 +31,7 @@ Faceting is applied by scenario, allowing comparison across model runs.
 }
 \examples{
 \dontrun{
-df <- kobe_data(list_models)
+df <- kobe_data(model_results)
 kobe_ggplot(df)
 }
 
