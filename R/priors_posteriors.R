@@ -155,8 +155,8 @@ priors_posteriors_data <- function(list_models) {
     psi = round(temp01$mu.psi/temp00$mu.psi, 3))
   
   mutipliers <- data.frame(
-    variable = c("K", "r", "psi"),
-    limit = c(8000000, 0.3, 1.6)
+    variable = c("K", "r", "psi"),# "sigma"),
+    limit = c(8000000, 0.3, 1.6)#, 1)
   )
 
   list(
@@ -203,7 +203,8 @@ priors_posteriors_data <- function(list_models) {
 priors_posteriors_ggplot <- function(
   df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853", "#ea4335")
 ) {
-  if(!var %in% c("K", "r", "psi")) {
+  if(!var %in% c("K", "r", "psi")) {#, "sigma")) {
+    # stop("Parameter 'var' was expecting 'K', 'r', 'psi' or 'sigma'.")
     stop("Parameter 'var' was expecting 'K', 'r' or 'psi'.")
   }
 
@@ -219,7 +220,8 @@ priors_posteriors_ggplot <- function(
   labels_x <- list(
     K = "Carrying capacity (K)",
     r = "Intrinsic growth rate (r)",
-    psi = "Initial biomass depletion ratio (psi)"
+    psi = "Initial biomass depletion ratio (psi)"#,
+    # sigma = "sigma"
   )
 
   if (is.null(title_x)) {

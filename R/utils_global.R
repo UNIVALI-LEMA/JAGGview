@@ -9,5 +9,5 @@ utils::globalVariables(c(
   "name", "obs", "retro", "retro.peels", "year", 
   "Bdev", "lcl2", "run", "ucl2", "Bratio", "Fratio",
   "harvest", "stock", "xmax", "xmin", ".data", 
-  "id_num", "Peel", "metric"
+  "id_num", "Peel", "metric", "indices"
 ))

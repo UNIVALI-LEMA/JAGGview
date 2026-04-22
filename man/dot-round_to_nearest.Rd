@@ -4,7 +4,7 @@
 \alias{.round_to_nearest}
 \title{Round values to a convenient axis limit}
 \usage{
-.round_to_nearest(value, max)
+.round_to_nearest(value, max, multiplier = 1.2)
 }
 \arguments{
 \item{value}{A numeric value.}
@@ -14,6 +14,9 @@
 \item \code{TRUE}: round up (used for upper axis limits).
 \item \code{FALSE}: round down (used for lower axis limits).
 }}
+
+\item{multiplier}{A number factor applied to the absolute value
+to create a margin for axis limits.}
 }
 \value{
 A rounded numeric value.

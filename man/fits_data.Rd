@@ -4,11 +4,14 @@
 \alias{fits_data}
 \title{Prepare fitted index data and confidence intervals}
 \usage{
-fits_data(list_models)
+fits_data(list_models, indices = NULL)
 }
 \arguments{
 \item{list_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
+
+\item{indices}{Optional. A vector of indices to include. Must exist
+in the \code{Index} column.}
 }
 \value{
 A named list with three elements:

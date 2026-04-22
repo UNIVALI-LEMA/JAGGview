@@ -42,24 +42,10 @@ hindcast_data <- function(hc_raw_data) {
   ######@> Plot hindcasting...
   hc <- .process_hindcasts(hc_raw_data)
 
-  # n_retro_peels <- length(unique(hc$retro.peels))
-
-  # year_retro_peels <- c(
-  #   "Ref",
-  #   paste0("-", sort(unique(hc$year), decreasing = TRUE))[seq_len(n_retro_peels)]
-  # )
-
-  # min_year <- min(
-  #   as.integer(gsub("-", "", year_retro_peels[year_retro_peels != "Ref"]))
-  # ) #- 1
-
   min_year <- as.integer(gsub("-", "", min(hc$Peel))) - 1
-
-  print(min_year)
 
   #####@> Extracting data...
   tmp14 <- hc %>%
-    # mutate(retro = year_retro_peels[retro.peels + 1]) %>%
     rename(retro = Peel) %>%
     mutate(
       retro = fct_relevel(retro, sort(unique(retro), decreasing = TRUE))
@@ -71,7 +57,6 @@ hindcast_data <- function(hc_raw_data) {
   
   tmp15 <- tmp14 %>%
     filter(hindcast == TRUE) %>%
-    # filter(year > 2015) %>% # or filter(year >= 2016) %>%
     filter(year > min_year) %>%
     group_by(retro.peels) %>%
     filter(year == min(year)) %>%
@@ -88,8 +73,6 @@ hindcast_data <- function(hc_raw_data) {
     pull(Index)
 
   na_index <- unique(na_index)
-
-  # print(na_index)
 
   list(
     data = tmp14 %>% filter(!Index %in% na_index),

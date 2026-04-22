@@ -42,20 +42,26 @@ runs_tests_data <- function(list_models) {
 
   tmp05 <- .process_runs(list_models)
 
+  indices <- 4:ncol(tmp05)
+
+  min_year <- min(tmp05$Year, na.rm = TRUE)
+
+  max_year <- max(tmp05$Year, na.rm = TRUE)
+
   #####@> Runstest...
   out.test <- data.frame(
     expand.grid(
-      Index = names(tmp05)[4:ncol(tmp05)], 
+      Index = names(tmp05)[indices], 
       Scenario = unique(tmp05$Scenario),
-      ymin = as.integer(1950), 
-      ymax = as.integer(2023), 
+      ymin = as.integer(min_year), 
+      ymax = as.integer(max_year), 
       lcl = NA, 
       ucl = NA, 
       pvalue = NA
     )
   )
   
-  for(i in 4:ncol(tmp05)) {
+  for(i in indices) {
     for(j in unique(tmp05$Scenario)) {
       name <- names(tmp05)[i]
       index <- tmp05[tmp05$Scenario == j, i]
@@ -74,7 +80,7 @@ runs_tests_data <- function(list_models) {
 
   ####@> Pivoting table...
   tmp05 <- pivot_longer(
-    tmp05, names_to = "Index", values_to = "Res", 4:ncol(tmp05)
+    tmp05, names_to = "Index", values_to = "Res", indices
   ) %>%
     filter(complete.cases(.)) %>%
     left_join(out.test, by = c("Scenario", "Index")) %>%
@@ -87,7 +93,7 @@ runs_tests_data <- function(list_models) {
 
   ###@> Including p-value in plot...
   out.test <- out.test %>%
-      mutate(x = mean(1950:2023), y = 0.65) # adapt to be generic
+      mutate(x = mean(min_year:max_year), y = ucl*1.5)
   
   loess_fit <- loess(Res ~ Year, data = tmp05)
   tmp05$fit <- predict(loess_fit)
@@ -135,9 +141,12 @@ runs_tests_data <- function(list_models) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_text geom_hline geom_segment 
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
+  max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2)
+  min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2)
+
   ggplot() +
     geom_rect(data = df_lists$SE3,
-              aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl,
+              aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
                   fill = class),
               alpha = 0.2) +
     geom_text(data = df_lists$SE3,
@@ -153,7 +162,7 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
         pch = 21, size = 2.5) +
     facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
-    scale_y_continuous(expand = c(0, 0), limits = c(-0.8, 0.8)) + # adapt to be generic
+    scale_y_continuous(limits = c(min_val, max_val)) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
@@ -226,7 +235,7 @@ cpue_conflicts_ggplot <- function(
 #' 
 #' @keywords internal
 #' @importFrom dplyr bind_rows
-.process_runs <- function(fit_list) {#, vars = "runs") {
+.process_runs <- function(fit_list) {
   temp00 <- lapply(
     fit_list,
     function(fit) {
@@ -235,11 +244,6 @@ cpue_conflicts_ggplot <- function(
         Scenario = fit$scenario,
         Ref = 0,
         t(fit$residuals)
-        # if(vars == "runs") {
-        #   t(fit$residuals)
-        # } else {
-        #   t(fit$residuals)
-        # }
       )
     }
   )

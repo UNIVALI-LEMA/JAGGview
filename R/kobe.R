@@ -112,7 +112,6 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
       x$harvest, 
       nbins = 151,  # See if can be generic (seems more of a parameter)
       factor = 1.5, # See if can be generic (seems more of a parameter)
-      # ci.levels = c(0.5, 0.8, 0.95), # See if can be generic (seems more of a parameter)
       ci.levels = ci_levels,
       show = "none",
       col = 1       # See if can be generic 

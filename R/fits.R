@@ -9,6 +9,8 @@
 #'
 #' @param list_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
+#' @param indices Optional. A vector of indices to include. Must exist
+#'  in the \code{Index} column.
 #'
 #' @return A named list with three elements:
 #' \describe{
@@ -39,7 +41,7 @@
 #' @importFrom dplyr %>% select filter full_join 
 #' @importFrom stats complete.cases
 #' @importFrom forcats fct_relevel
-fits_data <- function(list_models) {
+fits_data <- function(list_models, indices = NULL) {
   ###@> Filtering the expected data...
   .validate_fits_input_data(list_models)
 
@@ -61,6 +63,8 @@ fits_data <- function(list_models) {
   )
   tmp00 <- full_join(tmp01, tmp02)
 
+  if(!is.null(indices)) .validate_indices(unique(tmp00$Index), indices)
+
   ####@> Estimating Upper and Lower errors...
   tmp00$error <- with(tmp00, (1.96 * sqrt(SE)))
   tmp00$Ui <- with(tmp00, Mean + error)
@@ -75,7 +79,7 @@ fits_data <- function(list_models) {
   tmp00 <- tmp00[complete.cases(tmp00),]
 
   tmp00 <- tmp00 %>%
-    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
 
   tmp00 <- tmp00 %>%
     select(-SE)
@@ -83,12 +87,14 @@ fits_data <- function(list_models) {
   ####@> Fit (CI 80%)...
   tmp03 <- .process_cpues(list_models, vars = "ppd")
 
+  if(!is.null(indices)) .validate_indices(unique(tmp03$Index), indices)
+
   if(any(is.na(tmp03$Index))) {
     .fill_na_indices(tmp03, index_inputseries)
   }
 
   tmp03 <- tmp03 %>%
-    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
 
   tmp03 <- tmp03 %>% 
     select(-c(se, obserror))
@@ -96,12 +102,14 @@ fits_data <- function(list_models) {
   ####@> Fit (CI 95%)...
   tmp04 <- .process_cpues(list_models, vars = "hat")
 
+  if(!is.null(indices)) .validate_indices(unique(tmp04$Index), indices)
+
   if(any(is.na(tmp04$Index))) {
     .fill_na_indices(tmp04, index_inputseries)
   }
 
   tmp04 <- tmp04 %>%
-    mutate(Index = fct_relevel(Index)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
 
   tmp04 <- tmp04 %>% 
     select(-c(se, obserror, mu))
@@ -145,6 +153,9 @@ fits_data <- function(list_models) {
 fits_ggplot <- function(
   df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Abundance index"
 ) {
+  max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
+  min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
+
   ggplot() +
     geom_ribbon(data = df_lists$CI_80,
         aes(x = Year, ymin = lci, ymax = uci),
@@ -160,7 +171,7 @@ fits_ggplot <- function(
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) +
     facet_grid(Scenario ~ Index, scales = "free") +
-    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 4, 0.5)) +
+    scale_y_continuous(limits = c(min_val, max_val)) +
     labs(x = "Year", y = title_y) +
     .my_theme()
 }

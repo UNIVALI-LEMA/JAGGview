@@ -145,6 +145,8 @@ international_system_prefixes <- function(number, decimals = 2) {
 #'     \item \code{TRUE}: round up (used for upper axis limits).
 #'     \item \code{FALSE}: round down (used for lower axis limits).
 #'   }
+#' @param multiplier A number factor applied to the absolute value
+#'  to create a margin for axis limits. 
 #'
 #' @return A rounded numeric value.
 #' 
@@ -153,11 +155,11 @@ international_system_prefixes <- function(number, decimals = 2) {
 #' when appropriate, ensuring cleaner lower bounds in plots.
 #'
 #' @keywords internal
-.round_to_nearest <- function(value, max) {
+.round_to_nearest <- function(value, max, multiplier = 1.2) {
   sign_val <- sign(value)
   value_abs <- abs(value)
 
-  value_adj <- value_abs * 1.2
+  value_adj <- value_abs * multiplier
 
   magnitude <- 10^(floor(log10(value_adj)))
   

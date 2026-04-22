@@ -214,9 +214,6 @@
 
 #' @keywords internal
 .validate_jbplot_ensemble <- function(object_df) {
-  # After, review the function, to see what can be reduced to one function,
-  # compared to .validate_column, because the structures of the model results
-  # of the functions are different
   if(!.is_jbplot_ensemble(object_df)) {
     stop("Element must be a valid JABBA model output.")
   }
@@ -245,5 +242,12 @@
         paste(received_class, collapse = " | ")
       )
     )
+  }
+}
+
+#' @keywords internal
+.validate_indices <- function(data_indices, factor_indices) {
+  if (!all(factor_indices %in% data_indices)) {
+    stop("All indices past in 'indices' must be in the data.")
   }
 }
