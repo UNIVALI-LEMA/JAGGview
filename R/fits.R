@@ -1,6 +1,6 @@
 #' Prepare fitted index data and confidence intervals
 #'
-#' Processes model outputs to generate formatted data for fitted indices,
+#' Processes model outputs to generate formatted data for fitted indices_factor,
 #' including mean values and confidence intervals (80% and 95%).
 #'
 #' This function extracts index and uncertainty information from a list
@@ -9,7 +9,7 @@
 #'
 #' @param list_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
-#' @param indices Optional. A vector of indices to include. Must exist
+#' @param indices_factor Optional. A vector of indices_factor to include. Must exist
 #'  in the \code{Index} column.
 #'
 #' @return A named list with three elements:
@@ -23,10 +23,17 @@
 #' }
 #'
 #' @details
-#' The function internally processes scenario-based outputs, replaces
-#' missing values based on reference data, reshapes the data into long
-#' format, and computes confidence intervals assuming normality.
+#' The function processes scenario-based outputs for indices_factor (\code{I}),
+#' standard errors (\code{SE2}), and fitted values (\code{ppd} and \code{hat}).
+#' Missing values are handled using reference index data when necessary.
 #'
+#' Confidence intervals for \code{Li_Ui} are computed assuming normality,
+#' using a multiplier of 1.96 applied to the standard error.
+#'
+#' If \code{indices_factor} is provided, the results are filtered and reordered
+#' accordingly. The function also ensures consistency across different
+#' model outputs and removes incomplete cases before returning results.
+#' 
 #' @examples
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
@@ -41,7 +48,7 @@
 #' @importFrom dplyr %>% select filter full_join 
 #' @importFrom stats complete.cases
 #' @importFrom forcats fct_relevel
-fits_data <- function(list_models, indices = NULL) {
+fits_data <- function(list_models, indices_factor = NULL) {
   ###@> Filtering the expected data...
   .validate_fits_input_data(list_models)
 
@@ -63,7 +70,7 @@ fits_data <- function(list_models, indices = NULL) {
   )
   tmp00 <- full_join(tmp01, tmp02)
 
-  if(!is.null(indices)) .validate_indices(unique(tmp00$Index), indices)
+  if(!is.null(indices_factor)) .validate_indices(unique(tmp00$Index), indices_factor)
 
   ####@> Estimating Upper and Lower errors...
   tmp00$error <- with(tmp00, (1.96 * sqrt(SE)))
@@ -79,7 +86,7 @@ fits_data <- function(list_models, indices = NULL) {
   tmp00 <- tmp00[complete.cases(tmp00),]
 
   tmp00 <- tmp00 %>%
-    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices_factor))
 
   tmp00 <- tmp00 %>%
     select(-SE)
@@ -87,14 +94,14 @@ fits_data <- function(list_models, indices = NULL) {
   ####@> Fit (CI 80%)...
   tmp03 <- .process_cpues(list_models, vars = "ppd")
 
-  if(!is.null(indices)) .validate_indices(unique(tmp03$Index), indices)
+  if(!is.null(indices_factor)) .validate_indices(unique(tmp03$Index), indices_factor)
 
   if(any(is.na(tmp03$Index))) {
     .fill_na_indices(tmp03, index_inputseries)
   }
 
   tmp03 <- tmp03 %>%
-    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices_factor))
 
   tmp03 <- tmp03 %>% 
     select(-c(se, obserror))
@@ -102,14 +109,14 @@ fits_data <- function(list_models, indices = NULL) {
   ####@> Fit (CI 95%)...
   tmp04 <- .process_cpues(list_models, vars = "hat")
 
-  if(!is.null(indices)) .validate_indices(unique(tmp04$Index), indices)
+  if(!is.null(indices_factor)) .validate_indices(unique(tmp04$Index), indices_factor)
 
   if(any(is.na(tmp04$Index))) {
     .fill_na_indices(tmp04, index_inputseries)
   }
 
   tmp04 <- tmp04 %>%
-    mutate(Index = fct_relevel(Index, indices)) # after add the option for the user to choose the order
+    mutate(Index = fct_relevel(Index, indices_factor))
 
   tmp04 <- tmp04 %>% 
     select(-c(se, obserror, mu))
@@ -151,7 +158,7 @@ fits_data <- function(list_models, indices = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Abundance index"
+  df_lists, palette = "#4285f4", title_y = "Abundance index"
 ) {
   max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)

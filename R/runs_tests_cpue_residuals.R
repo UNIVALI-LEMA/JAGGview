@@ -6,6 +6,8 @@
 #'
 #' @param list_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
+#' @param indices_factor Optional. A vector of indices to include. Must exist
+#'  in the \code{Index} column.
 #'
 #' @return A named list with three elements:
 #' \describe{
@@ -21,6 +23,10 @@
 #' and classifies results based on statistical significance. Residuals
 #' are smoothed using LOESS, and confidence intervals are derived
 #' from the fitted model.
+#' 
+#' If \code{indices_factor} is provided, the results are filtered and reordered
+#' accordingly. The function also ensures consistency across different
+#' model outputs and removes incomplete cases before returning results.
 #'
 #' @examples
 #' \dontrun{
@@ -36,7 +42,7 @@
 #' @importFrom JABBA jbruns_sig3
 #' @importFrom stats loess predict complete.cases
 #' @importFrom forcats fct_relevel
-runs_tests_data <- function(list_models) {
+runs_tests_data <- function(list_models, indices_factor = NULL) {
   ###@> Filtering the expected data...
   .validate_fits_input_data(list_models)
 
@@ -81,13 +87,17 @@ runs_tests_data <- function(list_models) {
   ####@> Pivoting table...
   tmp05 <- pivot_longer(
     tmp05, names_to = "Index", values_to = "Res", indices
-  ) %>%
+  ) 
+
+  if(!is.null(indices_factor)) .validate_indices(unique(tmp05$Index), indices_factor)
+  
+  tmp05 <- tmp05 %>%
     filter(complete.cases(.)) %>%
     left_join(out.test, by = c("Scenario", "Index")) %>%
     select(Year:Res, lcl, ucl) %>%
     mutate(
       class = ifelse(Res < lcl | Res > ucl, "red", "white"),
-      Index = fct_relevel(Index) # after add the option for the user to choose the order
+      Index = fct_relevel(Index, indices_factor)
     ) %>%
     droplevels()
 
@@ -141,8 +151,16 @@ runs_tests_data <- function(list_models) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_text geom_hline geom_segment 
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
-  max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2)
-  min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2)
+  max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+  min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
+
+  pos <- .auto_text_position(
+    data_list = df_lists$cpue_residuals,
+    col_x = "Year",
+    col_y = "Res",
+    multiplier = 2,
+    margin = 0.5
+  )
 
   ggplot() +
     geom_rect(data = df_lists$SE3,
@@ -150,7 +168,8 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
                   fill = class),
               alpha = 0.2) +
     geom_text(data = df_lists$SE3,
-        aes(x = x, y = y, label = paste0("p-value = ", round(pvalue, 3)))) +
+        aes(x = pos$x, y = pos$y,
+          label = paste0("p-value = ", round(pvalue, 3)))) +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
                  aes(x = Year, xend = Year, y = Ref, yend = Res)) +
@@ -195,11 +214,13 @@ cpue_conflicts_ggplot <- function(
 ) {
   max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
-
-  max_year <- max(df_lists$cpue_residuals$Year)
-  min_year <- min(df_lists$cpue_residuals$Year)
-  x_diff <- max_year - min_year
-  x_year <- max_year - round(x_diff/4, 0)
+  
+  pos <- .auto_text_position(
+    data_list = df_lists$cpue_residuals,
+    col_x = "Year",
+    col_y = "Res",
+    multiplier = 1.1
+  )
   
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
@@ -212,8 +233,7 @@ cpue_conflicts_ggplot <- function(
     geom_smooth(data = df_lists$cpue_residuals, 
       aes(x = Year, y = Res), se = TRUE, colour = "black") +
     geom_text(data = df_lists$RMSE_data,
-              aes(x = x_year, 
-                  y = max_val / 1.1, 
+              aes(x = pos$x, y = pos$y,
                   label = paste0("RMSE = ", Value, " %"))) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
     scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
@@ -250,23 +270,6 @@ cpue_conflicts_ggplot <- function(
   result <- bind_rows(temp00)
   return(result)
 }
-
-# #' Prepare CPUE conflict diagnostics data
-# #'
-# #' Internal helper that filters model statistics to extract RMSE values
-# #' and prepares them for annotation in CPUE residual diagnostics plots.
-# #'
-# #' @param list_models A list of model outputs.
-# #'
-# #' @return A data frame containing RMSE values with plotting coordinates.
-# #' 
-# #' @keywords internal
-# #' @importFrom dplyr mutate
-# #' @importFrom dplyr %>% filter
-# .cpue_conflicts_data <- function(list_models) {
-#   .process_stats(list_models) %>%
-#     filter(Stastistic == "RMSE")
-# }
 
 #' Extract and combine model statistics
 #'

@@ -116,6 +116,8 @@ hindcast_data <- function(hc_raw_data) {
 hindcast_ggplot <- function(df_lists) {
   max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+
+  pos <- .auto_text_position(df_lists$data, "year", "hat.uci", multiplier = 1.1)
   
   ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
@@ -140,14 +142,14 @@ hindcast_ggplot <- function(df_lists) {
                aes(x = year, y = hat, fill = retro),
                pch = 21, size = 2) +
     geom_text(data = df_lists$mase_data,
-              aes(x = x, y = y,
+              aes(x = pos$x, y = pos$y,
                   label = paste0("MASE = ", round(MASE, 3)))) +
     labs(x = "Year", y = "Index", colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), drop = FALSE) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val))
+    scale_y_continuous(limits = c(min_val, max_val)) +
     .my_theme() +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 1))
@@ -237,8 +239,6 @@ hindcast_ggplot <- function(df_lists) {
     function(fit) {
       jbmase(fit) %>% 
         mutate(
-          x = 2015, 
-          y = 1.9,
           Scenario = fit[[1]]$scenario
         )
     }

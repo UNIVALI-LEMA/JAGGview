@@ -14,41 +14,22 @@
 #' 
 #' @export
 international_system_prefixes <- function(number, decimals = 2) {
-  value <- ifelse(
-    abs(number) >= 1e6, number / 1e6,
-    ifelse(
-      abs(number) >= 1e3, number / 1e3,
-      ifelse(
-        abs(number) >= 1, number,
-        ifelse(
-          abs(number) >= 1e-3, number * 1e3,
-          ifelse(
-            abs(number) >= 1e-6, number * 1e6,
-            number * 1e9
-          )
-        )
-      )
-    )
-  )
+  breaks <- c(0, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9, Inf)
+  scales <- c(1e-9, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9)
+  suffixes <- c("n", "\u00B5", "m", "", "k", "M", "G")
+
+  idx <- findInterval(abs(number), breaks, rightmost.closed = TRUE)
+
+  scale <- scales[idx]
+  suffix <- suffixes[idx]
+
+  value <- number / scale
   
-  suffix <- ifelse(
-    abs(number) >= 1e6, "M",
-    ifelse(
-      abs(number) >= 1e3, "k",
-      ifelse(
-        abs(number) >= 1, "",
-        ifelse(
-          abs(number) >= 1e-3, "m",
-          ifelse(
-            abs(number) >= 1e-6, "\u00B5",
-            "n"
-          )
-        )
-      )
-    )
-  )
+  formatted <- paste0(trimws(.format_number(value, decimals = decimals)), suffix)
+
+  formatted[number == 0] <- .format_number(0, decimals = 0)
   
-  paste0(trimws(.format_number(value, decimals = decimals)), suffix)
+  formatted
 }
 
 #' Format numeric values with custom separators
@@ -174,4 +155,137 @@ international_system_prefixes <- function(number, decimals = 2) {
   }
   
   return(result)
+}
+
+#' Automatically determine a suitable position for text in plots
+#'
+#' Internal helper that computes an appropriate (x, y) position for placing
+#' text in a plot, based on the distribution of the data.
+#'
+#' The function combines one or more datasets, evaluates regions with lower
+#' values (based on a quantile threshold), and selects a position that avoids
+#' dense or high-value areas.
+#'
+#' @param data_list A data frame or a list of data frames containing the data.
+#' @param col_x A string indicating the name of the column to be used as the x-axis.
+#' @param col_y A string indicating the name of the column to be used as the y-axis.
+#' @param margin A numeric value (between 0 and 0.5) defining the proportion of the
+#'   x-range to exclude from both ends when searching for candidate positions.
+#' @param low_quantile A numeric value (between 0 and 1) used to define low-value
+#'   regions in the data. Positions are selected among values below this quantile.
+#' @param multiplier A numeric factor (positive) applied to the maximum y-value to 
+#' define the vertical position of the text
+#' @param x_max Optional. A numeric value (positive) used to restrict the x-axis range
+#'   considered in the calculation.
+#'
+#' @return A list with two elements:
+#' \describe{
+#'   \item{x}{The selected x-coordinate for the text}
+#'   \item{y}{The selected y-coordinate for the text}
+#' }
+#'
+#' @details
+#' The function first aligns all datasets over a common x-axis and sums the
+#' corresponding y-values. It then excludes edge regions based on \code{margin}
+#' and identifies candidate positions where the combined y-values fall below
+#' a specified quantile (\code{low_quantile}). Among these, the rightmost
+#' candidate is selected. If no candidates are found, the global minimum is used.
+#'
+#' The y-position is defined as a proportion of the maximum y-value, controlled
+#' by \code{multiplier}.
+#'
+#' @keywords internal
+.auto_text_position <- function(
+  data_list, col_x, col_y, margin = 0.1, low_quantile = 0.2, multiplier = 0.9, x_max = NULL
+) {
+  
+  if (is.data.frame(data_list)) {
+    data_list <- list(data_list)
+  }
+  if (!is.list(data_list)) {
+    data_list <- list(data_list)
+  }
+  if(margin < 0 || margin > 0.5) {
+    stop("Expected parameter 'margin' to be between 0 and 0.5.")
+  }
+  if(low_quantile < 0 || low_quantile > 1) {
+    stop("Expected parameter 'low_quantile' to be between 0 and 1.")
+  }
+  if(multiplier <= 0) {
+    stop("Expected parameter 'multiplier' to be a positive number.")
+  }
+  if(x_max <= 0) {
+    stop("Expected parameter 'x_max' to be a positive number.")
+  }
+
+  all_x <- unique(unlist(lapply(data_list, function(d) d[[col_x]])))
+  all_x <- sort(all_x)
+
+  if (!is.null(x_max)) {
+    all_x <- all_x[all_x <= x_max]
+  }
+
+  if (length(all_x) == 0) {
+    stop("No values left after applying x_max.")
+  }
+
+  y_matrix <- sapply(data_list, function(d) {
+    x <- d[[col_x]]
+    y <- d[[col_y]]
+    
+    valid <- !is.na(x) & !is.na(y)
+    x <- x[valid]
+    y <- y[valid]
+
+    if (!is.null(x_max)) {
+      keep <- x <= x_max
+      x <- x[keep]
+      y <- y[keep]
+    }
+    
+    y_full <- rep(0, length(all_x))
+    match_idx <- match(x, all_x)
+    y_full[match_idx] <- y
+    
+    return(y_full)
+  })
+
+  if (is.vector(y_matrix)) {
+    y_matrix <- matrix(y_matrix, ncol = 1)
+  }
+
+  y_combined <- rowSums(y_matrix)
+
+  x <- all_x
+  y <- y_combined
+
+  x_range <- range(x)
+  x_min <- x_range[1] + diff(x_range) * margin
+  x_max_eff <- x_range[2] - diff(x_range) * margin
+  
+  inside <- x >= x_min & x <= x_max_eff
+  
+  x_in <- x[inside]
+  y_in <- y[inside]
+
+  if (length(x_in) == 0) {
+    x_in <- x
+    y_in <- y
+  }
+
+  threshold <- quantile(y_in, low_quantile)
+
+  candidates <- which(y_in <= threshold)
+
+  if (length(candidates) == 0) {
+    idx_x <- which.min(y_in)
+  } else {
+    idx_x <- candidates[which.max(x_in[candidates])]
+  }
+
+  x_pos <- x_in[idx_x]
+
+  y_pos <- max(y) * multiplier
+
+  return(list(x = x_pos, y = y_pos))
 }

@@ -8,7 +8,7 @@ priors_posteriors_ggplot(
   df_lists,
   var,
   title_x = NULL,
-  palette = c("#4285f4", "#34a853", "#ea4335")
+  palette = c("#4285f4", "#34a853")
 )
 }
 \arguments{
@@ -40,7 +40,7 @@ faceted views by scenario.
 \examples{
 \dontrun{
 df <- priors_posteriors_data(list_models)
-priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853", "#ea4335"))
+priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853"))
 }
 
 }

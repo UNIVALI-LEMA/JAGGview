@@ -164,11 +164,23 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
   rho_var <- rho_data[rho_data$Index == variable, ]
   
   if (variable == "MSY") {
-    max_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE)
-    min_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE)
+    max_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE, 1.1)
+    min_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE, 1.1)
+    pos <- .auto_text_position(
+      data_list = data_lines,
+      col_x = "SB_i",
+      col_y = "SP",
+      multiplier = 1.1
+    )
   } else {
-    max_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE)
-    min_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE)
+    max_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE, 1.1)
+    min_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE, 1.1)
+    pos <- .auto_text_position(
+      data_list = data_ref,
+      col_x = "Year",
+      col_y = "uci",
+      multiplier = 1.1
+    )
   }
   
   p <- ggplot()
@@ -185,7 +197,16 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
         aes(x = Year, y = mu, colour = id, group = id),
         linewidth = 1
       )
-  } else {
+    if (variable %in% c("BBmsy", "FFmsy")) {
+      p <- p +
+        geom_hline(yintercept = 1, linetype = "longdash")
+    } 
+    else if (variable == "procB") {
+      p <- p +
+        geom_hline(yintercept = 0, linetype = "longdash")
+    }  
+  } 
+  else {
     data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
     
     p <- p +
@@ -199,12 +220,18 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
   p +
     geom_text(
       data = rho_var,
-      aes(x = Inf, y = Inf, label = paste0("rho == ", round(rho, 3))),
-      hjust = 1.5, vjust = 2, parse = TRUE
+      # aes(x = Inf, y = Inf, 
+      aes(x = pos$x, y = pos$y,
+        label = paste0("rho == ", round(rho, 3))),
+      hjust = 1, vjust = 1, parse = TRUE
     ) +
     facet_wrap(~Scenario, ncol = 3, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
+    scale_y_continuous(
+      expand = c(0, 0), 
+      limits = c(min_val, max_val), 
+      labels = function(x) .format_number(x, decimals = 1)
+    ) +
     labs(x = title_x, y = title_y, colour = "") +
     .my_theme() +
     theme(

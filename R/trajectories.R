@@ -83,8 +83,9 @@ trajectories_data <- function(model_results) {
 #' including median trends and uncertainty intervals across scenarios.
 #'
 #' @param df A data frame as returned by \code{trajectories_data()}.
-#' @param variable A character string indicating the variable to plot.
 #' @param palette A character vector of colors used for plotting.
+#'   Defaults to "#4285f4"
+#' @param variable A character string indicating the variable to plot.
 #'   Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.
 #' @param title_y A character string or expression for the y-axis label.
 #'   Defaults to a mathematical expression depending on the selected variable.
@@ -107,14 +108,14 @@ trajectories_data <- function(model_results) {
 #' @examples
 #' \dontrun{
 #' df <- trajectories_data(model_results, "BB0")
-#' trajectories_ggplot(df, variable = "BB0", palette = c("#4285f4", "#34a853", "#ea4335"))
+#' trajectories_ggplot(df, variable = "BB0", palette = "#4285f4")
 #' }
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, variable, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = NULL
+  df, variable, palette = "#4285f4", title_y = NULL
 ) {
   if(!variable %in% c("BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref")) {
     stop(
@@ -137,8 +138,8 @@ trajectories_ggplot <- function(
     B = "Biomass (t)",
     H = "H",
     Catch = "Catch",
-    BBfrac = "BBfrac",
-    Bref = "Bref"
+    BBfrac = expression(B/B[frac]),
+    Bref = expression(B[REF])
   )
 
   if (is.null(title_y)) {
@@ -166,10 +167,14 @@ trajectories_ggplot <- function(
   }
   
   p <- p +
-    geom_line(data = df, aes(x = year, y = mu), size = 1) +
+    geom_line(data = df, aes(x = year, y = mu), linewidth = 1) +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
-    labs(x = "Year", y = title_y, fill = "", colour = "") +
+    scale_y_continuous(
+      expand = c(0, 0), 
+      limits = c(min_val, max_val),
+      labels = function(x) .format_number(x, decimals = 1)
+    ) +
+    labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
   p

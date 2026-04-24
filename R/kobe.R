@@ -53,7 +53,7 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
   ###@> Filtering the expected data...
   .validate_jbplot_ensemble(model_results)
 
-  if (inherits(ci_levels, "numeric")) {
+  if (!inherits(ci_levels, "numeric")) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")
   }
 
@@ -99,9 +99,8 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
   min_year <- min(model_results$year)
   mid_year <- round(min_year + (max_year - min_year)/2)
 
-  # tmp11b <- filter(tmp11, year %in% c(1950, 1986, 2023)) # Maybe to transform this to generic, ask for the user
   tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
-  tmp11c <- filter(model_results, year == max_year)          # to give the years he wants
+  tmp11c <- filter(model_results, year == max_year)
 
   k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
   for(i in unique(model_results$Scenario)) {
@@ -116,7 +115,6 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
       show = "none",
       col = 1       # See if can be generic 
     )
-    # See if can be generic (seems more of a parameter)
 
     tmp00 <- lapply(
       ci_levels, function(ci) {
@@ -184,8 +182,8 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
 #' coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(df) {
-  max_x <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE)
-  max_y <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE)
+  max_x <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
+  max_y <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
   if(max_x > 6) max_x <- 6
   if(max_y > 6) max_y <- 6
 

@@ -65,7 +65,6 @@
     stop("All elements must be a valid JABBA model output.")
   }
 
-  # .validate_column(list_models, "timeseries", "array")
   # fits
   .validate_column(list_models, "settings", "list")
   .validate_column(list_models$settings, "I", c("matrix", "array"))
@@ -163,6 +162,16 @@
   }
 }
 
+#' Check if object is a valid hindcast JABBA model result
+#' 
+#' Internal helper that verifies whether an object is a list containing
+#' all required components of a hindcast JABBA model result.
+#' 
+#' @param obj An object representing a JABBA model output.
+#' 
+#' @return A logical value indicating wheter the object is a valid hindcast 
+#' JABBA result
+#' 
 #' @keywords internal
 .is_hindcast_jabba <- function(obj) {
   if(!is.list(obj)) {
@@ -176,6 +185,15 @@
   .is_fit_jabba(elem)
 }
 
+#'Validate list of hindicast models
+#' 
+#' Internal helper that checks whether the input is a valid list of
+#' hindcast JABBA model outputs and verifies the presence and class of
+#' required components.
+#' 
+#' @param list_models A list of model outputs.
+#' 
+#' @return Invisibily returns NULL if all validation pass, otherwise throws an error.
 #' @keywords internal
 .validate_hcs_input_data <- function(list_models) {
   
@@ -202,6 +220,16 @@
   )
 }
 
+#' Check if an object is a valid JABBA ensemble output
+#'
+#' Internal helper that verifies whether an object is a data frame
+#' containing the required columns for a JABBA model ensemble output.
+#'
+#' @param obj An object to be checked.
+#'
+#' @return A logical value indicating whether the object matches the
+#'   expected structure.
+#'
 #' @keywords internal
 .is_jbplot_ensemble <- function(obj) {
   cols <- c(
@@ -212,6 +240,21 @@
   is.data.frame(obj) && all(cols %in% names(obj))
 }
 
+#' Validate a JABBA ensemble object
+#'
+#' Internal helper that checks whether a data frame is a valid JABBA
+#' model output. It verifies both the presence of required columns and
+#' that all relevant columns are numeric.
+#'
+#' @param object_df A data frame representing JABBA model output.
+#'
+#' @return Invisibly returns \code{NULL}. Throws an error if validation fails.
+#'
+#' @details
+#' Columns other than \code{year}, \code{run}, \code{type}, and \code{iter}
+#' are expected to be numeric. If not, an informative error is raised
+#' listing the invalid columns and their classes.
+#'
 #' @keywords internal
 .validate_jbplot_ensemble <- function(object_df) {
   if(!.is_jbplot_ensemble(object_df)) {
@@ -245,9 +288,20 @@
   }
 }
 
+#' Validate index values against available data
+#'
+#' Internal helper that checks whether all provided indices exist
+#' in the available data indices.
+#'
+#' @param data_indices A vector of valid indices present in the data.
+#' @param factor_indices A vector of indices to be validated.
+#'
+#' @return Invisibly returns \code{NULL}. Throws an error if any index
+#'   is not found in \code{data_indices}.
+#'
 #' @keywords internal
 .validate_indices <- function(data_indices, factor_indices) {
   if (!all(factor_indices %in% data_indices)) {
-    stop("All indices past in 'indices' must be in the data.")
+    stop("All indices past in 'indices' must exist in the data.")
   }
 }

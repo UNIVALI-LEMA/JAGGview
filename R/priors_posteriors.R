@@ -139,8 +139,6 @@ priors_posteriors_data <- function(list_models) {
   
   PPVR <- data.frame(
     Scenario = temp00$Scenario, 
-    x = 0.85, 
-    y = 0.88,
     K = round((temp01$sd.K/temp01$mu.K)^2/(temp00$sd.K/temp00$mu.K)^2, 3),
     r = round((temp01$sd.r/temp01$mu.r)^2/(temp00$sd.r/temp00$mu.r)^2, 3),
     psi = round((temp01$sd.psi/temp01$mu.psi)^2/(temp00$sd.psi/temp00$mu.psi)^2,
@@ -148,15 +146,13 @@ priors_posteriors_data <- function(list_models) {
 
   PPMR <- data.frame(
     Scenario = temp00$Scenario,
-    x = 0.85, 
-    y = 0.93,
     K = round(temp01$mu.K/temp00$mu.K, 3),
     r = round(temp01$mu.r/temp00$mu.r, 3),
     psi = round(temp01$mu.psi/temp00$mu.psi, 3))
   
   mutipliers <- data.frame(
-    variable = c("K", "r", "psi"),# "sigma"),
-    limit = c(8000000, 0.3, 1.6)#, 1)
+    variable = c("K", "r", "psi"),
+    limit = c(8000000, 0.3, 1.6)
   )
 
   list(
@@ -193,7 +189,7 @@ priors_posteriors_data <- function(list_models) {
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_models)
-#' priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853", "#ea4335"))
+#' priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853"))
 #' }
 #'
 #' @export
@@ -201,10 +197,9 @@ priors_posteriors_data <- function(list_models) {
 #' @importFrom ggplot2 ggplot geom_area aes geom_text facet_wrap 
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853", "#ea4335")
+  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853")
 ) {
-  if(!var %in% c("K", "r", "psi")) {#, "sigma")) {
-    # stop("Parameter 'var' was expecting 'K', 'r', 'psi' or 'sigma'.")
+  if(!var %in% c("K", "r", "psi")) {
     stop("Parameter 'var' was expecting 'K', 'r' or 'psi'.")
   }
 
@@ -220,8 +215,7 @@ priors_posteriors_ggplot <- function(
   labels_x <- list(
     K = "Carrying capacity (K)",
     r = "Intrinsic growth rate (r)",
-    psi = "Initial biomass depletion ratio (psi)"#,
-    # sigma = "sigma"
+    psi = "Initial biomass depletion ratio (psi)"
   )
 
   if (is.null(title_x)) {
@@ -239,21 +233,42 @@ priors_posteriors_ggplot <- function(
     filter(variable == var) %>%
     pull(limit)
 
+  pos_ppmr <- .auto_text_position(
+    data_list = list(prior, posterior), 
+    col_x = "value_1", 
+    col_y = "value_2", 
+    margin = 0.15, 
+    x_max = mult
+  )
+
+  pos_ppvr <- .auto_text_position(
+    data_list = list(prior, posterior), 
+    col_x = "value_1", 
+    col_y = "value_2", 
+    margin = 0.15, 
+    multiplier = 0.8, 
+    x_max = mult
+  )
+
+  max_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
+  min_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
+
   ggplot() +
     geom_area(data = prior, aes(x = value_1, y = value_2),
               fill = palette[1], alpha = 0.5, colour = "black") +
     geom_area(data = posterior, aes(x = value_1, y = value_2),
               fill = palette[2], alpha = 0.5, colour = "black") +
     geom_text(data = df_lists$PPMR,
-              aes(x = x * mult, y = y * max(posterior$value_2),
+              aes(x = pos_ppmr$x, y = pos_ppmr$y,
                   label = paste0("PPMR = ", K))) +
     geom_text(data = df_lists$PPVR,
-              aes(x = x * mult, y = y * max(posterior$value_2),
+              aes(x = pos_ppvr$x, y = pos_ppvr$y,
                   label = paste0("PPVR = ", K))) +
     facet_wrap(~Scenario, ncol = 3) +
     coord_cartesian(xlim = c(0, mult)) +
     labs(x = title_x, y = "Density") +
-    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(labels = function(x) .format_number(x, decimals = 1)) +
+    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
     .my_theme() +
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())

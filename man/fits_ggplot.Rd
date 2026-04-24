@@ -4,11 +4,7 @@
 \alias{fits_ggplot}
 \title{Plot fitted indices with confidence intervals}
 \usage{
-fits_ggplot(
-  df_lists,
-  palette = c("#4285f4", "#34a853", "#ea4335"),
-  title_y = "Abundance index"
-)
+fits_ggplot(df_lists, palette = "#4285f4", title_y = "Abundance index")
 }
 \arguments{
 \item{df_lists}{A named list of data frames as returned by

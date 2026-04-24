@@ -4,11 +4,14 @@
 \alias{runs_tests_data}
 \title{Prepare runs test diagnostics data}
 \usage{
-runs_tests_data(list_models)
+runs_tests_data(list_models, indices_factor = NULL)
 }
 \arguments{
 \item{list_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
+
+\item{indices_factor}{Optional. A vector of indices to include. Must exist
+in the \code{Index} column.}
 }
 \value{
 A named list with three elements:
@@ -30,6 +33,10 @@ The function computes runs tests using \code{JABBA::jbruns_sig3}
 and classifies results based on statistical significance. Residuals
 are smoothed using LOESS, and confidence intervals are derived
 from the fitted model.
+
+If \code{indices_factor} is provided, the results are filtered and reordered
+accordingly. The function also ensures consistency across different
+model outputs and removes incomplete cases before returning results.
 }
 \examples{
 \dontrun{
