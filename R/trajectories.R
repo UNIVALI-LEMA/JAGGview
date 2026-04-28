@@ -17,6 +17,7 @@
 #'   \item \code{ucl}: Upper 97.5% quantile
 #'   \item \code{lcl2}: Lower 10% quantile
 #'   \item \code{ucl2}: Upper 90% quantile
+#'   \item \code{metric}: Name of the metric (indicator) summarised
 #' }
 #'
 #' @details
@@ -30,7 +31,7 @@
 #' @examples
 #' \dontrun{
 #' model_results <- jbplot_ensemble()
-#' df <- trajectories_data(model_results, variable = "BB0")
+#' df <- trajectories_data(model_results)
 #' df
 #' }
 #' 
@@ -83,33 +84,40 @@ trajectories_data <- function(model_results) {
 #' including median trends and uncertainty intervals across scenarios.
 #'
 #' @param df A data frame as returned by \code{trajectories_data()}.
+#' @param variable A character string indicating the variable to plot.
+#'   Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, \code{"Bdev"}, 
+#'   \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or \code{"Bref"}.
 #' @param palette A character vector of colors used for plotting.
 #'   Defaults to "#4285f4"
-#' @param variable A character string indicating the variable to plot.
-#'   Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.
 #' @param title_y A character string or expression for the y-axis label.
-#'   Defaults to a mathematical expression depending on the selected variable.
+#'   Defaults to a predefined label depending on the selected variable.
 #'
 #' @return A ggplot object displaying trajectory summaries with
 #'   confidence intervals, faceted by scenario.
 #'
 #' @details
-#' The plot includes ribbons representing 80\% and 95\% confidence
-#' intervals, a median trajectory line, and facets by scenario.
-#' The y-axis label is automatically defined based on the selected variable
-#' unless provided by the user.
+#' The functions filters the input data based on the selected \code{variable}
+#' (matching the \code{metric} column). The plot includes ribbons representing 
+#' 80% (\code{lcl2}-\code{ucl2}) and 95% (\code{lcl}-\code{ucl}) confidence 
+#' intervals, as well as a median trajectory line (\code{mu}).
 #'
+#' Reference lines are added depending on the selected variable:
+#' \itemize{
+#'   \item \code{"BBmsy"}: horizontal lines at 1 and 0.4
+#'   \item \code{"FFmsy"}: horizontal line at 1
+#'   \item \code{"Bdev"}: horizontal line at 0
+#' }
+#'
+#' The y-axis limits are automatically adjusted based on the data range,
+#' and labels are formatted dynamically. The y-axis label is automatically
+#' defined unless provided by the user.
+#' 
 #' @examples
 #' \dontrun{
-#' df <- trajectories_data(out, variable = "BB0")
+#' df <- trajectories_data(out)
 #' trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' df <- trajectories_data(model_results, "BB0")
-#' trajectories_ggplot(df, variable = "BB0", palette = "#4285f4")
-#' }
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
@@ -123,6 +131,8 @@ trajectories_ggplot <- function(
       'BBfrac' or 'Bref'."
     )
   }
+
+  .is_palette_valid(palette)
 
   df <- df %>%
     filter(metric == variable)
@@ -145,6 +155,8 @@ trajectories_ggplot <- function(
   if (is.null(title_y)) {
     title_y <- labels_y[[variable]]
   }
+
+  y_decimals <- ifelse(max_val > 10, 0, 1)
 
   p <- ggplot() +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
@@ -172,7 +184,7 @@ trajectories_ggplot <- function(
     scale_y_continuous(
       expand = c(0, 0), 
       limits = c(min_val, max_val),
-      labels = function(x) .format_number(x, decimals = 1)
+      labels = function(x) .format_number(x, decimals = y_decimals)
     ) +
     labs(x = "Year", y = title_y) +
     .my_theme() +

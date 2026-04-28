@@ -56,12 +56,10 @@ hindcast_data <- function(hc_raw_data) {
     )
   
   tmp15 <- tmp14 %>%
-    filter(hindcast == TRUE) %>%
-    filter(year > min_year) %>%
+    filter(hindcast == TRUE, year > min_year) %>%
     group_by(retro.peels) %>%
     filter(year == min(year)) %>%
-    ungroup() %>%
-    data.frame
+    ungroup()
   
   tmp16 <- .filter_by_condition(tmp14, "retro.peels", "hindcast", "year")
 
@@ -70,10 +68,8 @@ hindcast_data <- function(hc_raw_data) {
 
   na_index <- mase %>%
     filter(is.na(MASE)) %>%
-    pull(Index)
-
-  na_index <- unique(na_index)
-
+    pull(unique(Index))
+  
   list(
     data = tmp14 %>% filter(!Index %in% na_index),
     hindcast_data_1 = tmp15 %>% filter(!Index %in% na_index),

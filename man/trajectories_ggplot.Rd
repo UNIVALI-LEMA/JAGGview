@@ -10,13 +10,14 @@ trajectories_ggplot(df, variable, palette = "#4285f4", title_y = NULL)
 \item{df}{A data frame as returned by \code{trajectories_data()}.}
 
 \item{variable}{A character string indicating the variable to plot.
-Options are \code{"BB0"}, \code{"BBmsy"}, or \code{"FFmsy"}.}
+Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, \code{"Bdev"},
+\code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or \code{"Bref"}.}
 
 \item{palette}{A character vector of colors used for plotting.
 Defaults to "#4285f4"}
 
 \item{title_y}{A character string or expression for the y-axis label.
-Defaults to a mathematical expression depending on the selected variable.}
+Defaults to a predefined label depending on the selected variable.}
 }
 \value{
 A ggplot object displaying trajectory summaries with
@@ -27,20 +28,27 @@ Creates a ggplot2-based visualization of model trajectories over time,
 including median trends and uncertainty intervals across scenarios.
 }
 \details{
-The plot includes ribbons representing 80\\% and 95\\% confidence
-intervals, a median trajectory line, and facets by scenario.
-The y-axis label is automatically defined based on the selected variable
-unless provided by the user.
+The functions filters the input data based on the selected \code{variable}
+(matching the \code{metric} column). The plot includes ribbons representing
+80\% (\code{lcl2}-\code{ucl2}) and 95\% (\code{lcl}-\code{ucl}) confidence
+intervals, as well as a median trajectory line (\code{mu}).
+
+Reference lines are added depending on the selected variable:
+\itemize{
+\item \code{"BBmsy"}: horizontal lines at 1 and 0.4
+\item \code{"FFmsy"}: horizontal line at 1
+\item \code{"Bdev"}: horizontal line at 0
+}
+
+The y-axis limits are automatically adjusted based on the data range,
+and labels are formatted dynamically. The y-axis label is automatically
+defined unless provided by the user.
 }
 \examples{
 \dontrun{
-df <- trajectories_data(out, variable = "BB0")
+df <- trajectories_data(out)
 trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
 }
 
-\dontrun{
-df <- trajectories_data(model_results, "BB0")
-trajectories_ggplot(df, variable = "BB0", palette = "#4285f4")
-}
 
 }

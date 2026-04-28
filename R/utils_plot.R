@@ -214,7 +214,7 @@ international_system_prefixes <- function(number, decimals = 2) {
   if(multiplier <= 0) {
     stop("Expected parameter 'multiplier' to be a positive number.")
   }
-  if(x_max <= 0) {
+  if(x_max <= 0 && !is.null(x_max)) {
     stop("Expected parameter 'x_max' to be a positive number.")
   }
 

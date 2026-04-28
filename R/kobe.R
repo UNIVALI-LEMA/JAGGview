@@ -61,7 +61,7 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
     stop("Parameter 'ci_levels' cannot contain NA.")
   }
 
-  if(any(ci_levels <= 0 | ci_levels >=1)) {
+  if(any(ci_levels <= 0 | ci_levels >= 1)) {
     stop("Parameter 'ci_levels' was expecting numbers between 0 and 1.")
   }
 
@@ -77,7 +77,7 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
       .by = c(year, Scenario)
     ) %>%
     arrange(Scenario, year)
-  # See if the size of the polygons in kobe plot change, or are always the same
+  
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
     col = "yellow"

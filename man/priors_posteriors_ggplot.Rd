@@ -8,7 +8,8 @@ priors_posteriors_ggplot(
   df_lists,
   var,
   title_x = NULL,
-  palette = c("#4285f4", "#34a853")
+  palette = c("#4285f4", "#34a853"),
+  x_lim = NULL
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ a default label is assigned based on \code{variable}.}
 
 \item{palette}{A character vector of colors used for prior and
 posterior distributions.}
+
+\item{x_lim}{Optional. A numeric value (positive) used to restrict the x-axis range
+in the plot.}
 }
 \value{
 A ggplot object displaying prior and posterior densities,

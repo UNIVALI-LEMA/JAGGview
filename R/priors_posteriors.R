@@ -13,7 +13,6 @@
 #'   \item{posterior}{A data frame containing posterior density estimates.}
 #'   \item{PPVR}{A data frame with prior-posterior variance ratios.}
 #'   \item{PPMR}{A data frame with prior-posterior mean ratios.}
-#'   \item{mult}{A data frame containing scaling factors for plotting.}
 #' }
 #'
 #' @details
@@ -51,8 +50,9 @@ priors_posteriors_data <- function(list_models) {
     psi01 = NULL, 
     psi02 = NULL, 
     sigma01 = NULL,
-    sigma02x = NULL, 
-    sigma02y = NULL
+    sigma02 = NULL
+    # sigma02x = NULL, 
+    # sigma02y = NULL
   )
   for(i in unique(tmp12$Scenario)) {
       init <- filter(tmp12, Scenario == i)
@@ -86,20 +86,24 @@ priors_posteriors_data <- function(list_models) {
 
   out03 <- data.frame(
     Scenario = NULL, K01 = NULL, K02 = NULL, r01 = NULL,r02 = NULL, 
-    psi01 = NULL, psi02 = NULL, sigma01 = NULL, sigma02x = NULL, 
-    sigma02y = NULL
+    psi01 = NULL, psi02 = NULL, sigma01 = NULL, sigma02 = NULL # sigma02x = NULL, 
+    # sigma02y = NULL
   )
   for(i in unique(tmp13$Scenario)) {
     init <- filter(tmp13, Scenario == i)
     scen <- i
-    K01 <- density(init$K, adjust = 2)$x
-    K02 <- density(init$K, adjust = 2)$y
-    r01 <- density(init$r, adjust = 2)$x
-    r02 <- density(init$r, adjust = 2)$y
-    psi01 <- density(init$psi, adjust = 2)$x
-    psi02 <- density(init$psi, adjust = 2)$y
-    sigma01 <- density(init$sigma2, adjust = 2)$x
-    sigma02 <- density(init$sigma2, adjust = 2)$y
+    K_density <- density(init$K, adjust = 2)
+    r_density <- density(init$r, adjust = 2)
+    psi_density <- density(init$psi, adjust = 2)
+    sigma_density <- density(init$sigma, adjust = 2)
+    K01 <- K_density$x
+    K02 <- K_density$y
+    r01 <- r_density$x
+    r02 <- r_density$y
+    psi01 <- psi_density$x
+    psi02 <- psi_density$y
+    sigma01 <- sigma_density$x
+    sigma02 <- sigma_density$y
     out03 <- rbind(
       out03, data.frame(
         Scenario = scen, 
@@ -149,18 +153,12 @@ priors_posteriors_data <- function(list_models) {
     K = round(temp01$mu.K/temp00$mu.K, 3),
     r = round(temp01$mu.r/temp00$mu.r, 3),
     psi = round(temp01$mu.psi/temp00$mu.psi, 3))
-  
-  mutipliers <- data.frame(
-    variable = c("K", "r", "psi"),
-    limit = c(8000000, 0.3, 1.6)
-  )
 
   list(
     prior = out02,
     posterior = out03,
     PPVR = PPVR,
-    PPMR = PPMR,
-    mult = mutipliers
+    PPMR = PPMR
   )
 }
 
@@ -177,6 +175,8 @@ priors_posteriors_data <- function(list_models) {
 #'   a default label is assigned based on \code{variable}.
 #' @param palette A character vector of colors used for prior and
 #'   posterior distributions.
+#' @param x_lim Optional. A numeric value (positive) used to restrict the x-axis range
+#'   in the plot.
 #'
 #' @return A ggplot object displaying prior and posterior densities,
 #'   annotated with prior-posterior metrics (PPMR and PPVR).
@@ -197,10 +197,16 @@ priors_posteriors_data <- function(list_models) {
 #' @importFrom ggplot2 ggplot geom_area aes geom_text facet_wrap 
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853")
+  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853"), x_lim = NULL
 ) {
   if(!var %in% c("K", "r", "psi")) {
     stop("Parameter 'var' was expecting 'K', 'r' or 'psi'.")
+  }
+
+  .is_palette_valid(palette)
+
+  if(x_lim <= 0 && !is.null(x_lim) || inherits(x_lim, "numeric")) {
+    stop("Expected parameter 'x_lim' to be a positive number.")
   }
 
   var1 <- paste0(var, "01")
@@ -228,27 +234,32 @@ priors_posteriors_ggplot <- function(
       value_1 = all_of(var1),
       value_2 = all_of(var2)
     )
-  
-  mult <- df_lists$mult %>%
-    filter(variable == var) %>%
-    pull(limit)
 
   pos_ppmr <- .auto_text_position(
     data_list = list(prior, posterior), 
     col_x = "value_1", 
     col_y = "value_2", 
-    margin = 0.15, 
-    x_max = mult
+    margin = 0.2, 
+    multiplier = 1.05,
+    x_max = x_lim
   )
 
   pos_ppvr <- .auto_text_position(
     data_list = list(prior, posterior), 
     col_x = "value_1", 
     col_y = "value_2", 
-    margin = 0.15, 
-    multiplier = 0.8, 
-    x_max = mult
+    margin = 0.2, 
+    multiplier = 1, 
+    x_max = x_lim
   )
+  
+  if(is.null(x_lim)) {
+    prior_max <- max(prior$value_1, na.rm = TRUE)
+    pos_max <- max(posterior$value_1, na.rm = TRUE)
+    x_lim <- ifelse(prior_max > pos_max, prior_max, pos_max)
+  }
+
+  x_decimals <- ifelse(x_lim > 10, 0, 1)
 
   max_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
   min_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
@@ -265,13 +276,12 @@ priors_posteriors_ggplot <- function(
               aes(x = pos_ppvr$x, y = pos_ppvr$y,
                   label = paste0("PPVR = ", K))) +
     facet_wrap(~Scenario, ncol = 3) +
-    coord_cartesian(xlim = c(0, mult)) +
+    coord_cartesian(xlim = c(0, x_lim)) +
     labs(x = title_x, y = "Density") +
-    scale_x_continuous(labels = function(x) .format_number(x, decimals = 1)) +
+    scale_x_continuous(labels = function(x) .format_number(x, decimals = x_decimals)) +
     scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
     .my_theme() +
-    theme(axis.text.y = element_blank(),
-          axis.ticks.y = element_blank())
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
 }
 
 #' Extract prior settings from model outputs

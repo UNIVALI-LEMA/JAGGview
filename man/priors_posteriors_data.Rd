@@ -17,7 +17,6 @@ A named list with the following elements:
 \item{posterior}{A data frame containing posterior density estimates.}
 \item{PPVR}{A data frame with prior-posterior variance ratios.}
 \item{PPMR}{A data frame with prior-posterior mean ratios.}
-\item{mult}{A data frame containing scaling factors for plotting.}
 }
 }
 \description{

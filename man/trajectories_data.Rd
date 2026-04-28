@@ -22,6 +22,7 @@ A data.frame containing:
 \item \code{ucl}: Upper 97.5\% quantile
 \item \code{lcl2}: Lower 10\% quantile
 \item \code{ucl2}: Upper 90\% quantile
+\item \code{metric}: Name of the metric (indicator) summarised
 }
 }
 \description{
@@ -39,7 +40,7 @@ The function maps user-friendly variable names to:
 \examples{
 \dontrun{
 model_results <- jbplot_ensemble()
-df <- trajectories_data(model_results, variable = "BB0")
+df <- trajectories_data(model_results)
 df
 }
 

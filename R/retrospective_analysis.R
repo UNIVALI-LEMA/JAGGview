@@ -82,9 +82,7 @@ retrospective_analysis_data <- function(hc_raw_data) {
     )
 
   # #####@> Extracting rhos...
-  # After change the x position to be variable to the input data, don't 
-  # need to be now, becausa only affect the dynamic plot
-  temp02 <- .rho_retro(hc_raw_data) %>% mutate(x = 2010)
+  temp02 <- .rho_retro(hc_raw_data)
 
   list(
     data = tmp17,
@@ -182,6 +180,8 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
       multiplier = 1.1
     )
   }
+
+  y_decimals <- ifelse(max_val > 10, 0, 1)
   
   p <- ggplot()
   
@@ -220,17 +220,16 @@ retrospective_analysis_ggplot <- function(df_lists, variable, title_y = NULL) {
   p +
     geom_text(
       data = rho_var,
-      # aes(x = Inf, y = Inf, 
       aes(x = pos$x, y = pos$y,
-        label = paste0("rho == ", round(rho, 3))),
-      hjust = 1, vjust = 1, parse = TRUE
+        label = paste0("rho == ", round(rho, 3))), 
+        parse = TRUE
     ) +
     facet_wrap(~Scenario, ncol = 3, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
     scale_y_continuous(
       expand = c(0, 0), 
       limits = c(min_val, max_val), 
-      labels = function(x) .format_number(x, decimals = 1)
+      labels = function(x) .format_number(x, decimals = y_decimals)
     ) +
     labs(x = title_x, y = title_y, colour = "") +
     .my_theme() +

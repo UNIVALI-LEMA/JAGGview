@@ -79,16 +79,10 @@ fits_data <- function(list_models, indices_factor = NULL) {
 
   index_inputseries <- .process_index(list_models)
 
-  if(any(is.na(tmp00$Index))) {
-    .fill_na_indices(tmp00, index_inputseries)
-  }
+  if(any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
 
-  tmp00 <- tmp00[complete.cases(tmp00),]
-
-  tmp00 <- tmp00 %>%
-    mutate(Index = fct_relevel(Index, indices_factor))
-
-  tmp00 <- tmp00 %>%
+  tmp00 <- tmp00[complete.cases(tmp00),] %>%
+    mutate(Index = fct_relevel(Index, indices_factor)) %>%
     select(-SE)
 
   ####@> Fit (CI 80%)...
@@ -96,14 +90,10 @@ fits_data <- function(list_models, indices_factor = NULL) {
 
   if(!is.null(indices_factor)) .validate_indices(unique(tmp03$Index), indices_factor)
 
-  if(any(is.na(tmp03$Index))) {
-    .fill_na_indices(tmp03, index_inputseries)
-  }
+  if(any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
 
   tmp03 <- tmp03 %>%
-    mutate(Index = fct_relevel(Index, indices_factor))
-
-  tmp03 <- tmp03 %>% 
+    mutate(Index = fct_relevel(Index, indices_factor)) %>% 
     select(-c(se, obserror))
 
   ####@> Fit (CI 95%)...
@@ -111,14 +101,10 @@ fits_data <- function(list_models, indices_factor = NULL) {
 
   if(!is.null(indices_factor)) .validate_indices(unique(tmp04$Index), indices_factor)
 
-  if(any(is.na(tmp04$Index))) {
-    .fill_na_indices(tmp04, index_inputseries)
-  }
-
-  tmp04 <- tmp04 %>%
-    mutate(Index = fct_relevel(Index, indices_factor))
+  if(any(is.na(tmp04$Index))) .fill_na_indices(tmp04, index_inputseries)
 
   tmp04 <- tmp04 %>% 
+    mutate(Index = fct_relevel(Index, indices_factor)) %>%
     select(-c(se, obserror, mu))
 
   list(
@@ -137,6 +123,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
 #'   \code{fits_data()}. It must contain the elements \code{Li_Ui},
 #'   \code{CI_80}, and \code{CI_95}.
 #' @param palette A character vector of colors used for plotting.
+#'   Defaults to "#4285f4".
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Abundance index".
 #'
@@ -151,7 +138,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
 #' @examples
 #' \dontrun{
 #' df <- fits_data(list_models)
-#' fits_ggplot(df, palette = c("blue"))
+#' fits_ggplot(df, palette = "blue")
 #' }
 #'
 #' @export
@@ -160,6 +147,9 @@ fits_data <- function(list_models, indices_factor = NULL) {
 fits_ggplot <- function(
   df_lists, palette = "#4285f4", title_y = "Abundance index"
 ) {
+
+  .is_palette_valid(palette)
+
   max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
 

@@ -100,10 +100,6 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
       Index = fct_relevel(Index, indices_factor)
     ) %>%
     droplevels()
-
-  ###@> Including p-value in plot...
-  out.test <- out.test %>%
-      mutate(x = mean(min_year:max_year), y = ucl*1.5)
   
   loess_fit <- loess(Res ~ Year, data = tmp05)
   tmp05$fit <- predict(loess_fit)
@@ -212,6 +208,9 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
 cpue_conflicts_ggplot <- function(
   df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Residuals"
 ) {
+
+  .is_palette_valid(palette)
+
   max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
   

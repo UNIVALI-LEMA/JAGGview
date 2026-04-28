@@ -11,7 +11,8 @@ fits_ggplot(df_lists, palette = "#4285f4", title_y = "Abundance index")
 \code{fits_data()}. It must contain the elements \code{Li_Ui},
 \code{CI_80}, and \code{CI_95}.}
 
-\item{palette}{A character vector of colors used for plotting.}
+\item{palette}{A character vector of colors used for plotting.
+Defaults to "#4285f4".}
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Abundance index".}
@@ -32,7 +33,7 @@ faceting by scenario and index.
 \examples{
 \dontrun{
 df <- fits_data(list_models)
-fits_ggplot(df, palette = c("blue"))
+fits_ggplot(df, palette = "blue")
 }
 
 }
