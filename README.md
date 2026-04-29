@@ -16,7 +16,6 @@ The package includes functions to:
 
 - prepare structured data from model output (e.g., fits, hindcast, retrospective, trajectories, Kobe, priors/posteriors, run tests);
 - create publication-ready `ggplot2` visualizations for each analysis component;
-- format numeric values with consistent decimal and SI-prefix presentation.
 
 ---
 
@@ -94,7 +93,6 @@ print(hc_plot)
 - **Retrospective:** `retrospective_analysis_data()`, `retrospective_analysis_ggplot()`
 - **Run tests:** `runs_tests_data()`, `runs_tests_ggplot()`
 - **Trajectories:** `trajectories_data()`, `trajectories_ggplot()`
-- **Formatting helper:** `international_system_prefixes()`
 
 ---
 

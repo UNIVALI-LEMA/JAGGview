@@ -9,11 +9,13 @@
 #' appended with their corresponding SI unit symbol.
 #' 
 #' @examples 
-#' number <- 1000000
-#' international_system_prefixes(number, 2)
+#' \dontrun{
+#'   number <- 1000000
+#'   .international_system_prefixes(number, 2)
+#' }
 #' 
-#' @export
-international_system_prefixes <- function(number, decimals = 2) {
+#' @keywords internal
+.international_system_prefixes <- function(number, decimals = 2) {
   breaks <- c(0, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9, Inf)
   scales <- c(1e-9, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9)
   suffixes <- c("n", "\u00B5", "m", "", "k", "M", "G")
