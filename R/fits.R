@@ -81,7 +81,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
 
   if(any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
 
-  tmp00 <- tmp00[complete.cases(tmp00),] %>%
+  tmp00 <- tmp00[complete.cases(tmp00),] %>% 
     mutate(Index = fct_relevel(Index, indices_factor)) %>%
     select(-SE)
 
@@ -92,7 +92,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
 
   if(any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
 
-  tmp03 <- tmp03 %>%
+  tmp03 <- tmp03 %>% 
     mutate(Index = fct_relevel(Index, indices_factor)) %>% 
     select(-c(se, obserror))
 
@@ -126,6 +126,8 @@ fits_data <- function(list_models, indices_factor = NULL) {
 #'   Defaults to "#4285f4".
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Abundance index".
+#' @param max_col Optional. A numeric value that limit the number
+#'   of plots per line.
 #'
 #' @return A ggplot object displaying fitted indices with uncertainty
 #'   ribbons, error bars, and observed values, faceted by scenario and index.
@@ -145,15 +147,29 @@ fits_data <- function(list_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, palette = "#4285f4", title_y = "Abundance index"
+  df_lists, palette = "#4285f4", title_y = "Abundance index", max_col = NULL
 ) {
-
+  n_scenarios <- length(unique(df_lists$CI_95$Scenario))
+  n_index <- length(unique(df_lists$CI_95$Index))
+  
   .is_palette_valid(palette)
 
   max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
 
-  ggplot() +
+  if (is.null(max_col)) {
+    max_col <- if(n_index <= 3) {
+      n_index
+    }
+    else if (n_index == 4) {
+      2
+    }
+    else {
+      3
+    }
+  }
+
+  p <- ggplot() +
     geom_ribbon(data = df_lists$CI_80,
         aes(x = Year, ymin = lci, ymax = uci),
         alpha = 0.3, fill = palette[1]) +
@@ -166,11 +182,20 @@ fits_ggplot <- function(
                   aes(x = Year, ymin = Li, ymax = Ui)) +
     geom_point(data = df_lists$Li_Ui,
         aes(x = Year, y = Mean),
-        pch = 21, fill = "white", size = 1.5) +
-    facet_grid(Scenario ~ Index, scales = "free") +
+        pch = 21, fill = "white", size = 1.5) 
+  if (n_scenarios == 1) {
+    p <- p + 
+      facet_wrap(~ interaction(Index, Scenario, sep = " - "), scales = "free_x", ncol = max_col)
+  } 
+  else {
+    p <- p + 
+      facet_grid(Scenario ~ Index, scales = "free")
+  }
+    p <- p +
     scale_y_continuous(limits = c(min_val, max_val)) +
     labs(x = "Year", y = title_y) +
     .my_theme()
+  p
 }
 
 #' Extract and combine scenario-level data

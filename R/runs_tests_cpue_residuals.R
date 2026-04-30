@@ -146,7 +146,7 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
 #' @export
 #' @importFrom ggplot2 ggplot geom_rect aes geom_text geom_hline geom_segment 
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
-runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
+runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
   max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
   min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
 
@@ -155,10 +155,26 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
     col_x = "Year",
     col_y = "Res",
     multiplier = 2,
-    margin = 0.5
+    margin = 0.4,
+    y_min = max(df_lists$SE3$ucl)
   )
 
-  ggplot() +
+  n_scenarios <- length(unique(df_lists$SE3$Scenario))
+  n_index <- length(unique(df_lists$SE3$Index))
+
+  if (is.null(max_col)) {
+    max_col <- if(n_index <= 3) {
+      n_index
+    }
+    else if (n_index == 4) {
+      2
+    }
+    else {
+      3
+    }
+  }
+
+  p <- ggplot() +
     geom_rect(data = df_lists$SE3,
               aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
                   fill = class),
@@ -174,13 +190,22 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals") {
         pch = 21, size = 2) +
     geom_point(data = filter(df_lists$cpue_residuals, class == "red"),
         aes(x = Year, y = Res), fill = "red",
-        pch = 21, size = 2.5) +
-    facet_grid(Scenario ~ Index, scales = "free") +
+        pch = 21, size = 2.5)
+  if(n_scenarios == 1) {
+    p <- p +
+      facet_wrap(~ interaction(Index, Scenario, sep = "-"), scales = "free_x", ncol = max_col)
+  }
+  else {
+    p <- p +
+      facet_grid(Scenario ~ Index, scales = "free")
+  }
+  p <- p +
     scale_fill_manual(values = c("green", "red")) +
     scale_y_continuous(limits = c(min_val, max_val)) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
+  p
 }
 
 #' Plot CPUE residuals diagnostics

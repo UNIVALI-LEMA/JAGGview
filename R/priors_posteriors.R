@@ -205,9 +205,14 @@ priors_posteriors_ggplot <- function(
 
   .is_palette_valid(palette)
 
-  if(x_lim <= 0 && !is.null(x_lim) || inherits(x_lim, "numeric")) {
-    stop("Expected parameter 'x_lim' to be a positive number.")
+  if(!is.null(x_lim)) {
+    if(x_lim <= 0 || !inherits(x_lim, "numeric")) {
+      stop("Expected parameter 'x_lim' to be a positive number.")
+    }
   }
+  # if(x_lim <= 0 && !is.null(x_lim) || !inherits(x_lim, "numeric")) {
+  #   stop("Expected parameter 'x_lim' to be a positive number.")
+  # }
 
   var1 <- paste0(var, "01")
   var2 <- paste0(var, "02")
@@ -261,8 +266,25 @@ priors_posteriors_ggplot <- function(
 
   x_decimals <- ifelse(x_lim > 10, 0, 1)
 
-  max_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
-  min_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
+  max_pos_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
+  min_pos_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
+
+  max_prior_val <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), TRUE, 1.1)
+  min_prior_val <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), FALSE, 1.1)
+
+  max_val <- if(max_pos_val > max_prior_val) {
+    max_pos_val
+  }
+  else {
+    max_prior_val
+  }
+
+  min_val <- if(min_pos_val < min_prior_val) {
+    min_pos_val
+  }
+  else {
+    min_prior_val
+  }
 
   ggplot() +
     geom_area(data = prior, aes(x = value_1, y = value_2),

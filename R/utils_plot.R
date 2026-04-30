@@ -179,6 +179,8 @@
 #' define the vertical position of the text
 #' @param x_max Optional. A numeric value (positive) used to restrict the x-axis range
 #'   considered in the calculation.
+#' @param y_min Optional. A numeric value (positive) used to define the minimum y-axis 
+#'   range to the plot.
 #'
 #' @return A list with two elements:
 #' \describe{
@@ -198,7 +200,7 @@
 #'
 #' @keywords internal
 .auto_text_position <- function(
-  data_list, col_x, col_y, margin = 0.1, low_quantile = 0.2, multiplier = 0.9, x_max = NULL
+  data_list, col_x, col_y, margin = 0.1, low_quantile = 0.2, multiplier = 0.9, x_max = NULL, y_min = NULL
 ) {
   
   if (is.data.frame(data_list)) {
@@ -288,6 +290,10 @@
   x_pos <- x_in[idx_x]
 
   y_pos <- max(y) * multiplier
+
+  if (y_pos < y_min && !is.null(y_min)) {
+    y_pos <- y_min * 1.2
+  }
 
   return(list(x = x_pos, y = y_pos))
 }

@@ -99,7 +99,8 @@
   cols_fit <- c(
     "assessment", "scenario", "settings", "inputseries", 
     "pars", "estimates", "yr", "catch", "est.catch",
-    "cpue.hat", "cpue.ppd", "PPC", "timeseries", "refpts", 
+    "cpue.hat", "cpue.ppd", #"PPC",
+    "timeseries", "refpts", 
     "pfunc", "diags", "residuals", "std.residuals", 
     "stats", "pars_posterior", "refpts_posterior", "kobe", 
     "flqs", "bppd", "kbtrj", "posteriors"#, "model"

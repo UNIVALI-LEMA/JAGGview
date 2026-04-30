@@ -4,7 +4,7 @@
 \alias{runs_tests_ggplot}
 \title{Plot runs test diagnostics}
 \usage{
-runs_tests_ggplot(df_lists, title_y = "Residuals")
+runs_tests_ggplot(df_lists, title_y = "Residuals", max_col = NULL)
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{runs_tests_data()}.}

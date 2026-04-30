@@ -11,7 +11,8 @@
   margin = 0.1,
   low_quantile = 0.2,
   multiplier = 0.9,
-  x_max = NULL
+  x_max = NULL,
+  y_min = NULL
 )
 }
 \arguments{
@@ -32,6 +33,9 @@ define the vertical position of the text}
 
 \item{x_max}{Optional. A numeric value (positive) used to restrict the x-axis range
 considered in the calculation.}
+
+\item{y_min}{Optional. A numeric value (positive) used to define the minimum y-axis
+range to the plot.}
 }
 \value{
 A list with two elements:
