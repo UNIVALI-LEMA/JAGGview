@@ -4,13 +4,11 @@
 \alias{trajectories_data}
 \title{Summarise trajectory data from model outputs}
 \usage{
-trajectories_data(model_results)
+trajectories_data(list_fit_models)
 }
 \arguments{
-\item{model_results}{A data.frame containing model outputs. Must include
-columns \code{year}, \code{run}, and the variables used in the analysis
-(e.g., \code{BB0}, \code{stock}, \code{harvest}), returned by the JABBA
-function \code{JABBA::jbplot_ensemble()}.}
+\item{list_fit_models}{A list containing model outputs as returned by the
+JABBA function \code{JABBA::fit_jabba()}.}
 }
 \value{
 A data.frame containing:
@@ -22,7 +20,7 @@ A data.frame containing:
 \item \code{ucl}: Upper 97.5\% quantile
 \item \code{lcl2}: Lower 10\% quantile
 \item \code{ucl2}: Upper 90\% quantile
-\item \code{metric}: Name of the metric (indicator) summarised
+\item \code{indicator}: Name of the indicator summarised
 }
 }
 \description{
@@ -30,7 +28,7 @@ This function computes summary statistics (median and quantiles)
 for selected variables from model outputs, grouped by year and scenario.
 }
 \details{
-The function maps user-friendly variable names to:
+The function maps user-friendly indicator_name names to:
 \itemize{
 \item \code{"BB0"}: \code{BB0}
 \item \code{"BBmsy"}: \code{stock}
@@ -39,8 +37,10 @@ The function maps user-friendly variable names to:
 }
 \examples{
 \dontrun{
-model_results <- jbplot_ensemble()
-df <- trajectories_data(model_results)
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_fit_models <- list(fit.S01, fit.S02)
+df <- trajectories_data(list_fit_models)
 df
 }
 

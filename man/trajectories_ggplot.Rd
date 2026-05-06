@@ -4,12 +4,12 @@
 \alias{trajectories_ggplot}
 \title{Plot model trajectories}
 \usage{
-trajectories_ggplot(df, variable, palette = "#4285f4", title_y = NULL)
+trajectories_ggplot(df, indicator_name, palette = "#4285f4", title_y = NULL)
 }
 \arguments{
 \item{df}{A data frame as returned by \code{trajectories_data()}.}
 
-\item{variable}{A character string indicating the variable to plot.
+\item{indicator_name}{A character string indicating the indicator_name to plot.
 Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, \code{"Bdev"},
 \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or \code{"Bref"}.}
 
@@ -28,12 +28,12 @@ Creates a ggplot2-based visualization of model trajectories over time,
 including median trends and uncertainty intervals across scenarios.
 }
 \details{
-The functions filters the input data based on the selected \code{variable}
-(matching the \code{metric} column). The plot includes ribbons representing
+The functions filters the input data based on the selected \code{indicator_name}
+(matching the \code{indicator} column). The plot includes ribbons representing
 80\% (\code{lcl2}-\code{ucl2}) and 95\% (\code{lcl}-\code{ucl}) confidence
 intervals, as well as a median trajectory line (\code{mu}).
 
-Reference lines are added depending on the selected variable:
+Reference lines are added depending on the selected indicator_name:
 \itemize{
 \item \code{"BBmsy"}: horizontal lines at 1 and 0.4
 \item \code{"FFmsy"}: horizontal line at 1
@@ -47,7 +47,7 @@ defined unless provided by the user.
 \examples{
 \dontrun{
 df <- trajectories_data(out)
-trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
+trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 }
 
 

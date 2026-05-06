@@ -4,10 +4,10 @@
 \alias{.validate_fits_input_data}
 \title{Validate list of model fits}
 \usage{
-.validate_fits_input_data(list_models)
+.validate_fits_input_data(list_fit_models)
 }
 \arguments{
-\item{list_models}{A list of model outputs.}
+\item{list_fit_models}{A list of model outputs.}
 }
 \value{
 Invisibly returns NULL if all validations pass, otherwise throws an error.

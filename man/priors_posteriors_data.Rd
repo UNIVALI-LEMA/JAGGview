@@ -4,10 +4,10 @@
 \alias{priors_posteriors_data}
 \title{Prepare prior and posterior distributions data}
 \usage{
-priors_posteriors_data(list_models)
+priors_posteriors_data(list_fit_models)
 }
 \arguments{
-\item{list_models}{A list containing model outputs as returned by the
+\item{list_fit_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
 }
 \value{
@@ -35,8 +35,8 @@ estimates.
 \dontrun{
 fit.S01 <- fit_jabba()
 fit.S02 <- fit_jabba()
-list_models <- list(fit.S01, fit.S02)
-df <- priors_posteriors_data(list_models)
+list_fit_models <- list(fit.S01, fit.S02)
+df <- priors_posteriors_data(list_fit_models)
 df
 }
 

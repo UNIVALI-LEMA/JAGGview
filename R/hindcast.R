@@ -4,7 +4,7 @@
 #' diagnostics, including observed and predicted values, filtered
 #' hindcast points, and accuracy metrics (MASE).
 #'
-#' @param hc_raw_data A list containing retrospective model outputs as 
+#' @param list_hc_models A list containing retrospective model outputs as 
 #' returned by the JABBA function \code{JABBA::hindcast_jabba()}.
 #'
 #' @return A named list with four elements:
@@ -16,7 +16,7 @@
 #'   \item{hindcast_data_2}{A data frame containing filtered hindcast
 #'   trajectories for plotting purposes.}
 #'   \item{mase_data}{A data frame containing Mean Absolute Scaled Error
-#'   (MASE) metrics for each scenario.}
+#'   (MASE) metrics for each index and scenario.}
 #' }
 #'
 #' @details
@@ -29,18 +29,21 @@
 #' \dontrun{
 #' hc_S01 <- hindcast_jabba()
 #' hc_S02 <- hindcast_jabba()
-#' df <- hindcast_data(hc_raw_data)
+#' df <- hindcast_data(list_hc_models)
 #' df
 #' }
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
-hindcast_data <- function(hc_raw_data) {
-  ###@> Filtering the expected data...
-  .validate_hcs_input_data(hc_raw_data)
+hindcast_data <- function(list_hc_models) {
+  # ###@> Filtering the expected data...
+  # .validate_hcs_input_data(list_hc_models)
+  if (.is_hindcast_jabba(list_hc_models)) {
+    list_hc_models <- list(list_hc_models)
+  }
 
   ######@> Plot hindcasting...
-  hc <- .process_hindcasts(hc_raw_data)
+  hc <- .process_hindcasts(list_hc_models)
 
   min_year <- as.integer(gsub("-", "", min(hc$Peel))) - 1
 
@@ -64,19 +67,27 @@ hindcast_data <- function(hc_raw_data) {
   tmp16 <- .filter_by_condition(tmp14, "retro.peels", "hindcast", "year")
 
   #####@> MASE analysis...
-  mase <- .process_mase(hc_raw_data)
+  mase <- .process_mase(list_hc_models)
 
   na_index <- mase %>%
     filter(is.na(MASE)) %>%
     pull(unique(Index))
   
-  list(
+  results <- list(
     data = tmp14 %>% filter(!Index %in% na_index),
     hindcast_data_1 = tmp15 %>% filter(!Index %in% na_index),
     hindcast_data_2 = tmp16 %>% filter(!Index %in% na_index),
     mase_data = mase %>% filter(!Index %in% na_index),
     min_year_retro = min_year
   )
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(sapply(results, function(df) all(is.na(df))))) {
+    stop("All the data frames have NA data.")
+  }
+  
+  return(results)
 }
 
 #' Plot hindcast diagnostics
@@ -99,7 +110,7 @@ hindcast_data <- function(hc_raw_data) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- hindcast_data(hc_raw_data)
+#' df <- hindcast_data(list_hc_models)
 #' hindcast_ggplot(df)
 #' }
 #'
@@ -110,10 +121,19 @@ hindcast_data <- function(hc_raw_data) {
 #' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
 hindcast_ggplot <- function(df_lists) {
+  if(!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
   max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+  ylim <- c(min_val, max_val)
 
-  pos <- .auto_text_position(df_lists$data, "year", "hat.uci", multiplier = 1.1)
+  pos <- .auto_text_position(
+    df_lists$data, 
+    "year", 
+    "hat.uci", 
+    ylim = ylim
+  )
   
   ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
@@ -145,10 +165,31 @@ hindcast_ggplot <- function(df_lists) {
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(limits = c(min_val, max_val)) +
+    scale_y_continuous(limits = ylim) +
     .my_theme() +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 1))
+}
+
+#' Extract MASE data from hindcast results
+#' 
+#' Retrieves the data frame containing MASE (Mean Absolute Scaled Errors) values
+#' for all indices and scenarios, as returned by \code{hindcast_data()}.
+#' 
+#' @param df_lists A named list object returned by \code{hindcast_data()}, which 
+#'   must contain a component named \code{"mase_data"}.
+#' 
+#' @return A data frame containing Mean Absolute Scaled Error (MASE) metrics 
+#' for each index and scenario.
+#' 
+#' @details
+#' The returned data frame is in wide format, with one row per combination of 
+#' Index and Scenario. This function is a convenience acessor for extracting
+#' MASE results for further analysis or visualization.
+#' 
+#' @export
+get_mase <- function(df_lists) {
+  return(df_lists$mase_data)
 }
 
 #' Extract hindcast diagnostics from model outputs

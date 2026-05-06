@@ -27,7 +27,7 @@ MASE values. Results are faceted by scenario and index.
 }
 \examples{
 \dontrun{
-df <- hindcast_data(hc_raw_data)
+df <- hindcast_data(list_hc_models)
 hindcast_ggplot(df)
 }
 

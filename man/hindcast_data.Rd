@@ -4,10 +4,10 @@
 \alias{hindcast_data}
 \title{Prepare hindcast analysis data}
 \usage{
-hindcast_data(hc_raw_data)
+hindcast_data(list_hc_models)
 }
 \arguments{
-\item{hc_raw_data}{A list containing retrospective model outputs as
+\item{list_hc_models}{A list containing retrospective model outputs as
 returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
 }
 \value{
@@ -20,7 +20,7 @@ used for visualization of observed and predicted values.}
 \item{hindcast_data_2}{A data frame containing filtered hindcast
 trajectories for plotting purposes.}
 \item{mase_data}{A data frame containing Mean Absolute Scaled Error
-(MASE) metrics for each scenario.}
+(MASE) metrics for each index and scenario.}
 }
 }
 \description{
@@ -38,7 +38,7 @@ in visualization functions.
 \dontrun{
 hc_S01 <- hindcast_jabba()
 hc_S02 <- hindcast_jabba()
-df <- hindcast_data(hc_raw_data)
+df <- hindcast_data(list_hc_models)
 df
 }
 

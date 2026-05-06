@@ -4,10 +4,10 @@
 \alias{.validate_column}
 \title{Validate column across model list}
 \usage{
-.validate_column(list_models, column, class_expected)
+.validate_column(list_fit_models, column, class_expected)
 }
 \arguments{
-\item{list_models}{A list of model outputs.}
+\item{list_fit_models}{A list of model outputs.}
 
 \item{column}{A character string indicating the column name.}
 

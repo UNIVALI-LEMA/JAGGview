@@ -11,6 +11,9 @@ runs_tests_ggplot(df_lists, title_y = "Residuals", max_col = NULL)
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals".}
+
+\item{max_col}{Optional. A numeric value that limit the number
+of plots per line.}
 }
 \value{
 A ggplot object showing residuals, confidence regions,
@@ -28,7 +31,7 @@ and p-value annotations. Results are faceted by scenario and index.
 }
 \examples{
 \dontrun{
-df <- runs_tests_data(list_models)
+df <- runs_tests_data(list_fit_models)
 runs_tests_ggplot(df)
 }
 

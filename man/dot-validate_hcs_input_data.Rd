@@ -4,10 +4,10 @@
 \alias{.validate_hcs_input_data}
 \title{Validate list of hindicast models}
 \usage{
-.validate_hcs_input_data(list_models)
+.validate_hcs_input_data(list_fit_models)
 }
 \arguments{
-\item{list_models}{A list of model outputs.}
+\item{list_fit_models}{A list of model outputs.}
 }
 \value{
 Invisibily returns NULL if all validation pass, otherwise throws an error.

@@ -3,10 +3,8 @@
 #' This function computes summary statistics (median and quantiles)
 #' for selected variables from model outputs, grouped by year and scenario.
 #'
-#' @param model_results A data.frame containing model outputs. Must include
-#' columns \code{year}, \code{run}, and the variables used in the analysis
-#' (e.g., \code{BB0}, \code{stock}, \code{harvest}), returned by the JABBA 
-#' function \code{JABBA::jbplot_ensemble()}.
+#' @param list_fit_models A list containing model outputs as returned by the 
+#' JABBA function \code{JABBA::fit_jabba()}.
 #'
 #' @return A data.frame containing:
 #' \itemize{
@@ -17,11 +15,11 @@
 #'   \item \code{ucl}: Upper 97.5% quantile
 #'   \item \code{lcl2}: Lower 10% quantile
 #'   \item \code{ucl2}: Upper 90% quantile
-#'   \item \code{metric}: Name of the metric (indicator) summarised
+#'   \item \code{indicator}: Name of the indicator summarised
 #' }
 #'
 #' @details
-#' The function maps user-friendly variable names to:
+#' The function maps user-friendly indicator_name names to:
 #' \itemize{
 #'   \item \code{"BB0"}: \code{BB0}
 #'   \item \code{"BBmsy"}: \code{stock}
@@ -30,17 +28,23 @@
 #'
 #' @examples
 #' \dontrun{
-#' model_results <- jbplot_ensemble()
-#' df <- trajectories_data(model_results)
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' df <- trajectories_data(list_fit_models)
 #' df
 #' }
 #' 
 #' @export
 #' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup
 #' @importFrom stats median quantile
-trajectories_data <- function(model_results) {
-  ###@> Filtering the expected data...
-  .validate_jbplot_ensemble(model_results)
+trajectories_data <- function(list_fit_models) {
+  # ###@> Filtering the expected data...
+  # .validate_jbplot_ensemble(model_results)
+  model_results <- JABBA::jbplot_ensemble(
+    kb = list_fit_models,
+    kbout = TRUE
+  )
 
   columns <- list(
     BB0   = "BB0",
@@ -69,13 +73,21 @@ trajectories_data <- function(model_results) {
         ucl  = quantile(.data[[var_col]], probs = 0.975),
         lcl2 = quantile(.data[[var_col]], probs = 0.1),
         ucl2 = quantile(.data[[var_col]], probs = 0.9),
-        metric = var_name,
+        indicator = var_name,
         .by = c(year, Scenario)
       )
   })
 
-  bind_rows(result_list) %>%
+  results <- bind_rows(result_list) %>%
     ungroup()
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(is.na(results))) {
+    stop("Data frame only have NA data.")
+  }
+
+  return(results)
 }
 
 #' Plot model trajectories
@@ -84,7 +96,7 @@ trajectories_data <- function(model_results) {
 #' including median trends and uncertainty intervals across scenarios.
 #'
 #' @param df A data frame as returned by \code{trajectories_data()}.
-#' @param variable A character string indicating the variable to plot.
+#' @param indicator_name A character string indicating the indicator_name to plot.
 #'   Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, \code{"Bdev"}, 
 #'   \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or \code{"Bref"}.
 #' @param palette A character vector of colors used for plotting.
@@ -96,12 +108,12 @@ trajectories_data <- function(model_results) {
 #'   confidence intervals, faceted by scenario.
 #'
 #' @details
-#' The functions filters the input data based on the selected \code{variable}
-#' (matching the \code{metric} column). The plot includes ribbons representing 
+#' The functions filters the input data based on the selected \code{indicator_name}
+#' (matching the \code{indicator} column). The plot includes ribbons representing 
 #' 80% (\code{lcl2}-\code{ucl2}) and 95% (\code{lcl}-\code{ucl}) confidence 
 #' intervals, as well as a median trajectory line (\code{mu}).
 #'
-#' Reference lines are added depending on the selected variable:
+#' Reference lines are added depending on the selected indicator_name:
 #' \itemize{
 #'   \item \code{"BBmsy"}: horizontal lines at 1 and 0.4
 #'   \item \code{"FFmsy"}: horizontal line at 1
@@ -115,7 +127,7 @@ trajectories_data <- function(model_results) {
 #' @examples
 #' \dontrun{
 #' df <- trajectories_data(out)
-#' trajectories_ggplot(df, variable = "BB0", palette = c("blue"))
+#' trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 #' }
 #'
 #'
@@ -123,11 +135,14 @@ trajectories_data <- function(model_results) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, variable, palette = "#4285f4", title_y = NULL
+  df, indicator_name, palette = "#4285f4", title_y = NULL
 ) {
-  if(!variable %in% c("BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref")) {
+  if(!inherits(df, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
+  if(!indicator_name %in% c("BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref")) {
     stop(
-      "Parameter 'variable' was expecting 'BB0', 'BBmsy', 'FFmsy', 'Bdev', 'B', 'H', 'Catch', 
+      "Parameter 'indicator_name' was expecting 'BB0', 'BBmsy', 'FFmsy', 'Bdev', 'B', 'H', 'Catch', 
       'BBfrac' or 'Bref'."
     )
   }
@@ -135,7 +150,7 @@ trajectories_ggplot <- function(
   .is_palette_valid(palette)
 
   df <- df %>%
-    filter(metric == variable)
+    filter(indicator == indicator_name)
 
   max_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE)
@@ -153,7 +168,7 @@ trajectories_ggplot <- function(
   )
 
   if (is.null(title_y)) {
-    title_y <- labels_y[[variable]]
+    title_y <- labels_y[[indicator_name]]
   }
 
   y_decimals <- ifelse(max_val > 10, 0, 1)
@@ -164,16 +179,16 @@ trajectories_ggplot <- function(
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl2, ymax = ucl2))
   
-  if (variable == "BBmsy") {
+  if (indicator_name == "BBmsy") {
     p <- p +
       geom_hline(yintercept = 1, linetype = "longdash") +
       geom_hline(yintercept = 0.4, linetype = "longdash", colour = "red")
   }
-  else if (variable == "FFmsy") {
+  else if (indicator_name == "FFmsy") {
     p <- p +
       geom_hline(yintercept = 1, linetype = "longdash")
   }
-  else if (variable == "Bdev") {
+  else if (indicator_name == "Bdev") {
     p <- p +
       geom_hline(yintercept = 0, linetype = "longdash")
   }

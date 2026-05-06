@@ -6,9 +6,9 @@
 \usage{
 priors_posteriors_ggplot(
   df_lists,
-  var,
-  title_x = NULL,
+  indicator_name,
   palette = c("#4285f4", "#34a853"),
+  title_x = NULL,
   x_lim = NULL
 )
 }
@@ -16,17 +16,18 @@ priors_posteriors_ggplot(
 \item{df_lists}{A named list as returned by
 \code{priors_posteriors_data()}.}
 
-\item{var}{A character string specifying the parameter to plot.
+\item{indicator_name}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
-
-\item{title_x}{A character string for the x-axis label. If \code{NULL},
-a default label is assigned based on \code{variable}.}
 
 \item{palette}{A character vector of colors used for prior and
 posterior distributions.}
 
-\item{x_lim}{Optional. A numeric value (positive) used to restrict the x-axis range
-in the plot.}
+\item{title_x}{A character string for the x-axis label. If \code{NULL},
+a default label is assigned based on \code{indicator_name}.}
+
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis c(min, max) used to restrict the
+plotting range.}
 }
 \value{
 A ggplot object displaying prior and posterior densities,
@@ -43,8 +44,8 @@ faceted views by scenario.
 }
 \examples{
 \dontrun{
-df <- priors_posteriors_data(list_models)
-priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853"))
+df <- priors_posteriors_data(list_fit_models)
+priors_posteriors_ggplot(df, indicator_name = "K", palette = c("#4285f4", "#34a853"))
 }
 
 }

@@ -4,10 +4,10 @@
 \alias{runs_tests_data}
 \title{Prepare runs test diagnostics data}
 \usage{
-runs_tests_data(list_models, indices_factor = NULL)
+runs_tests_data(list_fit_models, indices_factor = NULL)
 }
 \arguments{
-\item{list_models}{A list containing model outputs as returned by the
+\item{list_fit_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
 
 \item{indices_factor}{Optional. A vector of indices to include. Must exist
@@ -42,8 +42,8 @@ model outputs and removes incomplete cases before returning results.
 \dontrun{
 fit.S01 <- fit_jabba()
 fit.S02 <- fit_jabba()
-list_models <- list(fit.S01, fit.S02)
-df <- runs_tests_data(list_models)
+list_fit_models <- list(fit.S01, fit.S02)
+df <- runs_tests_data(list_fit_models)
 df
 }
 

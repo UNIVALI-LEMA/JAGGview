@@ -4,7 +4,7 @@
 #' for key parameters (e.g., K, r, psi), along with summary metrics for
 #' prior-posterior comparisons.
 #'
-#' @param list_models A list containing model outputs as returned by the 
+#' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
 #'
 #' @return A named list with the following elements:
@@ -26,20 +26,23 @@
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
 #' fit.S02 <- fit_jabba()
-#' list_models <- list(fit.S01, fit.S02)
-#' df <- priors_posteriors_data(list_models)
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' df <- priors_posteriors_data(list_fit_models)
 #' df
 #' }
 #'
 #' @export
 #' @importFrom dplyr %>% filter summarise
 #' @importFrom stats dlnorm dgamma density rlnorm sd
-priors_posteriors_data <- function(list_models) {
-  ###@> Filtering the expected data...
-  .validate_fits_input_data(list_models)
+priors_posteriors_data <- function(list_fit_models) {
+  # ###@> Filtering the expected data...
+  # .validate_fits_input_data(list_fit_models)
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
 
   #####@> Priors...
-  tmp12 <- .process_priors(list_models)
+  tmp12 <- .process_priors(list_fit_models)
 
   out02 <- data.frame(
     Scenario = NULL, 
@@ -82,7 +85,7 @@ priors_posteriors_data <- function(list_models) {
   }
 
   #####@> Posteriors...
-  tmp13 <- .process_posteriors(list_models)
+  tmp13 <- .process_posteriors(list_fit_models)
 
   out03 <- data.frame(
     Scenario = NULL, K01 = NULL, K02 = NULL, r01 = NULL,r02 = NULL, 
@@ -154,12 +157,20 @@ priors_posteriors_data <- function(list_models) {
     r = round(temp01$mu.r/temp00$mu.r, 3),
     psi = round(temp01$mu.psi/temp00$mu.psi, 3))
 
-  list(
+  results <- list(
     prior = out02,
     posterior = out03,
     PPVR = PPVR,
     PPMR = PPMR
   )
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(sapply(results, function(df) all(is.na(df))))) {
+    stop("All the data frames have NA data.")
+  }
+
+  return(results)
 }
 
 #' Plot prior and posterior distributions
@@ -169,14 +180,15 @@ priors_posteriors_data <- function(list_models) {
 #'
 #' @param df_lists A named list as returned by
 #'   \code{priors_posteriors_data()}.
-#' @param var A character string specifying the parameter to plot.
+#' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
-#' @param title_x A character string for the x-axis label. If \code{NULL},
-#'   a default label is assigned based on \code{variable}.
 #' @param palette A character vector of colors used for prior and
 #'   posterior distributions.
-#' @param x_lim Optional. A numeric value (positive) used to restrict the x-axis range
-#'   in the plot.
+#' @param title_x A character string for the x-axis label. If \code{NULL},
+#'   a default label is assigned based on \code{indicator_name}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower 
+#'   and upper limits of the x-axis c(min, max) used to restrict the 
+#'   plotting range.
 #'
 #' @return A ggplot object displaying prior and posterior densities,
 #'   annotated with prior-posterior metrics (PPMR and PPVR).
@@ -188,8 +200,8 @@ priors_posteriors_data <- function(list_models) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- priors_posteriors_data(list_models)
-#' priors_posteriors_ggplot(df, var = "K", palette = c("#4285f4", "#34a853"))
+#' df <- priors_posteriors_data(list_fit_models)
+#' priors_posteriors_ggplot(df, indicator_name = "K", palette = c("#4285f4", "#34a853"))
 #' }
 #'
 #' @export
@@ -197,30 +209,36 @@ priors_posteriors_data <- function(list_models) {
 #' @importFrom ggplot2 ggplot geom_area aes geom_text facet_wrap 
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, var, title_x = NULL, palette = c("#4285f4", "#34a853"), x_lim = NULL
+  df_lists, indicator_name, palette = c("#4285f4", "#34a853"), title_x = NULL, x_lim = NULL
 ) {
-  if(!var %in% c("K", "r", "psi")) {
-    stop("Parameter 'var' was expecting 'K', 'r' or 'psi'.")
+  if(!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
+  if(!indicator_name %in% c("K", "r", "psi")) {
+    stop("Parameter 'indicator_name' was expecting 'K', 'r' or 'psi'.")
   }
 
   .is_palette_valid(palette)
 
   if(!is.null(x_lim)) {
-    if(x_lim <= 0 || !inherits(x_lim, "numeric")) {
-      stop("Expected parameter 'x_lim' to be a positive number.")
+    if (x_lim[1] > x_lim[2]) {
+      stop("Expected first value of parameter 'x_lim' would be less than the second.")
+    }
+    if(!any(inherits(x_lim, "numeric"))) {
+      stop("Expected parameter 'x_lim' to have a numeric class.")
+    }
+    if(length(x_lim) != 2) {
+      stop("Expected parameter 'x_lim' to be a vector of length of 2.")
     }
   }
-  # if(x_lim <= 0 && !is.null(x_lim) || !inherits(x_lim, "numeric")) {
-  #   stop("Expected parameter 'x_lim' to be a positive number.")
-  # }
 
-  var1 <- paste0(var, "01")
-  var2 <- paste0(var, "02")
+  indicator1 <- paste0(indicator_name, "01")
+  indicator2 <- paste0(indicator_name, "02")
   prior <- df_lists$prior %>%
-    select(c(Scenario, all_of(c(var1, var2)))) %>%
+    select(c(Scenario, all_of(c(indicator1, indicator2)))) %>%
     rename(
-      value_1 = all_of(var1),
-      value_2 = all_of(var2)
+      value_1 = all_of(indicator1),
+      value_2 = all_of(indicator2)
     )
   
   labels_x <- list(
@@ -230,41 +248,23 @@ priors_posteriors_ggplot <- function(
   )
 
   if (is.null(title_x)) {
-    title_x <- labels_x[[var]]
+    title_x <- labels_x[[indicator_name]]
   }
   
   posterior <- df_lists$posterior %>%
-    select(c(Scenario, all_of(c(var1, var2)))) %>%
+    select(c(Scenario, all_of(c(indicator1, indicator2)))) %>%
     rename(
-      value_1 = all_of(var1),
-      value_2 = all_of(var2)
+      value_1 = all_of(indicator1),
+      value_2 = all_of(indicator2)
     )
-
-  pos_ppmr <- .auto_text_position(
-    data_list = list(prior, posterior), 
-    col_x = "value_1", 
-    col_y = "value_2", 
-    margin = 0.2, 
-    multiplier = 1.05,
-    x_max = x_lim
-  )
-
-  pos_ppvr <- .auto_text_position(
-    data_list = list(prior, posterior), 
-    col_x = "value_1", 
-    col_y = "value_2", 
-    margin = 0.2, 
-    multiplier = 1, 
-    x_max = x_lim
-  )
   
-  if(is.null(x_lim)) {
+  if(is.null(x_lim[2])) {
     prior_max <- max(prior$value_1, na.rm = TRUE)
     pos_max <- max(posterior$value_1, na.rm = TRUE)
-    x_lim <- ifelse(prior_max > pos_max, prior_max, pos_max)
+    x_lim[2] <- ifelse(prior_max > pos_max, prior_max, pos_max)
   }
 
-  x_decimals <- ifelse(x_lim > 10, 0, 1)
+  x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
 
   max_pos_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
   min_pos_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
@@ -285,25 +285,100 @@ priors_posteriors_ggplot <- function(
   else {
     min_prior_val
   }
+  ylim <- c(min_val, max_val)
 
+  pos <- .auto_text_position(
+    data_list = list(prior, posterior), 
+    col_x = "value_1", 
+    col_y = "value_2",
+    ylim = ylim, 
+    margin = 0.2,
+    x_max = x_lim[2]
+  )
+  
+  df_text <- df_lists$PPMR %>%
+  select(Scenario, ppmr_value = all_of(indicator_name)) %>%
+  full_join(
+    df_lists$PPVR %>%
+      select(Scenario, ppvr_value = all_of(indicator_name)),
+    by = "Scenario"
+  ) %>%
+  mutate(
+    x = pos$x,
+    y = pos$y
+  )
+  print(df_text)
+  
   ggplot() +
     geom_area(data = prior, aes(x = value_1, y = value_2),
               fill = palette[1], alpha = 0.5, colour = "black") +
     geom_area(data = posterior, aes(x = value_1, y = value_2),
               fill = palette[2], alpha = 0.5, colour = "black") +
-    geom_text(data = df_lists$PPMR,
-              aes(x = pos_ppmr$x, y = pos_ppmr$y,
-                  label = paste0("PPMR = ", K))) +
-    geom_text(data = df_lists$PPVR,
-              aes(x = pos_ppvr$x, y = pos_ppvr$y,
-                  label = paste0("PPVR = ", K))) +
+    geom_text(data = df_text,
+              aes(x = x, y = y,
+                  label = paste0("PPMR = ", ppmr_value))) +
+    geom_text(data = df_text,
+              aes(x = x, y = y,
+                  label = paste0("PPVR = ", ppvr_value)), vjust = 2) +
     facet_wrap(~Scenario, ncol = 3) +
-    coord_cartesian(xlim = c(0, x_lim)) +
+    coord_cartesian(xlim = x_lim) +
     labs(x = title_x, y = "Density") +
     scale_x_continuous(labels = function(x) .format_number(x, decimals = x_decimals)) +
-    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
+    scale_y_continuous(expand = c(0, 0), limits = ylim) +
     .my_theme() +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+}
+
+#' Extract PPVR data from priors/posteriors results
+#'
+#' Retrieves the data frame containing PPVR (Posterior Probability of
+#' Variable in a reference region) values for all indicators and scenarios, 
+#' as returned by \code{priors_posteriors_data()}.
+#'
+#' @param df_lists A named list object returned by
+#'   \code{priors_posteriors_data()}, which must contain a component
+#'   named \code{"PPVR"}.
+#'
+#' @return A data frame with the following structure:
+#' \describe{
+#'   \item{Scenario}{Scenario identifier}
+#'   \item{K, r, psi, ...}{Numeric PPVR values for each indicator}
+#'  }
+#'
+#' @details
+#' The returned data frame is in wide format, with one row per scenario and
+#' one column per indicator. This function is a convenience accessor for
+#' extracting PPVR results for further analysis or visualization.
+#'
+#' @export
+get_ppvr <- function(df_lists) {
+  return(df_lists$PPVR)
+}
+
+#' Extract PPMR data by scenario
+#'
+#' Retrieves the data frame containing PPMR (Posterior Probability of
+#' Metric exceeding a reference) values for all indicators and scenarios, 
+#' as returned by \code{priors_posteriors_data()}.
+#'
+#' @param df_lists A named list object returned by
+#'   \code{priors_posteriors_data()}, which must contain a component
+#'   named \code{"PPMR"}.
+#'
+#' @return A data frame with the following structure:
+#' \describe{
+#'   \item{Scenario}{Scenario identifier}
+#'   \item{K, r, psi, ...}{Numeric PPMR values for each indicator}
+#'  }
+#'
+#' @details
+#' The returned data frame is in wide format, with one row per scenario and
+#' one column per indicator. This function is a convenience accessor for
+#' extracting PPMR results for further analysis or visualization.
+#'
+#' @export
+get_ppmr <- function(df_lists) {
+  return(df_lists$PPMR)
 }
 
 #' Extract prior settings from model outputs

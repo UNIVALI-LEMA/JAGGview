@@ -51,38 +51,38 @@
 #' JABBA model outputs and verifies the presence and class of
 #' required components.
 #'
-#' @param list_models A list of model outputs.
+#' @param list_fit_models A list of model outputs.
 #'
 #' @return Invisibly returns NULL if all validations pass, otherwise throws an error.
 #'
 #' @keywords internal
-.validate_fits_input_data <- function(list_models) {
-  if(.is_fit_jabba(list_models)) {
+.validate_fits_input_data <- function(list_fit_models) {
+  if(.is_fit_jabba(list_fit_models)) {
     stop("Expected a list of valid JABBA model outputs.")
   }
 
-  if(!all(vapply(list_models, .is_fit_jabba, logical(1)))) {
+  if(!all(vapply(list_fit_models, .is_fit_jabba, logical(1)))) {
     stop("All elements must be a valid JABBA model output.")
   }
 
   # fits
-  .validate_column(list_models, "settings", "list")
-  .validate_column(list_models$settings, "I", c("matrix", "array"))
-  .validate_column(list_models$settings, "SE2", c("matrix", "array"))
-  .validate_column(list_models, "cpue.ppd", "array")
-  .validate_column(list_models, "cpue.hat", "array")
-  .validate_column(list_models, "yr", "numeric")
-  .validate_column(list_models, "scenario", "character")
+  .validate_column(list_fit_models, "settings", "list")
+  .validate_column(list_fit_models$settings, "I", c("matrix", "array"))
+  .validate_column(list_fit_models$settings, "SE2", c("matrix", "array"))
+  .validate_column(list_fit_models, "cpue.ppd", "array")
+  .validate_column(list_fit_models, "cpue.hat", "array")
+  .validate_column(list_fit_models, "yr", "numeric")
+  .validate_column(list_fit_models, "scenario", "character")
   # runs_tests_cpue_residuals
-  .validate_column(list_models, "residuals", c("matrix", "array"))
-  .validate_column(list_models, "stats", "data.frame")
+  .validate_column(list_fit_models, "residuals", c("matrix", "array"))
+  .validate_column(list_fit_models, "stats", "data.frame")
   # prios_posteriors
-  .validate_column(list_models$settings, "K.pr", "numeric")
-  .validate_column(list_models$settings, "r.pr", "numeric")
-  .validate_column(list_models$settings, "psi.pr", "numeric")
-  .validate_column(list_models$settings, "psi.dist", "character")
-  .validate_column(list_models$settings, "igamma", "numeric")
-  .validate_column(list_models, "pars_posterior", "data.frame")
+  .validate_column(list_fit_models$settings, "K.pr", "numeric")
+  .validate_column(list_fit_models$settings, "r.pr", "numeric")
+  .validate_column(list_fit_models$settings, "psi.pr", "numeric")
+  .validate_column(list_fit_models$settings, "psi.dist", "character")
+  .validate_column(list_fit_models$settings, "igamma", "numeric")
+  .validate_column(list_fit_models, "pars_posterior", "data.frame")
 }
 
 #' Check if object is a valid JABBA model fit
@@ -130,16 +130,16 @@
 #' in all models and matches the expected class. If any model fails
 #' validation, an informative error is thrown.
 #'
-#' @param list_models A list of model outputs.
+#' @param list_fit_models A list of model outputs.
 #' @param column A character string indicating the column name.
 #' @param class_expected A character vector of expected class names.
 #'
 #' @return Invisibly returns NULL if validation passes, otherwise throws an error.
 #'
 #' @keywords internal
-.validate_column <- function(list_models, column, class_expected) {
+.validate_column <- function(list_fit_models, column, class_expected) {
   check <- vapply(
-    list_models,
+    list_fit_models,
     function(m) .is_column_valid(m, column, class_expected),
     logical(1)
   )
@@ -147,7 +147,7 @@
     invalid_idx <- which(!check)
 
     received_class <- vapply(
-      list_models[invalid_idx],
+      list_fit_models[invalid_idx],
       function(m) paste(class(m[[column]]), collapse = ", "),
       character(1)
     )
@@ -192,23 +192,23 @@
 #' hindcast JABBA model outputs and verifies the presence and class of
 #' required components.
 #' 
-#' @param list_models A list of model outputs.
+#' @param list_fit_models A list of model outputs.
 #' 
 #' @return Invisibily returns NULL if all validation pass, otherwise throws an error.
 #' @keywords internal
-.validate_hcs_input_data <- function(list_models) {
+.validate_hcs_input_data <- function(list_fit_models) {
   
-  if(.is_hindcast_jabba(list_models)) {
+  if(.is_hindcast_jabba(list_fit_models)) {
     stop("Expected a list of valid JABBA model outputs.")
   }
 
-  if(!all(vapply(list_models, .is_hindcast_jabba, logical(1)))) {
+  if(!all(vapply(list_fit_models, .is_hindcast_jabba, logical(1)))) {
     stop("All elements must be a valid JABBA model output.")
   }
 
   all(
     vapply(
-      list_models,
+      list_fit_models,
       function(hc) {
         .validate_column(hc, "scenario", "character")
         .validate_column(hc, "timeseries", "array")

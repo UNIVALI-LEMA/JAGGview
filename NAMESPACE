@@ -2,6 +2,10 @@
 
 export(fits_data)
 export(fits_ggplot)
+export(get_mase)
+export(get_ppmr)
+export(get_ppvr)
+export(get_rho)
 export(hindcast_data)
 export(hindcast_ggplot)
 export(kobe_data)

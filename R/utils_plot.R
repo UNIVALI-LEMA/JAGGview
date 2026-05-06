@@ -171,16 +171,15 @@
 #' @param data_list A data frame or a list of data frames containing the data.
 #' @param col_x A string indicating the name of the column to be used as the x-axis.
 #' @param col_y A string indicating the name of the column to be used as the y-axis.
+#' @param ylim A numeric vector of length 2, used to informn the y-axis limits of 
+#'   the plot.
 #' @param margin A numeric value (between 0 and 0.5) defining the proportion of the
 #'   x-range to exclude from both ends when searching for candidate positions.
+#'   Defaults to 0.1.
 #' @param low_quantile A numeric value (between 0 and 1) used to define low-value
 #'   regions in the data. Positions are selected among values below this quantile.
-#' @param multiplier A numeric factor (positive) applied to the maximum y-value to 
-#' define the vertical position of the text
 #' @param x_max Optional. A numeric value (positive) used to restrict the x-axis range
 #'   considered in the calculation.
-#' @param y_min Optional. A numeric value (positive) used to define the minimum y-axis 
-#'   range to the plot.
 #'
 #' @return A list with two elements:
 #' \describe{
@@ -195,12 +194,10 @@
 #' a specified quantile (\code{low_quantile}). Among these, the rightmost
 #' candidate is selected. If no candidates are found, the global minimum is used.
 #'
-#' The y-position is defined as a proportion of the maximum y-value, controlled
-#' by \code{multiplier}.
-#'
 #' @keywords internal
 .auto_text_position <- function(
-  data_list, col_x, col_y, margin = 0.1, low_quantile = 0.2, multiplier = 0.9, x_max = NULL, y_min = NULL
+  data_list, col_x, col_y, ylim, margin = 0.1, low_quantile = 0.2,
+  x_max = NULL
 ) {
   
   if (is.data.frame(data_list)) {
@@ -215,11 +212,11 @@
   if(low_quantile < 0 || low_quantile > 1) {
     stop("Expected parameter 'low_quantile' to be between 0 and 1.")
   }
-  if(multiplier <= 0) {
-    stop("Expected parameter 'multiplier' to be a positive number.")
-  }
   if(x_max <= 0 && !is.null(x_max)) {
     stop("Expected parameter 'x_max' to be a positive number.")
+  }
+  if(is.null(ylim) || length(ylim) != 2) {
+    stop("Expected parameter 'ylim' to be numeric vector of length 2.")
   }
 
   all_x <- unique(unlist(lapply(data_list, function(d) d[[col_x]])))
@@ -289,11 +286,7 @@
 
   x_pos <- x_in[idx_x]
 
-  y_pos <- max(y) * multiplier
-
-  if (y_pos < y_min && !is.null(y_min)) {
-    y_pos <- y_min * 1.2
-  }
+  y_pos <- ylim[2] - (ylim[2] - ylim[1]) * 0.1
 
   return(list(x = x_pos, y = y_pos))
 }

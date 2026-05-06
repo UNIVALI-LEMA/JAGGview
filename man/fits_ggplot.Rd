@@ -21,6 +21,9 @@ Defaults to "#4285f4".}
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Abundance index".}
+
+\item{max_col}{Optional. A numeric value that limit the number
+of plots per line.}
 }
 \value{
 A ggplot object displaying fitted indices with uncertainty
@@ -37,7 +40,7 @@ faceting by scenario and index.
 }
 \examples{
 \dontrun{
-df <- fits_data(list_models)
+df <- fits_data(list_fit_models)
 fits_ggplot(df, palette = "blue")
 }
 

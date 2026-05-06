@@ -4,11 +4,11 @@
 \alias{kobe_data}
 \title{Prepare data for Kobe plot visualization}
 \usage{
-kobe_data(model_results, ci_levels = c(0.5, 0.8, 0.95))
+kobe_data(list_fit_models, ci_levels = c(0.5, 0.8, 0.95))
 }
 \arguments{
-\item{model_results}{A data frame containing model outputs with at
-least the following columns: \code{year}, \code{Scenario},
+\item{list_fit_models}{A list containing model outputs as returned by the
+JABBA function \code{JABBA::fit_jabba()}.
 \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by
 the JABBA function \code{JABBA::jbplot_ensemble()}.}
 
@@ -50,8 +50,10 @@ The output is designed to be used directly with
 }
 \examples{
 \dontrun{
-model_results <- jbplot_ensemble()
-df <- kobe_data(model_results)
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_fit_models <- list(fit.S01, fit.S02)
+df <- kobe_data(list_fit_models)
 str(df)
 }
 

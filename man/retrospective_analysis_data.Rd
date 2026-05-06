@@ -4,10 +4,10 @@
 \alias{retrospective_analysis_data}
 \title{Prepare retrospective analysis data}
 \usage{
-retrospective_analysis_data(hc_raw_data)
+retrospective_analysis_data(list_hc_models)
 }
 \arguments{
-\item{hc_raw_data}{A list containing retrospective model outputs as
+\item{list_hc_models}{A list containing retrospective model outputs as
 returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
 }
 \value{
@@ -36,8 +36,8 @@ and rho diagnostics.
 \dontrun{
 hc_S01 <- hindcast_jabba()
 hc_S02 <- hindcast_jabba()
-hc_raw_data <- list(hc_S01, hc_S02)
-df <- retrospective_analysis_data(hc_raw_data)
+list_hc_models <- list(hc_S01, hc_S02)
+df <- retrospective_analysis_data(list_hc_models)
 df
 }
 

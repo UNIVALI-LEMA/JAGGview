@@ -7,7 +7,7 @@
 #' of model results, computes upper and lower confidence bounds, and
 #' organizes the data for downstream visualization.
 #'
-#' @param list_models A list containing model outputs as returned by the 
+#' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
 #' @param indices_factor Optional. A vector of indices_factor to include. Must exist
 #'  in the \code{Index} column.
@@ -38,8 +38,8 @@
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
 #' fit.S02 <- fit_jabba()
-#' list_models <- list(fit.S01, fit.S02)
-#' result <- fits_data(list_models)
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' result <- fits_data(list_fit_models)
 #' result
 #' }
 #'
@@ -48,15 +48,18 @@
 #' @importFrom dplyr %>% select filter full_join 
 #' @importFrom stats complete.cases
 #' @importFrom forcats fct_relevel
-fits_data <- function(list_models, indices_factor = NULL) {
-  ###@> Filtering the expected data...
-  .validate_fits_input_data(list_models)
+fits_data <- function(list_fit_models, indices_factor = NULL) {
+  # ###@> Filtering the expected data...
+  # .validate_fits_input_data(list_fit_models)
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
 
   ###@> Index...
-  tmp01 <- .process_scenarios(list_models, vars = "I")
+  tmp01 <- .process_scenarios(list_fit_models, vars = "I")
   
   ###@> SE...
-  tmp02 <- .process_scenarios(list_models, vars = "SE2")
+  tmp02 <- .process_scenarios(list_fit_models, vars = "SE2")
 
   ##@> Replacing NA...
   tmp02 <- .replace_na_with_na(tmp02, tmp01)
@@ -77,7 +80,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
   tmp00$Ui <- with(tmp00, Mean + error)
   tmp00$Li <- with(tmp00, Mean - error)
 
-  index_inputseries <- .process_index(list_models)
+  index_inputseries <- .process_index(list_fit_models)
 
   if(any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
 
@@ -86,7 +89,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
     select(-SE)
 
   ####@> Fit (CI 80%)...
-  tmp03 <- .process_cpues(list_models, vars = "ppd")
+  tmp03 <- .process_cpues(list_fit_models, vars = "ppd")
 
   if(!is.null(indices_factor)) .validate_indices(unique(tmp03$Index), indices_factor)
 
@@ -97,7 +100,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
     select(-c(se, obserror))
 
   ####@> Fit (CI 95%)...
-  tmp04 <- .process_cpues(list_models, vars = "hat")
+  tmp04 <- .process_cpues(list_fit_models, vars = "hat")
 
   if(!is.null(indices_factor)) .validate_indices(unique(tmp04$Index), indices_factor)
 
@@ -107,11 +110,18 @@ fits_data <- function(list_models, indices_factor = NULL) {
     mutate(Index = fct_relevel(Index, indices_factor)) %>%
     select(-c(se, obserror, mu))
 
-  list(
+  results <- list(
     Li_Ui = tmp00,
     CI_80 = tmp03,
     CI_95 = tmp04
   )
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(sapply(results, function(df) all(is.na(df))))) {
+    stop("All the data frames have NA data.")
+  }
+  
+  return(results)
 }
 
 #' Plot fitted indices with confidence intervals
@@ -139,7 +149,7 @@ fits_data <- function(list_models, indices_factor = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- fits_data(list_models)
+#' df <- fits_data(list_fit_models)
 #' fits_ggplot(df, palette = "blue")
 #' }
 #'
@@ -149,6 +159,9 @@ fits_data <- function(list_models, indices_factor = NULL) {
 fits_ggplot <- function(
   df_lists, palette = "#4285f4", title_y = "Abundance index", max_col = NULL
 ) {
+  if(!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
   n_scenarios <- length(unique(df_lists$CI_95$Scenario))
   n_index <- length(unique(df_lists$CI_95$Index))
   

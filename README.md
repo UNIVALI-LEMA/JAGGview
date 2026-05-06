@@ -63,8 +63,8 @@ library(JAGGview)
 ### 2) Prepare data from JABBA model objects
 
 ```r
-# list_models should contain fit objects returned by JABBA::fit_jabba()
-fits_df <- fits_data(list_models)
+# list_fit_models should contain fit objects returned by JABBA::fit_jabba()
+fits_df <- fits_data(list_fit_models)
 ```
 
 ### 3) Create a plot
@@ -77,7 +77,7 @@ print(p)
 ### 4) Example with other modules
 
 ```r
-hc_df <- hindcast_data(list_models)
+hc_df <- hindcast_data(list_fit_models)
 hc_plot <- hindcast_ggplot(hc_df)
 print(hc_plot)
 ```

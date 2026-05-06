@@ -4,18 +4,18 @@
 \alias{retrospective_analysis_ggplot}
 \title{Plot retrospective analysis results}
 \usage{
-retrospective_analysis_ggplot(df_lists, variable, title_y = NULL)
+retrospective_analysis_ggplot(df_lists, indicator_name, title_y = NULL)
 }
 \arguments{
 \item{df_lists}{A named list as returned by
 \code{retrospective_analysis_data()}.}
 
-\item{variable}{A character string specifying the variable to plot.
-Supported values include "B", "F", "BBmsy", "FFmsy",
+\item{indicator_name}{A character string specifying the name of the
+indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 "procB", and "MSY".}
 
 \item{title_y}{A character string for the y-axis label. If \code{NULL},
-a default label is assigned based on \code{variable}.}
+a default label is assigned based on \code{indicator_name}.}
 }
 \value{
 A ggplot object displaying retrospective trajectories,
@@ -34,8 +34,8 @@ faceted by scenario.
 }
 \examples{
 \dontrun{
-df <- retrospective_analysis_data(hc_raw_data)
-retrospective_analysis_ggplot(df, variable = "B")
+df <- retrospective_analysis_data(list_hc_models)
+retrospective_analysis_ggplot(df, indicator_name = "B")
 }
 
 }

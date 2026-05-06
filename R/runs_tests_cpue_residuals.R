@@ -4,7 +4,7 @@
 #' structures for CPUE indices, including confidence limits and LOESS
 #' smoothing.
 #'
-#' @param list_models A list containing model outputs as returned by the 
+#' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
 #' @param indices_factor Optional. A vector of indices to include. Must exist
 #'  in the \code{Index} column.
@@ -32,8 +32,8 @@
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
 #' fit.S02 <- fit_jabba()
-#' list_models <- list(fit.S01, fit.S02)
-#' df <- runs_tests_data(list_models)
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' df <- runs_tests_data(list_fit_models)
 #' df
 #' }
 #'
@@ -42,11 +42,14 @@
 #' @importFrom JABBA jbruns_sig3
 #' @importFrom stats loess predict complete.cases
 #' @importFrom forcats fct_relevel
-runs_tests_data <- function(list_models, indices_factor = NULL) {
-  ###@> Filtering the expected data...
-  .validate_fits_input_data(list_models)
+runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
+  # ###@> Filtering the expected data...
+  # .validate_fits_input_data(list_fit_models)
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
 
-  tmp05 <- .process_runs(list_models)
+  tmp05 <- .process_runs(list_fit_models)
 
   indices <- 4:ncol(tmp05)
 
@@ -109,14 +112,22 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
   tmp05$upper <- pred$fit + 1.96 * pred$se.fit
   tmp05$lower <- pred$fit - 1.96 * pred$se.fit
 
-  RMSE_data <- .process_stats(list_models) %>%
+  RMSE_data <- .process_stats(list_fit_models) %>%
     filter(Stastistic == "RMSE")
 
-  list(
+  results <- list(
     cpue_residuals = tmp05,
     SE3 = out.test,
     RMSE_data = RMSE_data
   )
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(sapply(results, function(df) all(is.na(df))))) {
+    stop("All the data frames have NA data.")
+  }
+
+  return(results)
 }
 
 #' Plot runs test diagnostics
@@ -128,6 +139,8 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
 #' @param df_lists A named list as returned by \code{runs_tests_data()}.
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Residuals".
+#' @param max_col Optional. A numeric value that limit the number
+#'   of plots per line.
 #'
 #' @return A ggplot object showing residuals, confidence regions,
 #'   and runs test results.
@@ -139,7 +152,7 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' df <- runs_tests_data(list_models)
+#' df <- runs_tests_data(list_fit_models)
 #' runs_tests_ggplot(df)
 #' }
 #'
@@ -147,16 +160,19 @@ runs_tests_data <- function(list_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_text geom_hline geom_segment 
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
+  if(!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
   max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
   min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
+  ylim <- c(min_val, max_val)
 
   pos <- .auto_text_position(
     data_list = df_lists$cpue_residuals,
     col_x = "Year",
     col_y = "Res",
-    multiplier = 2,
     margin = 0.4,
-    y_min = max(df_lists$SE3$ucl)
+    ylim = ylim
   )
 
   n_scenarios <- length(unique(df_lists$SE3$Scenario))
@@ -201,7 +217,7 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
   }
   p <- p +
     scale_fill_manual(values = c("green", "red")) +
-    scale_y_continuous(limits = c(min_val, max_val)) +
+    scale_y_continuous(limits = ylim) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
@@ -238,12 +254,13 @@ cpue_conflicts_ggplot <- function(
 
   max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
   min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+  ylim <- c(min_val, max_val)
   
   pos <- .auto_text_position(
     data_list = df_lists$cpue_residuals,
     col_x = "Year",
     col_y = "Res",
-    multiplier = 1.1
+    ylim = ylim
   )
   
   ggplot() +
@@ -260,7 +277,7 @@ cpue_conflicts_ggplot <- function(
               aes(x = pos$x, y = pos$y,
                   label = paste0("RMSE = ", Value, " %"))) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), limits = c(min_val, max_val)) +
+    scale_y_continuous(expand = c(0, 0), limits = ylim) +
     scale_fill_manual(values = palette) +
     scale_colour_manual(values = palette) +
     labs(x = "Year", y = title_y, fill = "", colour = "") +

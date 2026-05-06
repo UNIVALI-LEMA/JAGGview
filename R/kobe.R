@@ -4,8 +4,8 @@
 #' required components to build a Kobe plot, including confidence
 #' contours and reference quadrants.
 #'
-#' @param model_results A data frame containing model outputs with at
-#' least the following columns: \code{year}, \code{Scenario},
+#' @param list_fit_models A list containing model outputs as returned by the 
+#' JABBA function \code{JABBA::fit_jabba()}.
 #' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by 
 #' the JABBA function \code{JABBA::jbplot_ensemble()}.
 #' @param ci_levels A numeric vector containing the CI values between 0 and 1.
@@ -40,8 +40,10 @@
 #'
 #' @examples
 #' \dontrun{
-#' model_results <- jbplot_ensemble()
-#' df <- kobe_data(model_results)
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' df <- kobe_data(list_fit_models)
 #' str(df)
 #' }
 #'
@@ -49,9 +51,13 @@
 #' @importFrom dplyr %>% summarise arrange filter
 #' @importFrom stats median
 #' @importFrom gplots ci2d
-kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
-  ###@> Filtering the expected data...
-  .validate_jbplot_ensemble(model_results)
+kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
+  # ###@> Filtering the expected data...
+  # .validate_jbplot_ensemble(model_results)
+  model_results <- JABBA::jbplot_ensemble(
+    kb = list_fit_models,
+    kbout = TRUE
+  )
 
   if (!inherits(ci_levels, "numeric")) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")
@@ -136,7 +142,8 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
       )
     )
   }
-  list(
+  
+  results <- list(
     col01 = col01[1, , drop = FALSE],
     col02 = col02[1, , drop = FALSE],
     col03 = col03[1, , drop = FALSE],
@@ -145,6 +152,14 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
     tmp11 = tmp11,
     tmp11b = tmp11b
   )
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(is.na(results))) {
+    stop("Data frame only have NA data.")
+  }
+
+  return(results)
 }
 
 #' Plot Kobe diagram
@@ -153,7 +168,7 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
 #' biomass (B/Bmsy) and fishing mortality (F/Fmsy), including
 #' uncertainty contours and temporal trajectories.
 #'
-#' @param df A list as returned by \code{kobe_data()}.
+#' @param df_lists A list as returned by \code{kobe_data()}.
 #'
 #' @return A ggplot object representing the Kobe plot, faceted by scenario.
 #'
@@ -181,40 +196,45 @@ kobe_data <- function(model_results, ci_levels = c(0.5, 0.8, 0.95)) {
 #' scale_x_continuous scale_shape_manual scale_fill_manual labs
 #' coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
-kobe_ggplot <- function(df) {
-  max_x <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
-  max_y <- .round_to_nearest(max(df$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
+kobe_ggplot <- function(df_lists) {
+  if(!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
+  max_x <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
+  max_y <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
   if(max_x > 6) max_x <- 6
   if(max_y > 6) max_y <- 6
 
-  n_levels <- length(unique(df$k.out$q))
+  n_levels <- length(unique(df_lists$k.out$q))
   ggplot() +
-    geom_rect(data = df$col01, 
+    geom_rect(data = df_lists$col01, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-      fill = "yellow") + # Maybe try passing the color of the data frame
-    geom_rect(data = df$col02, 
+      fill = "yellow") +
+    geom_rect(data = df_lists$col02, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
       fill = "orange") +
-    geom_rect(data = df$col03, 
+    geom_rect(data = df_lists$col03, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
       fill = "red") +
-    geom_rect(data = df$col04, 
+    geom_rect(data = df_lists$col04, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
       fill = "green") +
     geom_hline(yintercept = 1, linetype = "longdash") +
     geom_vline(xintercept = 1, linetype = "longdash") +
-    geom_polygon(data = df$k.out,
+    geom_polygon(data = df_lists$k.out,
                  aes(x = x, y = y, fill = q),
                  colour = "gray30") +
-    geom_path(data = df$tmp11, aes(x = Bratio, y = Fratio)) +
-    geom_point(data = df$tmp11b,
+    geom_path(data = df_lists$tmp11, aes(x = Bratio, y = Fratio)) +
+    geom_point(data = df_lists$tmp11b,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
     scale_y_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
     scale_x_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
     scale_shape_manual(values = c(21, 22, 23)) +
-    scale_fill_manual(values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)) +
+    scale_fill_manual(
+      values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
+    ) +
     labs(x = expression(B/B[MSY]), y = expression(F/F[MSY]), fill = "",
          shape = "") +
     coord_cartesian(xlim = c(0, max_x), ylim = c(0, max_y)) +

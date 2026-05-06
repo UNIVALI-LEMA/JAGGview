@@ -4,10 +4,10 @@
 \alias{kobe_ggplot}
 \title{Plot Kobe diagram}
 \usage{
-kobe_ggplot(df)
+kobe_ggplot(df_lists)
 }
 \arguments{
-\item{df}{A list as returned by \code{kobe_data()}.}
+\item{df_lists}{A list as returned by \code{kobe_data()}.}
 }
 \value{
 A ggplot object representing the Kobe plot, faceted by scenario.

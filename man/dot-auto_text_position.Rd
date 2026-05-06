@@ -8,11 +8,10 @@
   data_list,
   col_x,
   col_y,
+  ylim,
   margin = 0.1,
   low_quantile = 0.2,
-  multiplier = 0.9,
-  x_max = NULL,
-  y_min = NULL
+  x_max = NULL
 )
 }
 \arguments{
@@ -22,20 +21,18 @@
 
 \item{col_y}{A string indicating the name of the column to be used as the y-axis.}
 
+\item{ylim}{A numeric vector of length 2, used to informn the y-axis limits of
+the plot.}
+
 \item{margin}{A numeric value (between 0 and 0.5) defining the proportion of the
-x-range to exclude from both ends when searching for candidate positions.}
+x-range to exclude from both ends when searching for candidate positions.
+Defaults to 0.1.}
 
 \item{low_quantile}{A numeric value (between 0 and 1) used to define low-value
 regions in the data. Positions are selected among values below this quantile.}
 
-\item{multiplier}{A numeric factor (positive) applied to the maximum y-value to
-define the vertical position of the text}
-
 \item{x_max}{Optional. A numeric value (positive) used to restrict the x-axis range
 considered in the calculation.}
-
-\item{y_min}{Optional. A numeric value (positive) used to define the minimum y-axis
-range to the plot.}
 }
 \value{
 A list with two elements:
