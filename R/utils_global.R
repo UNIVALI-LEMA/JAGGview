@@ -10,5 +10,6 @@ utils::globalVariables(c(
   "Bdev", "lcl2", "run", "ucl2", "Bratio", "Fratio",
   "harvest", "stock", "xmax", "xmin", ".data", 
   "id_num", "Peel", "indicator", "indices", 
-  "ppmr_value", "ppvr_value"
+  "ppmr_value", "ppvr_value", "jbs", "prefix", 
+  "output.dir"
 ))

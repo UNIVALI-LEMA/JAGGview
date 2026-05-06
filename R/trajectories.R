@@ -41,9 +41,10 @@
 trajectories_data <- function(list_fit_models) {
   # ###@> Filtering the expected data...
   # .validate_jbplot_ensemble(model_results)
-  model_results <- JABBA::jbplot_ensemble(
+  model_results <- .jbplot_ensemble2(
     kb = list_fit_models,
-    kbout = TRUE
+    kbout = TRUE,
+    plot = FALSE
   )
 
   columns <- list(
@@ -161,7 +162,7 @@ trajectories_ggplot <- function(
     FFmsy = expression(F/F[MSY]),
     Bdev = "Process Error on log(Biomass)", # This and below are in development
     B = "Biomass (t)",
-    H = "H",
+    H = "Harvest rate",
     Catch = "Catch",
     BBfrac = expression(B/B[frac]),
     Bref = expression(B[REF])

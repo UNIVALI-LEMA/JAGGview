@@ -55,8 +55,5 @@ corresponding y-values. It then excludes edge regions based on \code{margin}
 and identifies candidate positions where the combined y-values fall below
 a specified quantile (\code{low_quantile}). Among these, the rightmost
 candidate is selected. If no candidates are found, the global minimum is used.
-
-The y-position is defined as a proportion of the maximum y-value, controlled
-by \code{multiplier}.
 }
 \keyword{internal}

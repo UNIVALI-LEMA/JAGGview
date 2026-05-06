@@ -54,9 +54,10 @@
 kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
   # ###@> Filtering the expected data...
   # .validate_jbplot_ensemble(model_results)
-  model_results <- JABBA::jbplot_ensemble(
+  model_results <- .jbplot_ensemble2(
     kb = list_fit_models,
-    kbout = TRUE
+    kbout = TRUE,
+    plot = FALSE
   )
 
   if (!inherits(ci_levels, "numeric")) {
