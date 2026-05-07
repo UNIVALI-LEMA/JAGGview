@@ -2,7 +2,7 @@
 % Please edit documentation in R/retrospective_analysis.R
 \name{.jbplot_retro2}
 \alias{.jbplot_retro2}
-\title{jbplot_retro() to plot retrospective pattern}
+\title{.jbplot_retro2() to plot retrospective pattern}
 \usage{
 .jbplot_retro2(
   hc,
@@ -68,7 +68,6 @@ if (requireNamespace("JABBA", quietly = TRUE)) {
   data("iccat", package = "JABBA")
   bet <- iccat$bet
   
-  # exemplo simples
   .jbplot_retro2(bet)
 }
 }

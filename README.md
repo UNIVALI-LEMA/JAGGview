@@ -113,7 +113,7 @@ print(hc_plot)
 - **Kobe:** `kobe_data()`, `kobe_ggplot()`
 - **Priors vs posteriors:** `priors_posteriors_data()`, `priors_posteriors_ggplot()`
 - **Retrospective:** `retrospective_analysis_data()`, `retrospective_analysis_ggplot()`
-- **Run tests Cpue residuals:** `runs_tests_data()`, `runs_tests_ggplot()`, `cpue_conflicts_ggplot()`
+- **Run tests Cpue residuals:** `runs_tests_data()`, `runs_tests_ggplot()`, `cpue_residuals_ggplot()`
 - **Trajectories:** `trajectories_data()`, `trajectories_ggplot()`
 
 ---

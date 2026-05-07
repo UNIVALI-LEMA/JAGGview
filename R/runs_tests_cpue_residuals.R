@@ -246,7 +246,7 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
 #' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' geom_text facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual 
 #' labs theme
-cpue_conflicts_ggplot <- function(
+cpue_residuals_ggplot <- function(
   df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Residuals"
 ) {
 

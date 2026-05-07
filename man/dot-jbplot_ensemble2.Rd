@@ -173,7 +173,6 @@ if (requireNamespace("JABBA", quietly = TRUE)) {
   data("iccat", package = "JABBA")
   bet <- iccat$bet
   
-  # exemplo simples
   .jbplot_ensemble2(bet)
 }
 }
