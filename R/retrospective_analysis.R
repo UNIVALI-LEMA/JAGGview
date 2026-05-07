@@ -398,7 +398,7 @@ get_rho <- function(df_lists) {
   return(result)
 }
 
-#' jbplot_retro() to plot retrospective pattern
+#' .jbplot_retro2() to plot retrospective pattern
 #'
 #' Plots retrospective pattern of B, F, BBmsy, FFmsy, BB0 and SP #'
 #' @param hc output list from hindast_jabba()

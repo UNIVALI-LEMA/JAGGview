@@ -34,18 +34,42 @@ flowchart LR
 
 ## Installation
 
-### Option 1: Install from GitHub
+### Linux prerequisites
+
+Before installing the package in R, install JAGS in your system terminal:
+
+```bash
+sudo apt update
+sudo apt install jags
+```
+
+---
+
+### R package installation
+
+Open the R console and install the required dependencies:
 
 ```r
 install.packages("remotes")
-remotes::install_github("UNIVALI-LEMA/JAGGview")
+library(remotes)
+
+install.packages(c("rjags", "R2jags"))
+install_github("jabbamodel/JABBA")
+```
+
+---
+
+
+### Option 1: Install from GitHub
+
+```r
+install_github("UNIVALI-LEMA/JAGGview")
 ```
 
 ### Option 2: Install from a local clone
 
 ```r
-install.packages("remotes")
-remotes::install_local(".")
+install_local(".")
 ```
 
 ---
@@ -89,7 +113,7 @@ print(hc_plot)
 - **Kobe:** `kobe_data()`, `kobe_ggplot()`
 - **Priors vs posteriors:** `priors_posteriors_data()`, `priors_posteriors_ggplot()`
 - **Retrospective:** `retrospective_analysis_data()`, `retrospective_analysis_ggplot()`
-- **Run tests:** `runs_tests_data()`, `runs_tests_ggplot()`
+- **Run tests Cpue residuals:** `runs_tests_data()`, `runs_tests_ggplot()`, `cpue_conflicts_ggplot()`
 - **Trajectories:** `trajectories_data()`, `trajectories_ggplot()`
 
 ---
