@@ -38,10 +38,8 @@ flowchart LR
 
 ```r
 install.packages("remotes")
-remotes::install_github("<owner>/JAGGview")
+remotes::install_github("UNIVALI-LEMA/JAGGview")
 ```
-
-> Replace `<owner>` with the GitHub organization or username hosting this repository.
 
 ### Option 2: Install from a local clone
 
