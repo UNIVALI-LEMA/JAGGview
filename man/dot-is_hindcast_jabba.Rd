@@ -14,7 +14,7 @@ A logical value indicating wheter the object is a valid hindcast
 JABBA result
 }
 \description{
-Internal helper that verifies whether an object is a list containing
-all required components of a hindcast JABBA model result.
+Internal helper that verifies whether an object is a list containing all
+required components of a hindcast JABBA model result.
 }
 \keyword{internal}

@@ -23,6 +23,9 @@ Imports:
     ggplot2,
     gplots,
     grDevices,
+    gt,
     JABBA,
+    openxlsx,
+    rstudioapi,
     stats,
     tidyr

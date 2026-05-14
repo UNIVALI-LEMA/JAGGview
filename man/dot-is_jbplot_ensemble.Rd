@@ -10,11 +10,11 @@
 \item{obj}{An object to be checked.}
 }
 \value{
-A logical value indicating whether the object matches the
-expected structure.
+A logical value indicating whether the object matches the expected
+structure.
 }
 \description{
-Internal helper that verifies whether an object is a data frame
-containing the required columns for a JABBA model ensemble output.
+Internal helper that verifies whether an object is a data frame containing
+the required columns for a JABBA model ensemble output.
 }
 \keyword{internal}

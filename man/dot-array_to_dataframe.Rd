@@ -10,12 +10,12 @@
 \item{arr}{A three-dimensional array.}
 }
 \value{
-A data frame with combined slices and additional columns
-identifying the index and year.
+A data frame with combined slices and additional columns identifying
+the index and year.
 }
 \description{
-Internal helper that transforms a three-dimensional array into a
-data frame by stacking slices along the third dimension and adding
-index and year columns.
+Internal helper that transforms a three-dimensional array into a data frame
+by stacking slices along the third dimension and adding index and year
+columns.
 }
 \keyword{internal}

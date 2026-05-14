@@ -10,11 +10,12 @@
 \item{list_fit_models}{A list of model outputs.}
 }
 \value{
-Invisibily returns NULL if all validation pass, otherwise throws an error.
+Invisibily returns NULL if all validation pass, otherwise throws an
+error.
 }
 \description{
-Internal helper that checks whether the input is a valid list of
-hindcast JABBA model outputs and verifies the presence and class of
-required components.
+Internal helper that checks whether the input is a valid list of hindcast
+JABBA model outputs and verifies the presence and class of required
+components.
 }
 \keyword{internal}

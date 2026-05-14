@@ -12,11 +12,11 @@
 \item{factor_indices}{A vector of indices to be validated.}
 }
 \value{
-Invisibly returns \code{NULL}. Throws an error if any index
-is not found in \code{data_indices}.
+Invisibly returns \code{NULL}. Throws an error if any index is not
+found in \code{data_indices}.
 }
 \description{
-Internal helper that checks whether all provided indices exist
-in the available data indices.
+Internal helper that checks whether all provided indices exist in the
+available data indices.
 }
 \keyword{internal}

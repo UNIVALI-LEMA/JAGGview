@@ -14,11 +14,12 @@
 \item{class_expected}{A character vector of expected class names.}
 }
 \value{
-Invisibly returns NULL if validation passes, otherwise throws an error.
+Invisibly returns NULL if validation passes, otherwise throws an
+error.
 }
 \description{
-Internal helper that verifies whether a specific column exists
-in all models and matches the expected class. If any model fails
-validation, an informative error is thrown.
+Internal helper that verifies whether a specific column exists in all models
+and matches the expected class. If any model fails validation, an informative
+error is thrown.
 }
 \keyword{internal}

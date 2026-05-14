@@ -10,15 +10,15 @@
 \item{pal}{A character vector of color names or hexadecimal color codes.}
 }
 \value{
-Returns \code{TRUE} if all elements are valid colors.
-Otherwise, the function stops with an error.
+Returns \code{TRUE} if all elements are valid colors. Otherwise, the
+function stops with an error.
 }
 \description{
 Checks whether all elements in a character vector are valid R colors.
 }
 \details{
 The function attempts to convert the provided values using
-\code{grDevices::col2rgb()}. If any element is not a valid color,
-an error is raised.
+\code{grDevices::col2rgb()}. If any element is not a valid color, an error is
+raised.
 }
 \keyword{internal}

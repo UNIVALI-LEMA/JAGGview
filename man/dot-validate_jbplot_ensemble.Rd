@@ -13,13 +13,13 @@
 Invisibly returns \code{NULL}. Throws an error if validation fails.
 }
 \description{
-Internal helper that checks whether a data frame is a valid JABBA
-model output. It verifies both the presence of required columns and
-that all relevant columns are numeric.
+Internal helper that checks whether a data frame is a valid JABBA model
+output. It verifies both the presence of required columns and that all
+relevant columns are numeric.
 }
 \details{
-Columns other than \code{year}, \code{run}, \code{type}, and \code{iter}
-are expected to be numeric. If not, an informative error is raised
-listing the invalid columns and their classes.
+Columns other than \code{year}, \code{run}, \code{type}, and \code{iter} are
+expected to be numeric. If not, an informative error is raised listing the
+invalid columns and their classes.
 }
 \keyword{internal}

@@ -17,7 +17,7 @@
 A logical value indicating whether the column has the expected class.
 }
 \description{
-Internal helper that checks whether a specific column in a model
-object inherits from the expected class.
+Internal helper that checks whether a specific column in a model object
+inherits from the expected class.
 }
 \keyword{internal}

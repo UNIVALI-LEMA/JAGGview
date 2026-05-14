@@ -11,5 +11,5 @@ utils::globalVariables(c(
   "harvest", "stock", "xmax", "xmin", ".data", 
   "id_num", "Peel", "indicator", "indices", 
   "ppmr_value", "ppvr_value", "jbs", "prefix", 
-  "output.dir"
+  "output.dir", "k", "bmsy", "fmsy", "msy"
 ))

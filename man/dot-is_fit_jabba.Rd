@@ -13,7 +13,7 @@
 A logical value indicating whether the object is a valid JABBA fit.
 }
 \description{
-Internal helper that verifies whether an object is a list containing
-all required components of a JABBA model output.
+Internal helper that verifies whether an object is a list containing all
+required components of a JABBA model output.
 }
 \keyword{internal}

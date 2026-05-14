@@ -15,7 +15,7 @@
 A data frame with values replaced by NA where applicable.
 }
 \description{
-Internal helper that replaces values in one data frame with NA
-wherever the corresponding positions in another data frame are NA.
+Internal helper that replaces values in one data frame with NA wherever the
+corresponding positions in another data frame are NA.
 }
 \keyword{internal}

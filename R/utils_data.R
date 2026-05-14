@@ -1,13 +1,13 @@
 #' Convert a 3D array into a long-format data frame
 #'
-#' Internal helper that transforms a three-dimensional array into a
-#' data frame by stacking slices along the third dimension and adding
-#' index and year columns.
+#' Internal helper that transforms a three-dimensional array into a data frame 
+#' by stacking slices along the third dimension and adding index and year 
+#' columns.
 #'
 #' @param arr A three-dimensional array.
 #'
-#' @return A data frame with combined slices and additional columns
-#'   identifying the index and year.
+#' @return A data frame with combined slices and additional columns identifying 
+#'   the index and year.
 #'
 #' @keywords internal
 .array_to_dataframe <- function(arr) {
@@ -29,8 +29,8 @@
 
 #' Replace values based on NA pattern of another data frame
 #'
-#' Internal helper that replaces values in one data frame with NA
-#' wherever the corresponding positions in another data frame are NA.
+#' Internal helper that replaces values in one data frame with NA wherever the 
+#' corresponding positions in another data frame are NA.
 #'
 #' @param df1 A data frame to be modified.
 #' @param df2 A data frame providing the NA pattern.
@@ -47,13 +47,13 @@
 
 #' Validate list of model fits
 #'
-#' Internal helper that checks whether the input is a valid list of
-#' JABBA model outputs and verifies the presence and class of
-#' required components.
+#' Internal helper that checks whether the input is a valid list of JABBA model 
+#' outputs and verifies the presence and class of required components.
 #'
 #' @param list_fit_models A list of model outputs.
 #'
-#' @return Invisibly returns NULL if all validations pass, otherwise throws an error.
+#' @return Invisibly returns NULL if all validations pass, otherwise throws an 
+#' error.
 #'
 #' @keywords internal
 .validate_fits_input_data <- function(list_fit_models) {
@@ -87,8 +87,8 @@
 
 #' Check if object is a valid JABBA model fit
 #'
-#' Internal helper that verifies whether an object is a list containing
-#' all required components of a JABBA model output.
+#' Internal helper that verifies whether an object is a list containing all 
+#' required components of a JABBA model output.
 #'
 #' @param model An object representing a model output.
 #'
@@ -110,8 +110,8 @@
 
 #' Validate column class
 #'
-#' Internal helper that checks whether a specific column in a model
-#' object inherits from the expected class.
+#' Internal helper that checks whether a specific column in a model object 
+#' inherits from the expected class.
 #'
 #' @param model A model object.
 #' @param column A character string indicating the column name.
@@ -126,15 +126,16 @@
 
 #' Validate column across model list
 #'
-#' Internal helper that verifies whether a specific column exists
-#' in all models and matches the expected class. If any model fails
-#' validation, an informative error is thrown.
+#' Internal helper that verifies whether a specific column exists in all models 
+#' and matches the expected class. If any model fails validation, an informative 
+#' error is thrown.
 #'
 #' @param list_fit_models A list of model outputs.
 #' @param column A character string indicating the column name.
 #' @param class_expected A character vector of expected class names.
 #'
-#' @return Invisibly returns NULL if validation passes, otherwise throws an error.
+#' @return Invisibly returns NULL if validation passes, otherwise throws an 
+#' error.
 #'
 #' @keywords internal
 .validate_column <- function(list_fit_models, column, class_expected) {
@@ -165,8 +166,8 @@
 
 #' Check if object is a valid hindcast JABBA model result
 #' 
-#' Internal helper that verifies whether an object is a list containing
-#' all required components of a hindcast JABBA model result.
+#' Internal helper that verifies whether an object is a list containing all 
+#' required components of a hindcast JABBA model result.
 #' 
 #' @param obj An object representing a JABBA model output.
 #' 
@@ -188,13 +189,14 @@
 
 #'Validate list of hindicast models
 #' 
-#' Internal helper that checks whether the input is a valid list of
-#' hindcast JABBA model outputs and verifies the presence and class of
-#' required components.
+#' Internal helper that checks whether the input is a valid list of hindcast 
+#' JABBA model outputs and verifies the presence and class of required 
+#' components.
 #' 
 #' @param list_fit_models A list of model outputs.
 #' 
-#' @return Invisibily returns NULL if all validation pass, otherwise throws an error.
+#' @return Invisibily returns NULL if all validation pass, otherwise throws an 
+#' error.
 #' @keywords internal
 .validate_hcs_input_data <- function(list_fit_models) {
   
@@ -223,13 +225,13 @@
 
 #' Check if an object is a valid JABBA ensemble output
 #'
-#' Internal helper that verifies whether an object is a data frame
-#' containing the required columns for a JABBA model ensemble output.
+#' Internal helper that verifies whether an object is a data frame containing 
+#' the required columns for a JABBA model ensemble output.
 #'
 #' @param obj An object to be checked.
 #'
-#' @return A logical value indicating whether the object matches the
-#'   expected structure.
+#' @return A logical value indicating whether the object matches the expected 
+#' structure.
 #'
 #' @keywords internal
 .is_jbplot_ensemble <- function(obj) {
@@ -243,18 +245,18 @@
 
 #' Validate a JABBA ensemble object
 #'
-#' Internal helper that checks whether a data frame is a valid JABBA
-#' model output. It verifies both the presence of required columns and
-#' that all relevant columns are numeric.
+#' Internal helper that checks whether a data frame is a valid JABBA model 
+#' output. It verifies both the presence of required columns and that all 
+#' relevant columns are numeric.
 #'
 #' @param object_df A data frame representing JABBA model output.
 #'
 #' @return Invisibly returns \code{NULL}. Throws an error if validation fails.
 #'
 #' @details
-#' Columns other than \code{year}, \code{run}, \code{type}, and \code{iter}
-#' are expected to be numeric. If not, an informative error is raised
-#' listing the invalid columns and their classes.
+#' Columns other than \code{year}, \code{run}, \code{type}, and \code{iter} are 
+#' expected to be numeric. If not, an informative error is raised listing the 
+#' invalid columns and their classes.
 #'
 #' @keywords internal
 .validate_jbplot_ensemble <- function(object_df) {
@@ -291,14 +293,14 @@
 
 #' Validate index values against available data
 #'
-#' Internal helper that checks whether all provided indices exist
-#' in the available data indices.
+#' Internal helper that checks whether all provided indices exist in the 
+#' available data indices.
 #'
 #' @param data_indices A vector of valid indices present in the data.
 #' @param factor_indices A vector of indices to be validated.
 #'
-#' @return Invisibly returns \code{NULL}. Throws an error if any index
-#'   is not found in \code{data_indices}.
+#' @return Invisibly returns \code{NULL}. Throws an error if any index is not 
+#' found in \code{data_indices}.
 #'
 #' @keywords internal
 .validate_indices <- function(data_indices, factor_indices) {
@@ -313,13 +315,13 @@
 #'
 #' @param pal A character vector of color names or hexadecimal color codes.
 #'
-#' @return Returns \code{TRUE} if all elements are valid colors.
-#'   Otherwise, the function stops with an error.
+#' @return Returns \code{TRUE} if all elements are valid colors. Otherwise, the 
+#'   function stops with an error.
 #'
 #' @details
-#' The function attempts to convert the provided values using
-#' \code{grDevices::col2rgb()}. If any element is not a valid color,
-#' an error is raised.
+#' The function attempts to convert the provided values using 
+#' \code{grDevices::col2rgb()}. If any element is not a valid color, an error is 
+#' raised.
 #'
 #' @keywords internal
 #' @importFrom grDevices col2rgb
@@ -335,7 +337,8 @@
 #'
 #' Plots plots JABBA ensemble models + projections - joint or by run  
 #' 
-#' @param kb objects from fit_jabba(),jabba_fw(), list of fit_jabba() or fit_jabba()$kbtrj    
+#' @param kb objects from fit_jabba(),jabba_fw(), list of fit_jabba() or 
+#'   fit_jabba()$kbtrj    
 #' @param subplots option choose from subplots 1:7 
 #' \itemize{
 #'   \item 1: stock (B/Bmsy)  
@@ -355,10 +358,11 @@
 #' @param bref biomass fraction reference options c("bmsy","b0")
 #' @param reflines if TRUE show reference point lines in absolute plots
 #' @param ylabs yaxis labels for quants
-#' @param ylab.bref option to only specify BBfrac plot ylab 
-#' final year of values to show for each model. By default it is set to the
+#' @param ylab.bref option to only specify BBfrac plot ylab final year of values 
+#' to show for each model. By default it is set to the
 #' @param col Optional vector of colors to be used for lines. Input NULL
-#' @param bref.col option to set color for Bref reference line (default is "red")
+#' @param bref.col option to set color for Bref reference line (default is 
+#' "red")
 #' @param pch Optional vector of plot character values
 #' @param lty Optional vector of line types
 #' @param lwd Optional vector of line widths
@@ -372,9 +376,10 @@
 #' top of lines)
 #' @param legend Add a legend?
 #' @param legendlabels Optional vector of labels to include in legend.
-#' @param legend.loc Location of legend. Either a string like "topleft" or a vector
-#' of two numeric values representing the fraction of the maximum in the x and y
-#' dimensions, respectively. See ?legend for more info on the string options.
+#' @param legend.loc Location of legend. Either a string like "topleft" or a 
+#' vector of two numeric values representing the fraction of the maximum in the 
+#' x and y dimensions, respectively. See ?legend for more info on the string 
+#' options.
 #' @param legendorder Optional vector of model numbers that can be used to have
 #' the legend display the model names in an order that is different than that
 #' which is represented in the summary input object.
@@ -413,12 +418,16 @@
 #' @importFrom grDevices adjustcolor dev.off graphics.off png
 #' @importFrom graphics abline arrows axis box legend lines par points polygon
 #' @importFrom stats aggregate
-.jbplot_ensemble2 <- function(kb,subplots=1:6,joint=FALSE,plotCIs=TRUE,quantiles = c(0.025,0.975),bfrac = 0.5,
-  bref = c("bmsy","b0")[1],reflines = TRUE,kbout = FALSE,ylabs = NULL,ylab.bref = NULL,plot=TRUE,as.png=FALSE,
-  col=NULL,bref.col = "red",pch=NULL, lty=1, lwd=1.5,tickEndYr=FALSE,xlim=NULL, ylimAdj=1.05,xaxs="i", yaxs="i",
-  xylabs=TRUE,type="l",legend=TRUE, legendlabels="default", legend.loc="topright",legendorder="default",
-  legendncol=1,legendcex=0.7,legendsp=0.8,pwidth=6.5,pheight=5.0,punits="in",res=300,ptsize=10,cex.main=1,
-  plotdir=NULL,filenameprefix="",par=list(mar=c(5,4,1,1)+.1),verbose=FALSE,shadecol = NULL, shadealpha=0.3,
+.jbplot_ensemble2 <- function(
+  kb,subplots=1:6,joint=FALSE,plotCIs=TRUE,quantiles = c(0.025,0.975),
+  bfrac = 0.5,bref = c("bmsy","b0")[1],reflines = TRUE,kbout = FALSE,
+  ylabs = NULL,ylab.bref = NULL,plot=TRUE,as.png=FALSE,col=NULL,
+  bref.col = "red",pch=NULL, lty=1, lwd=1.5,tickEndYr=FALSE,xlim=NULL, 
+  ylimAdj=1.05,xaxs="i", yaxs="i",xylabs=TRUE,type="l",legend=TRUE, 
+  legendlabels="default", legend.loc="topright",legendorder="default",
+  legendncol=1,legendcex=0.7,legendsp=0.8,pwidth=6.5,pheight=5.0,punits="in",
+  res=300,ptsize=10,cex.main=1,plotdir=NULL,filenameprefix="",
+  par=list(mar=c(5,4,1,1)+.1),verbose=FALSE,shadecol = NULL, shadealpha=0.3,
   new=TRUE,add=FALSE,single.plots = add,run=NULL,fmax=5.0){
   if(!is.null(kb$settings)){ 
     kb = kb$kbtrj
@@ -682,3 +691,90 @@
   } # endplot
   if(kbout) return(kb)
 } 
+
+#' Extract reference points data from fitted models
+#' 
+#' Retrieves the data frame containing reference points (refpts) extracted from
+#' one or more fitted JABBA models returned by \code{fit_jabba()}.
+#' 
+#' @param list_fit_models A list of fitted model objects returned by 
+#'   \code{fit_jabba()}, or a single fitted model object.
+#' 
+#' @return A combined data frame containing reference points (refpts) for all
+#'   fitted models provided in \code{list_fit_models}.
+#' 
+#' @details
+#' If a single fitted model is provided, it is automatically wrapped into a list
+#' to ensure consistent processing. The function extracts the \code{refpts}
+#' component from each model and binds them by rows into a single data frame.
+#' 
+#' This function is a convenience accessor to facilitate comparison and further
+#' analysis of reference points across multiple fitted models.
+#' 
+#' @export
+#' @importFrom dplyr bind_rows
+get_refpts <- function(list_fit_models) {
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
+
+  temp00 <- lapply(
+    list_fit_models,
+    function(fit) {
+      fit$refpts
+    }
+  )
+  temp00 <- bind_rows(temp00) %>%
+    mutate(
+      across(
+        c(k, bmsy, fmsy, msy),
+        ~ifelse(quant == "logse", exp(.x), .x)
+      )
+    )
+
+  return(temp00)
+}
+
+#' Extract parameters data from fitted models
+#' 
+#' Retrieves a combined data frame containing model parameters extracted from
+#' one or more fitted JABBA models returned by \code{fit_jabba()}.
+#' 
+#' @param list_fit_models A list of fitted model objects returned by 
+#'   \code{fit_jabba()}, or a single fitted model object.
+#' 
+#' @return A data frame containing parameter estimates for each model, including
+#'   the parameter name and associated scenario.
+#' 
+#' @details
+#' If a single fitted model is provided, it is automatically wrapped into a list
+#' to ensure consistent processing. For each model, the \code{pars} component is
+#' converted to a data frame, with row names extracted as an \code{indicator}
+#' column and the model \code{scenario} appended as an additional column.
+#' 
+#' The resulting data frames are combined by rows into a single data frame,
+#' facilitating comparison of parameter estimates across scenarios or models.
+#' 
+#' @importFrom dplyr bind_rows
+#' @export
+get_pars <- function(list_fit_models) {
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
+
+  temp00 <- lapply(
+    list_fit_models,
+    function(fit) {
+      df <- as.data.frame(fit$pars)
+      df$indicator <- rownames(df)
+      df$scenario <- fit$scenario
+
+      rownames(df) <- NULL
+      df[, c("scenario", "indicator", setdiff(names(df), 
+      c("scenario", "indicator")))]
+    }
+  )
+  temp00 <- bind_rows(temp00) 
+
+  return(temp00)
+}
