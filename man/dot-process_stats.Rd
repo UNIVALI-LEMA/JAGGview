@@ -13,7 +13,7 @@
 A data frame containing model statistics by scenario.
 }
 \description{
-Internal helper that extracts summary statistics from each model
-and combines them into a single data frame across scenarios.
+Internal helper that extracts summary statistics from each model and
+combines them into a single data frame across scenarios.
 }
 \keyword{internal}

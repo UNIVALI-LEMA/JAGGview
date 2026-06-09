@@ -15,19 +15,19 @@
 \item \code{FALSE}: round down (used for lower axis limits).
 }}
 
-\item{multiplier}{A number factor applied to the absolute value
-to create a margin for axis limits.}
+\item{multiplier}{A number factor applied to the absolute value to create a
+margin for axis limits.}
 }
 \value{
 A rounded numeric value.
 }
 \description{
-Internal helper that rounds a numeric value to the nearest
-order of magnitude, either upward (for maximum values) or downward
-(for minimum values), useful for defining plot axis limits.
+Internal helper that rounds a numeric value to the nearest order of
+magnitude, either upward (for maximum values) or downward (for minimum
+values), useful for defining plot axis limits.
 }
 \details{
-When \code{max = FALSE}, positive values are adjusted to include zero
-when appropriate, ensuring cleaner lower bounds in plots.
+When \code{max = FALSE}, positive values are adjusted to include zero when
+appropriate, ensuring cleaner lower bounds in plots.
 }
 \keyword{internal}

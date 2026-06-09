@@ -7,22 +7,26 @@
 get_rho(df_lists)
 }
 \arguments{
-\item{df_lists}{A named list object returned by \code{hindcast_data()}, which
-must contain a component named \code{"rho_data"}.}
+\item{df_lists}{A named list object returned by
+\code{retrospective_analysis_data()}, which must contain a component named
+\code{"rho_data"}.}
 }
 \value{
 A data frame where each row represents a combination of scenario and
 index, typically including the following columns:
 \describe{
 \item{Scenario}{Scenario identifier}
-\item{Index}{Short name of the indicator (e.g., \code{B}, \code{F}, \code{BBmsy})}
+\item{Index}{Short name of the indicator (e.g., \code{B}, \code{F},
+\code{BBmsy})}
 \item{Index2}{Descriptive name of the indicator}
-\item{rho}{Numeric value representing retrospective bias for the given index}
+\item{rho}{Numeric value representing retrospective bias for the given
+index}
 }
 }
 \description{
 Retrieves the data frame containing rho (retrospective bias metrics) values
-for all indices and scenarios, as returned by \code{hindcast_data()}.
+for all indices and scenarios, as returned by
+\code{retrospective_analysis_data()}.
 }
 \details{
 The returned data frame is in long format, with one row per combination of

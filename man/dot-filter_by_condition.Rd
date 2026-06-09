@@ -21,7 +21,7 @@ A filtered data frame containing selected observations.
 }
 \description{
 Internal helper that filters grouped data by identifying the first
-occurrence of a logical condition and returning selected rows around
-that transition.
+occurrence of a logical condition and returning selected rows around that
+transition.
 }
 \keyword{internal}

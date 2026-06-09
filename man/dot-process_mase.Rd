@@ -10,11 +10,11 @@
 \item{fit_list}{A list of model outputs.}
 }
 \value{
-A data frame containing MASE values for each scenario,
-including plotting coordinates.
+A data frame containing MASE values for each scenario, including
+plotting coordinates.
 }
 \description{
-Internal helper that computes Mean Absolute Scaled Error (MASE)
-metrics from model outputs.
+Internal helper that computes Mean Absolute Scaled Error (MASE) metrics from
+model outputs.
 }
 \keyword{internal}

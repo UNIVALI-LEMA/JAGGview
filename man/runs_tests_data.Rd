@@ -17,26 +17,25 @@ in the \code{Index} column.}
 A named list with three elements:
 \describe{
 \item{cpue_residuals}{A data frame containing residuals, fitted
-LOESS values, and confidence bands.}
+LOESS values, and credibility bands.}
 \item{SE3}{A data frame containing runs test results, including
-lower and upper confidence limits and p-values.}
+lower and upper credibility limits and p-values.}
 \item{RMSE_data}{A data frame with RMSE-related diagnostics.}
 }
 }
 \description{
 Processes model outputs to compute runs test diagnostics and residual
-structures for CPUE indices, including confidence limits and LOESS
+structures for CPUE indices, including credibility limits and LOESS
 smoothing.
 }
 \details{
-The function computes runs tests using \code{JABBA::jbruns_sig3}
-and classifies results based on statistical significance. Residuals
-are smoothed using LOESS, and confidence intervals are derived
-from the fitted model.
+The function computes runs tests using \code{JABBA::jbruns_sig3} and
+classifies results based on statistical significance. Residuals are smoothed
+using LOESS, and credibility intervals are derived from the fitted model.
 
 If \code{indices_factor} is provided, the results are filtered and reordered
-accordingly. The function also ensures consistency across different
-model outputs and removes incomplete cases before returning results.
+accordingly. The function also ensures consistency across different model
+outputs and removes incomplete cases before returning results.
 }
 \examples{
 \dontrun{

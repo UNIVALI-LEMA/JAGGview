@@ -11,28 +11,32 @@
   ylim,
   margin = 0.1,
   low_quantile = 0.2,
+  text_width_fraction = 0.15,
   x_max = NULL
 )
 }
 \arguments{
 \item{data_list}{A data frame or a list of data frames containing the data.}
 
-\item{col_x}{A string indicating the name of the column to be used as the x-axis.}
+\item{col_x}{A string indicating the name of the column to be used as the
+x-axis.}
 
-\item{col_y}{A string indicating the name of the column to be used as the y-axis.}
+\item{col_y}{A string indicating the name of the column to be used as the
+y-axis.}
 
-\item{ylim}{A numeric vector of length 2, used to informn the y-axis limits of
-the plot.}
+\item{ylim}{A numeric vector of length 2, used to informn the y-axis limits
+of the plot.}
 
-\item{margin}{A numeric value (between 0 and 0.5) defining the proportion of the
-x-range to exclude from both ends when searching for candidate positions.
-Defaults to 0.1.}
+\item{margin}{A numeric value (between 0 and 0.5) defining the proportion of
+the x-range to exclude from both ends when searching for candidate
+positions. Defaults to 0.1.}
 
-\item{low_quantile}{A numeric value (between 0 and 1) used to define low-value
-regions in the data. Positions are selected among values below this quantile.}
+\item{low_quantile}{A numeric value (between 0 and 1) used to define
+low-value regions in the data. Positions are selected among values below
+this quantile.}
 
-\item{x_max}{Optional. A numeric value (positive) used to restrict the x-axis range
-considered in the calculation.}
+\item{x_max}{Optional. A numeric value (positive) used to restrict the
+x-axis range considered in the calculation.}
 }
 \value{
 A list with two elements:
@@ -54,6 +58,7 @@ The function first aligns all datasets over a common x-axis and sums the
 corresponding y-values. It then excludes edge regions based on \code{margin}
 and identifies candidate positions where the combined y-values fall below
 a specified quantile (\code{low_quantile}). Among these, the rightmost
-candidate is selected. If no candidates are found, the global minimum is used.
+candidate is selected. If no candidates are found, the global minimum is
+used.
 }
 \keyword{internal}

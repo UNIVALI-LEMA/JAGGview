@@ -16,7 +16,7 @@ Supported values are "I" (index) and "SE2" (variance).}
 A data frame containing year, scenario, and extracted variables.
 }
 \description{
-Internal helper that extracts scenario-specific variables from a list
-of model outputs and combines them into a single data frame.
+Internal helper that extracts scenario-specific variables from a list of
+model outputs and combines them into a single data frame.
 }
 \keyword{internal}

@@ -1,8 +1,8 @@
 #' Prepare retrospective analysis data
 #'
-#' Processes retrospective model outputs to generate time series data,
-#' surplus production curves, and retrospective bias metrics (rho)
-#' for multiple scenarios and indices.
+#' Processes retrospective model outputs to generate time series data, surplus 
+#' production curves, and retrospective bias metrics (rho) for multiple 
+#' scenarios and indices.
 #'
 #' @param list_hc_models A list containing retrospective model outputs as 
 #' returned by the JABBA function \code{JABBA::hindcast_jabba()}.
@@ -13,15 +13,14 @@
 #'   (e.g., B, F, B/Bmsy, F/Fmsy, and process error).}
 #'   \item{surplus_data}{A data frame containing surplus production
 #'   (MSY-related) data.}
-#'   \item{rho_data}{A data frame containing retrospective bias
-#'   estimates (rho) for each index and scenario.}
+#'   \item{rho_data}{A data frame containing retrospective bias estimates (rho) 
+#'   for each index and scenario.}
 #' }
 #'
 #' @details
-#' The function extracts retrospective runs, filters relevant indices,
-#' and structures the data for visualization. It also computes logical
-#' filters for valid retrospective years and includes surplus production
-#' and rho diagnostics.
+#' The function extracts retrospective runs, filters relevant indices, and 
+#' structures the data for visualization. It also computes logical filters for 
+#' valid retrospective years and includes surplus production and rho diagnostics.
 #'
 #' @examples
 #' \dontrun{
@@ -104,26 +103,29 @@ retrospective_analysis_data <- function(list_hc_models) {
 
 #' Plot retrospective analysis results
 #'
-#' Creates a ggplot2-based visualization of retrospective analyses,
-#' including time series of key indices and surplus production curves,
-#' along with retrospective bias (rho) annotations.
+#' Creates a ggplot2-based visualization of retrospective analyses, including 
+#' time series of key indices and surplus production curves, along with 
+#' retrospective bias (rho) annotations.
 #'
 #' @param df_lists A named list as returned by
 #'   \code{retrospective_analysis_data()}.
 #' @param indicator_name A character string specifying the name of the 
 #'   indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 #'   "procB", and "MSY".
-#' @param title_y A character string for the y-axis label. If \code{NULL},
-#'   a default label is assigned based on \code{indicator_name}.
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param text_size An integer value that determines the size of the text. 
+#'   Defaults to 4.
+#' @param title_y A character string for the y-axis label. If \code{NULL}, a 
+#'   default label is assigned based on \code{indicator_name}.
 #'
-#' @return A ggplot object displaying retrospective trajectories,
-#'   confidence intervals (when applicable), and rho annotations.
+#' @return A ggplot object displaying retrospective trajectories, credibility 
+#' intervals (when applicable), and rho annotations.
 #'
 #' @details
-#' For standard indices, the plot shows time series with confidence
-#' ribbons and retrospective trajectories. For "MSY", the plot displays
-#' surplus production curves as a function of biomass. Results are
-#' faceted by scenario.
+#' For standard indices, the plot shows time series with credibility ribbons 
+#' and retrospective trajectories. For "MSY", the plot displays surplus 
+#' production curves as a function of biomass. Results are faceted by scenario.
 #'
 #' @examples
 #' \dontrun{
@@ -132,15 +134,20 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_line aes geom_ribbon geom_text facet_wrap
-#' scale_colour_manual scale_y_continuous labs theme element_text
+#' @importFrom ggplot2 ggplot geom_line aes geom_ribbon facet_wrap
+#' scale_colour_manual scale_y_continuous labs theme element_text geom_text
 #' @importFrom JABBA ss3col
-retrospective_analysis_ggplot <- function(df_lists, indicator_name, title_y = NULL) {
+retrospective_analysis_ggplot <- function(
+  df_lists, indicator_name, text_size = 4, use_si_suffix = FALSE, title_y = NULL
+) {
   if(!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
   if(!indicator_name %in% c("B", "F", "BBmsy", "FFmsy", "procB", "MSY")) {
-    stop("Parameter 'indicator_name' was expecting 'B', 'F', 'BBmsy', 'FFmsy', 'procB' or 'MSY'.")
+    stop(paste0(
+      "Parameter 'indicator_name' was expecting 'B', 'F', 'BBmsy', 'FFmsy', ",
+      "'procB' or 'MSY'."
+    ))
   }
 
   if (indicator_name != "MSY") {
@@ -183,7 +190,8 @@ retrospective_analysis_ggplot <- function(df_lists, indicator_name, title_y = NU
       data_list = data_ref,
       col_x = "Year",
       col_y = "uci",
-      ylim = ylim
+      ylim = ylim,
+      margin = 0.15
     )
   } else {
     max_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE, 1.1)
@@ -193,11 +201,26 @@ retrospective_analysis_ggplot <- function(df_lists, indicator_name, title_y = NU
       data_list = data_lines,
       col_x = "SB_i",
       col_y = "SP",
-      ylim = ylim
+      ylim = ylim,
+      margin = 0.2
     )
+    max_x_val <- .round_to_nearest(max(data_var$SB_i, na.rm = TRUE), TRUE, 1.1)
+    x_decimals <- ifelse(max_x_val > 10, 0, 1)
+    x_labels <- if (use_si_suffix) {
+      function(x) .international_system_prefixes(x)
+    } else {
+      function(x) .format_number(x, decimals = x_decimals)
+    }
   }
 
+
   y_decimals <- ifelse(max_val > 10, 0, 1)
+
+  y_labels <- if (use_si_suffix) {
+    function(x) .international_system_prefixes(x)
+  } else {
+    function(x) .format_number(x, decimals = y_decimals)
+  }
   
   p <- ggplot()
   
@@ -233,44 +256,57 @@ retrospective_analysis_ggplot <- function(df_lists, indicator_name, title_y = NU
       )
   }
   
-  p +
+  p <- p +
     geom_text(
       data = rho_var,
       aes(x = pos$x, y = pos$y,
         label = paste0("rho == ", round(rho, 3))), 
-        parse = TRUE
+        parse = TRUE,
+        size = text_size
     ) +
     facet_wrap(~Scenario, ncol = 3, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
     scale_y_continuous(
       expand = c(0, 0), 
       limits = ylim, 
-      labels = function(x) .format_number(x, decimals = y_decimals)
-    ) +
+      labels = y_labels
+    )
+  
+  if (indicator_name == "MSY") {
+    p <- p +
+      scale_x_continuous(labels = x_labels)
+  }
+  
+  p <- p +
     labs(x = title_x, y = title_y, colour = "") +
     .my_theme() +
     theme(
-      legend.position = "right",
+      legend.position = "bottom",
       legend.justification = c(0, 1),
       legend.text = element_text(size = 12)
     )
+  p
 }
 
 #' Extract rho data from retrospective analysis results
 #' 
 #' Retrieves the data frame containing rho (retrospective bias metrics) values
-#' for all indices and scenarios, as returned by \code{hindcast_data()}.
+#' for all indices and scenarios, as returned by 
+#' \code{retrospective_analysis_data()}.
 #' 
-#' @param df_lists A named list object returned by \code{hindcast_data()}, which 
-#'   must contain a component named \code{"rho_data"}.
+#' @param df_lists A named list object returned by 
+#'   \code{retrospective_analysis_data()}, which must contain a component named 
+#'   \code{"rho_data"}.
 #' 
 #' @return A data frame where each row represents a combination of scenario and
 #'   index, typically including the following columns:
 #' \describe{
 #'   \item{Scenario}{Scenario identifier}
-#'   \item{Index}{Short name of the indicator (e.g., \code{B}, \code{F}, \code{BBmsy})}
+#'   \item{Index}{Short name of the indicator (e.g., \code{B}, \code{F}, 
+#'   \code{BBmsy})}
 #'   \item{Index2}{Descriptive name of the indicator}
-#'   \item{rho}{Numeric value representing retrospective bias for the given index}
+#'   \item{rho}{Numeric value representing retrospective bias for the given 
+#'   index}
 #' }
 #' 
 #' @details
@@ -289,8 +325,8 @@ get_rho <- function(df_lists) {
 
 #' Extract retrospective time series
 #'
-#' Internal helper that extracts time series data from retrospective
-#' model runs and reshapes them into a combined data frame.
+#' Internal helper that extracts time series data from retrospective model runs 
+#' and reshapes them into a combined data frame.
 #'
 #' @param hc_list A list of retrospective model outputs.
 #'
@@ -321,8 +357,8 @@ get_rho <- function(df_lists) {
 
 #' Extract surplus production data
 #'
-#' Internal helper that extracts surplus production function outputs
-#' from retrospective model runs.
+#' Internal helper that extracts surplus production function outputs from 
+#' retrospective model runs.
 #'
 #' @param hc_list A list of retrospective model outputs.
 #'
@@ -354,8 +390,8 @@ get_rho <- function(df_lists) {
 
 #' Extract retrospective bias (rho) values
 #'
-#' Internal helper that computes retrospective bias statistics (rho)
-#' using JABBA outputs.
+#' Internal helper that computes retrospective bias statistics (rho) using 
+#' JABBA outputs.
 #'
 #' @param hc_list A list of retrospective model outputs.
 #'
@@ -370,7 +406,9 @@ get_rho <- function(df_lists) {
     function(hc) {
       cbind.data.frame(
         Scenario = names(hc[1]),
-        .extract_rhos(.jbplot_retro2(hc, verbose = FALSE, rhoout = TRUE, plot = FALSE))
+        .extract_rhos(
+          .jbplot_retro2(hc, verbose = FALSE, rhoout = TRUE, plot = FALSE)
+        )
       )
     }
   )
@@ -379,7 +417,7 @@ get_rho <- function(df_lists) {
 
 #' Format rho values into a data frame
 #'
-#' Internal helper that converts rho outputs into a structured
+#' Internal helper that converts rho outputs into a structured 
 #' data frame with index labels.
 #'
 #' @param rho A matrix or data frame containing rho values.

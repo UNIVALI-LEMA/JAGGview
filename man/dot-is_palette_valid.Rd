@@ -18,7 +18,7 @@ Checks whether all elements in a character vector are valid R colors.
 }
 \details{
 The function attempts to convert the provided values using
-\code{grDevices::col2rgb()}. If any element is not a valid color, an error is
-raised.
+\code{grDevices::col2rgb()}. If any element is not a valid color, an error
+is raised.
 }
 \keyword{internal}

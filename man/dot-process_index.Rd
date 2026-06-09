@@ -13,7 +13,7 @@
 A character vector containing unique index names across models.
 }
 \description{
-Internal helper that extracts CPUE index names from the input series
-of each model in the list and returns the unique set of indices.
+Internal helper that extracts CPUE index names from the input series of each
+model in the list and returns the unique set of indices.
 }
 \keyword{internal}

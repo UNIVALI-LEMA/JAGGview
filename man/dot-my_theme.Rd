@@ -24,7 +24,7 @@
 A ggplot2 theme object.
 }
 \description{
-Internal helper that defines a customized ggplot2 theme used
-across plots in the package.
+Internal helper that defines a customized ggplot2 theme used across plots in
+the package.
 }
 \keyword{internal}

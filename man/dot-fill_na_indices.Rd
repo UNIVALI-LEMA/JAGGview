@@ -15,7 +15,7 @@
 The input data frame with missing Index values filled.
 }
 \description{
-Internal helper that replaces missing values in the Index column
-using the set of expected indices from the input series.
+Internal helper that replaces missing values in the Index column using the
+set of expected indices from the input series.
 }
 \keyword{internal}

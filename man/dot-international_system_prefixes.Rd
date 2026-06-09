@@ -4,18 +4,18 @@
 \alias{.international_system_prefixes}
 \title{International System of Prefixes}
 \usage{
-.international_system_prefixes(number, decimals = 2)
+.international_system_prefixes(number, decimals = NULL)
 }
 \arguments{
 \item{number}{A numeric value (or a numeric vector of values) to be
 formated using SI prefixes.}
 
-\item{decimals}{An integer indicating the number of decimals places
-to display in the formatted string. Defaults to 2.}
+\item{decimals}{Optional. An integer indicating the number of decimals places to
+display in the formatted string.}
 }
 \value{
-A character value (or a character vector of values)
-appended with their corresponding SI unit symbol.
+A character value (or a character vector of values) appended with
+their corresponding SI unit symbol.
 }
 \description{
 International System of Prefixes

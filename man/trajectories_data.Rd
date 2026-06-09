@@ -24,8 +24,8 @@ A data.frame containing:
 }
 }
 \description{
-This function computes summary statistics (median and quantiles)
-for selected variables from model outputs, grouped by year and scenario.
+Computes summary statistics (median and quantiles) selected variables from
+model outputs, grouped by year and scenario.
 }
 \details{
 The function maps user-friendly indicator_name names to:

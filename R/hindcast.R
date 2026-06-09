@@ -92,21 +92,22 @@ hindcast_data <- function(list_hc_models) {
 
 #' Plot hindcast diagnostics
 #'
-#' Creates a ggplot2-based visualization of hindcast diagnostics,
-#' including observed and predicted values, uncertainty intervals,
-#' and model performance metrics (MASE).
+#' Creates a ggplot2-based visualization of hindcast diagnostics, including 
+#' observed and predicted values, uncertainty intervals, and model performance 
+#' metrics (MASE).
 #'
-#' @param df_lists A named list as returned by
-#'   \code{hindcast_data()}.
+#' @param df_lists A named list as returned by \code{hindcast_data()}.
+#' @param text_size An integer value that determines the size of the text. 
+#'   Defaults to 4.
 #'
-#' @return A ggplot object displaying hindcast trajectories, observed
-#'   data points, uncertainty ribbons, and MASE annotations, faceted
-#'   by scenario and index.
+#' @return A ggplot object displaying hindcast trajectories, observed data 
+#'   points, uncertainty ribbons, and MASE annotations, faceted by scenario and 
+#'   index.
 #'
 #' @details
-#' The plot includes confidence ribbons for reference runs, hindcast
-#' trajectories, observed and predicted points, and annotations of
-#' MASE values. Results are faceted by scenario and index.
+#' The plot includes credibility ribbons for reference runs, hindcast
+#' trajectories, observed and predicted points, and annotations of MASE values. 
+#' Results are faceted by scenario and index.
 #'
 #' @examples
 #' \dontrun{
@@ -120,7 +121,7 @@ hindcast_data <- function(list_hc_models) {
 #' theme guides guide_legend
 #' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
-hindcast_ggplot <- function(df_lists) {
+hindcast_ggplot <- function(df_lists, text_size = 4) {
   if(!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -140,7 +141,8 @@ hindcast_ggplot <- function(df_lists) {
         aes(x = year,
             ymin = hat.lci, ymax = hat.uci),
         fill = "gray80") +
-    geom_ribbon(data = filter(df_lists$data, retro.peels == 0, year < df_lists$min_year_retro),
+    geom_ribbon(data = filter(df_lists$data, retro.peels == 0, 
+                              year < df_lists$min_year_retro),
                 aes(x = year, ymin = hat.lci, ymax = hat.uci),
                 fill = "gray30", alpha = 0.5) +
     geom_line(data = filter(df_lists$data, hindcast == FALSE),
@@ -148,7 +150,8 @@ hindcast_ggplot <- function(df_lists) {
     geom_line(data = df_lists$hindcast_data_2,
               aes(x = year, y = hat, group = retro.peels),
               linewidth = 1, colour = "white") +
-    geom_point(data = filter(df_lists$data, retro.peels == 0, year < df_lists$min_year_retro),
+    geom_point(data = filter(df_lists$data, retro.peels == 0, 
+                            year < df_lists$min_year_retro),
                aes(x = year, y = obs), pch = 21, size = 4,
                fill = "white") +
     geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
@@ -159,9 +162,11 @@ hindcast_ggplot <- function(df_lists) {
                pch = 21, size = 2) +
     geom_text(data = df_lists$mase_data,
               aes(x = pos$x, y = pos$y,
-                  label = paste0("MASE = ", round(MASE, 3)))) +
+                  label = paste0("MASE = ", round(MASE, 3))), 
+                  size = text_size) +
     labs(x = "Year", y = "Index", colour = "") +
-    facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), drop = FALSE) +
+    facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
+              drop = FALSE) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
@@ -194,8 +199,8 @@ get_mase <- function(df_lists) {
 
 #' Extract hindcast diagnostics from model outputs
 #'
-#' Internal helper that extracts hindcast diagnostic data from model
-#' outputs and combines them into a single data frame.
+#' Internal helper that extracts hindcast diagnostic data from model outputs 
+#' and combines them into a single data frame.
 #'
 #' @param fit_list A list of model outputs.
 #'
@@ -227,8 +232,8 @@ get_mase <- function(df_lists) {
 #' Filter data based on conditional transitions
 #'
 #' Internal helper that filters grouped data by identifying the first
-#' occurrence of a logical condition and returning selected rows around
-#' that transition.
+#' occurrence of a logical condition and returning selected rows around that 
+#' transition.
 #'
 #' @param df A data frame.
 #' @param group_col A character string specifying the grouping column.
@@ -259,16 +264,16 @@ get_mase <- function(df_lists) {
 
 #' Compute MASE diagnostics
 #'
-#' Internal helper that computes Mean Absolute Scaled Error (MASE)
-#' metrics from model outputs.
+#' Internal helper that computes Mean Absolute Scaled Error (MASE) metrics from 
+#' model outputs.
 #'
 #' @param fit_list A list of model outputs.
 #'
-#' @return A data frame containing MASE values for each scenario,
-#'   including plotting coordinates.
+#' @return A data frame containing MASE values for each scenario, including 
+#' plotting coordinates.
 #'
 #' @keywords internal
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr bind_rows everything
 #' @importFrom JABBA jbmase
 .process_mase <- function(fit_list) {
   temp00 <- lapply(
@@ -280,6 +285,8 @@ get_mase <- function(df_lists) {
         )
     }
   )
-  result <- bind_rows(temp00) %>% filter(Index != "joint")
+  result <- bind_rows(temp00) %>% 
+    filter(Index != "joint") %>%
+    select(Scenario, everything())
   return(result)
 }

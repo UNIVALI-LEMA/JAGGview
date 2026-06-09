@@ -13,7 +13,7 @@
 A data frame containing surplus production data.
 }
 \description{
-Internal helper that extracts surplus production function outputs
-from retrospective model runs.
+Internal helper that extracts surplus production function outputs from
+retrospective model runs.
 }
 \keyword{internal}

@@ -20,16 +20,15 @@ A named list with the following elements:
 }
 }
 \description{
-Processes model outputs to generate prior and posterior distributions
-for key parameters (e.g., K, r, psi), along with summary metrics for
+Processes model outputs to generate prior and posterior distributions for
+key parameters (e.g., K, r, psi), along with summary metrics for
 prior-posterior comparisons.
 }
 \details{
-Prior distributions are simulated using log-normal and gamma
-distributions based on model settings, while posterior distributions
-are estimated using kernel density methods. Summary metrics (PPVR and
-PPMR) are computed to assess the influence of priors on posterior
-estimates.
+Prior distributions are simulated using log-normal and gamma distributions
+based on model settings, while posterior distributions are estimated using
+kernel density methods. Summary metrics (PPVR and PPMR) are computed to
+assess the influence of priors on posterior estimates.
 }
 \examples{
 \dontrun{

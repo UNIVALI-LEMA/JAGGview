@@ -16,11 +16,11 @@
 \item{decimal.mark}{Decimal separator.}
 }
 \value{
-A character value (or a chracter vector value) with
-formatted numbers.
+A character value (or a chracter vector value) with formatted
+numbers.
 }
 \description{
-Internal helper that formats numeric values with a specified number
-of decimal places and custom thousands and decimal separators.
+Internal helper that formats numeric values with a specified number of
+decimal places and custom thousands and decimal separators.
 }
 \keyword{internal}

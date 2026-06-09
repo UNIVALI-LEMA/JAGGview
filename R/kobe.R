@@ -1,13 +1,13 @@
 #' Prepare data for Kobe plot visualization
 #'
-#' Computes biomass and fishing mortality ratios and prepares all
-#' required components to build a Kobe plot, including confidence
-#' contours and reference quadrants.
+#' Computes biomass and fishing mortality ratios and prepares all required 
+#' components to build a Kobe plot, including credibility contours and 
+#' reference quadrants.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
-#' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by 
-#' the JABBA function \code{JABBA::jbplot_ensemble()}.
+#' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by the JABBA 
+#' function \code{JABBA::jbplot_ensemble()}.
 #' @param ci_levels A numeric vector containing the CI values between 0 and 1.
 #' Deafults to 0.5, 0.8, 0.95
 #'
@@ -30,13 +30,12 @@
 #' }
 #'
 #' @details
-#' The function computes median biomass (B/Bmsy) and fishing mortality
-#' (F/Fmsy) ratios by year and scenario, and estimates kernel density
-#' contours for the terminal year using \code{gplots::ci2d}. These
-#' contours represent uncertainty regions commonly displayed in Kobe plots.
+#' The function computes median biomass (B/Bmsy) and fishing mortality (F/Fmsy) 
+#' ratios by year and scenario, and estimates kernel density contours for the 
+#' terminal year using \code{gplots::ci2d}. These contours represent 
+#' uncertainty regions commonly displayed in Kobe plots.
 #'
-#' The output is designed to be used directly with
-#' \code{kobe_ggplot()}.
+#' The output is designed to be used directly with \code{kobe_ggplot()}.
 #'
 #' @examples
 #' \dontrun{
@@ -165,9 +164,9 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 
 #' Plot Kobe diagram
 #'
-#' Creates a Kobe plot showing the status of fish stocks in terms of
-#' biomass (B/Bmsy) and fishing mortality (F/Fmsy), including
-#' uncertainty contours and temporal trajectories.
+#' Creates a Kobe plot showing the status of fish stocks in terms of biomass 
+#' (B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and 
+#' temporal trajectories.
 #'
 #' @param df_lists A list as returned by \code{kobe_data()}.
 #'
@@ -192,10 +191,9 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline 
-#' geom_polygon geom_path geom_point facet_wrap scale_y_continuous
-#' scale_x_continuous scale_shape_manual scale_fill_manual labs
-#' coord_cartesian theme
+#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline geom_polygon 
+#' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
+#' scale_shape_manual scale_fill_manual labs coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(df_lists) {
   if(!inherits(df_lists, "JAGGdata")) {

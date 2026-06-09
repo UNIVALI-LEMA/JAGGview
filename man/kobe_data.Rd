@@ -9,8 +9,8 @@ kobe_data(list_fit_models, ci_levels = c(0.5, 0.8, 0.95))
 \arguments{
 \item{list_fit_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.
-\code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by
-the JABBA function \code{JABBA::jbplot_ensemble()}.}
+\code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by the JABBA
+function \code{JABBA::jbplot_ensemble()}.}
 
 \item{ci_levels}{A numeric vector containing the CI values between 0 and 1.
 Deafults to 0.5, 0.8, 0.95}
@@ -35,18 +35,17 @@ highlighting points.}
 }
 }
 \description{
-Computes biomass and fishing mortality ratios and prepares all
-required components to build a Kobe plot, including confidence
-contours and reference quadrants.
+Computes biomass and fishing mortality ratios and prepares all required
+components to build a Kobe plot, including credibility contours and
+reference quadrants.
 }
 \details{
-The function computes median biomass (B/Bmsy) and fishing mortality
-(F/Fmsy) ratios by year and scenario, and estimates kernel density
-contours for the terminal year using \code{gplots::ci2d}. These
-contours represent uncertainty regions commonly displayed in Kobe plots.
+The function computes median biomass (B/Bmsy) and fishing mortality (F/Fmsy)
+ratios by year and scenario, and estimates kernel density contours for the
+terminal year using \code{gplots::ci2d}. These contours represent
+uncertainty regions commonly displayed in Kobe plots.
 
-The output is designed to be used directly with
-\code{kobe_ggplot()}.
+The output is designed to be used directly with \code{kobe_ggplot()}.
 }
 \examples{
 \dontrun{

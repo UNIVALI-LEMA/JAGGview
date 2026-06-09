@@ -2,7 +2,7 @@
 % Please edit documentation in R/fits.R
 \name{fits_ggplot}
 \alias{fits_ggplot}
-\title{Plot fitted indices with confidence intervals}
+\title{Plot fitted indices with credibility intervals}
 \usage{
 fits_ggplot(
   df_lists,
@@ -22,21 +22,21 @@ Defaults to "#4285f4".}
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Abundance index".}
 
-\item{max_col}{Optional. A numeric value that limit the number
-of plots per line.}
+\item{max_col}{Optional. A numeric value that limit the number of plots per
+line.}
 }
 \value{
-A ggplot object displaying fitted indices with uncertainty
-ribbons, error bars, and observed values, faceted by scenario and index.
+A ggplot object displaying fitted indices with uncertainty ribbons,
+error bars, and observed values, faceted by scenario and index.
 }
 \description{
 Creates a ggplot2-based visualization of fitted abundance indices,
-including mean values and confidence intervals (80\% and 95\%).
+including mean values and credibility intervals (80\% and 95\%).
 }
 \details{
-The plot includes ribbons representing 80\% and 95\% confidence
-intervals, a fitted line, observed points with error bars, and
-faceting by scenario and index.
+The plot includes ribbons representing 80\% and 95\% credibility intervals, a
+fitted line, observed points with error bars, and faceting by scenario and
+index.
 }
 \examples{
 \dontrun{

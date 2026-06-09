@@ -8,8 +8,8 @@ get_ppmr(df_lists)
 }
 \arguments{
 \item{df_lists}{A named list object returned by
-\code{priors_posteriors_data()}, which must contain a component
-named \code{"PPMR"}.}
+\code{priors_posteriors_data()}, which must contain a component named
+\code{"PPMR"}.}
 }
 \value{
 A data frame with the following structure:
@@ -19,12 +19,12 @@ A data frame with the following structure:
 }
 }
 \description{
-Retrieves the data frame containing PPMR (Posterior Probability of
-Metric exceeding a reference) values for all indicators and scenarios,
-as returned by \code{priors_posteriors_data()}.
+Retrieves the data frame containing PPMR (Posterior Probability of Metric
+exceeding a reference) values for all indicators and scenarios, as returned
+by \code{priors_posteriors_data()}.
 }
 \details{
-The returned data frame is in wide format, with one row per scenario and
-one column per indicator. This function is a convenience accessor for
-extracting PPMR results for further analysis or visualization.
+The returned data frame is in wide format, with one row per scenario and one
+column per indicator. This function is a convenience accessor for extracting
+PPMR results for further analysis or visualization.
 }

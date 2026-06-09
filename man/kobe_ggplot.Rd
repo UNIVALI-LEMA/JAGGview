@@ -13,9 +13,9 @@ kobe_ggplot(df_lists)
 A ggplot object representing the Kobe plot, faceted by scenario.
 }
 \description{
-Creates a Kobe plot showing the status of fish stocks in terms of
-biomass (B/Bmsy) and fishing mortality (F/Fmsy), including
-uncertainty contours and temporal trajectories.
+Creates a Kobe plot showing the status of fish stocks in terms of biomass
+(B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and
+temporal trajectories.
 }
 \details{
 The plot includes:

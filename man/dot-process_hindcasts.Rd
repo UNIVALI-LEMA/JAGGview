@@ -13,7 +13,7 @@
 A data frame containing hindcast diagnostics across scenarios.
 }
 \description{
-Internal helper that extracts hindcast diagnostic data from model
-outputs and combines them into a single data frame.
+Internal helper that extracts hindcast diagnostic data from model outputs
+and combines them into a single data frame.
 }
 \keyword{internal}

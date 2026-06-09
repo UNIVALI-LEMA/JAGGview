@@ -9,16 +9,15 @@
 \arguments{
 \item{data}{A data frame to be formatted as a \pkg{gt} table.}
 
-\item{digits}{A integer indicating the number of decimals places
-to display.}
+\item{digits}{A integer indicating the number of decimals places to display.}
 }
 \value{
 A formatted \code{gt} table object with bold column labels and alternating
 row background colors.
 }
 \description{
-Internal helper function used to generate consistently formatted
-\pkg{gt} tables across package outputs.
+Internal helper function used to generate consistently formatted \pkg{gt}
+tables across package outputs.
 }
 \details{
 This function applies a default visual style to tables, including bold

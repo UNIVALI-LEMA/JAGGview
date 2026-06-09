@@ -1,24 +1,24 @@
-#' Prepare fitted index data and confidence intervals
+#' Prepare fitted index data and credibility intervals
 #'
 #' Processes model outputs to generate formatted data for fitted indices_factor,
-#' including mean values and confidence intervals (80% and 95%).
+#' including mean values and credibility intervals (80% and 95%).
 #'
-#' This function extracts index and uncertainty information from a list
-#' of model results, computes upper and lower confidence bounds, and
-#' organizes the data for downstream visualization.
+#' Extracts index and uncertainty information from a list of model results, 
+#' computes upper and lower credibility bounds, and organizes the data for 
+#' downstream visualization.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
-#' @param indices_factor Optional. A vector of indices_factor to include. Must exist
-#'  in the \code{Index} column.
+#' @param indices_factor Optional. A vector of indices_factor to include. Must 
+#' exist in the \code{Index} column.
 #'
 #' @return A named list with three elements:
 #' \describe{
 #'   \item{Li_Ui}{A data frame containing mean values and lower (Li) and
-#'   upper (Ui) confidence bounds.}
-#'   \item{CI_80}{A data frame containing fitted values and 80% confidence
+#'   upper (Ui) credibility bounds.}
+#'   \item{CI_80}{A data frame containing fitted values and 80% credibility
 #'   intervals.}
-#'   \item{CI_95}{A data frame containing fitted values and 95% confidence
+#'   \item{CI_95}{A data frame containing fitted values and 95% credibility
 #'   intervals.}
 #' }
 #'
@@ -27,7 +27,7 @@
 #' standard errors (\code{SE2}), and fitted values (\code{ppd} and \code{hat}).
 #' Missing values are handled using reference index data when necessary.
 #'
-#' Confidence intervals for \code{Li_Ui} are computed assuming normality,
+#' Credibility intervals for \code{Li_Ui} are computed assuming normality,
 #' using a multiplier of 1.96 applied to the standard error.
 #'
 #' If \code{indices_factor} is provided, the results are filtered and reordered
@@ -73,7 +73,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   )
   tmp00 <- full_join(tmp01, tmp02)
 
-  if(!is.null(indices_factor)) .validate_indices(unique(tmp00$Index), indices_factor)
+  if(!is.null(indices_factor)) {
+    .validate_indices(unique(tmp00$Index), indices_factor)
+  }
 
   ####@> Estimating Upper and Lower errors...
   tmp00$error <- with(tmp00, (1.96 * sqrt(SE)))
@@ -91,7 +93,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   ####@> Fit (CI 80%)...
   tmp03 <- .process_cpues(list_fit_models, vars = "ppd")
 
-  if(!is.null(indices_factor)) .validate_indices(unique(tmp03$Index), indices_factor)
+  if(!is.null(indices_factor)) {
+    .validate_indices(unique(tmp03$Index), indices_factor)
+  }
 
   if(any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
 
@@ -102,7 +106,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   ####@> Fit (CI 95%)...
   tmp04 <- .process_cpues(list_fit_models, vars = "hat")
 
-  if(!is.null(indices_factor)) .validate_indices(unique(tmp04$Index), indices_factor)
+  if(!is.null(indices_factor)) {
+    .validate_indices(unique(tmp04$Index), indices_factor)
+  }
 
   if(any(is.na(tmp04$Index))) .fill_na_indices(tmp04, index_inputseries)
 
@@ -124,10 +130,10 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   return(results)
 }
 
-#' Plot fitted indices with confidence intervals
+#' Plot fitted indices with credibility intervals
 #'
 #' Creates a ggplot2-based visualization of fitted abundance indices,
-#' including mean values and confidence intervals (80% and 95%).
+#' including mean values and credibility intervals (80% and 95%).
 #'
 #' @param df_lists A named list of data frames as returned by
 #'   \code{fits_data()}. It must contain the elements \code{Li_Ui},
@@ -136,16 +142,16 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'   Defaults to "#4285f4".
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Abundance index".
-#' @param max_col Optional. A numeric value that limit the number
-#'   of plots per line.
+#' @param max_col Optional. A numeric value that limit the number of plots per 
+#'   line.
 #'
-#' @return A ggplot object displaying fitted indices with uncertainty
-#'   ribbons, error bars, and observed values, faceted by scenario and index.
+#' @return A ggplot object displaying fitted indices with uncertainty ribbons, 
+#'   error bars, and observed values, faceted by scenario and index.
 #'
 #' @details
-#' The plot includes ribbons representing 80% and 95% confidence
-#' intervals, a fitted line, observed points with error bars, and
-#' faceting by scenario and index.
+#' The plot includes ribbons representing 80% and 95% credibility intervals, a 
+#' fitted line, observed points with error bars, and faceting by scenario and 
+#' index.
 #'
 #' @examples
 #' \dontrun{
@@ -182,7 +188,7 @@ fits_ggplot <- function(
     }
   }
 
-  p <- ggplot() +
+  ggplot() +
     geom_ribbon(data = df_lists$CI_80,
         aes(x = Year, ymin = lci, ymax = uci),
         alpha = 0.3, fill = palette[1]) +
@@ -195,29 +201,20 @@ fits_ggplot <- function(
                   aes(x = Year, ymin = Li, ymax = Ui)) +
     geom_point(data = df_lists$Li_Ui,
         aes(x = Year, y = Mean),
-        pch = 21, fill = "white", size = 1.5) 
-  if (n_scenarios == 1) {
-    p <- p + 
-      facet_wrap(~ interaction(Index, Scenario, sep = " - "), scales = "free_x", ncol = max_col)
-  } 
-  else {
-    p <- p + 
-      facet_grid(Scenario ~ Index, scales = "free")
-  }
-    p <- p +
+        pch = 21, fill = "white", size = 1.5) + 
+    facet_grid(Scenario ~ Index, scales = "free") +
     scale_y_continuous(limits = c(min_val, max_val)) +
     labs(x = "Year", y = title_y) +
     .my_theme()
-  p
 }
 
 #' Extract and combine scenario-level data
 #'
-#' Internal helper that extracts scenario-specific variables from a list
-#' of model outputs and combines them into a single data frame.
+#' Internal helper that extracts scenario-specific variables from a list of 
+#' model outputs and combines them into a single data frame.
 #'
 #' @param fit_list A list of model outputs.
-#' @param vars A character string indicating which variable to extract.
+#' @param vars A character string indicating which variable to extract. 
 #'   Supported values are "I" (index) and "SE2" (variance).
 #'
 #' @return A data frame containing year, scenario, and extracted variables.
@@ -246,8 +243,8 @@ fits_ggplot <- function(
 
 #' Fill missing index values
 #'
-#' Internal helper that replaces missing values in the Index column
-#' using the set of expected indices from the input series.
+#' Internal helper that replaces missing values in the Index column using the 
+#' set of expected indices from the input series.
 #'
 #' @param data A data frame containing an Index column.
 #' @param index_inputseries A character vector with expected index names.
@@ -264,8 +261,8 @@ fits_ggplot <- function(
 
 #' Extract index names from model inputs
 #'
-#' Internal helper that extracts CPUE index names from the input series
-#' of each model in the list and returns the unique set of indices.
+#' Internal helper that extracts CPUE index names from the input series of each 
+#' model in the list and returns the unique set of indices.
 #'
 #' @param fit_list A list of model outputs.
 #'
@@ -281,9 +278,9 @@ fits_ggplot <- function(
 
 #' Extract and combine CPUE data
 #'
-#' Internal helper that extracts CPUE-related outputs from a list of
-#' model results, converts array-based data into data frames, and
-#' combines them into a single structure.
+#' Internal helper that extracts CPUE-related outputs from a list of model 
+#' results, converts array-based data into data frames, and combines them into 
+#' a single structure.
 #'
 #' @param fit_list A list of model outputs.
 #' @param vars A character string indicating which CPUE output to extract.

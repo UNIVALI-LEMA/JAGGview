@@ -13,7 +13,7 @@
 A data frame containing rho values by index and scenario.
 }
 \description{
-Internal helper that computes retrospective bias statistics (rho)
-using JABBA outputs.
+Internal helper that computes retrospective bias statistics (rho) using
+JABBA outputs.
 }
 \keyword{internal}

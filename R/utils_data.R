@@ -320,8 +320,8 @@
 #'
 #' @details
 #' The function attempts to convert the provided values using 
-#' \code{grDevices::col2rgb()}. If any element is not a valid color, an error is 
-#' raised.
+#' \code{grDevices::col2rgb()}. If any element is not a valid color, an error 
+#' is raised.
 #'
 #' @keywords internal
 #' @importFrom grDevices col2rgb
@@ -730,7 +730,8 @@ get_refpts <- function(list_fit_models) {
         c(k, bmsy, fmsy, msy),
         ~ifelse(quant == "logse", exp(.x), .x)
       )
-    )
+    ) %>%
+    rename(Scenario = level)
 
   return(temp00)
 }

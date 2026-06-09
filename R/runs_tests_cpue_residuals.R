@@ -1,32 +1,31 @@
 #' Prepare runs test diagnostics data
 #'
 #' Processes model outputs to compute runs test diagnostics and residual
-#' structures for CPUE indices, including confidence limits and LOESS
+#' structures for CPUE indices, including credibility limits and LOESS
 #' smoothing.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
-#' JABBA function \code{JABBA::fit_jabba()}.
+#'   JABBA function \code{JABBA::fit_jabba()}.
 #' @param indices_factor Optional. A vector of indices to include. Must exist
-#'  in the \code{Index} column.
+#'   in the \code{Index} column.
 #'
 #' @return A named list with three elements:
 #' \describe{
 #'   \item{cpue_residuals}{A data frame containing residuals, fitted
-#'   LOESS values, and confidence bands.}
+#'   LOESS values, and credibility bands.}
 #'   \item{SE3}{A data frame containing runs test results, including
-#'   lower and upper confidence limits and p-values.}
+#'   lower and upper credibility limits and p-values.}
 #'   \item{RMSE_data}{A data frame with RMSE-related diagnostics.}
 #' }
 #'
 #' @details
-#' The function computes runs tests using \code{JABBA::jbruns_sig3}
-#' and classifies results based on statistical significance. Residuals
-#' are smoothed using LOESS, and confidence intervals are derived
-#' from the fitted model.
+#' The function computes runs tests using \code{JABBA::jbruns_sig3} and 
+#' classifies results based on statistical significance. Residuals are smoothed 
+#' using LOESS, and credibility intervals are derived from the fitted model.
 #' 
 #' If \code{indices_factor} is provided, the results are filtered and reordered
-#' accordingly. The function also ensures consistency across different
-#' model outputs and removes incomplete cases before returning results.
+#' accordingly. The function also ensures consistency across different model 
+#' outputs and removes incomplete cases before returning results.
 #'
 #' @examples
 #' \dontrun{
@@ -92,7 +91,9 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
     tmp05, names_to = "Index", values_to = "Res", indices
   ) 
 
-  if(!is.null(indices_factor)) .validate_indices(unique(tmp05$Index), indices_factor)
+  if(!is.null(indices_factor)) {
+    .validate_indices(unique(tmp05$Index), indices_factor)
+  }
   
   tmp05 <- tmp05 %>%
     filter(complete.cases(.)) %>%
@@ -132,23 +133,24 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 
 #' Plot runs test diagnostics
 #'
-#' Creates a ggplot2-based visualization of runs test diagnostics,
-#' including residuals, confidence limits, and p-values across
-#' scenarios and indices.
+#' Creates a ggplot2-based visualization of runs test diagnostics, including 
+#' residuals, credibility limits, and p-values across scenarios and indices.
 #'
 #' @param df_lists A named list as returned by \code{runs_tests_data()}.
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Residuals".
-#' @param max_col Optional. A numeric value that limit the number
-#'   of plots per line.
+#' @param text_size An integer value that determines the size of the text. 
+#'   Defaults to 4.
+#' @param max_col Optional. A numeric value that limit the number of plots per 
+#'   line.
 #'
-#' @return A ggplot object showing residuals, confidence regions,
-#'   and runs test results.
+#' @return A ggplot object showing residuals, credibility regions, and runs 
+#'   test results.
 #'
 #' @details
-#' The plot includes shaded regions representing confidence limits,
-#' residual segments, highlighted points based on threshold exceedance,
-#' and p-value annotations. Results are faceted by scenario and index.
+#' The plot includes shaded regions representing credibility limits, residual 
+#' segments, highlighted points based on threshold exceedance, and p-value 
+#' annotations. Results are faceted by scenario and index.
 #'
 #' @examples
 #' \dontrun{
@@ -157,9 +159,10 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_rect aes geom_text geom_hline geom_segment 
+#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
-runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
+runs_tests_ggplot <- function(
+  df_lists, title_y = "Residuals", text_size = 4, max_col = NULL) {
   if(!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -189,15 +192,15 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
       3
     }
   }
-
-  p <- ggplot() +
+  
+  ggplot() +
     geom_rect(data = df_lists$SE3,
               aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
                   fill = class),
               alpha = 0.2) +
     geom_text(data = df_lists$SE3,
         aes(x = pos$x, y = pos$y,
-          label = paste0("p-value = ", round(pvalue, 3)))) +
+          label = paste0("p-value = ", round(pvalue, 3))), size = text_size) +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
                  aes(x = Year, xend = Year, y = Ref, yend = Res)) +
@@ -206,22 +209,13 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
         pch = 21, size = 2) +
     geom_point(data = filter(df_lists$cpue_residuals, class == "red"),
         aes(x = Year, y = Res), fill = "red",
-        pch = 21, size = 2.5)
-  if(n_scenarios == 1) {
-    p <- p +
-      facet_wrap(~ interaction(Index, Scenario, sep = "-"), scales = "free_x", ncol = max_col)
-  }
-  else {
-    p <- p +
-      facet_grid(Scenario ~ Index, scales = "free")
-  }
-  p <- p +
+        pch = 21, size = 2.5) +
+      facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
     scale_y_continuous(limits = ylim) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
-  p
 }
 
 #' Plot CPUE residuals diagnostics
@@ -236,6 +230,8 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
 #'   Defaults to the vector \code{c("#4285f4", "#34a853", "#ea4335")}
 #' @param title_y A character string for the y-axis label. 
 #'   Defaults to "Residuals"
+#' @param text_size An integer value that determines the size of the text. 
+#'   Defaults to 4.
 #' 
 #' @return A ggplot object displaying CPUE residual diagnostics.
 #' 
@@ -244,23 +240,27 @@ runs_tests_ggplot <- function(df_lists, title_y = "Residuals", max_col = NULL) {
 #' and RMSE annotations for each scenario.
 #' 
 #' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
-#' geom_text facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual 
-#' labs theme
+#' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
+#' theme geom_text
 cpue_residuals_ggplot <- function(
-  df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), title_y = "Residuals"
+  df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), 
+  title_y = "Residuals", text_size = 4
 ) {
 
   .is_palette_valid(palette)
 
-  max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
-  min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+  max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), 
+                              TRUE)
+  min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), 
+                              FALSE)
   ylim <- c(min_val, max_val)
   
   pos <- .auto_text_position(
     data_list = df_lists$cpue_residuals,
     col_x = "Year",
     col_y = "Res",
-    ylim = ylim
+    ylim = ylim,
+    margin = 0.25
   )
   
   ggplot() +
@@ -275,7 +275,7 @@ cpue_residuals_ggplot <- function(
       aes(x = Year, y = Res), se = TRUE, colour = "black") +
     geom_text(data = df_lists$RMSE_data,
               aes(x = pos$x, y = pos$y,
-                  label = paste0("RMSE = ", Value, " %"))) +
+                  label = paste0("RMSE = ", Value, " %")), size = text_size) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
     scale_y_continuous(expand = c(0, 0), limits = ylim) +
     scale_fill_manual(values = palette) +
@@ -287,8 +287,8 @@ cpue_residuals_ggplot <- function(
 
 #' Extract and combine residuals data
 #' 
-#' Internal helper that extracts residuals from each model, converts
-#' them into a data frame format, and combines them across scenarios.
+#' Internal helper that extracts residuals from each model, converts them into 
+#' a data frame format, and combines them across scenarios.
 #'
 #' @param fit_list A list of model outputs.
 #'
@@ -314,8 +314,8 @@ cpue_residuals_ggplot <- function(
 
 #' Extract and combine model statistics
 #'
-#' Internal helper that extracts summary statistics from each model
-#' and combines them into a single data frame across scenarios.
+#' Internal helper that extracts summary statistics from each model and 
+#' combines them into a single data frame across scenarios.
 #'
 #' @param fit_list A list of model outputs.
 #'

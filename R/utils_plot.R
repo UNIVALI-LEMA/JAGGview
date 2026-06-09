@@ -1,12 +1,12 @@
 #' International System of Prefixes
 #' 
 #' @param number A numeric value (or a numeric vector of values) to be 
-#' formated using SI prefixes.
-#' @param decimals An integer indicating the number of decimals places
-#' to display in the formatted string. Defaults to 2. 
+#'   formated using SI prefixes.
+#' @param decimals Optional. An integer indicating the number of decimals places to 
+#'   display in the formatted string.  
 #' 
-#' @return A character value (or a character vector of values) 
-#' appended with their corresponding SI unit symbol.
+#' @return A character value (or a character vector of values) appended with 
+#'   their corresponding SI unit symbol.
 #' 
 #' @examples 
 #' \dontrun{
@@ -15,37 +15,49 @@
 #' }
 #' 
 #' @keywords internal
-.international_system_prefixes <- function(number, decimals = 2) {
-  breaks <- c(0, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9, Inf)
-  scales <- c(1e-9, 1e-6, 1e-3, 1, 1e3, 1e6, 1e9)
-  suffixes <- c("n", "\u00B5", "m", "", "k", "M", "G")
-
-  idx <- findInterval(abs(number), breaks, rightmost.closed = TRUE)
-
-  scale <- scales[idx]
-  suffix <- suffixes[idx]
-
-  value <- number / scale
+.international_system_prefixes <- function(number, decimals = NULL) {
+  format_single <- function(val) {
+    if (is.na(val) || val == 0) return("0")
+    
+    abs_val <- abs(val)
+    
+    if (abs_val >= 1e6) {
+      divisor <- 1e6
+      suffix  <- "M"
+    } else if (abs_val >= 1e3) {
+      divisor <- 1e3
+      suffix  <- "k"
+    } else {
+      divisor <- 1
+      suffix  <- ""
+    }
+    
+    scaled <- val / divisor
+    
+    dec <- if (is.null(decimals)) {
+      if (scaled == round(scaled)) 0 else 1
+    } else {
+      decimals
+    }
+    
+    paste0(format(round(scaled, dec), nsmall = dec, big.mark = ","), suffix)
+  }
   
-  formatted <- paste0(trimws(.format_number(value, decimals = decimals)), suffix)
-
-  formatted[number == 0] <- .format_number(0, decimals = 0)
-  
-  formatted
+  sapply(number, format_single)
 }
 
 #' Format numeric values with custom separators
 #'
-#' Internal helper that formats numeric values with a specified number
-#' of decimal places and custom thousands and decimal separators.
+#' Internal helper that formats numeric values with a specified number of 
+#' decimal places and custom thousands and decimal separators.
 #'
 #' @param number A numeric value (or a numeric vector value).
 #' @param decimals Number of decimal places.
 #' @param big.mark Thousands separator.
 #' @param decimal.mark Decimal separator.
 #'
-#' @return A character value (or a chracter vector value) with 
-#' formatted numbers.
+#' @return A character value (or a chracter vector value) with formatted 
+#'   numbers.
 #'
 #' @keywords internal
 .format_number <- function(
@@ -62,8 +74,8 @@
 
 #' Custom ggplot2 theme
 #'
-#' Internal helper that defines a customized ggplot2 theme used
-#' across plots in the package.
+#' Internal helper that defines a customized ggplot2 theme used across plots in 
+#' the package.
 #'
 #' @param base_size Base font size.
 #' @param base_family Base font family.
@@ -118,9 +130,9 @@
 
 #' Round values to a convenient axis limit
 #'
-#' Internal helper that rounds a numeric value to the nearest
-#' order of magnitude, either upward (for maximum values) or downward
-#' (for minimum values), useful for defining plot axis limits.
+#' Internal helper that rounds a numeric value to the nearest order of 
+#' magnitude, either upward (for maximum values) or downward (for minimum 
+#' values), useful for defining plot axis limits.
 #'
 #' @param value A numeric value.
 #' @param max A logical value indicating the rounding direction:
@@ -128,14 +140,14 @@
 #'     \item \code{TRUE}: round up (used for upper axis limits).
 #'     \item \code{FALSE}: round down (used for lower axis limits).
 #'   }
-#' @param multiplier A number factor applied to the absolute value
-#'  to create a margin for axis limits. 
+#' @param multiplier A number factor applied to the absolute value to create a 
+#'   margin for axis limits. 
 #'
 #' @return A rounded numeric value.
 #' 
 #' @details
-#' When \code{max = FALSE}, positive values are adjusted to include zero
-#' when appropriate, ensuring cleaner lower bounds in plots.
+#' When \code{max = FALSE}, positive values are adjusted to include zero when 
+#' appropriate, ensuring cleaner lower bounds in plots.
 #'
 #' @keywords internal
 .round_to_nearest <- function(value, max, multiplier = 1.2) {
@@ -169,17 +181,20 @@
 #' dense or high-value areas.
 #'
 #' @param data_list A data frame or a list of data frames containing the data.
-#' @param col_x A string indicating the name of the column to be used as the x-axis.
-#' @param col_y A string indicating the name of the column to be used as the y-axis.
-#' @param ylim A numeric vector of length 2, used to informn the y-axis limits of 
-#'   the plot.
-#' @param margin A numeric value (between 0 and 0.5) defining the proportion of the
-#'   x-range to exclude from both ends when searching for candidate positions.
-#'   Defaults to 0.1.
-#' @param low_quantile A numeric value (between 0 and 1) used to define low-value
-#'   regions in the data. Positions are selected among values below this quantile.
-#' @param x_max Optional. A numeric value (positive) used to restrict the x-axis range
-#'   considered in the calculation.
+#' @param col_x A string indicating the name of the column to be used as the 
+#'   x-axis.
+#' @param col_y A string indicating the name of the column to be used as the 
+#'   y-axis.
+#' @param ylim A numeric vector of length 2, used to informn the y-axis limits 
+#'   of the plot.
+#' @param margin A numeric value (between 0 and 0.5) defining the proportion of 
+#'   the x-range to exclude from both ends when searching for candidate 
+#'   positions. Defaults to 0.1.
+#' @param low_quantile A numeric value (between 0 and 1) used to define 
+#'   low-value regions in the data. Positions are selected among values below 
+#'   this quantile.
+#' @param x_max Optional. A numeric value (positive) used to restrict the 
+#'   x-axis range considered in the calculation.
 #'
 #' @return A list with two elements:
 #' \describe{
@@ -192,12 +207,13 @@
 #' corresponding y-values. It then excludes edge regions based on \code{margin}
 #' and identifies candidate positions where the combined y-values fall below
 #' a specified quantile (\code{low_quantile}). Among these, the rightmost
-#' candidate is selected. If no candidates are found, the global minimum is used.
+#' candidate is selected. If no candidates are found, the global minimum is 
+#' used.
 #'
 #' @keywords internal
 .auto_text_position <- function(
-  data_list, col_x, col_y, ylim, margin = 0.1, low_quantile = 0.2,
-  x_max = NULL
+  data_list, col_x, col_y, ylim, margin = 0.1, low_quantile = 0.2, 
+  text_width_fraction = 0.15, x_max = NULL
 ) {
   
   if (is.data.frame(data_list)) {
@@ -278,10 +294,39 @@
 
   candidates <- which(y_in <= threshold)
 
-  if (length(candidates) == 0) {
-    idx_x <- which.min(y_in)
+  text_width <- diff(x_range) * text_width_fraction
+
+  valid_candidates <- c()
+
+  for(i in candidates){
+
+  x_right <- x_in[i]
+  x_left <- x_right - text_width
+
+  idx_window <- which(
+      x >= x_left &
+      x <= x_right
+    )
+
+    if(length(idx_window) == 0){
+      next
+    }
+
+    if(max(y[idx_window]) <= threshold){
+      valid_candidates <- c(valid_candidates, i)
+    }
+  }
+
+  if(length(valid_candidates) > 0){
+    idx_x <- valid_candidates[
+      which.max(x_in[valid_candidates])
+    ]
+  } else if(length(candidates) > 0){
+    idx_x <- candidates[
+      which.max(x_in[candidates])
+    ]
   } else {
-    idx_x <- candidates[which.max(x_in[candidates])]
+    idx_x <- which.min(y_in)
   }
 
   x_pos <- x_in[idx_x]

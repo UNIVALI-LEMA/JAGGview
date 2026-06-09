@@ -17,20 +17,19 @@ A named list with three elements:
 (e.g., B, F, B/Bmsy, F/Fmsy, and process error).}
 \item{surplus_data}{A data frame containing surplus production
 (MSY-related) data.}
-\item{rho_data}{A data frame containing retrospective bias
-estimates (rho) for each index and scenario.}
+\item{rho_data}{A data frame containing retrospective bias estimates (rho)
+for each index and scenario.}
 }
 }
 \description{
-Processes retrospective model outputs to generate time series data,
-surplus production curves, and retrospective bias metrics (rho)
-for multiple scenarios and indices.
+Processes retrospective model outputs to generate time series data, surplus
+production curves, and retrospective bias metrics (rho) for multiple
+scenarios and indices.
 }
 \details{
-The function extracts retrospective runs, filters relevant indices,
-and structures the data for visualization. It also computes logical
-filters for valid retrospective years and includes surplus production
-and rho diagnostics.
+The function extracts retrospective runs, filters relevant indices, and
+structures the data for visualization. It also computes logical filters for
+valid retrospective years and includes surplus production and rho diagnostics.
 }
 \examples{
 \dontrun{

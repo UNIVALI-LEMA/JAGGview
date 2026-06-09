@@ -1,7 +1,7 @@
 #' Prepare prior and posterior distributions data
 #'
-#' Processes model outputs to generate prior and posterior distributions
-#' for key parameters (e.g., K, r, psi), along with summary metrics for
+#' Processes model outputs to generate prior and posterior distributions for 
+#' key parameters (e.g., K, r, psi), along with summary metrics for
 #' prior-posterior comparisons.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
@@ -16,11 +16,10 @@
 #' }
 #'
 #' @details
-#' Prior distributions are simulated using log-normal and gamma
-#' distributions based on model settings, while posterior distributions
-#' are estimated using kernel density methods. Summary metrics (PPVR and
-#' PPMR) are computed to assess the influence of priors on posterior
-#' estimates.
+#' Prior distributions are simulated using log-normal and gamma distributions 
+#' based on model settings, while posterior distributions are estimated using 
+#' kernel density methods. Summary metrics (PPVR and PPMR) are computed to 
+#' assess the influence of priors on posterior estimates.
 #'
 #' @examples
 #' \dontrun{
@@ -178,38 +177,40 @@ priors_posteriors_data <- function(list_fit_models) {
 #' Creates a ggplot2-based visualization comparing prior and posterior
 #' distributions for a selected parameter across scenarios.
 #'
-#' @param df_lists A named list as returned by
-#'   \code{priors_posteriors_data()}.
+#' @param df_lists A named list as returned by \code{priors_posteriors_data()}.
 #' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
-#' @param palette A character vector of colors used for prior and
-#'   posterior distributions.
-#' @param title_x A character string for the x-axis label. If \code{NULL},
-#'   a default label is assigned based on \code{indicator_name}.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower 
-#'   and upper limits of the x-axis c(min, max) used to restrict the 
-#'   plotting range.
+#' @param palette A character vector of colors used for prior and posterior 
+#'   distributions.
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param text_size An integer value that determines the size of the text. 
+#'   Defaults to 4.
+#' @param title_x A character string for the x-axis label. If \code{NULL}, a 
+#'   default label is assigned based on \code{indicator_name}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #'
-#' @return A ggplot object displaying prior and posterior densities,
-#'   annotated with prior-posterior metrics (PPMR and PPVR).
+#' @return A ggplot object displaying prior and posterior densities, annotated 
+#'   with prior-posterior metrics (PPMR and PPVR).
 #'
 #' @details
-#' The plot overlays prior and posterior density curves, includes
-#' annotations for prior-posterior mean and variance ratios, and
-#' faceted views by scenario.
+#' The plot overlays prior and posterior density curves, includes annotations 
+#' for prior-posterior mean and variance ratios, and faceted views by scenario.
 #'
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_fit_models)
-#' priors_posteriors_ggplot(df, indicator_name = "K", palette = c("#4285f4", "#34a853"))
+#' priors_posteriors_ggplot(df, "K", c("#4285f4", "#34a853"))
 #' }
 #'
 #' @export
 #' @importFrom dplyr %>% filter select rename pull all_of
-#' @importFrom ggplot2 ggplot geom_area aes geom_text facet_wrap 
+#' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, palette = c("#4285f4", "#34a853"), title_x = NULL, x_lim = NULL
+  df_lists, indicator_name, palette = c("#4285f4", "#34a853"), 
+  use_si_suffix = FALSE, text_size = 4, title_x = NULL, x_lim = NULL
 ) {
   if(!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -222,7 +223,9 @@ priors_posteriors_ggplot <- function(
 
   if(!is.null(x_lim)) {
     if (x_lim[1] > x_lim[2]) {
-      stop("Expected first value of parameter 'x_lim' would be less than the second.")
+      stop(
+        "Expected first value of parameter 'x_lim' to be less than the second."
+      )
     }
     if(!any(inherits(x_lim, "numeric"))) {
       stop("Expected parameter 'x_lim' to have a numeric class.")
@@ -266,11 +269,15 @@ priors_posteriors_ggplot <- function(
 
   x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
 
-  max_pos_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), TRUE, 1.1)
-  min_pos_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), FALSE, 1.1)
+  max_pos_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
+                                  TRUE, 1.1)
+  min_pos_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), 
+                                  FALSE, 1.1)
 
-  max_prior_val <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), TRUE, 1.1)
-  min_prior_val <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), FALSE, 1.1)
+  max_prior_val <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
+                                    TRUE, 1.1)
+  min_prior_val <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
+                                    FALSE, 1.1)
 
   max_val <- if(max_pos_val > max_prior_val) {
     max_pos_val
@@ -307,7 +314,13 @@ priors_posteriors_ggplot <- function(
     x = pos$x,
     y = pos$y
   )
-  print(df_text)
+  # print(df_text)
+
+  x_labels <- if (use_si_suffix) {
+    function(x) .international_system_prefixes(x)
+  } else {
+    function(x) .format_number(x, decimals = x_decimals)
+  }
   
   ggplot() +
     geom_area(data = prior, aes(x = value_1, y = value_2),
@@ -315,15 +328,18 @@ priors_posteriors_ggplot <- function(
     geom_area(data = posterior, aes(x = value_1, y = value_2),
               fill = palette[2], alpha = 0.5, colour = "black") +
     geom_text(data = df_text,
-              aes(x = x, y = y,
-                  label = paste0("PPMR = ", ppmr_value))) +
+                    aes(x = x, y = y, 
+                        label = paste0("PPMR = ", ppmr_value)), size = text_size
+    ) +
     geom_text(data = df_text,
-              aes(x = x, y = y,
-                  label = paste0("PPVR = ", ppvr_value)), vjust = 2) +
+                    aes(x = x, y = y, 
+                        label = paste0("PPVR = ", ppvr_value)), vjust = 2,
+                        size = text_size
+    ) +
     facet_wrap(~Scenario, ncol = 3) +
     coord_cartesian(xlim = x_lim) +
     labs(x = title_x, y = "Density") +
-    scale_x_continuous(labels = function(x) .format_number(x, decimals = x_decimals)) +
+    scale_x_continuous(labels = x_labels) +
     scale_y_continuous(expand = c(0, 0), limits = ylim) +
     .my_theme() +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
@@ -332,12 +348,12 @@ priors_posteriors_ggplot <- function(
 #' Extract PPVR data from priors/posteriors results
 #'
 #' Retrieves the data frame containing PPVR (Posterior Probability of
-#' Variable in a reference region) values for all indicators and scenarios, 
-#' as returned by \code{priors_posteriors_data()}.
+#' Variable in a reference region) values for all indicators and scenarios, as 
+#' returned by \code{priors_posteriors_data()}.
 #'
 #' @param df_lists A named list object returned by
-#'   \code{priors_posteriors_data()}, which must contain a component
-#'   named \code{"PPVR"}.
+#'   \code{priors_posteriors_data()}, which must contain a component named 
+#'   \code{"PPVR"}.
 #'
 #' @return A data frame with the following structure:
 #' \describe{
@@ -346,9 +362,9 @@ priors_posteriors_ggplot <- function(
 #'  }
 #'
 #' @details
-#' The returned data frame is in wide format, with one row per scenario and
-#' one column per indicator. This function is a convenience accessor for
-#' extracting PPVR results for further analysis or visualization.
+#' The returned data frame is in wide format, with one row per scenario and one 
+#' column per indicator. This function is a convenience accessor for extracting 
+#' PPVR results for further analysis or visualization.
 #'
 #' @export
 get_ppvr <- function(df_lists) {
@@ -357,13 +373,13 @@ get_ppvr <- function(df_lists) {
 
 #' Extract PPMR data by scenario
 #'
-#' Retrieves the data frame containing PPMR (Posterior Probability of
-#' Metric exceeding a reference) values for all indicators and scenarios, 
-#' as returned by \code{priors_posteriors_data()}.
+#' Retrieves the data frame containing PPMR (Posterior Probability of Metric 
+#' exceeding a reference) values for all indicators and scenarios, as returned 
+#' by \code{priors_posteriors_data()}.
 #'
-#' @param df_lists A named list object returned by
-#'   \code{priors_posteriors_data()}, which must contain a component
-#'   named \code{"PPMR"}.
+#' @param df_lists A named list object returned by 
+#'   \code{priors_posteriors_data()}, which must contain a component named 
+#'   \code{"PPMR"}.
 #'
 #' @return A data frame with the following structure:
 #' \describe{
@@ -372,9 +388,9 @@ get_ppvr <- function(df_lists) {
 #'  }
 #'
 #' @details
-#' The returned data frame is in wide format, with one row per scenario and
-#' one column per indicator. This function is a convenience accessor for
-#' extracting PPMR results for further analysis or visualization.
+#' The returned data frame is in wide format, with one row per scenario and one 
+#' column per indicator. This function is a convenience accessor for extracting 
+#' PPMR results for further analysis or visualization.
 #'
 #' @export
 get_ppmr <- function(df_lists) {
@@ -383,8 +399,8 @@ get_ppmr <- function(df_lists) {
 
 #' Extract prior settings from model outputs
 #'
-#' Internal helper that extracts prior distribution parameters from
-#' a list of model outputs and combines them into a single data frame.
+#' Internal helper that extracts prior distribution parameters from a list of 
+#' model outputs and combines them into a single data frame.
 #'
 #' @param fit_list A list of model outputs.
 #'
@@ -412,8 +428,8 @@ get_ppmr <- function(df_lists) {
 
 #' Extract posterior samples from model outputs
 #'
-#' Internal helper that extracts posterior parameter samples from a
-#' list of model outputs and combines them into a single data frame.
+#' Internal helper that extracts posterior parameter samples from a list of 
+#' model outputs and combines them into a single data frame.
 #'
 #' @param fit_list A list of model outputs.
 #'

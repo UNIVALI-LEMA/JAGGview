@@ -4,7 +4,12 @@
 \alias{runs_tests_ggplot}
 \title{Plot runs test diagnostics}
 \usage{
-runs_tests_ggplot(df_lists, title_y = "Residuals", max_col = NULL)
+runs_tests_ggplot(
+  df_lists,
+  title_y = "Residuals",
+  text_size = 4,
+  max_col = NULL
+)
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
@@ -12,22 +17,24 @@ runs_tests_ggplot(df_lists, title_y = "Residuals", max_col = NULL)
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals".}
 
-\item{max_col}{Optional. A numeric value that limit the number
-of plots per line.}
+\item{text_size}{An integer value that determines the size of the text.
+Defaults to 4.}
+
+\item{max_col}{Optional. A numeric value that limit the number of plots per
+line.}
 }
 \value{
-A ggplot object showing residuals, confidence regions,
-and runs test results.
+A ggplot object showing residuals, credibility regions, and runs
+test results.
 }
 \description{
-Creates a ggplot2-based visualization of runs test diagnostics,
-including residuals, confidence limits, and p-values across
-scenarios and indices.
+Creates a ggplot2-based visualization of runs test diagnostics, including
+residuals, credibility limits, and p-values across scenarios and indices.
 }
 \details{
-The plot includes shaded regions representing confidence limits,
-residual segments, highlighted points based on threshold exceedance,
-and p-value annotations. Results are faceted by scenario and index.
+The plot includes shaded regions representing credibility limits, residual
+segments, highlighted points based on threshold exceedance, and p-value
+annotations. Results are faceted by scenario and index.
 }
 \examples{
 \dontrun{

@@ -7,7 +7,8 @@
 cpue_residuals_ggplot(
   df_lists,
   palette = c("#4285f4", "#34a853", "#ea4335"),
-  title_y = "Residuals"
+  title_y = "Residuals",
+  text_size = 4
 )
 }
 \arguments{
@@ -19,6 +20,9 @@ Defaults to the vector \code{c("#4285f4", "#34a853", "#ea4335")}}
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals"}
+
+\item{text_size}{An integer value that determines the size of the text.
+Defaults to 4.}
 }
 \value{
 A ggplot object displaying CPUE residual diagnostics.

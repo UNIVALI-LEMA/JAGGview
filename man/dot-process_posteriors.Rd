@@ -13,7 +13,7 @@
 A data frame containing posterior samples for each scenario.
 }
 \description{
-Internal helper that extracts posterior parameter samples from a
-list of model outputs and combines them into a single data frame.
+Internal helper that extracts posterior parameter samples from a list of
+model outputs and combines them into a single data frame.
 }
 \keyword{internal}

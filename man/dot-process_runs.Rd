@@ -13,7 +13,7 @@
 A data frame containing residuals by year and scenario.
 }
 \description{
-Internal helper that extracts residuals from each model, converts
-them into a data frame format, and combines them across scenarios.
+Internal helper that extracts residuals from each model, converts them into
+a data frame format, and combines them across scenarios.
 }
 \keyword{internal}

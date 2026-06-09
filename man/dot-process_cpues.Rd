@@ -16,8 +16,8 @@ Supported values are "ppd" and "hat".}
 A data frame containing combined CPUE data across scenarios.
 }
 \description{
-Internal helper that extracts CPUE-related outputs from a list of
-model results, converts array-based data into data frames, and
-combines them into a single structure.
+Internal helper that extracts CPUE-related outputs from a list of model
+results, converts array-based data into data frames, and combines them into
+a single structure.
 }
 \keyword{internal}

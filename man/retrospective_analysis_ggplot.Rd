@@ -4,7 +4,13 @@
 \alias{retrospective_analysis_ggplot}
 \title{Plot retrospective analysis results}
 \usage{
-retrospective_analysis_ggplot(df_lists, indicator_name, title_y = NULL)
+retrospective_analysis_ggplot(
+  df_lists,
+  indicator_name,
+  text_size = 4,
+  use_si_suffix = FALSE,
+  title_y = NULL
+)
 }
 \arguments{
 \item{df_lists}{A named list as returned by
@@ -14,23 +20,28 @@ retrospective_analysis_ggplot(df_lists, indicator_name, title_y = NULL)
 indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 "procB", and "MSY".}
 
-\item{title_y}{A character string for the y-axis label. If \code{NULL},
-a default label is assigned based on \code{indicator_name}.}
+\item{text_size}{An integer value that determines the size of the text.
+Defaults to 4.}
+
+\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
+used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+
+\item{title_y}{A character string for the y-axis label. If \code{NULL}, a
+default label is assigned based on \code{indicator_name}.}
 }
 \value{
-A ggplot object displaying retrospective trajectories,
-confidence intervals (when applicable), and rho annotations.
+A ggplot object displaying retrospective trajectories, credibility
+intervals (when applicable), and rho annotations.
 }
 \description{
-Creates a ggplot2-based visualization of retrospective analyses,
-including time series of key indices and surplus production curves,
-along with retrospective bias (rho) annotations.
+Creates a ggplot2-based visualization of retrospective analyses, including
+time series of key indices and surplus production curves, along with
+retrospective bias (rho) annotations.
 }
 \details{
-For standard indices, the plot shows time series with confidence
-ribbons and retrospective trajectories. For "MSY", the plot displays
-surplus production curves as a function of biomass. Results are
-faceted by scenario.
+For standard indices, the plot shows time series with credibility ribbons
+and retrospective trajectories. For "MSY", the plot displays surplus
+production curves as a function of biomass. Results are faceted by scenario.
 }
 \examples{
 \dontrun{

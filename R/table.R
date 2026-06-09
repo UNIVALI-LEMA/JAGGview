@@ -5,8 +5,8 @@
 #' functions, using the \pkg{gt} package. The table can be displayed in the
 #' Viewer pane, printed to the console, and optionally saved to file.
 #' 
-#' @param data A data frame containing extracted model results, returned
-#'   by one of the package \code{get_*()} functions.
+#' @param data A data frame containing extracted model results, returned by one 
+#'   of the package \code{get_*()} functions.
 #' @param show Optional. Character string specifying how the table should be
 #'   displayed. Possible values are:
 #'   \itemize{
@@ -26,8 +26,8 @@
 #'   }
 #' @param filename Optional. Character string specifying the output file name
 #'   without extension. Defaults to \code{"summary_table"}.
-#' @param digits A integer indicating the number of decimals places
-#'   to display. Defaults to 4.
+#' @param digits A integer indicating the number of decimals places to display. 
+#'   Defaults to 4.
 #' 
 #' @return
 #' Invisibly returns a formatted \code{gt} table object.
@@ -95,12 +95,11 @@ summary_table <- function(data, show = "html", save = NULL,
 
 #' Create a default formatted gt table
 #' 
-#' Internal helper function used to generate consistently formatted
-#' \pkg{gt} tables across package outputs.
+#' Internal helper function used to generate consistently formatted \pkg{gt} 
+#' tables across package outputs.
 #' 
 #' @param data A data frame to be formatted as a \pkg{gt} table.
-#' @param digits A integer indicating the number of decimals places
-#'   to display.
+#' @param digits A integer indicating the number of decimals places to display.
 #' 
 #' @return
 #' A formatted \code{gt} table object with bold column labels and alternating

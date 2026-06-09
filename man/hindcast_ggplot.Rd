@@ -4,26 +4,28 @@
 \alias{hindcast_ggplot}
 \title{Plot hindcast diagnostics}
 \usage{
-hindcast_ggplot(df_lists)
+hindcast_ggplot(df_lists, text_size = 4)
 }
 \arguments{
-\item{df_lists}{A named list as returned by
-\code{hindcast_data()}.}
+\item{df_lists}{A named list as returned by \code{hindcast_data()}.}
+
+\item{text_size}{An integer value that determines the size of the text.
+Defaults to 4.}
 }
 \value{
-A ggplot object displaying hindcast trajectories, observed
-data points, uncertainty ribbons, and MASE annotations, faceted
-by scenario and index.
+A ggplot object displaying hindcast trajectories, observed data
+points, uncertainty ribbons, and MASE annotations, faceted by scenario and
+index.
 }
 \description{
-Creates a ggplot2-based visualization of hindcast diagnostics,
-including observed and predicted values, uncertainty intervals,
-and model performance metrics (MASE).
+Creates a ggplot2-based visualization of hindcast diagnostics, including
+observed and predicted values, uncertainty intervals, and model performance
+metrics (MASE).
 }
 \details{
-The plot includes confidence ribbons for reference runs, hindcast
-trajectories, observed and predicted points, and annotations of
-MASE values. Results are faceted by scenario and index.
+The plot includes credibility ribbons for reference runs, hindcast
+trajectories, observed and predicted points, and annotations of MASE values.
+Results are faceted by scenario and index.
 }
 \examples{
 \dontrun{

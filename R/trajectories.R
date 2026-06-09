@@ -1,7 +1,7 @@
 #' Summarise trajectory data from model outputs
 #'
-#' This function computes summary statistics (median and quantiles)
-#' for selected variables from model outputs, grouped by year and scenario.
+#' Computes summary statistics (median and quantiles) selected variables from 
+#' model outputs, grouped by year and scenario.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
@@ -97,22 +97,26 @@ trajectories_data <- function(list_fit_models) {
 #' including median trends and uncertainty intervals across scenarios.
 #'
 #' @param df A data frame as returned by \code{trajectories_data()}.
-#' @param indicator_name A character string indicating the indicator_name to plot.
-#'   Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, \code{"Bdev"}, 
-#'   \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or \code{"Bref"}.
+#' @param indicator_name A character string indicating the indicator_name to 
+#'   plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
+#'   \code{"Bdev"}, \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or 
+#'   \code{"Bref"}.
 #' @param palette A character vector of colors used for plotting.
 #'   Defaults to "#4285f4"
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param title_y A character string or expression for the y-axis label.
 #'   Defaults to a predefined label depending on the selected variable.
 #'
-#' @return A ggplot object displaying trajectory summaries with
-#'   confidence intervals, faceted by scenario.
+#' @return A ggplot object displaying trajectory summaries with credibility 
+#'   intervals, faceted by scenario.
 #'
 #' @details
-#' The functions filters the input data based on the selected \code{indicator_name}
-#' (matching the \code{indicator} column). The plot includes ribbons representing 
-#' 80% (\code{lcl2}-\code{ucl2}) and 95% (\code{lcl}-\code{ucl}) confidence 
-#' intervals, as well as a median trajectory line (\code{mu}).
+#' The functions filters the input data based on the selected 
+#' \code{indicator_name} (matching the \code{indicator} column). The plot 
+#' includes ribbons representing 80% (\code{lcl2}-\code{ucl2}) and 95% 
+#' (\code{lcl}-\code{ucl}) credibility intervals, as well as a median 
+#' trajectory line (\code{mu}).
 #'
 #' Reference lines are added depending on the selected indicator_name:
 #' \itemize{
@@ -121,9 +125,9 @@ trajectories_data <- function(list_fit_models) {
 #'   \item \code{"Bdev"}: horizontal line at 0
 #' }
 #'
-#' The y-axis limits are automatically adjusted based on the data range,
-#' and labels are formatted dynamically. The y-axis label is automatically
-#' defined unless provided by the user.
+#' The y-axis limits are automatically adjusted based on the data range, and 
+#' labels are formatted dynamically. The y-axis label is automatically defined 
+#' unless provided by the user.
 #' 
 #' @examples
 #' \dontrun{
@@ -136,16 +140,19 @@ trajectories_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, indicator_name, palette = "#4285f4", title_y = NULL
+  df, indicator_name, palette = "#4285f4", use_si_suffix = FALSE, 
+  title_y = NULL
 ) {
   if(!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  if(!indicator_name %in% c("BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref")) {
-    stop(
-      "Parameter 'indicator_name' was expecting 'BB0', 'BBmsy', 'FFmsy', 'Bdev', 'B', 'H', 'Catch', 
-      'BBfrac' or 'Bref'."
-    )
+  if(!indicator_name %in% c(
+    "BB0", "BBmsy", "FFmsy", "Bdev", "B", "H", "Catch", "BBfrac", "Bref"
+  )) {
+    stop(paste0(
+      "Parameter 'indicator_name' was expecting 'BB0', 'BBmsy', 'FFmsy', ", 
+      "'Bdev', 'B', 'H', 'Catch', 'BBfrac' or 'Bref'."
+    ))
   }
 
   .is_palette_valid(palette)
@@ -160,7 +167,7 @@ trajectories_ggplot <- function(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
     FFmsy = expression(F/F[MSY]),
-    Bdev = "Process Error on log(Biomass)", # This and below are in development
+    Bdev = "Process Error on log(Biomass)",
     B = "Biomass (t)",
     H = "Harvest rate",
     Catch = "Catch",
@@ -173,6 +180,12 @@ trajectories_ggplot <- function(
   }
 
   y_decimals <- ifelse(max_val > 10, 0, 1)
+
+  y_labels <- if (use_si_suffix) {
+    function(x) .international_system_prefixes(x, decimals = y_decimals)
+  } else {
+    function(x) .format_number(x, decimals = y_decimals)
+  }
 
   p <- ggplot() +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
@@ -200,7 +213,7 @@ trajectories_ggplot <- function(
     scale_y_continuous(
       expand = c(0, 0), 
       limits = c(min_val, max_val),
-      labels = function(x) .format_number(x, decimals = y_decimals)
+      labels = y_labels
     ) +
     labs(x = "Year", y = title_y) +
     .my_theme() +

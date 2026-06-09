@@ -13,7 +13,7 @@
 A data frame containing time series across scenarios and runs.
 }
 \description{
-Internal helper that extracts time series data from retrospective
-model runs and reshapes them into a combined data frame.
+Internal helper that extracts time series data from retrospective model runs
+and reshapes them into a combined data frame.
 }
 \keyword{internal}

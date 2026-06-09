@@ -13,8 +13,8 @@ summary_table(
 )
 }
 \arguments{
-\item{data}{A data frame containing extracted model results, returned
-by one of the package \code{get_*()} functions.}
+\item{data}{A data frame containing extracted model results, returned by one
+of the package \code{get_*()} functions.}
 
 \item{show}{Optional. Character string specifying how the table should be
 displayed. Possible values are:
@@ -38,8 +38,8 @@ save the table. Possible values are:
 \item{filename}{Optional. Character string specifying the output file name
 without extension. Defaults to \code{"summary_table"}.}
 
-\item{digits}{A integer indicating the number of decimals places
-to display. Defaults to 4.}
+\item{digits}{A integer indicating the number of decimals places to display.
+Defaults to 4.}
 }
 \value{
 Invisibly returns a formatted \code{gt} table object.

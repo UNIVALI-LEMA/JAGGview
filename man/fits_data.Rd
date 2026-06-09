@@ -2,7 +2,7 @@
 % Please edit documentation in R/fits.R
 \name{fits_data}
 \alias{fits_data}
-\title{Prepare fitted index data and confidence intervals}
+\title{Prepare fitted index data and credibility intervals}
 \usage{
 fits_data(list_fit_models, indices_factor = NULL)
 }
@@ -10,34 +10,34 @@ fits_data(list_fit_models, indices_factor = NULL)
 \item{list_fit_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
 
-\item{indices_factor}{Optional. A vector of indices_factor to include. Must exist
-in the \code{Index} column.}
+\item{indices_factor}{Optional. A vector of indices_factor to include. Must
+exist in the \code{Index} column.}
 }
 \value{
 A named list with three elements:
 \describe{
 \item{Li_Ui}{A data frame containing mean values and lower (Li) and
-upper (Ui) confidence bounds.}
-\item{CI_80}{A data frame containing fitted values and 80\% confidence
+upper (Ui) credibility bounds.}
+\item{CI_80}{A data frame containing fitted values and 80\% credibility
 intervals.}
-\item{CI_95}{A data frame containing fitted values and 95\% confidence
+\item{CI_95}{A data frame containing fitted values and 95\% credibility
 intervals.}
 }
 }
 \description{
 Processes model outputs to generate formatted data for fitted indices_factor,
-including mean values and confidence intervals (80\% and 95\%).
+including mean values and credibility intervals (80\% and 95\%).
 }
 \details{
-This function extracts index and uncertainty information from a list
-of model results, computes upper and lower confidence bounds, and
-organizes the data for downstream visualization.
+Extracts index and uncertainty information from a list of model results,
+computes upper and lower credibility bounds, and organizes the data for
+downstream visualization.
 
 The function processes scenario-based outputs for indices_factor (\code{I}),
 standard errors (\code{SE2}), and fitted values (\code{ppd} and \code{hat}).
 Missing values are handled using reference index data when necessary.
 
-Confidence intervals for \code{Li_Ui} are computed assuming normality,
+Credibility intervals for \code{Li_Ui} are computed assuming normality,
 using a multiplier of 1.96 applied to the standard error.
 
 If \code{indices_factor} is provided, the results are filtered and reordered
