@@ -8,9 +8,9 @@
 #' downstream visualization.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
-#' JABBA function \code{JABBA::fit_jabba()}.
+#'   JABBA function \code{JABBA::fit_jabba()}.
 #' @param indices_factor Optional. A vector of indices_factor to include. Must 
-#' exist in the \code{Index} column.
+#'   exist in the \code{Index} column.
 #'
 #' @return A named list with three elements:
 #' \describe{
@@ -73,7 +73,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   )
   tmp00 <- full_join(tmp01, tmp02)
 
-  if(!is.null(indices_factor)) {
+  if (!is.null(indices_factor)) {
     .validate_indices(unique(tmp00$Index), indices_factor)
   }
 
@@ -84,7 +84,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 
   index_inputseries <- .process_index(list_fit_models)
 
-  if(any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
+  if (any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
 
   tmp00 <- tmp00[complete.cases(tmp00),] %>% 
     mutate(Index = fct_relevel(Index, indices_factor)) %>%
@@ -93,11 +93,11 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   ####@> Fit (CI 80%)...
   tmp03 <- .process_cpues(list_fit_models, vars = "ppd")
 
-  if(!is.null(indices_factor)) {
+  if (!is.null(indices_factor)) {
     .validate_indices(unique(tmp03$Index), indices_factor)
   }
 
-  if(any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
+  if (any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
 
   tmp03 <- tmp03 %>% 
     mutate(Index = fct_relevel(Index, indices_factor)) %>% 
@@ -106,11 +106,11 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   ####@> Fit (CI 95%)...
   tmp04 <- .process_cpues(list_fit_models, vars = "hat")
 
-  if(!is.null(indices_factor)) {
+  if (!is.null(indices_factor)) {
     .validate_indices(unique(tmp04$Index), indices_factor)
   }
 
-  if(any(is.na(tmp04$Index))) .fill_na_indices(tmp04, index_inputseries)
+  if (any(is.na(tmp04$Index))) .fill_na_indices(tmp04, index_inputseries)
 
   tmp04 <- tmp04 %>% 
     mutate(Index = fct_relevel(Index, indices_factor)) %>%
@@ -142,8 +142,8 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'   Defaults to "#4285f4".
 #' @param title_y A character string for the y-axis label.
 #'   Defaults to "Abundance index".
-#' @param max_col Optional. A numeric value that limit the number of plots per 
-#'   line.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
 #' @return A ggplot object displaying fitted indices with uncertainty ribbons, 
 #'   error bars, and observed values, faceted by scenario and index.
@@ -163,9 +163,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, palette = "#4285f4", title_y = "Abundance index", max_col = NULL
+  df_lists, palette = "#4285f4", title_y = "Abundance index", y_lim = NULL
 ) {
-  if(!inherits(df_lists, "JAGGdata")) {
+  if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
   n_scenarios <- length(unique(df_lists$CI_95$Scenario))
@@ -173,19 +173,12 @@ fits_ggplot <- function(
   
   .is_palette_valid(palette)
 
-  max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
-  min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
+  .axis_limit(y_lim)
 
-  if (is.null(max_col)) {
-    max_col <- if(n_index <= 3) {
-      n_index
-    }
-    else if (n_index == 4) {
-      2
-    }
-    else {
-      3
-    }
+  if (is.null(y_lim)) {
+    max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
+    min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
+    y_lim <- c(min_val, max_val)
   }
 
   ggplot() +
@@ -203,7 +196,7 @@ fits_ggplot <- function(
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 
     facet_grid(Scenario ~ Index, scales = "free") +
-    scale_y_continuous(limits = c(min_val, max_val)) +
+    scale_y_continuous(limits = y_lim) +
     labs(x = "Year", y = title_y) +
     .my_theme()
 }
@@ -226,7 +219,7 @@ fits_ggplot <- function(
     cbind.data.frame(
       Year = fit$yr,
       Scenario = fit$scenario,
-      if(vars == "I") {
+      if (vars == "I") {
         fit$settings$I
       } else {
         fit$settings$SE2
@@ -294,7 +287,7 @@ fits_ggplot <- function(
   temp00 <- lapply(fit_list, function(fit) {
     cbind.data.frame(
       Scenario = fit$scenario,
-      if(vars == "ppd") {
+      if (vars == "ppd") {
           .array_to_dataframe(fit$cpue.ppd)
       } else {
           .array_to_dataframe(fit$cpue.hat)

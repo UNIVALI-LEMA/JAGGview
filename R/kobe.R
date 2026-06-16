@@ -63,11 +63,11 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")
   }
 
-  if(any(is.na(ci_levels))) {
+  if (any(is.na(ci_levels))) {
     stop("Parameter 'ci_levels' cannot contain NA.")
   }
 
-  if(any(ci_levels <= 0 | ci_levels >= 1)) {
+  if (any(ci_levels <= 0 | ci_levels >= 1)) {
     stop("Parameter 'ci_levels' was expecting numbers between 0 and 1.")
   }
 
@@ -196,13 +196,13 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' scale_shape_manual scale_fill_manual labs coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(df_lists) {
-  if(!inherits(df_lists, "JAGGdata")) {
+  if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
   max_x <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
   max_y <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
-  if(max_x > 6) max_x <- 6
-  if(max_y > 6) max_y <- 6
+  if (max_x > 6) max_x <- 6
+  if (max_y > 6) max_y <- 6
 
   n_levels <- length(unique(df_lists$k.out$q))
   ggplot() +

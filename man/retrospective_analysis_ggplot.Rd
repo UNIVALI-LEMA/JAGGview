@@ -9,7 +9,8 @@ retrospective_analysis_ggplot(
   indicator_name,
   text_size = 4,
   use_si_suffix = FALSE,
-  title_y = NULL
+  title_y = NULL,
+  y_lim = NULL
 )
 }
 \arguments{
@@ -28,6 +29,9 @@ used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{title_y}{A character string for the y-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}
+
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object displaying retrospective trajectories, credibility

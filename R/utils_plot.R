@@ -164,7 +164,7 @@
     floor(sign_val * value_adj / magnitude) * magnitude
   )
 
-  if(!max) {
+  if (!max) {
     result <- ifelse(result > 0, 0, result)
   }
   
@@ -222,16 +222,16 @@
   if (!is.list(data_list)) {
     data_list <- list(data_list)
   }
-  if(margin < 0 || margin > 0.5) {
+  if (margin < 0 || margin > 0.5) {
     stop("Expected parameter 'margin' to be between 0 and 0.5.")
   }
-  if(low_quantile < 0 || low_quantile > 1) {
+  if (low_quantile < 0 || low_quantile > 1) {
     stop("Expected parameter 'low_quantile' to be between 0 and 1.")
   }
-  if(x_max <= 0 && !is.null(x_max)) {
+  if (x_max <= 0 && !is.null(x_max)) {
     stop("Expected parameter 'x_max' to be a positive number.")
   }
-  if(is.null(ylim) || length(ylim) != 2) {
+  if (is.null(ylim) || length(ylim) != 2) {
     stop("Expected parameter 'ylim' to be numeric vector of length 2.")
   }
 
@@ -298,7 +298,7 @@
 
   valid_candidates <- c()
 
-  for(i in candidates){
+  for(i in candidates) {
 
   x_right <- x_in[i]
   x_left <- x_right - text_width
@@ -308,20 +308,20 @@
       x <= x_right
     )
 
-    if(length(idx_window) == 0){
+    if (length(idx_window) == 0) {
       next
     }
 
-    if(max(y[idx_window]) <= threshold){
+    if (max(y[idx_window]) <= threshold) {
       valid_candidates <- c(valid_candidates, i)
     }
   }
 
-  if(length(valid_candidates) > 0){
+  if (length(valid_candidates) > 0) {
     idx_x <- valid_candidates[
       which.max(x_in[valid_candidates])
     ]
-  } else if(length(candidates) > 0){
+  } else if (length(candidates) > 0) {
     idx_x <- candidates[
       which.max(x_in[candidates])
     ]
@@ -334,4 +334,27 @@
   y_pos <- ylim[2] - (ylim[2] - ylim[1]) * 0.1
 
   return(list(x = x_pos, y = y_pos))
+}
+
+#' @keywords internal
+.axis_limit <- function(lim) {
+  if (!is.null(lim)) {
+    param_name <- deparse(substitute(lim))
+    if (length(lim) != 2) {
+      stop(paste0(
+        "Expected parameter '", param_name, "' to be a vector of length of 2."
+      ))
+    }
+    if (lim[1] > lim[2]) {
+      stop(paste0(
+        "Expected first value of parameter '", param_name,
+        "' to be less than the second."
+      ))
+    }
+    if (!any(inherits(lim, "numeric"))) {
+      stop(paste0(
+        "Expected parameter '", param_name, "' to have a numeric class."
+      ))
+    }
+  }
 }

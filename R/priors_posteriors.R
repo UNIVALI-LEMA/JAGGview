@@ -212,28 +212,16 @@ priors_posteriors_ggplot <- function(
   df_lists, indicator_name, palette = c("#4285f4", "#34a853"), 
   use_si_suffix = FALSE, text_size = 4, title_x = NULL, x_lim = NULL
 ) {
-  if(!inherits(df_lists, "JAGGdata")) {
+  if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  if(!indicator_name %in% c("K", "r", "psi")) {
+  if (!indicator_name %in% c("K", "r", "psi")) {
     stop("Parameter 'indicator_name' was expecting 'K', 'r' or 'psi'.")
   }
 
   .is_palette_valid(palette)
 
-  if(!is.null(x_lim)) {
-    if (x_lim[1] > x_lim[2]) {
-      stop(
-        "Expected first value of parameter 'x_lim' to be less than the second."
-      )
-    }
-    if(!any(inherits(x_lim, "numeric"))) {
-      stop("Expected parameter 'x_lim' to have a numeric class.")
-    }
-    if(length(x_lim) != 2) {
-      stop("Expected parameter 'x_lim' to be a vector of length of 2.")
-    }
-  }
+  .axis_limit(x_lim)
 
   indicator1 <- paste0(indicator_name, "01")
   indicator2 <- paste0(indicator_name, "02")
@@ -261,7 +249,7 @@ priors_posteriors_ggplot <- function(
       value_2 = all_of(indicator2)
     )
   
-  if(is.null(x_lim[2])) {
+  if (is.null(x_lim[2])) {
     prior_max <- max(prior$value_1, na.rm = TRUE)
     pos_max <- max(posterior$value_1, na.rm = TRUE)
     x_lim[2] <- ifelse(prior_max > pos_max, prior_max, pos_max)
@@ -279,14 +267,14 @@ priors_posteriors_ggplot <- function(
   min_prior_val <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
                                     FALSE, 1.1)
 
-  max_val <- if(max_pos_val > max_prior_val) {
+  max_val <- if (max_pos_val > max_prior_val) {
     max_pos_val
   }
   else {
     max_prior_val
   }
 
-  min_val <- if(min_pos_val < min_prior_val) {
+  min_val <- if (min_pos_val < min_prior_val) {
     min_pos_val
   }
   else {

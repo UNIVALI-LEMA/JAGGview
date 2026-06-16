@@ -99,6 +99,8 @@ hindcast_data <- function(list_hc_models) {
 #' @param df_lists A named list as returned by \code{hindcast_data()}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
 #' @return A ggplot object displaying hindcast trajectories, observed data 
 #'   points, uncertainty ribbons, and MASE annotations, faceted by scenario and 
@@ -121,19 +123,24 @@ hindcast_data <- function(list_hc_models) {
 #' theme guides guide_legend
 #' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
-hindcast_ggplot <- function(df_lists, text_size = 4) {
-  if(!inherits(df_lists, "JAGGdata")) {
+hindcast_ggplot <- function(df_lists, text_size = 4, y_lim = NULL) {
+  if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
-  min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
-  ylim <- c(min_val, max_val)
+
+  .axis_limit(y_lim)
+
+  if (is.null(y_lim)) {
+    max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
+    min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+    y_lim <- c(min_val, max_val)
+  }
 
   pos <- .auto_text_position(
     df_lists$data, 
     "year", 
     "hat.uci", 
-    ylim = ylim
+    ylim = y_lim
   )
   
   ggplot() +
@@ -170,11 +177,11 @@ hindcast_ggplot <- function(df_lists, text_size = 4) {
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(limits = ylim) +
+    scale_y_continuous(limits = y_lim) +
     .my_theme() +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 1))
-}
+  }
 
 #' Extract MASE data from hindcast results
 #' 

@@ -91,7 +91,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
     tmp05, names_to = "Index", values_to = "Res", indices
   ) 
 
-  if(!is.null(indices_factor)) {
+  if (!is.null(indices_factor)) {
     .validate_indices(unique(tmp05$Index), indices_factor)
   }
   
@@ -141,8 +141,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #'   Defaults to "Residuals".
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
-#' @param max_col Optional. A numeric value that limit the number of plots per 
-#'   line.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
 #' @return A ggplot object showing residuals, credibility regions, and runs 
 #'   test results.
@@ -162,36 +162,26 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, title_y = "Residuals", text_size = 4, max_col = NULL) {
-  if(!inherits(df_lists, "JAGGdata")) {
+  df_lists, title_y = "Residuals", text_size = 4, y_lim = NULL) {
+  if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
-  min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
-  ylim <- c(min_val, max_val)
+
+  .axis_limit(y_lim)
+
+  if (is.null(y_lim)) {
+    max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+    min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE,2.5)
+    y_lim <- c(min_val, max_val)
+  }
 
   pos <- .auto_text_position(
     data_list = df_lists$cpue_residuals,
     col_x = "Year",
     col_y = "Res",
     margin = 0.4,
-    ylim = ylim
+    ylim = y_lim
   )
-
-  n_scenarios <- length(unique(df_lists$SE3$Scenario))
-  n_index <- length(unique(df_lists$SE3$Index))
-
-  if (is.null(max_col)) {
-    max_col <- if(n_index <= 3) {
-      n_index
-    }
-    else if (n_index == 4) {
-      2
-    }
-    else {
-      3
-    }
-  }
   
   ggplot() +
     geom_rect(data = df_lists$SE3,
@@ -212,11 +202,11 @@ runs_tests_ggplot <- function(
         pch = 21, size = 2.5) +
       facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
-    scale_y_continuous(limits = ylim) +
+    scale_y_continuous(limits = y_lim) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
-}
+  }
 
 #' Plot CPUE residuals diagnostics
 #' 
@@ -239,6 +229,7 @@ runs_tests_ggplot <- function(
 #' The plot includes residual segments, observed values, a smoothed trend,
 #' and RMSE annotations for each scenario.
 #' 
+#' @export
 #' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
 #' theme geom_text

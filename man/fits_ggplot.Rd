@@ -8,7 +8,7 @@ fits_ggplot(
   df_lists,
   palette = "#4285f4",
   title_y = "Abundance index",
-  max_col = NULL
+  y_lim = NULL
 )
 }
 \arguments{
@@ -22,8 +22,8 @@ Defaults to "#4285f4".}
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Abundance index".}
 
-\item{max_col}{Optional. A numeric value that limit the number of plots per
-line.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object displaying fitted indices with uncertainty ribbons,

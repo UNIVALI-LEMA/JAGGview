@@ -4,13 +4,16 @@
 \alias{hindcast_ggplot}
 \title{Plot hindcast diagnostics}
 \usage{
-hindcast_ggplot(df_lists, text_size = 4)
+hindcast_ggplot(df_lists, text_size = 4, y_lim = NULL)
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{hindcast_data()}.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object displaying hindcast trajectories, observed data

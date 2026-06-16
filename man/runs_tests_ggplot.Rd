@@ -4,12 +4,7 @@
 \alias{runs_tests_ggplot}
 \title{Plot runs test diagnostics}
 \usage{
-runs_tests_ggplot(
-  df_lists,
-  title_y = "Residuals",
-  text_size = 4,
-  max_col = NULL
-)
+runs_tests_ggplot(df_lists, title_y = "Residuals", text_size = 4, y_lim = NULL)
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
@@ -20,8 +15,8 @@ Defaults to "Residuals".}
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
 
-\item{max_col}{Optional. A numeric value that limit the number of plots per
-line.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object showing residuals, credibility regions, and runs

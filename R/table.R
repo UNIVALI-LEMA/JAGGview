@@ -49,8 +49,9 @@
 #' 
 #' @export
 #' @importFrom gt gtsave
-#' @importFrom rstudioapi viewer
+#' @importFrom rstudioapi viewer isAvailable
 #' @importFrom openxlsx write.xlsx
+#' @importFrom utils browseURL
 summary_table <- function(data, show = "html", save = NULL, 
   filename = "summary_table", digits = 4) {
   table <- .default_table(data, digits = digits)
@@ -66,7 +67,11 @@ summary_table <- function(data, show = "html", save = NULL,
     if (ext != "console") {
       file <- tempfile(fileext = ext)
       gtsave(table, file)
-      viewer(file)
+      if (isAvailable()) {
+        viewer(file)
+      } else {
+        browseURL(file)
+      }
     }
     else {
       print(data)

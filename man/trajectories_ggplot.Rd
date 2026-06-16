@@ -9,7 +9,8 @@ trajectories_ggplot(
   indicator_name,
   palette = "#4285f4",
   use_si_suffix = FALSE,
-  title_y = NULL
+  title_y = NULL,
+  y_lim = NULL
 )
 }
 \arguments{
@@ -17,8 +18,7 @@ trajectories_ggplot(
 
 \item{indicator_name}{A character string indicating the indicator_name to
 plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
-\code{"Bdev"}, \code{"B"}, \code{"H"}, \code{"Catch"}, \code{"BBfrac"} or
-\code{"Bref"}.}
+\code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.}
 
 \item{palette}{A character vector of colors used for plotting.
 Defaults to "#4285f4"}
@@ -28,6 +28,9 @@ used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{title_y}{A character string or expression for the y-axis label.
 Defaults to a predefined label depending on the selected variable.}
+
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object displaying trajectory summaries with credibility
