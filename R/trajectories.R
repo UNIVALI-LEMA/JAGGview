@@ -100,12 +100,15 @@ trajectories_data <- function(list_fit_models) {
 #' @param indicator_name A character string indicating the indicator_name to 
 #'   plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
 #'   \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.
-#' @param palette A character vector of colors used for plotting.
-#'   Defaults to "#4285f4"
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param title_y A character string or expression for the y-axis label.
-#'   Defaults to a predefined label depending on the selected variable.
+#' @param palette Optional. A character vector of colors used for plotting. 
+#'   If \code{NULL} (default), a color-blind-friendly palette is generated
+#'   automatically according to the number of index levels.
+#'   If the number of suplied colors is smaller than the number specified, 
+#'   than the code returns an error.
+#' @param title_y Optional. A character string or expression for the y-axis 
+#'   label. Defaults to a predefined label depending on the selected variable.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -141,7 +144,7 @@ trajectories_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, indicator_name, palette = "#4285f4", use_si_suffix = FALSE, 
+  df, indicator_name, use_si_suffix = FALSE, palette = NULL, 
   title_y = NULL, y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
@@ -155,8 +158,7 @@ trajectories_ggplot <- function(
       "'Bdev', 'B', 'H' or 'Catch'."
     ))
   }
-
-  .is_palette_valid(palette)
+  palette <- .resolve_palette(palette, 1)
 
   .axis_limit(y_lim)
 

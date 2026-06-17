@@ -309,30 +309,6 @@
   }
 }
 
-#' Validate color palette
-#'
-#' Checks whether all elements in a character vector are valid R colors.
-#'
-#' @param pal A character vector of color names or hexadecimal color codes.
-#'
-#' @return Returns \code{TRUE} if all elements are valid colors. Otherwise, the 
-#'   function stops with an error.
-#'
-#' @details
-#' The function attempts to convert the provided values using 
-#' \code{grDevices::col2rgb()}. If any element is not a valid color, an error 
-#' is raised.
-#'
-#' @keywords internal
-#' @importFrom grDevices col2rgb
-.is_palette_valid <- function(pal) {
-  res <- try(col2rgb(pal), silent = TRUE)
-  if (inherits(res, "try-error")) {
-    stop("All elements in palette are expected to be colors.")
-  }
-  return(TRUE)
-}
-
 #' .jbplot_ensemble2()
 #'
 #' Plots plots JABBA ensemble models + projections - joint or by run  

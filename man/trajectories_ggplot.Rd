@@ -7,8 +7,8 @@
 trajectories_ggplot(
   df,
   indicator_name,
-  palette = "#4285f4",
   use_si_suffix = FALSE,
+  palette = NULL,
   title_y = NULL,
   y_lim = NULL
 )
@@ -20,14 +20,17 @@ trajectories_ggplot(
 plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
 \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.}
 
-\item{palette}{A character vector of colors used for plotting.
-Defaults to "#4285f4"}
-
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
-\item{title_y}{A character string or expression for the y-axis label.
-Defaults to a predefined label depending on the selected variable.}
+\item{palette}{Optional. A character vector of colors used for plotting.
+If \code{NULL} (default), a color-blind-friendly palette is generated
+automatically according to the number of index levels.
+If the number of suplied colors is smaller than the number specified,
+than the code returns an error.}
+
+\item{title_y}{Optional. A character string or expression for the y-axis
+label. Defaults to a predefined label depending on the selected variable.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}

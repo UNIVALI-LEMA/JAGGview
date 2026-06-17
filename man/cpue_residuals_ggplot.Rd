@@ -6,23 +6,26 @@
 \usage{
 cpue_residuals_ggplot(
   df_lists,
-  palette = c("#4285f4", "#34a853", "#ea4335"),
   title_y = "Residuals",
-  text_size = 4
+  text_size = 4,
+  palette = NULL
 )
 }
 \arguments{
 \item{df_lists}{A named list of data frames as returned by
 \code{runs_tests_data()}.}
 
-\item{palette}{A character vector of colors used for plotting.
-Defaults to the vector \code{c("#4285f4", "#34a853", "#ea4335")}}
-
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals"}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{palette}{Optional. A character vector of colors used for plotting.
+If \code{NULL} (default), a color-blind-friendly palette is generated
+automatically according to the number of index levels.
+If the number of suplied colors is smaller than the number specified,
+than the code returns an error.}
 }
 \value{
 A ggplot object displaying CPUE residual diagnostics.

@@ -6,8 +6,8 @@
 \usage{
 fits_ggplot(
   df_lists,
-  palette = "#4285f4",
   title_y = "Abundance index",
+  palette = NULL,
   y_lim = NULL
 )
 }
@@ -16,11 +16,14 @@ fits_ggplot(
 \code{fits_data()}. It must contain the elements \code{Li_Ui},
 \code{CI_80}, and \code{CI_95}.}
 
-\item{palette}{A character vector of colors used for plotting.
-Defaults to "#4285f4".}
-
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Abundance index".}
+
+\item{palette}{Optional. A character vector of colors used for plotting.
+If \code{NULL} (default), a color-blind-friendly palette is generated
+automatically according to the number of index levels.
+If the number of suplied colors is smaller than the number specified,
+than the code returns an error.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}

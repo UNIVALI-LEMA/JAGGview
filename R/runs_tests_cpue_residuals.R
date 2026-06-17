@@ -216,12 +216,15 @@ runs_tests_ggplot <- function(
 #' 
 #' @param df_lists A named list of data frames as returned by
 #'   \code{runs_tests_data()}.
-#' @param palette A character vector of colors used for plotting. 
-#'   Defaults to the vector \code{c("#4285f4", "#34a853", "#ea4335")}
 #' @param title_y A character string for the y-axis label. 
 #'   Defaults to "Residuals"
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param palette Optional. A character vector of colors used for plotting. 
+#'   If \code{NULL} (default), a color-blind-friendly palette is generated
+#'   automatically according to the number of index levels.
+#'   If the number of suplied colors is smaller than the number specified, 
+#'   than the code returns an error.
 #' 
 #' @return A ggplot object displaying CPUE residual diagnostics.
 #' 
@@ -233,12 +236,14 @@ runs_tests_ggplot <- function(
 #' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
 #' theme geom_text
+#' @importFrom grDevices colorRampPalette
 cpue_residuals_ggplot <- function(
-  df_lists, palette = c("#4285f4", "#34a853", "#ea4335"), 
-  title_y = "Residuals", text_size = 4
+  df_lists, title_y = "Residuals", text_size = 4, palette = NULL
 ) {
 
-  .is_palette_valid(palette)
+  n_levels <- length(unique(df_lists$cpue_residuals$Index))
+
+  palette <- .resolve_palette(palette, n_levels)
 
   max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), 
                               TRUE)
@@ -252,7 +257,7 @@ cpue_residuals_ggplot <- function(
     col_y = "Res",
     ylim = ylim,
     margin = 0.25
-  )
+  ) 
   
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +

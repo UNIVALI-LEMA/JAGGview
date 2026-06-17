@@ -7,9 +7,9 @@
 priors_posteriors_ggplot(
   df_lists,
   indicator_name,
-  palette = c("#4285f4", "#34a853"),
   use_si_suffix = FALSE,
   text_size = 4,
+  palette = NULL,
   title_x = NULL,
   x_lim = NULL
 )
@@ -20,14 +20,17 @@ priors_posteriors_ggplot(
 \item{indicator_name}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
 
-\item{palette}{A character vector of colors used for prior and posterior
-distributions.}
-
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{palette}{Optional. A character vector of colors used for plotting.
+If \code{NULL} (default), a color-blind-friendly palette is generated
+automatically according to the number of index levels.
+If the number of suplied colors is smaller than the number specified,
+than the code returns an error.}
 
 \item{title_x}{A character string for the x-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}
@@ -50,7 +53,7 @@ for prior-posterior mean and variance ratios, and faceted views by scenario.
 \examples{
 \dontrun{
 df <- priors_posteriors_data(list_fit_models)
-priors_posteriors_ggplot(df, "K", c("#4285f4", "#34a853"))
+priors_posteriors_ggplot(df, "K", TRUE, palette = c("#4285f4", "#34a853"))
 }
 
 }

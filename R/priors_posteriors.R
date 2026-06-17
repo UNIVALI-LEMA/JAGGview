@@ -180,12 +180,15 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @param df_lists A named list as returned by \code{priors_posteriors_data()}.
 #' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
-#' @param palette A character vector of colors used for prior and posterior 
-#'   distributions.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param palette Optional. A character vector of colors used for plotting. 
+#'   If \code{NULL} (default), a color-blind-friendly palette is generated
+#'   automatically according to the number of index levels.
+#'   If the number of suplied colors is smaller than the number specified, 
+#'   than the code returns an error.
 #' @param title_x A character string for the x-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -201,7 +204,7 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_fit_models)
-#' priors_posteriors_ggplot(df, "K", c("#4285f4", "#34a853"))
+#' priors_posteriors_ggplot(df, "K", TRUE, palette = c("#4285f4", "#34a853"))
 #' }
 #'
 #' @export
@@ -209,8 +212,8 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, palette = c("#4285f4", "#34a853"), 
-  use_si_suffix = FALSE, text_size = 4, title_x = NULL, x_lim = NULL
+  df_lists, indicator_name, use_si_suffix = FALSE, text_size = 4, 
+  palette = NULL,title_x = NULL, x_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -219,7 +222,7 @@ priors_posteriors_ggplot <- function(
     stop("Parameter 'indicator_name' was expecting 'K', 'r' or 'psi'.")
   }
 
-  .is_palette_valid(palette)
+  palette <- .resolve_palette(palette, 2)
 
   .axis_limit(x_lim)
 

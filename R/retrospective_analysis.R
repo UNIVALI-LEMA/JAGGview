@@ -79,8 +79,8 @@ retrospective_analysis_data <- function(list_hc_models) {
       Index = "MSY",
       Index2 = "Surplus Production"
     ) %>%
-      mutate(
-        id = fct_relevel(id, sort(unique(id), decreasing = TRUE))
+    mutate(
+      id = fct_relevel(id, sort(unique(id), decreasing = TRUE))
     )
 
   # #####@> Extracting rhos...
@@ -222,7 +222,6 @@ retrospective_analysis_ggplot <- function(
       function(x) .format_number(x, decimals = x_decimals)
     }
   }
-
 
   y_decimals <- ifelse(max_val > 10, 0, 1)
 

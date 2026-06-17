@@ -336,6 +336,17 @@
   return(list(x = x_pos, y = y_pos))
 }
 
+#' Validate axis limits
+#' 
+#' Internal helper to validate axis limit vectors. Checks whether the provided 
+#' limits contain exactly two numeric values and whether the lower limit is 
+#' less than the upper limit.
+#' 
+#' @param lim A numeric vector of length 2 containing the lower and upper axis 
+#'   limits. Can be 'NULL'
+#' 
+#' @return Invisibly returns 'NULL'. An error is thrown if the validation fails.
+#' 
 #' @keywords internal
 .axis_limit <- function(lim) {
   if (!is.null(lim)) {
@@ -355,6 +366,99 @@
       stop(paste0(
         "Expected parameter '", param_name, "' to have a numeric class."
       ))
+    }
+  }
+}
+
+#' Validate color palette
+#'
+#' Checks whether all elements in a character vector are valid R colors.
+#'
+#' @param pal A character vector of color names or hexadecimal color codes.
+#'
+#' @return Returns \code{TRUE} if all elements are valid colors. Otherwise, the 
+#'   function stops with an error.
+#'
+#' @details
+#' The function attempts to convert the provided values using 
+#' \code{grDevices::col2rgb()}. If any element is not a valid color, an error 
+#' is raised.
+#'
+#' @keywords internal
+#' @importFrom grDevices col2rgb
+.is_palette_valid <- function(pal) {
+  res <- try(col2rgb(pal), silent = TRUE)
+  if (inherits(res, "try-error")) {
+    stop("All elements in palette are expected to be colors.")
+  }
+  return(TRUE)
+}
+
+#' Generate a default color palette
+#' 
+#' Creates a default color-blind-friendly palette with \code{n} colors. For up 
+#' to three colors a subset of highly contrasting colors is used. For larger 
+#' values, colors are selected from a predefined palette and interpolated when 
+#' necessary.
+#' 
+#' @param n Number of colors required.
+#' 
+#' @return A character vector of hexadecimal color codes.
+#' 
+#' @keywords internal
+.make_index_palette <- function(n) {
+  base <- c(
+    "#1B4F8A",
+    "#17A6A6",
+    "#2A9D5C",
+    "#A3CB9A",
+    "#F0A500",
+    "#E05C2A",
+    "#C0392B",
+    "#8E44AD",
+    "#5D6D7E",
+    "#85C1E9"
+  )
+  
+  if (n <= length(base)) {
+    if (n <= 3) {
+      return(base[c(1, 3, 6)[1:n]])
+    }
+    else {
+      return(base[1:n])
+    }
+  } else {
+    return(colorRampPalette(base)(n))
+  }
+}
+
+#' Resolve plotting palette
+#' 
+#' Returns the palette to be used in a plot. If \code{palette} is \code{NULL}, 
+#' a default palette is generated using \code{.make_index_palette()}. Otherwise, 
+#' the supplied palette is validated and checked to ensure that it contains at 
+#' least \code{num} colors.
+#' 
+#' @param palette Optional character vector of hexadecimal color codes.
+#' @param num Minimum number of colors required.
+#' 
+#' @return A character vector of hexadecimal color codes.
+#' 
+#' @keywords internal
+.resolve_palette <- function(palette, num) {
+  if (is.null(palette)) {
+    return(.make_index_palette(num))
+  } else {
+    .is_palette_valid(palette)
+    n_pal <- length(palette)
+    if (n_pal < num) {
+      stop(paste0(
+        "The palette contains ", n_pal," color(s), but ", num, 
+        " are required."
+      ))
+    }
+    else {
+      return(palette)
     }
   }
 }
