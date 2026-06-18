@@ -10,7 +10,7 @@ test_that(".array_to_dataframe() converts 3D array to data frame correctly", {
   
   expect_true(is.data.frame(result))
   expect_true(all(c("Index", "Year") %in% names(result)))
-  expect_equal(nrow(result), 4)  # 2x2x2 → 4 linhas por slice empilhado
+  expect_equal(nrow(result), 4)
 })
 
 test_that(".array_to_dataframe() assigns correct Index values", {
