@@ -10,6 +10,7 @@ retrospective_analysis_ggplot(
   text_size = 4,
   use_si_suffix = FALSE,
   title_y = NULL,
+  x_lim = NULL,
   y_lim = NULL
 )
 }
@@ -29,6 +30,9 @@ used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{title_y}{A character string for the y-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}
+
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the x-axis c(min, max) used to restrict the plotting range.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}

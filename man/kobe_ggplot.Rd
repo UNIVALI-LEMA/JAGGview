@@ -4,10 +4,16 @@
 \alias{kobe_ggplot}
 \title{Plot Kobe diagram}
 \usage{
-kobe_ggplot(df_lists)
+kobe_ggplot(df_lists, x_lim = NULL, y_lim = NULL)
 }
 \arguments{
 \item{df_lists}{A list as returned by \code{kobe_data()}.}
+
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object representing the Kobe plot, faceted by scenario.

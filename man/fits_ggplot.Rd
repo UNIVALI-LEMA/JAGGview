@@ -8,6 +8,7 @@ fits_ggplot(
   df_lists,
   title_y = "Abundance index",
   palette = NULL,
+  x_lim = NULL,
   y_lim = NULL
 )
 }
@@ -24,6 +25,9 @@ If \code{NULL} (default), a color-blind-friendly palette is generated
 automatically according to the number of index levels.
 If the number of suplied colors is smaller than the number specified,
 than the code returns an error.}
+
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the x-axis c(min, max) used to restrict the plotting range.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}

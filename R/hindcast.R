@@ -99,6 +99,8 @@ hindcast_data <- function(list_hc_models) {
 #' @param df_lists A named list as returned by \code{hindcast_data()}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -123,23 +125,34 @@ hindcast_data <- function(list_hc_models) {
 #' theme guides guide_legend
 #' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
-hindcast_ggplot <- function(df_lists, text_size = 4, y_lim = NULL) {
+hindcast_ggplot <- function(
+  df_lists, text_size = 4, x_lim = NULL, y_lim = NULL
+) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
 
   .axis_limit(y_lim)
 
+  .axis_limit(x_lim)
+
   if (is.null(y_lim)) {
-    max_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
-    min_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
-    y_lim <- c(min_val, max_val)
+    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
+    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+    y_lim <- c(min_y_val, max_y_val)
+  }
+
+  if (is.null(x_lim)) {
+    max_x_val <- max(df_lists$data$year)
+    min_x_val <- min(df_lists$data$year)
+    x_lim <- c(min_x_val, max_x_val)
   }
 
   pos <- .auto_text_position(
     df_lists$data, 
     "year", 
     "hat.uci", 
+    xlim = x_lim,
     ylim = y_lim
   )
   
@@ -177,7 +190,7 @@ hindcast_ggplot <- function(df_lists, text_size = 4, y_lim = NULL) {
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(limits = y_lim) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +
     theme(legend.position = "bottom") +
     guides(colour = guide_legend(nrow = 1))

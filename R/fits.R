@@ -145,6 +145,8 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'   automatically according to the number of index levels.
 #'   If the number of suplied colors is smaller than the number specified, 
 #'   than the code returns an error.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -166,22 +168,29 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, title_y = "Abundance index", palette = NULL, y_lim = NULL
+  df_lists, title_y = "Abundance index", palette = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  n_scenarios <- length(unique(df_lists$CI_95$Scenario))
-  n_index <- length(unique(df_lists$CI_95$Index))
 
   palette <- .resolve_palette(palette, 1)
 
   .axis_limit(y_lim)
 
+  .axis_limit(x_lim)
+
   if (is.null(y_lim)) {
-    max_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
-    min_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
-    y_lim <- c(min_val, max_val)
+    max_y_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
+    min_y_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
+    y_lim <- c(min_y_val, max_y_val)
+  }
+
+  if (is.null(x_lim)) {
+    max_x_val <- max(df_lists$CI_80$Year, na.rm = TRUE)
+    min_x_val <- min(df_lists$CI_80$Year, na.rm = TRUE)
+    x_lim <- c(min_x_val, max_x_val)
   }
 
   ggplot() +
@@ -199,7 +208,7 @@ fits_ggplot <- function(
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 
     facet_grid(Scenario ~ Index, scales = "free") +
-    scale_y_continuous(limits = y_lim) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) + 
     labs(x = "Year", y = title_y) +
     .my_theme()
 }

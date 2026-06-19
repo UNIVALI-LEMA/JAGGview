@@ -8,11 +8,11 @@
   data_list,
   col_x,
   col_y,
+  xlim,
   ylim,
   margin = 0.1,
   low_quantile = 0.2,
-  text_width_fraction = 0.15,
-  x_max = NULL
+  text_width_fraction = 0.15
 )
 }
 \arguments{
@@ -24,6 +24,9 @@ x-axis.}
 \item{col_y}{A string indicating the name of the column to be used as the
 y-axis.}
 
+\item{xlim}{A numeric vector of length 2, used to informn the x-axis limits
+of the plot.}
+
 \item{ylim}{A numeric vector of length 2, used to informn the y-axis limits
 of the plot.}
 
@@ -34,9 +37,6 @@ positions. Defaults to 0.1.}
 \item{low_quantile}{A numeric value (between 0 and 1) used to define
 low-value regions in the data. Positions are selected among values below
 this quantile.}
-
-\item{x_max}{Optional. A numeric value (positive) used to restrict the
-x-axis range considered in the calculation.}
 }
 \value{
 A list with two elements:

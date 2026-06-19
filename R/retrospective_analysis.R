@@ -118,6 +118,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #'   Defaults to 4.
 #' @param title_y A character string for the y-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -141,7 +143,7 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @importFrom JABBA ss3col
 retrospective_analysis_ggplot <- function(
   df_lists, indicator_name, text_size = 4, use_si_suffix = FALSE, 
-  title_y = NULL, y_lim = NULL
+  title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -154,6 +156,8 @@ retrospective_analysis_ggplot <- function(
   }
 
   .axis_limit(y_lim)
+
+  .axis_limit(x_lim)
 
   if (indicator_name != "MSY") {
     data <- df_lists$data
@@ -188,34 +192,46 @@ retrospective_analysis_ggplot <- function(
   rho_var <- rho_data[rho_data$Index == indicator_name, ]
   
   if (indicator_name != "MSY") {
-    max_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE, 1.1)
+    max_y_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
-      min_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_val, max_val)
+      min_y_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE, 1.1)
+      y_lim <- c(min_y_val, max_y_val)
+    }
+    if (is.null(x_lim)) {
+      max_x_val <- max(data_ref$Year)
+      min_x_val <- min(data_ref$Year)
     }
     pos <- .auto_text_position(
       data_list = data_ref,
       col_x = "Year",
       col_y = "uci",
+      xlim = x_lim,
       ylim = y_lim,
       margin = 0.15
     )
-    } else {
-    max_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE, 1.1)
+  } else {
+    max_y_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
-      min_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_val, max_val)
+      min_y_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE, 1.1)
+      y_lim <- c(min_y_val, max_y_val)
+    }
+
+    if (is.null(x_lim)) {
+      max_x_val <- max(data_ref$SB_i)
+      min_x_val <- min(data_ref$SB_i)
+      x_lim <- c(min_x_val, max_x_val)
     }
     
     pos <- .auto_text_position(
       data_list = data_lines,
       col_x = "SB_i",
       col_y = "SP",
+      xlim = x_lim,
       ylim = y_lim,
       margin = 0.2
     )
     max_x_val <- .round_to_nearest(max(data_var$SB_i, na.rm = TRUE), TRUE, 1.1)
-    x_decimals <- ifelse(max_x_val > 10, 0, 1)
+    x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
     x_labels <- if (use_si_suffix) {
       function(x) .international_system_prefixes(x)
     } else {
@@ -223,7 +239,7 @@ retrospective_analysis_ggplot <- function(
     }
   }
 
-  y_decimals <- ifelse(max_val > 10, 0, 1)
+  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
 
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
@@ -275,12 +291,9 @@ retrospective_analysis_ggplot <- function(
     ) +
     facet_wrap(~Scenario, ncol = 3, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(
-      expand = c(0, 0), 
-      limits = y_lim, 
-      labels = y_labels
-    )
-  
+    scale_y_continuous(expand = c(0, 0), labels = y_labels) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim)
+
   if (indicator_name == "MSY") {
     p <- p +
       scale_x_continuous(labels = x_labels)

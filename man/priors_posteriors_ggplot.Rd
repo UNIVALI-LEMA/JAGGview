@@ -11,7 +11,9 @@ priors_posteriors_ggplot(
   text_size = 4,
   palette = NULL,
   title_x = NULL,
-  x_lim = NULL
+  x_decimals = NULL,
+  x_lim = NULL,
+  y_lim = NULL
 )
 }
 \arguments{
@@ -35,8 +37,13 @@ than the code returns an error.}
 \item{title_x}{A character string for the x-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}
 
+\item{x_decimals}{Optional. Number of decimal places.}
+
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the y-axis c(min, max) used to restrict the plotting range.}
 }
 \value{
 A ggplot object displaying prior and posterior densities, annotated

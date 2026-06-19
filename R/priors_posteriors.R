@@ -191,8 +191,11 @@ priors_posteriors_data <- function(list_fit_models) {
 #'   than the code returns an error.
 #' @param title_x A character string for the x-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
+#' @param x_decimals Optional. Number of decimal places.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
 #' @return A ggplot object displaying prior and posterior densities, annotated 
 #'   with prior-posterior metrics (PPMR and PPVR).
@@ -212,8 +215,8 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, use_si_suffix = FALSE, text_size = 4, 
-  palette = NULL,title_x = NULL, x_lim = NULL
+  df_lists, indicator_name, use_si_suffix = FALSE, text_size = 4,
+  palette = NULL, title_x = NULL, x_decimals = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -225,6 +228,8 @@ priors_posteriors_ggplot <- function(
   palette <- .resolve_palette(palette, 2)
 
   .axis_limit(x_lim)
+
+  .axis_limit(y_lim)
 
   indicator1 <- paste0(indicator_name, "01")
   indicator2 <- paste0(indicator_name, "02")
@@ -252,46 +257,50 @@ priors_posteriors_ggplot <- function(
       value_2 = all_of(indicator2)
     )
   
-  if (is.null(x_lim[2])) {
-    prior_max <- max(prior$value_1, na.rm = TRUE)
-    pos_max <- max(posterior$value_1, na.rm = TRUE)
-    x_lim[2] <- ifelse(prior_max > pos_max, prior_max, pos_max)
+  if (is.null(x_lim)) {
+    prior_x_max <- max(prior$value_1, na.rm = TRUE)
+    pos_x_max <- max(posterior$value_1, na.rm = TRUE)
+    x_lim <- c(0, ifelse(prior_x_max > pos_x_max, prior_x_max, pos_x_max))
   }
 
-  x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
+  if (is.null(x_decimals)) {
+    x_decimals <- ifelse(x_lim[2] > 10, 0, 2)
+  }
 
-  max_pos_val <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
-                                  TRUE, 1.1)
-  min_pos_val <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), 
-                                  FALSE, 1.1)
-
-  max_prior_val <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
+  if (is.null(y_lim)) {
+    max_y_pos <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
                                     TRUE, 1.1)
-  min_prior_val <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
+    min_y_pos <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), 
                                     FALSE, 1.1)
 
-  max_val <- if (max_pos_val > max_prior_val) {
-    max_pos_val
-  }
-  else {
-    max_prior_val
-  }
+    max_prior <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
+                                      TRUE, 1.1)
+    min_prior <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
+                                      FALSE, 1.1)
 
-  min_val <- if (min_pos_val < min_prior_val) {
-    min_pos_val
+    max_y_val <- if (max_y_pos > max_prior) {
+      max_y_pos
+    }
+    else {
+      max_prior
+    }
+
+    min_y_val <- if (min_y_pos < min_prior) {
+      min_y_pos
+    }
+    else {
+      min_prior
+    }
+    y_lim <- c(min_y_val, max_y_val)
   }
-  else {
-    min_prior_val
-  }
-  ylim <- c(min_val, max_val)
 
   pos <- .auto_text_position(
     data_list = list(prior, posterior), 
     col_x = "value_1", 
     col_y = "value_2",
-    ylim = ylim, 
-    margin = 0.2,
-    x_max = x_lim[2]
+    xlim = x_lim,
+    ylim = y_lim, 
+    margin = 0.2
   )
   
   df_text <- df_lists$PPMR %>%
@@ -305,7 +314,6 @@ priors_posteriors_ggplot <- function(
     x = pos$x,
     y = pos$y
   )
-  # print(df_text)
 
   x_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
@@ -328,10 +336,10 @@ priors_posteriors_ggplot <- function(
                         size = text_size
     ) +
     facet_wrap(~Scenario, ncol = 3) +
-    coord_cartesian(xlim = x_lim) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = "Density") +
     scale_x_continuous(labels = x_labels) +
-    scale_y_continuous(expand = c(0, 0), limits = ylim) +
+    scale_y_continuous(expand = c(0, 0)) +
     .my_theme() +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
 }

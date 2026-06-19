@@ -141,6 +141,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #'   Defaults to "Residuals".
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -162,17 +164,25 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, title_y = "Residuals", text_size = 4, y_lim = NULL) {
+  df_lists, title_y = "Residuals", text_size = 4, x_lim = NULL, y_lim = NULL) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
 
   .axis_limit(y_lim)
 
+  .axis_limit(x_lim)
+
   if (is.null(y_lim)) {
-    max_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
-    min_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE,2.5)
-    y_lim <- c(min_val, max_val)
+    max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+    min_y_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE,2.5)
+    y_lim <- c(min_y_val, max_y_val)
+  }
+
+  if (is.null(x_lim)) {
+    max_x_val <- max(df_lists$SE3$ymax)
+    min_x_val <- min(df_lists$SE3$ymin)
+    x_lim <- c(min_x_val, max_x_val)
   }
 
   pos <- .auto_text_position(
@@ -180,9 +190,10 @@ runs_tests_ggplot <- function(
     col_x = "Year",
     col_y = "Res",
     margin = 0.4,
+    xlim = x_lim,
     ylim = y_lim
   )
-  
+
   ggplot() +
     geom_rect(data = df_lists$SE3,
               aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
@@ -202,7 +213,7 @@ runs_tests_ggplot <- function(
         pch = 21, size = 2.5) +
       facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
-    scale_y_continuous(limits = y_lim) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
@@ -225,6 +236,10 @@ runs_tests_ggplot <- function(
 #'   automatically according to the number of index levels.
 #'   If the number of suplied colors is smaller than the number specified, 
 #'   than the code returns an error.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #' 
 #' @return A ggplot object displaying CPUE residual diagnostics.
 #' 
@@ -238,24 +253,38 @@ runs_tests_ggplot <- function(
 #' theme geom_text
 #' @importFrom grDevices colorRampPalette
 cpue_residuals_ggplot <- function(
-  df_lists, title_y = "Residuals", text_size = 4, palette = NULL
+  df_lists, title_y = "Residuals", text_size = 4, palette = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
 
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
 
   palette <- .resolve_palette(palette, n_levels)
 
-  max_val <- .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), 
-                              TRUE)
-  min_val <- .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), 
-                              FALSE)
-  ylim <- c(min_val, max_val)
+  .axis_limit(y_lim)
+
+  .axis_limit(x_lim)
+
+  if (is.null(y_lim)) {
+    max_y_val <- .round_to_nearest(max(
+      df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
+    min_y_val <- .round_to_nearest(min(
+      df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+    y_lim <- c(min_y_val, max_y_val)
+  }
+  
+  if (is.null(x_lim)) {
+    max_x_val <- max(df_lists$cpue_residuals$Year, na.rm = TRUE)
+    min_x_val <- min(df_lists$cpue_residuals$Year, na.rm = TRUE)
+    x_lim <- c(min_x_val, max_x_val)
+  }
   
   pos <- .auto_text_position(
     data_list = df_lists$cpue_residuals,
     col_x = "Year",
     col_y = "Res",
-    ylim = ylim,
+    xlim = x_lim,
+    ylim = y_lim,
     margin = 0.25
   ) 
   
@@ -273,7 +302,8 @@ cpue_residuals_ggplot <- function(
               aes(x = pos$x, y = pos$y,
                   label = paste0("RMSE = ", Value, " %")), size = text_size) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), limits = ylim) +
+    scale_y_continuous(expand = c(0, 0)) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     scale_fill_manual(values = palette) +
     scale_colour_manual(values = palette) +
     labs(x = "Year", y = title_y, fill = "", colour = "") +

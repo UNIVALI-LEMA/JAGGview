@@ -109,6 +109,8 @@ trajectories_data <- function(list_fit_models) {
 #'   than the code returns an error.
 #' @param title_y Optional. A character string or expression for the y-axis 
 #'   label. Defaults to a predefined label depending on the selected variable.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
@@ -145,7 +147,7 @@ trajectories_data <- function(list_fit_models) {
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
   df, indicator_name, use_si_suffix = FALSE, palette = NULL, 
-  title_y = NULL, y_lim = NULL
+  title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -162,13 +164,21 @@ trajectories_ggplot <- function(
 
   .axis_limit(y_lim)
 
+  .axis_limit(x_lim)
+
   df <- df %>%
     filter(indicator == indicator_name)
 
-  max_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE)
   if (is.null(y_lim)) {
-    min_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE)
-    y_lim <- c(min_val, max_val)
+    max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE)
+    min_y_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE)
+    y_lim <- c(min_y_val, max_y_val)
+  }
+
+  if (is.null(x_lim)) {
+    max_x_val <- max(df$year, na.rm = TRUE)
+    min_x_val <- min(df$year, na.rm = TRUE)
+    x_lim <- c(min_x_val, max_x_val)
   }
 
 
@@ -188,7 +198,7 @@ trajectories_ggplot <- function(
     title_y <- labels_y[[indicator_name]]
   }
 
-  y_decimals <- ifelse(max_val > 10, 0, 1)
+  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
 
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
@@ -221,9 +231,9 @@ trajectories_ggplot <- function(
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
     scale_y_continuous(
       expand = c(0, 0), 
-      limits = y_lim,
       labels = y_labels
     ) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = "Year", y = title_y) +
     .my_theme() +
     theme(legend.position = "none")

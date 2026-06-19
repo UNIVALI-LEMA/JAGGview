@@ -84,6 +84,8 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
     ) %>%
     arrange(Scenario, year)
   
+  # After need review because the values are not fixed, should be dinamic, the
+  # values that are now 6
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
     col = "yellow"
@@ -169,6 +171,10 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' temporal trajectories.
 #'
 #' @param df_lists A list as returned by \code{kobe_data()}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
+#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
 #'
 #' @return A ggplot object representing the Kobe plot, faceted by scenario.
 #'
@@ -195,14 +201,24 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
 #' scale_shape_manual scale_fill_manual labs coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
-kobe_ggplot <- function(df_lists) {
+kobe_ggplot <- function(df_lists, x_lim = NULL, y_lim = NULL) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  max_x <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
-  max_y <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
-  if (max_x > 6) max_x <- 6
-  if (max_y > 6) max_y <- 6
+  .axis_limit(y_lim)
+
+  .axis_limit(x_lim)
+
+  if (is.null(y_lim)) {
+    max_y <- .round_to_nearest(max(df_lists$tmp11$Fratio, na.rm = TRUE), TRUE, 1)
+    y_lim <- c(0, max_y)
+  }
+  if (is.null(x_lim)) {
+    max_x <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
+    x_lim <- c(0, max_x)
+  }
+  if (x_lim[1] < 0) x_lim[1] <- 0
+  if (y_lim[1] < 0) y_lim[1] <- 0
 
   n_levels <- length(unique(df_lists$k.out$q))
   ggplot() +
@@ -228,15 +244,15 @@ kobe_ggplot <- function(df_lists) {
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
-    scale_x_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) +
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) + # dynamic
+    scale_x_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) + # dynamic
     scale_shape_manual(values = c(21, 22, 23)) +
     scale_fill_manual(
       values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
     ) +
     labs(x = expression(B/B[MSY]), y = expression(F/F[MSY]), fill = "",
          shape = "") +
-    coord_cartesian(xlim = c(0, max_x), ylim = c(0, max_y)) +
+    coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +
     theme(legend.position = "top")
 }

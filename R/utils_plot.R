@@ -185,6 +185,8 @@
 #'   x-axis.
 #' @param col_y A string indicating the name of the column to be used as the 
 #'   y-axis.
+#' @param xlim A numeric vector of length 2, used to informn the x-axis limits 
+#'   of the plot.
 #' @param ylim A numeric vector of length 2, used to informn the y-axis limits 
 #'   of the plot.
 #' @param margin A numeric value (between 0 and 0.5) defining the proportion of 
@@ -193,8 +195,6 @@
 #' @param low_quantile A numeric value (between 0 and 1) used to define 
 #'   low-value regions in the data. Positions are selected among values below 
 #'   this quantile.
-#' @param x_max Optional. A numeric value (positive) used to restrict the 
-#'   x-axis range considered in the calculation.
 #'
 #' @return A list with two elements:
 #' \describe{
@@ -212,8 +212,8 @@
 #'
 #' @keywords internal
 .auto_text_position <- function(
-  data_list, col_x, col_y, ylim, margin = 0.1, low_quantile = 0.2, 
-  text_width_fraction = 0.15, x_max = NULL
+  data_list, col_x, col_y, xlim, ylim, margin = 0.1, low_quantile = 0.2, 
+  text_width_fraction = 0.15
 ) {
   
   if (is.data.frame(data_list)) {
@@ -228,22 +228,19 @@
   if (low_quantile < 0 || low_quantile > 1) {
     stop("Expected parameter 'low_quantile' to be between 0 and 1.")
   }
-  if (x_max <= 0 && !is.null(x_max)) {
-    stop("Expected parameter 'x_max' to be a positive number.")
-  }
-  if (is.null(ylim) || length(ylim) != 2) {
-    stop("Expected parameter 'ylim' to be numeric vector of length 2.")
-  }
+  .axis_limit(xlim)
+
+  .axis_limit(ylim)
 
   all_x <- unique(unlist(lapply(data_list, function(d) d[[col_x]])))
   all_x <- sort(all_x)
 
-  if (!is.null(x_max)) {
-    all_x <- all_x[all_x <= x_max]
+  if (!is.null(xlim)) {
+    all_x <- all_x[all_x >= xlim[1] & all_x <= xlim[2]]
   }
 
   if (length(all_x) == 0) {
-    stop("No values left after applying x_max.")
+    stop("No values left after applying xlim")
   }
 
   y_matrix <- sapply(data_list, function(d) {
@@ -254,8 +251,8 @@
     x <- x[valid]
     y <- y[valid]
 
-    if (!is.null(x_max)) {
-      keep <- x <= x_max
+    if (!is.null(xlim)) {
+      keep <- x >= xlim[1] & x <= xlim[2]
       x <- x[keep]
       y <- y[keep]
     }
@@ -362,7 +359,7 @@
         "' to be less than the second."
       ))
     }
-    if (!any(inherits(lim, "numeric"))) {
+    if (!is.numeric(lim)) {
       stop(paste0(
         "Expected parameter '", param_name, "' to have a numeric class."
       ))

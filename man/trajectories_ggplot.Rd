@@ -10,6 +10,7 @@ trajectories_ggplot(
   use_si_suffix = FALSE,
   palette = NULL,
   title_y = NULL,
+  x_lim = NULL,
   y_lim = NULL
 )
 }
@@ -31,6 +32,9 @@ than the code returns an error.}
 
 \item{title_y}{Optional. A character string or expression for the y-axis
 label. Defaults to a predefined label depending on the selected variable.}
+
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
+upper limits of the x-axis c(min, max) used to restrict the plotting range.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}
