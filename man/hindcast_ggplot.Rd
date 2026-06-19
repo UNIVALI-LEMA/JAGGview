@@ -4,7 +4,13 @@
 \alias{hindcast_ggplot}
 \title{Plot hindcast diagnostics}
 \usage{
-hindcast_ggplot(df_lists, text_size = 4, x_lim = NULL, y_lim = NULL)
+hindcast_ggplot(
+  df_lists,
+  text_size = 4,
+  x_lim = NULL,
+  y_lim = NULL,
+  zoom = FALSE
+)
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{hindcast_data()}.}
@@ -17,6 +23,10 @@ upper limits of the x-axis c(min, max) used to restrict the plotting range.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+
+\item{zoom}{Optional. A boolean value that if \code{TRUE} shows a subplot of
+a zoomed view of the hindcast window. Facets with no data for a given
+Scenario and Index combination are left blank. Defaults to \code{FALSE}.}
 }
 \value{
 A ggplot object displaying hindcast trajectories, observed data
