@@ -83,23 +83,25 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
       .by = c(year, Scenario)
     ) %>%
     arrange(Scenario, year)
+
+  max_x <- ceiling(max(tmp11$Bratio))
+  max_y <- ceiling(max(tmp11$Fratio))
   
-  # After need review because the values are not fixed, should be dinamic, the
-  # values that are now 6
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
     col = "yellow"
   )
   col02 <- data.frame(
-    xmin = c(1, 1), xmax = c(6, 6), ymin = c(1, 1), ymax = c(6, 6), 
+    xmin = c(1, 1), xmax = c(max_x, max_x), 
+    ymin = c(1, 1), ymax = c(max_y, max_y), 
     col = "orange"
   )
   col03 <- data.frame(
-    xmin = c(0, 0), xmax = c(1, 1), ymin = c(1, 1), ymax = c(6, 6), 
+    xmin = c(0, 0), xmax = c(1, 1), ymin = c(1, 1), ymax = c(max_y, max_y), 
     col = "red"
   )
   col04 <- data.frame(
-    xmin = c(1, 1), xmax = c(6, 6), ymin = c(0, 0), ymax = c(1, 1), 
+    xmin = c(1, 1), xmax = c(max_x, max_x), ymin = c(0, 0), ymax = c(1, 1), 
     col = "#00FF00"
   )
 
@@ -210,11 +212,11 @@ kobe_ggplot <- function(df_lists, x_lim = NULL, y_lim = NULL) {
   .axis_limit(x_lim)
 
   if (is.null(y_lim)) {
-    max_y <- .round_to_nearest(max(df_lists$tmp11$Fratio, na.rm = TRUE), TRUE, 1)
+    max_y <- df_lists$col02$ymax
     y_lim <- c(0, max_y)
   }
   if (is.null(x_lim)) {
-    max_x <- .round_to_nearest(max(df_lists$tmp11$Bratio, na.rm = TRUE), TRUE, 1)
+    max_x <- df_lists$col02$xmax
     x_lim <- c(0, max_x)
   }
   if (x_lim[1] < 0) x_lim[1] <- 0
@@ -244,8 +246,8 @@ kobe_ggplot <- function(df_lists, x_lim = NULL, y_lim = NULL) {
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
     facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
-    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) + # dynamic
-    scale_x_continuous(expand = c(0, 0), breaks = seq(0, 6, 1)) + # dynamic
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, y_lim[2], 1)) + 
+    scale_x_continuous(expand = c(0, 0), breaks = seq(0, x_lim[2], 1)) + 
     scale_shape_manual(values = c(21, 22, 23)) +
     scale_fill_manual(
       values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
