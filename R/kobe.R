@@ -173,6 +173,8 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' temporal trajectories.
 #'
 #' @param df_lists A list as returned by \code{kobe_data()}.
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -203,7 +205,7 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
 #' scale_shape_manual scale_fill_manual labs coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
-kobe_ggplot <- function(df_lists, x_lim = NULL, y_lim = NULL) {
+kobe_ggplot <- function(df_lists, n_col = 3, x_lim = NULL, y_lim = NULL) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -245,7 +247,7 @@ kobe_ggplot <- function(df_lists, x_lim = NULL, y_lim = NULL) {
     geom_point(data = df_lists$tmp11b,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
-    facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
+    facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
     scale_y_continuous(expand = c(0, 0), breaks = seq(0, y_lim[2], 1)) + 
     scale_x_continuous(expand = c(0, 0), breaks = seq(0, x_lim[2], 1)) + 
     scale_shape_manual(values = c(21, 22, 23)) +

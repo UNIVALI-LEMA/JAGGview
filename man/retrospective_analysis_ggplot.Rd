@@ -7,6 +7,7 @@
 retrospective_analysis_ggplot(
   df_lists,
   indicator_name,
+  n_col = 3,
   text_size = 4,
   use_si_suffix = FALSE,
   title_y = NULL,
@@ -21,6 +22,9 @@ retrospective_analysis_ggplot(
 \item{indicator_name}{A character string specifying the name of the
 indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 "procB", and "MSY".}
+
+\item{n_col}{An integer value that determines the maximum number of columns
+per line. Defaults to 3.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}

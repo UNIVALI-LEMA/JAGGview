@@ -6,8 +6,8 @@
 \usage{
 runs_tests_ggplot(
   df_lists,
-  title_y = "Residuals",
   text_size = 4,
+  title_y = "Residuals",
   x_lim = NULL,
   y_lim = NULL
 )
@@ -15,11 +15,11 @@ runs_tests_ggplot(
 \arguments{
 \item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
 
-\item{title_y}{A character string for the y-axis label.
-Defaults to "Residuals".}
-
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{title_y}{A character string for the y-axis label.
+Defaults to "Residuals".}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}

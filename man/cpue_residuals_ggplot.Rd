@@ -6,8 +6,9 @@
 \usage{
 cpue_residuals_ggplot(
   df_lists,
-  title_y = "Residuals",
+  n_col = 3,
   text_size = 4,
+  title_y = "Residuals",
   palette = NULL,
   x_lim = NULL,
   y_lim = NULL
@@ -17,11 +18,14 @@ cpue_residuals_ggplot(
 \item{df_lists}{A named list of data frames as returned by
 \code{runs_tests_data()}.}
 
-\item{title_y}{A character string for the y-axis label.
-Defaults to "Residuals"}
+\item{n_col}{An integer value that determines the maximum number of columns
+per line. Defaults to 3.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{title_y}{A character string for the y-axis label.
+Defaults to "Residuals"}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
 If \code{NULL} (default), a color-blind-friendly palette is generated

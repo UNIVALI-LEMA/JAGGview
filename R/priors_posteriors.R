@@ -180,10 +180,12 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @param df_lists A named list as returned by \code{priors_posteriors_data()}.
 #' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -215,7 +217,7 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, use_si_suffix = FALSE, text_size = 4,
+  df_lists, indicator_name, n_col = 3, text_size = 4, use_si_suffix = FALSE,
   palette = NULL, title_x = NULL, x_decimals = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
@@ -274,9 +276,9 @@ priors_posteriors_ggplot <- function(
                                     FALSE, 1.1)
 
     max_prior <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
-                                      TRUE, 1.1)
+                                  TRUE, 1.1)
     min_prior <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
-                                      FALSE, 1.1)
+                                  FALSE, 1.1)
 
     max_y_val <- if (max_y_pos > max_prior) {
       max_y_pos
@@ -327,15 +329,14 @@ priors_posteriors_ggplot <- function(
     geom_area(data = posterior, aes(x = value_1, y = value_2),
               fill = palette[2], alpha = 0.5, colour = "black") +
     geom_text(data = df_text,
-                    aes(x = x, y = y, 
-                        label = paste0("PPMR = ", ppmr_value)), size = text_size
+              aes(x = x, y = y, label = paste0("PPMR = ", ppmr_value)), 
+              size = text_size
     ) +
     geom_text(data = df_text,
-                    aes(x = x, y = y, 
-                        label = paste0("PPVR = ", ppvr_value)), vjust = 2,
-                        size = text_size
+              aes(x = x, y = y, label = paste0("PPVR = ", ppvr_value)), 
+              vjust = 2, size = text_size
     ) +
-    facet_wrap(~Scenario, ncol = 3) +
+    facet_wrap(~Scenario, ncol = n_col) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = "Density") +
     scale_x_continuous(labels = x_labels) +

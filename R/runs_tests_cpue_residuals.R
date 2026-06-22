@@ -137,10 +137,10 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' residuals, credibility limits, and p-values across scenarios and indices.
 #'
 #' @param df_lists A named list as returned by \code{runs_tests_data()}.
-#' @param title_y A character string for the y-axis label.
-#'   Defaults to "Residuals".
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_y A character string for the y-axis label.
+#'   Defaults to "Residuals".
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -164,7 +164,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, title_y = "Residuals", text_size = 4, x_lim = NULL, y_lim = NULL) {
+  df_lists, text_size = 4, title_y = "Residuals", x_lim = NULL, y_lim = NULL) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -227,10 +227,12 @@ runs_tests_ggplot <- function(
 #' 
 #' @param df_lists A named list of data frames as returned by
 #'   \code{runs_tests_data()}.
-#' @param title_y A character string for the y-axis label. 
-#'   Defaults to "Residuals"
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_y A character string for the y-axis label. 
+#'   Defaults to "Residuals"
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -253,8 +255,8 @@ runs_tests_ggplot <- function(
 #' theme geom_text
 #' @importFrom grDevices colorRampPalette
 cpue_residuals_ggplot <- function(
-  df_lists, title_y = "Residuals", text_size = 4, palette = NULL, x_lim = NULL, 
-  y_lim = NULL
+  df_lists, n_col = 3, text_size = 4, title_y = "Residuals", palette = NULL, 
+  x_lim = NULL, y_lim = NULL
 ) {
 
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
@@ -301,7 +303,7 @@ cpue_residuals_ggplot <- function(
     geom_text(data = df_lists$RMSE_data,
               aes(x = pos$x, y = pos$y,
                   label = paste0("RMSE = ", Value, " %")), size = text_size) +
-    facet_wrap(~ Scenario, scales = "fixed", ncol = 3) +
+    facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
     scale_y_continuous(expand = c(0, 0)) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     scale_fill_manual(values = palette) +

@@ -7,6 +7,7 @@
 trajectories_ggplot(
   df,
   indicator_name,
+  n_col = 3,
   use_si_suffix = FALSE,
   palette = NULL,
   title_y = NULL,
@@ -20,6 +21,9 @@ trajectories_ggplot(
 \item{indicator_name}{A character string indicating the indicator_name to
 plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
 \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.}
+
+\item{n_col}{An integer value that determines the maximum number of columns
+per line. Defaults to 3.}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}

@@ -100,6 +100,8 @@ trajectories_data <- function(list_fit_models) {
 #' @param indicator_name A character string indicating the indicator_name to 
 #'   plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
 #'   \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param palette Optional. A character vector of colors used for plotting. 
@@ -146,7 +148,7 @@ trajectories_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, indicator_name, use_si_suffix = FALSE, palette = NULL, 
+  df, indicator_name, n_col = 3, use_si_suffix = FALSE, palette = NULL, 
   title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
@@ -170,8 +172,8 @@ trajectories_ggplot <- function(
     filter(indicator == indicator_name)
 
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE)
-    min_y_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE)
+    max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
+    min_y_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -228,7 +230,7 @@ trajectories_ggplot <- function(
   
   p <- p +
     geom_line(data = df, aes(x = year, y = mu), linewidth = 1) +
-    facet_wrap(~ Scenario, scales = "free_x", ncol = 3) +
+    facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
     scale_y_continuous(
       expand = c(0, 0), 
       labels = y_labels

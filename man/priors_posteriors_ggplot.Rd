@@ -7,8 +7,9 @@
 priors_posteriors_ggplot(
   df_lists,
   indicator_name,
-  use_si_suffix = FALSE,
+  n_col = 3,
   text_size = 4,
+  use_si_suffix = FALSE,
   palette = NULL,
   title_x = NULL,
   x_decimals = NULL,
@@ -22,11 +23,14 @@ priors_posteriors_ggplot(
 \item{indicator_name}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{n_col}{An integer value that determines the maximum number of columns
+per line. Defaults to 3.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
+used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
 If \code{NULL} (default), a color-blind-friendly palette is generated

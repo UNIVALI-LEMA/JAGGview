@@ -202,8 +202,8 @@ fits_ggplot <- function(
         alpha = 0.3, fill = palette[1]) +
     geom_line(data = df_lists$CI_80,
         aes(x = Year, y = mu)) +
-    geom_errorbar(data = df_lists$Li_Ui,
-                  aes(x = Year, ymin = Li, ymax = Ui)) +
+    geom_errorbar(data = df_lists$Li_Ui, 
+                  aes(x = Year, ymin = Li, ymax = Ui), width = 1.5) +
     geom_point(data = df_lists$Li_Ui,
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 

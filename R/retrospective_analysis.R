@@ -112,6 +112,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @param indicator_name A character string specifying the name of the 
 #'   indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 #'   "procB", and "MSY".
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param text_size An integer value that determines the size of the text. 
@@ -138,11 +140,12 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_line aes geom_ribbon facet_wrap
-#' scale_colour_manual scale_y_continuous labs theme element_text geom_text
+#' @importFrom ggplot2 element_text ggplot geom_line aes geom_ribbon geom_text 
+#' guides guide_legend facet_wrap scale_colour_manual scale_y_continuous labs 
+#' theme  
 #' @importFrom JABBA ss3col
 retrospective_analysis_ggplot <- function(
-  df_lists, indicator_name, text_size = 4, use_si_suffix = FALSE, 
+  df_lists, indicator_name, n_col = 3, text_size = 4, use_si_suffix = FALSE, 
   title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
@@ -192,14 +195,14 @@ retrospective_analysis_ggplot <- function(
   rho_var <- rho_data[rho_data$Index == indicator_name, ]
   
   if (indicator_name != "MSY") {
-    max_y_val <- .round_to_nearest(max(data_var$uci, na.rm = TRUE), TRUE, 1.1)
+    max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
-      min_y_val <- .round_to_nearest(min(data_var$lci, na.rm = TRUE), FALSE, 1.1)
+      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
       y_lim <- c(min_y_val, max_y_val)
     }
     if (is.null(x_lim)) {
-      max_x_val <- max(data_ref$Year)
-      min_x_val <- min(data_ref$Year)
+      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
+      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
     }
     pos <- .auto_text_position(
       data_list = data_ref,
@@ -210,15 +213,15 @@ retrospective_analysis_ggplot <- function(
       margin = 0.15
     )
   } else {
-    max_y_val <- .round_to_nearest(max(data_var$SP, na.rm = TRUE), TRUE, 1.1)
+    max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
-      min_y_val <- .round_to_nearest(min(data_var$SP, na.rm = TRUE), FALSE, 1.1)
+      min_y_val <- .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
       y_lim <- c(min_y_val, max_y_val)
     }
 
     if (is.null(x_lim)) {
-      max_x_val <- max(data_ref$SB_i)
-      min_x_val <- min(data_ref$SB_i)
+      max_x_val <- max(max(data_ref$SB_i), max(data_var$SB_i))
+      min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
       x_lim <- c(min_x_val, max_x_val)
     }
     
@@ -230,7 +233,7 @@ retrospective_analysis_ggplot <- function(
       ylim = y_lim,
       margin = 0.2
     )
-    max_x_val <- .round_to_nearest(max(data_var$SB_i, na.rm = TRUE), TRUE, 1.1)
+    max_x_val <- .round_to_nearest(max(data_ref$SB_i, na.rm = TRUE), TRUE, 1.1)
     x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
     x_labels <- if (use_si_suffix) {
       function(x) .international_system_prefixes(x)
@@ -289,7 +292,7 @@ retrospective_analysis_ggplot <- function(
         parse = TRUE,
         size = text_size
     ) +
-    facet_wrap(~Scenario, ncol = 3, scales = "fixed") +
+    facet_wrap(~Scenario, ncol = n_col, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
     scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim)
@@ -306,7 +309,8 @@ retrospective_analysis_ggplot <- function(
       legend.position = "bottom",
       legend.justification = c(0, 1),
       legend.text = element_text(size = 12)
-    )
+    ) +
+    guides(colour = guide_legend(nrow = 1))
   p
 }
 
