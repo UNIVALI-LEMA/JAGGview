@@ -8,6 +8,7 @@ cpue_residuals_ggplot(
   df_lists,
   n_col = 3,
   text_size = 4,
+  title_x = "Year",
   title_y = "Residuals",
   palette = NULL,
   x_lim = NULL,
@@ -23,6 +24,8 @@ per line. Defaults to 3.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals"}

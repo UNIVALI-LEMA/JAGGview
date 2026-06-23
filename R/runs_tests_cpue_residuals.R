@@ -139,8 +139,9 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @param df_lists A named list as returned by \code{runs_tests_data()}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
-#' @param title_y A character string for the y-axis label.
-#'   Defaults to "Residuals".
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
+#' @param title_y A character string for the y-axis label. Defaults to 
+#'   "Residuals".
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -164,7 +165,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, text_size = 4, title_y = "Residuals", x_lim = NULL, y_lim = NULL) {
+  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", x_lim = NULL, y_lim = NULL
+) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -214,7 +216,7 @@ runs_tests_ggplot <- function(
       facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
-    labs(x = "Year", y = title_y) +
+    labs(x = title_x, y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
   }
@@ -231,6 +233,7 @@ runs_tests_ggplot <- function(
 #'   per line. Defaults to 3.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. 
 #'   Defaults to "Residuals"
 #' @param palette Optional. A character vector of colors used for plotting. 
@@ -255,8 +258,8 @@ runs_tests_ggplot <- function(
 #' theme geom_text
 #' @importFrom grDevices colorRampPalette
 cpue_residuals_ggplot <- function(
-  df_lists, n_col = 3, text_size = 4, title_y = "Residuals", palette = NULL, 
-  x_lim = NULL, y_lim = NULL
+  df_lists, n_col = 3, text_size = 4, title_x = "Year", title_y = "Residuals", 
+  palette = NULL, x_lim = NULL, y_lim = NULL
 ) {
 
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
@@ -308,7 +311,7 @@ cpue_residuals_ggplot <- function(
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     scale_fill_manual(values = palette) +
     scale_colour_manual(values = palette) +
-    labs(x = "Year", y = title_y, fill = "", colour = "") +
+    labs(x = title_x, y = title_y, fill = "", colour = "") +
     .my_theme() +
     theme(legend.position = "top")
 }

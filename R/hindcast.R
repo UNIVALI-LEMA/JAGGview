@@ -99,6 +99,8 @@ hindcast_data <- function(list_hc_models) {
 #' @param df_lists A named list as returned by \code{hindcast_data()}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
+#' @param title_y A character string for the y-axis label. Defaults to "Index".
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -130,7 +132,8 @@ hindcast_data <- function(list_hc_models) {
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot
 hindcast_ggplot <- function(
-  df_lists, text_size = 4, x_lim = NULL, y_lim = NULL, zoom = FALSE
+  df_lists, text_size = 4, title_x = "Year", title_y = "Index", x_lim = NULL, 
+  y_lim = NULL, zoom = FALSE
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -197,7 +200,7 @@ hindcast_ggplot <- function(
               aes(x = pos$x, y = pos$y,
                   label = paste0("MASE = ", round(MASE, 3))), 
                   size = text_size) +
-    labs(x = "Year", y = "Index", colour = "") +
+    labs(x = title_x, y = title_y, colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
               drop = FALSE) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +

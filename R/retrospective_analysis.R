@@ -118,6 +118,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_x A character string for the x-axis label. If \code{NULL}, a 
+#'   default label is assigned based on \code{indicator_name}.
 #' @param title_y A character string for the y-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -146,7 +148,7 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @importFrom JABBA ss3col
 retrospective_analysis_ggplot <- function(
   df_lists, indicator_name, n_col = 3, text_size = 4, use_si_suffix = FALSE, 
-  title_y = NULL, x_lim = NULL, y_lim = NULL
+  title_x = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -164,10 +166,10 @@ retrospective_analysis_ggplot <- function(
 
   if (indicator_name != "MSY") {
     data <- df_lists$data
-    title_x <- "Year"
+    if (is.null(title_x)) title_x <- "Year"
   } else {
     data <- df_lists$surplus_data
-    title_x <- "Biomass (t)"
+    if (is.null(title_x)) title_x <- "Biomass (t)"
   }
 
   labels_y <- list(
@@ -312,7 +314,7 @@ retrospective_analysis_ggplot <- function(
     ) +
     guides(colour = guide_legend(nrow = 1))
   p
-}
+  }
 
 #' Extract rho data from retrospective analysis results
 #' 

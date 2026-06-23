@@ -138,8 +138,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @param df_lists A named list of data frames as returned by
 #'   \code{fits_data()}. It must contain the elements \code{Li_Ui},
 #'   \code{CI_80}, and \code{CI_95}.
-#' @param title_y A character string for the y-axis label.
-#'   Defaults to "Abundance index".
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
+#' @param title_y A character string for the y-axis label. Defaults to 
+#'   "Abundance index".
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -168,7 +169,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, title_y = "Abundance index", palette = NULL, x_lim = NULL, 
+  df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, x_lim = NULL, 
   y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
@@ -209,7 +210,7 @@ fits_ggplot <- function(
         pch = 21, fill = "white", size = 1.5) + 
     facet_grid(Scenario ~ Index, scales = "free") +
     coord_cartesian(xlim = x_lim, ylim = y_lim) + 
-    labs(x = "Year", y = title_y) +
+    labs(x = title_x, y = title_y) +
     .my_theme()
 }
 

@@ -10,6 +10,7 @@ retrospective_analysis_ggplot(
   n_col = 3,
   text_size = 4,
   use_si_suffix = FALSE,
+  title_x = NULL,
   title_y = NULL,
   x_lim = NULL,
   y_lim = NULL
@@ -31,6 +32,9 @@ Defaults to 4.}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+
+\item{title_x}{A character string for the x-axis label. If \code{NULL}, a
+default label is assigned based on \code{indicator_name}.}
 
 \item{title_y}{A character string for the y-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}

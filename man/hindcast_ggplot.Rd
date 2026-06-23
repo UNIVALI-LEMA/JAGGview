@@ -7,6 +7,8 @@
 hindcast_ggplot(
   df_lists,
   text_size = 4,
+  title_x = "Year",
+  title_y = "Index",
   x_lim = NULL,
   y_lim = NULL,
   zoom = FALSE
@@ -17,6 +19,10 @@ hindcast_ggplot(
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{title_x}{A character string for the x-axis label. Defaults to "Year".}
+
+\item{title_y}{A character string for the y-axis label. Defaults to "Index".}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}

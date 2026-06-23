@@ -4,13 +4,24 @@
 \alias{kobe_ggplot}
 \title{Plot Kobe diagram}
 \usage{
-kobe_ggplot(df_lists, n_col = 3, x_lim = NULL, y_lim = NULL)
+kobe_ggplot(
+  df_lists,
+  n_col = 3,
+  title_x = expression(B/B[MSY]),
+  title_y = expression(F/F[MSY]),
+  x_lim = NULL,
+  y_lim = NULL
+)
 }
 \arguments{
 \item{df_lists}{A list as returned by \code{kobe_data()}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
+
+\item{title_x}{A character string for the x-axis label. Defaults to "B/Bmsy".}
+
+\item{title_y}{A character string for the y-axis label. Defaults to "F/Fmsy".}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}

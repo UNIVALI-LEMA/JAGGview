@@ -6,6 +6,7 @@
 \usage{
 fits_ggplot(
   df_lists,
+  title_x = "Year",
   title_y = "Abundance index",
   palette = NULL,
   x_lim = NULL,
@@ -17,8 +18,10 @@ fits_ggplot(
 \code{fits_data()}. It must contain the elements \code{Li_Ui},
 \code{CI_80}, and \code{CI_95}.}
 
-\item{title_y}{A character string for the y-axis label.
-Defaults to "Abundance index".}
+\item{title_x}{A character string for the x-axis label. Defaults to "Year".}
+
+\item{title_y}{A character string for the y-axis label. Defaults to
+"Abundance index".}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
 If \code{NULL} (default), a color-blind-friendly palette is generated

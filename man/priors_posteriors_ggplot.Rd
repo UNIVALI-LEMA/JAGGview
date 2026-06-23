@@ -9,6 +9,7 @@ priors_posteriors_ggplot(
   indicator_name,
   n_col = 3,
   text_size = 4,
+  title_y = "Density",
   use_si_suffix = FALSE,
   palette = NULL,
   title_x = NULL,
@@ -28,6 +29,9 @@ per line. Defaults to 3.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 4.}
+
+\item{title_y}{A character string for the y-axis label. Defaults to
+"Density".}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}

@@ -175,6 +175,8 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' @param df_lists A list as returned by \code{kobe_data()}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
+#' @param title_x A character string for the x-axis label. Defaults to "B/Bmsy".
+#' @param title_y A character string for the y-axis label. Defaults to "F/Fmsy".
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -205,7 +207,10 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
 #' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
 #' scale_shape_manual scale_fill_manual labs coord_cartesian theme
 #' @importFrom grDevices colorRampPalette
-kobe_ggplot <- function(df_lists, n_col = 3, x_lim = NULL, y_lim = NULL) {
+kobe_ggplot <- function(
+  df_lists, n_col = 3, title_x = expression(B/B[MSY]), 
+  title_y = expression(F/F[MSY]), x_lim = NULL, y_lim = NULL
+) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
@@ -254,7 +259,7 @@ kobe_ggplot <- function(df_lists, n_col = 3, x_lim = NULL, y_lim = NULL) {
     scale_fill_manual(
       values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
     ) +
-    labs(x = expression(B/B[MSY]), y = expression(F/F[MSY]), fill = "",
+    labs(x = title_x, y = title_y, fill = "",
          shape = "") +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +

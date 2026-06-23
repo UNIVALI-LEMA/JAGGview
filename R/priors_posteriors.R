@@ -184,6 +184,8 @@ priors_posteriors_data <- function(list_fit_models) {
 #'   per line. Defaults to 3.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 4.
+#' @param title_y A character string for the y-axis label. Defaults to 
+#'   "Density".
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param palette Optional. A character vector of colors used for plotting. 
@@ -217,8 +219,9 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, n_col = 3, text_size = 4, use_si_suffix = FALSE,
-  palette = NULL, title_x = NULL, x_decimals = NULL, x_lim = NULL, y_lim = NULL
+  df_lists, indicator_name, n_col = 3, text_size = 4, title_y = "Density", 
+  use_si_suffix = FALSE, palette = NULL, title_x = NULL, x_decimals = NULL, 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -338,7 +341,7 @@ priors_posteriors_ggplot <- function(
     ) +
     facet_wrap(~Scenario, ncol = n_col) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
-    labs(x = title_x, y = "Density") +
+    labs(x = title_x, y = title_y) +
     scale_x_continuous(labels = x_labels) +
     scale_y_continuous(expand = c(0, 0)) +
     .my_theme() +

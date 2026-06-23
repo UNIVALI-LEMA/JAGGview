@@ -100,6 +100,7 @@ trajectories_data <- function(list_fit_models) {
 #' @param indicator_name A character string indicating the indicator_name to 
 #'   plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
 #'   \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
@@ -148,8 +149,8 @@ trajectories_data <- function(list_fit_models) {
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
 #' scale_y_continuous labs theme
 trajectories_ggplot <- function(
-  df, indicator_name, n_col = 3, use_si_suffix = FALSE, palette = NULL, 
-  title_y = NULL, x_lim = NULL, y_lim = NULL
+  df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
+  palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -236,7 +237,7 @@ trajectories_ggplot <- function(
       labels = y_labels
     ) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
-    labs(x = "Year", y = title_y) +
+    labs(x = title_x, y = title_y) +
     .my_theme() +
     theme(legend.position = "none")
   p

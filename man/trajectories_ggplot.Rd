@@ -8,6 +8,7 @@ trajectories_ggplot(
   df,
   indicator_name,
   n_col = 3,
+  title_x = "Year",
   use_si_suffix = FALSE,
   palette = NULL,
   title_y = NULL,
@@ -24,6 +25,8 @@ plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
+
+\item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
