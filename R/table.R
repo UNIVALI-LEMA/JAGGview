@@ -61,8 +61,9 @@
 #' @importFrom rstudioapi viewer isAvailable
 #' @importFrom openxlsx write.xlsx
 #' @importFrom utils browseURL
-summary_table <- function(data, show = "html", save = NULL, 
-  filename = "summary_table", digits = 4) {
+summary_table <- function(
+  data, show = "html", save = NULL, filename = "summary_table", digits = 4
+) {
   table <- .default_table(data, digits = digits)
   
   if (!is.null(show)) {

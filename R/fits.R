@@ -169,8 +169,8 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
 #' scale_y_continuous labs geom_point aes
 fits_ggplot <- function(
-  df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, x_lim = NULL, 
-  y_lim = NULL
+  df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")

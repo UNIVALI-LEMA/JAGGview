@@ -45,45 +45,45 @@
   return(df1)
 }
 
-#' Validate list of model fits
-#'
-#' Internal helper that checks whether the input is a valid list of JABBA model 
-#' outputs and verifies the presence and class of required components.
-#'
-#' @param list_fit_models A list of model outputs.
-#'
-#' @return Invisibly returns NULL if all validations pass, otherwise throws an 
-#' error.
-#'
-#' @keywords internal
-.validate_fits_input_data <- function(list_fit_models) {
-  if(.is_fit_jabba(list_fit_models)) {
-    stop("Expected a list of valid JABBA model outputs.")
-  }
+# #' Validate list of model fits
+# #'
+# #' Internal helper that checks whether the input is a valid list of JABBA model 
+# #' outputs and verifies the presence and class of required components.
+# #'
+# #' @param list_fit_models A list of model outputs.
+# #'
+# #' @return Invisibly returns NULL if all validations pass, otherwise throws an 
+# #' error.
+# #'
+# #' @keywords internal
+# .validate_fits_input_data <- function(list_fit_models) {
+#   if(.is_fit_jabba(list_fit_models)) {
+#     stop("Expected a list of valid JABBA model outputs.")
+#   }
 
-  if(!all(vapply(list_fit_models, .is_fit_jabba, logical(1)))) {
-    stop("All elements must be a valid JABBA model output.")
-  }
+#   if(!all(vapply(list_fit_models, .is_fit_jabba, logical(1)))) {
+#     stop("All elements must be a valid JABBA model output.")
+#   }
 
-  # fits
-  .validate_column(list_fit_models, "settings", "list")
-  .validate_column(list_fit_models$settings, "I", c("matrix", "array"))
-  .validate_column(list_fit_models$settings, "SE2", c("matrix", "array"))
-  .validate_column(list_fit_models, "cpue.ppd", "array")
-  .validate_column(list_fit_models, "cpue.hat", "array")
-  .validate_column(list_fit_models, "yr", "numeric")
-  .validate_column(list_fit_models, "scenario", "character")
-  # runs_tests_cpue_residuals
-  .validate_column(list_fit_models, "residuals", c("matrix", "array"))
-  .validate_column(list_fit_models, "stats", "data.frame")
-  # prios_posteriors
-  .validate_column(list_fit_models$settings, "K.pr", "numeric")
-  .validate_column(list_fit_models$settings, "r.pr", "numeric")
-  .validate_column(list_fit_models$settings, "psi.pr", "numeric")
-  .validate_column(list_fit_models$settings, "psi.dist", "character")
-  .validate_column(list_fit_models$settings, "igamma", "numeric")
-  .validate_column(list_fit_models, "pars_posterior", "data.frame")
-}
+#   # fits
+#   .validate_column(list_fit_models, "settings", "list")
+#   .validate_column(list_fit_models$settings, "I", c("matrix", "array"))
+#   .validate_column(list_fit_models$settings, "SE2", c("matrix", "array"))
+#   .validate_column(list_fit_models, "cpue.ppd", "array")
+#   .validate_column(list_fit_models, "cpue.hat", "array")
+#   .validate_column(list_fit_models, "yr", "numeric")
+#   .validate_column(list_fit_models, "scenario", "character")
+#   # runs_tests_cpue_residuals
+#   .validate_column(list_fit_models, "residuals", c("matrix", "array"))
+#   .validate_column(list_fit_models, "stats", "data.frame")
+#   # prios_posteriors
+#   .validate_column(list_fit_models$settings, "K.pr", "numeric")
+#   .validate_column(list_fit_models$settings, "r.pr", "numeric")
+#   .validate_column(list_fit_models$settings, "psi.pr", "numeric")
+#   .validate_column(list_fit_models$settings, "psi.dist", "character")
+#   .validate_column(list_fit_models$settings, "igamma", "numeric")
+#   .validate_column(list_fit_models, "pars_posterior", "data.frame")
+# }
 
 #' Check if object is a valid JABBA model fit
 #'
@@ -108,61 +108,61 @@
   is.list(model) && all(cols_fit %in% names(model))
 }
 
-#' Validate column class
-#'
-#' Internal helper that checks whether a specific column in a model object 
-#' inherits from the expected class.
-#'
-#' @param model A model object.
-#' @param column A character string indicating the column name.
-#' @param class_expected A character vector of expected class names.
-#'
-#' @return A logical value indicating whether the column has the expected class.
-#'
-#' @keywords internal
-.is_column_valid <- function(model, column, class_expected) {
-  inherits(model[[column]], class_expected)
-}
+# #' Validate column class
+# #'
+# #' Internal helper that checks whether a specific column in a model object 
+# #' inherits from the expected class.
+# #'
+# #' @param model A model object.
+# #' @param column A character string indicating the column name.
+# #' @param class_expected A character vector of expected class names.
+# #'
+# #' @return A logical value indicating whether the column has the expected class.
+# #'
+# #' @keywords internal
+# .is_column_valid <- function(model, column, class_expected) {
+#   inherits(model[[column]], class_expected)
+# }
 
-#' Validate column across model list
-#'
-#' Internal helper that verifies whether a specific column exists in all models 
-#' and matches the expected class. If any model fails validation, an informative 
-#' error is thrown.
-#'
-#' @param list_fit_models A list of model outputs.
-#' @param column A character string indicating the column name.
-#' @param class_expected A character vector of expected class names.
-#'
-#' @return Invisibly returns NULL if validation passes, otherwise throws an 
-#' error.
-#'
-#' @keywords internal
-.validate_column <- function(list_fit_models, column, class_expected) {
-  check <- vapply(
-    list_fit_models,
-    function(m) .is_column_valid(m, column, class_expected),
-    logical(1)
-  )
-  if(!all(check)) {
-    invalid_idx <- which(!check)
+# #' Validate column across model list
+# #'
+# #' Internal helper that verifies whether a specific column exists in all models 
+# #' and matches the expected class. If any model fails validation, an informative 
+# #' error is thrown.
+# #'
+# #' @param list_fit_models A list of model outputs.
+# #' @param column A character string indicating the column name.
+# #' @param class_expected A character vector of expected class names.
+# #'
+# #' @return Invisibly returns NULL if validation passes, otherwise throws an 
+# #' error.
+# #'
+# #' @keywords internal
+# .validate_column <- function(list_fit_models, column, class_expected) {
+#   check <- vapply(
+#     list_fit_models,
+#     function(m) .is_column_valid(m, column, class_expected),
+#     logical(1)
+#   )
+#   if(!all(check)) {
+#     invalid_idx <- which(!check)
 
-    received_class <- vapply(
-      list_fit_models[invalid_idx],
-      function(m) paste(class(m[[column]]), collapse = ", "),
-      character(1)
-    )
+#     received_class <- vapply(
+#       list_fit_models[invalid_idx],
+#       function(m) paste(class(m[[column]]), collapse = ", "),
+#       character(1)
+#     )
 
-    stop(
-      paste0(
-        "Invalid '", column, "' in model(s): ", 
-        paste(invalid_idx, collapse = ", "),
-        ". Expected class: ", paste(class_expected, collapse = ", "),
-        ". Received class: ", paste(received_class, collapse = " | ")
-      )
-    )
-  }
-}
+#     stop(
+#       paste0(
+#         "Invalid '", column, "' in model(s): ", 
+#         paste(invalid_idx, collapse = ", "),
+#         ". Expected class: ", paste(class_expected, collapse = ", "),
+#         ". Received class: ", paste(received_class, collapse = " | ")
+#       )
+#     )
+#   }
+# }
 
 #' Check if object is a valid hindcast JABBA model result
 #' 
@@ -187,109 +187,109 @@
   .is_fit_jabba(elem)
 }
 
-#'Validate list of hindicast models
-#' 
-#' Internal helper that checks whether the input is a valid list of hindcast 
-#' JABBA model outputs and verifies the presence and class of required 
-#' components.
-#' 
-#' @param list_fit_models A list of model outputs.
-#' 
-#' @return Invisibily returns NULL if all validation pass, otherwise throws an 
-#' error.
-#' @keywords internal
-.validate_hcs_input_data <- function(list_fit_models) {
+# #'Validate list of hindicast models
+# #' 
+# #' Internal helper that checks whether the input is a valid list of hindcast 
+# #' JABBA model outputs and verifies the presence and class of required 
+# #' components.
+# #' 
+# #' @param list_fit_models A list of model outputs.
+# #' 
+# #' @return Invisibily returns NULL if all validation pass, otherwise throws an 
+# #' error.
+# #' @keywords internal
+# .validate_hcs_input_data <- function(list_fit_models) {
   
-  if(.is_hindcast_jabba(list_fit_models)) {
-    stop("Expected a list of valid JABBA model outputs.")
-  }
+#   if(.is_hindcast_jabba(list_fit_models)) {
+#     stop("Expected a list of valid JABBA model outputs.")
+#   }
 
-  if(!all(vapply(list_fit_models, .is_hindcast_jabba, logical(1)))) {
-    stop("All elements must be a valid JABBA model output.")
-  }
+#   if(!all(vapply(list_fit_models, .is_hindcast_jabba, logical(1)))) {
+#     stop("All elements must be a valid JABBA model output.")
+#   }
 
-  all(
-    vapply(
-      list_fit_models,
-      function(hc) {
-        .validate_column(hc, "scenario", "character")
-        .validate_column(hc, "timeseries", "array")
-        .validate_column(hc, "pfunc", "data.frame")
-        .validate_column(hc, "diags", "data.frame")
-        TRUE
-      },
-      logical(1)
-    )
-  )
-}
+#   all(
+#     vapply(
+#       list_fit_models,
+#       function(hc) {
+#         .validate_column(hc, "scenario", "character")
+#         .validate_column(hc, "timeseries", "array")
+#         .validate_column(hc, "pfunc", "data.frame")
+#         .validate_column(hc, "diags", "data.frame")
+#         TRUE
+#       },
+#       logical(1)
+#     )
+#   )
+# }
 
-#' Check if an object is a valid JABBA ensemble output
-#'
-#' Internal helper that verifies whether an object is a data frame containing 
-#' the required columns for a JABBA model ensemble output.
-#'
-#' @param obj An object to be checked.
-#'
-#' @return A logical value indicating whether the object matches the expected 
-#' structure.
-#'
-#' @keywords internal
-.is_jbplot_ensemble <- function(obj) {
-  cols <- c(
-    "year", "run", "type", "iter", "stock",
-    "harvest", "B", "H", "Bdev", "Catch", 
-    "BB0", "BBfrac", "Bref"
-  )
-  is.data.frame(obj) && all(cols %in% names(obj))
-}
+# #' Check if an object is a valid JABBA ensemble output
+# #'
+# #' Internal helper that verifies whether an object is a data frame containing 
+# #' the required columns for a JABBA model ensemble output.
+# #'
+# #' @param obj An object to be checked.
+# #'
+# #' @return A logical value indicating whether the object matches the expected 
+# #' structure.
+# #'
+# #' @keywords internal
+# .is_jbplot_ensemble <- function(obj) {
+#   cols <- c(
+#     "year", "run", "type", "iter", "stock",
+#     "harvest", "B", "H", "Bdev", "Catch", 
+#     "BB0", "BBfrac", "Bref"
+#   )
+#   is.data.frame(obj) && all(cols %in% names(obj))
+# }
 
-#' Validate a JABBA ensemble object
-#'
-#' Internal helper that checks whether a data frame is a valid JABBA model 
-#' output. It verifies both the presence of required columns and that all 
-#' relevant columns are numeric.
-#'
-#' @param object_df A data frame representing JABBA model output.
-#'
-#' @return Invisibly returns \code{NULL}. Throws an error if validation fails.
-#'
-#' @details
-#' Columns other than \code{year}, \code{run}, \code{type}, and \code{iter} are 
-#' expected to be numeric. If not, an informative error is raised listing the 
-#' invalid columns and their classes.
-#'
-#' @keywords internal
-.validate_jbplot_ensemble <- function(object_df) {
-  if(!.is_jbplot_ensemble(object_df)) {
-    stop("Element must be a valid JABBA model output.")
-  }
+# #' Validate a JABBA ensemble object
+# #'
+# #' Internal helper that checks whether a data frame is a valid JABBA model 
+# #' output. It verifies both the presence of required columns and that all 
+# #' relevant columns are numeric.
+# #'
+# #' @param object_df A data frame representing JABBA model output.
+# #'
+# #' @return Invisibly returns \code{NULL}. Throws an error if validation fails.
+# #'
+# #' @details
+# #' Columns other than \code{year}, \code{run}, \code{type}, and \code{iter} are 
+# #' expected to be numeric. If not, an informative error is raised listing the 
+# #' invalid columns and their classes.
+# #'
+# #' @keywords internal
+# .validate_jbplot_ensemble <- function(object_df) {
+#   if(!.is_jbplot_ensemble(object_df)) {
+#     stop("Element must be a valid JABBA model output.")
+#   }
 
-  cols <- setdiff(names(object_df), c("year", "run", "type", "iter"))
-  check <- vapply(
-    cols,
-    function(col) .is_column_valid(object_df, col, "numeric"),
-    logical(1)
-  )
-  if(!all(check)) {
-    invalid_cols <- cols[!check]
+#   cols <- setdiff(names(object_df), c("year", "run", "type", "iter"))
+#   check <- vapply(
+#     cols,
+#     function(col) .is_column_valid(object_df, col, "numeric"),
+#     logical(1)
+#   )
+#   if(!all(check)) {
+#     invalid_cols <- cols[!check]
 
-    received_class <- vapply(
-      invalid_cols,
-      function(col) paste(class(object_df[[col]]), collapse = ", "),
-      character(1)
-    )
+#     received_class <- vapply(
+#       invalid_cols,
+#       function(col) paste(class(object_df[[col]]), collapse = ", "),
+#       character(1)
+#     )
 
-    stop(
-      paste0(
-        "Invalid column(s): ",
-        paste(invalid_cols, collapse = ", "),
-        ". Expected class: numeric",
-        ". Received class: ",
-        paste(received_class, collapse = " | ")
-      )
-    )
-  }
-}
+#     stop(
+#       paste0(
+#         "Invalid column(s): ",
+#         paste(invalid_cols, collapse = ", "),
+#         ". Expected class: numeric",
+#         ". Received class: ",
+#         paste(received_class, collapse = " | ")
+#       )
+#     )
+#   }
+# }
 
 #' Validate index values against available data
 #'
@@ -404,7 +404,8 @@
   legendncol=1,legendcex=0.7,legendsp=0.8,pwidth=6.5,pheight=5.0,punits="in",
   res=300,ptsize=10,cex.main=1,plotdir=NULL,filenameprefix="",
   par=list(mar=c(5,4,1,1)+.1),verbose=FALSE,shadecol = NULL, shadealpha=0.3,
-  new=TRUE,add=FALSE,single.plots = add,run=NULL,fmax=5.0){
+  new=TRUE,add=FALSE,single.plots = add,run=NULL,fmax=5.0)
+  {
   if(!is.null(kb$settings)){ 
     kb = kb$kbtrj
   }      
