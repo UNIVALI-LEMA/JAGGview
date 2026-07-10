@@ -277,11 +277,27 @@ hindcast_data <- function(list_hc_models) {
 kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
   # ###@> Filtering the expected data...
   # .validate_jbplot_ensemble(model_results)
-  model_results <- .jbplot_ensemble2(
-    kb = list_fit_models,
-    kbout = TRUE,
-    plot = FALSE
-  )
+  # model_results <- tryCatch({
+  #   .jbplot_ensemble2(
+  #     kb = list_fit_models,
+  #     kbout = TRUE,
+  #     plot = FALSE
+  #   )
+  # }, error = function(e) {
+  #   message("An error ocurred: ", e$message)
+  #   return(NULL)
+  # })
+  model_results <- tryCatch({
+    .safe_execute(
+      fn = function() .jbplot_ensemble2(
+        kb = list_fit_models, kbout = TRUE, plot = FALSE
+      )
+    )
+  }, memoryLimitExceeded = function(e) {
+    message("Process aborted for security, before crashing the system.")
+    NULL
+  })
+
 
   if (!inherits(ci_levels, "numeric")) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")
@@ -386,7 +402,6 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
   if (all(is.na(results))) {
     stop("Data frame only have NA data.")
   }
-
   return(results)
 }
 
