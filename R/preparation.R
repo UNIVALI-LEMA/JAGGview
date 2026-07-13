@@ -229,11 +229,16 @@ hindcast_data <- function(list_hc_models) {
 #' reference quadrants.
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
-#' JABBA function \code{JABBA::fit_jabba()}.
+#'   JABBA function \code{JABBA::fit_jabba()}.
 #' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by the JABBA 
-#' function \code{JABBA::jbplot_ensemble()}.
+#'   function \code{JABBA::jbplot_ensemble()}.
 #' @param ci_levels A numeric vector containing the CI values between 0 and 1.
-#' Deafults to 0.5, 0.8, 0.95
+#'   Deafults to 0.5, 0.8, 0.95
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system. Defaults
+#'   to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds, 
+#'   between memory availability checks. Defaults to 0.5.
 #'
 #' @return A named list containing:
 #' \describe{
@@ -274,7 +279,10 @@ hindcast_data <- function(list_hc_models) {
 #' @importFrom dplyr %>% summarise arrange filter
 #' @importFrom stats median
 #' @importFrom gplots ci2d
-kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
+kobe_data <- function(
+  list_fit_models, ci_levels = c(0.5, 0.8, 0.95), reserve_mb = 2048, 
+  poll_interval = 0.5
+) {
   # ###@> Filtering the expected data...
   # .validate_jbplot_ensemble(model_results)
   # model_results <- tryCatch({
@@ -291,13 +299,14 @@ kobe_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
     .safe_execute(
       fn = function() .jbplot_ensemble2(
         kb = list_fit_models, kbout = TRUE, plot = FALSE
-      )
+      ),
+      reserve_mb = reserve_mb,
+      poll_interval = poll_interval
     )
   }, memoryLimitExceeded = function(e) {
     message("Process aborted for security, before crashing the system.")
     NULL
   })
-
 
   if (!inherits(ci_levels, "numeric")) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")

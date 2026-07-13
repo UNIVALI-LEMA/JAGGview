@@ -588,9 +588,10 @@
 #' @param fn A function to be executed.
 #' @param args A named list of arguments passed to \code{fn}. 
 #' @param reserve_mb A numeric value specifying the minimum amount of free
-#'   system memory, in megabytes, to reserve for the operating system.
+#'   system memory, in megabytes, to reserve for the operating system. Defaults 
+#'   to 2048.
 #' @param poll_interval A numeric value giving the time interval, in seconds, 
-#'   between memory availability checks.
+#'   between memory availability checks. Defaults to 0.5.
 #' 
 #' @details
 #' This function is, currently, supported only on Linux and macOS, where the 

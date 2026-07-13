@@ -12,10 +12,11 @@
 \item{args}{A named list of arguments passed to \code{fn}.}
 
 \item{reserve_mb}{A numeric value specifying the minimum amount of free
-system memory, in megabytes, to reserve for the operating system.}
+system memory, in megabytes, to reserve for the operating system. Defaults
+to 2048.}
 
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
-between memory availability checks.}
+between memory availability checks. Defaults to 0.5.}
 }
 \description{
 Internal helper that executes a function while monitoring the available
