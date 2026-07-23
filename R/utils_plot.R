@@ -293,16 +293,25 @@
     if (is.na(val) || val == 0) return("0")
     
     abs_val <- abs(val)
-    
+
     if (abs_val >= 1e6) {
       divisor <- 1e6
       suffix  <- "M"
     } else if (abs_val >= 1e3) {
       divisor <- 1e3
       suffix  <- "k"
-    } else {
+    } else if (abs_val >= 1) {
       divisor <- 1
       suffix  <- ""
+    } else if (abs_val >= 1e-3) {
+      divisor <- 1e-3
+      suffix <- "m"
+    } else if (abs_val >= 1e-6) {
+      divisor <- 1e-6
+      suffix <- "\u00B5"
+    } else {
+      divisor <- 1e-9
+      suffix <- "n"
     }
     
     scaled <- val / divisor
@@ -576,4 +585,9 @@
   }
   
   return(result)
+}
+
+.expand_range <- function(lim, mult = 0.05) {
+  d <- diff(lim)
+  lim + c(-1, 1) * d * mult
 }

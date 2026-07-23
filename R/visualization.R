@@ -164,10 +164,10 @@ fits_ggplot <- function(
     geom_ribbon(data = df_lists$CI_95,
         aes(x = Year, ymin = lci, ymax = uci),
         alpha = 0.3, fill = palette[1]) +
-    geom_line(data = df_lists$CI_80,
-        aes(x = Year, y = mu)) +
+    geom_line(data = df_lists$CI_80, aes(x = Year, y = mu)) +
     geom_errorbar(data = df_lists$Li_Ui, 
-                  aes(x = Year, ymin = Li, ymax = Ui), width = 1.5) +
+                  aes(x = Year, ymin = Li, ymax = Ui
+                  ), width = 1.5) +
     geom_point(data = df_lists$Li_Ui,
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 
@@ -893,7 +893,8 @@ retrospective_analysis_ggplot <- function(
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", x_lim = NULL, y_lim = NULL
+  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")

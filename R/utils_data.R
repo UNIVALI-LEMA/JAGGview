@@ -135,7 +135,7 @@
 #' @keywords internal
 .is_hindcast_jabba <- function(obj) {
   if(!is.list(obj)) {
-    stop()
+    return(FALSE)
   }
 
   if (length(obj) == 0) return(FALSE)
