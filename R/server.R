@@ -26,9 +26,19 @@ server <- function(input, output, session) {
 
     scenarios <- unique(df_lists$cpue_residuals$Scenario)
 
-    n_levels <- length(unique(df_lists$cpue_residuals$Index))
+    n_indices <- length(unique(df_lists$cpue_residuals$Index))
 
-    palette <- .resolve_palette(NULL, n_levels)
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
+    palette <- .resolve_palette(NULL, n_indices)
 
     pos <- .auto_text_position(
       data_list = df_lists$cpue_residuals,
@@ -198,7 +208,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -267,7 +277,7 @@ server <- function(input, output, session) {
     scenarios <- unique(df$Scenario)
     indices <- levels(df$Index)
 
-    n_scenario <- length(scenarios)
+    n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
     plots <- map(scenarios, function(s) {
@@ -527,10 +537,15 @@ server <- function(input, output, session) {
     scenarios <- unique(df_lists$data$Scenario)
     indices <- unique(df_lists$data$Index)
 
-    n_scenario <- length(scenarios)
+    n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
-    # palette <- .resolve_palette(NULL, length(unique(hc_df$data$retro)))
+    nrow <- case_when(
+      n_scenarios > n_indices ~ n_scenarios,
+      n_scenarios < 3          ~ 1,
+      n_scenarios < 8          ~ 2,
+      TRUE                     ~ 3
+    )
 
     max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
     min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
@@ -827,7 +842,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots, 
-      nrows = n_scenario,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -890,6 +905,16 @@ server <- function(input, output, session) {
     scenarios <- unique(df_lists$k.out$Scenario)
 
     n_levels <- length(unique(df_lists$k.out$q))
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
 
@@ -1120,7 +1145,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -1195,6 +1220,16 @@ server <- function(input, output, session) {
     palette <- .resolve_palette(NULL, 2)
 
     scenarios <- unique(df_lists$prior$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     prior <- df_lists$prior %>%
       select(Scenario, K01, K02)
@@ -1397,7 +1432,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -1445,6 +1480,16 @@ server <- function(input, output, session) {
     palette <- .resolve_palette(NULL, 2)
 
     scenarios <- unique(df_lists$prior$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     prior <- df_lists$prior %>%
       select(Scenario, r01, r02)
@@ -1647,7 +1692,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -1695,6 +1740,16 @@ server <- function(input, output, session) {
     palette <- .resolve_palette(NULL, 2)
 
     scenarios <- unique(df_lists$prior$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     prior <- df_lists$prior %>%
       select(Scenario, psi01, psi02)
@@ -1897,7 +1952,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -1998,6 +2053,16 @@ server <- function(input, output, session) {
 
     scenarios <- unique(data$Scenario)
 
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
     palette <- .resolve_palette(NULL, length(scenarios))
 
     rho_data <- ra_df$rho_data
@@ -2090,7 +2155,7 @@ server <- function(input, output, session) {
         )
       )
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,
@@ -2157,7 +2222,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -2203,6 +2268,16 @@ server <- function(input, output, session) {
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, length(scenarios))
 
@@ -2296,7 +2371,7 @@ server <- function(input, output, session) {
         )
       )
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,
@@ -2363,7 +2438,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -2409,6 +2484,16 @@ server <- function(input, output, session) {
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, length(scenarios))
 
@@ -2502,7 +2587,7 @@ server <- function(input, output, session) {
         )
       )
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,
@@ -2582,7 +2667,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -2628,6 +2713,16 @@ server <- function(input, output, session) {
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, length(scenarios))
 
@@ -2721,7 +2816,7 @@ server <- function(input, output, session) {
         )
       )
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,
@@ -2801,7 +2896,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -2847,6 +2942,16 @@ server <- function(input, output, session) {
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, length(scenarios))
 
@@ -2940,7 +3045,7 @@ server <- function(input, output, session) {
         )
       )
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,
@@ -3020,7 +3125,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -3066,6 +3171,16 @@ server <- function(input, output, session) {
     data <- ra_df$surplus_data
 
     scenarios <- unique(data$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, length(scenarios))
 
@@ -3158,7 +3273,7 @@ server <- function(input, output, session) {
 
       data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
 
-      plot_ly(colors = palette) %>%
+      plot_ly(colors = c("black", ss3col(8))) %>%
         add_lines(
           data = data_lines,
           x = ~SB_i,
@@ -3214,7 +3329,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -3281,7 +3396,7 @@ server <- function(input, output, session) {
     scenarios <- unique(df_lists$SE3$Scenario)
     indices <- levels(df_lists$SE3$Index)
 
-    n_scenario <- length(scenarios)
+    n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
     pos <- .auto_text_position(
@@ -3630,6 +3745,16 @@ server <- function(input, output, session) {
 
     scenarios <- unique(df$Scenario)
 
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
     palette <- .resolve_palette(NULL, 1)
   
     max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
@@ -3771,7 +3896,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -3818,6 +3943,16 @@ server <- function(input, output, session) {
       filter(indicator == "BBmsy")
 
     scenarios <- unique(df$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, 1)
   
@@ -3986,7 +4121,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -4033,6 +4168,16 @@ server <- function(input, output, session) {
       filter(indicator == "FFmsy")
 
     scenarios <- unique(df$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, 1)
   
@@ -4188,7 +4333,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -4235,6 +4380,16 @@ server <- function(input, output, session) {
       filter(indicator == "Bdev")
 
     scenarios <- unique(df$Scenario)
+
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
 
     palette <- .resolve_palette(NULL, 1)
   
@@ -4390,7 +4545,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -4438,6 +4593,16 @@ server <- function(input, output, session) {
 
     scenarios <- unique(df$Scenario)
 
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
     palette <- .resolve_palette(NULL, 1)
   
     max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
@@ -4579,7 +4744,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -4627,6 +4792,16 @@ server <- function(input, output, session) {
 
     scenarios <- unique(df$Scenario)
 
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
     palette <- .resolve_palette(NULL, 1)
   
     max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
@@ -4768,7 +4943,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,
@@ -4816,6 +4991,16 @@ server <- function(input, output, session) {
 
     scenarios <- unique(df$Scenario)
 
+    n_scenarios <- length(scenarios)
+
+    nrow <- if (n_scenarios < 3) {
+      1
+    } else if (n_scenarios < 8) {
+      2
+    } else {
+      3
+    }
+
     palette <- .resolve_palette(NULL, 1)
   
     max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
@@ -4957,7 +5142,7 @@ server <- function(input, output, session) {
 
     subplot(
       plots,
-      nrows = 2,
+      nrows = nrow,
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,

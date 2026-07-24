@@ -27,6 +27,179 @@
   return(result)
 }
 
+#' Combine trajectory and Kobe plot data for the dashboard
+#'
+#' Internal helper that computes both the trajectory summaries (as in 
+#' \code{trajectories_data()}) and the Kobe plot components (as in 
+#' \code{kobe_data()}) from a single call to \code{.jbplot_ensemble2()}, 
+#' avoiding a redundant, potentially expensive computation when both outputs 
+#' are needed at once, as is the case in \code{create_report()}.
+#'
+#' @param list_fit_models A list containing model outputs as returned by the 
+#' JABBA function \code{JABBA::fit_jabba()}.
+#' @param ci_levels A numeric vector containing the CI values between 0 and 1,
+#' used for the Kobe plot's kernel density contours. Defaults to 0.5, 0.8, 0.95.
+#'
+#' @return A named list containing:
+#' \describe{
+#'   \item{trajectories_df}{A data frame with the trajectory summaries (median 
+#'   and quantiles) for each indicator, as returned by 
+#'   \code{trajectories_data()}. See that function for column details.}
+#'   \item{kobe_dfs}{A named list with the Kobe plot components (quadrant 
+#'   definitions, kernel density contours, and time series), as returned by 
+#'   \code{kobe_data()}. See that function for details on each element.}
+#' }
+#'
+#' @details
+#' This function duplicates the internal logic of \code{trajectories_data()} 
+#' and \code{kobe_data()} rather than calling them directly, so that 
+#' \code{.jbplot_ensemble2()} (the shared, most expensive step) only runs 
+#' once. It is intended for internal use by \code{create_report()} only; end 
+#' users should call \code{trajectories_data()} and \code{kobe_data()} 
+#' directly if only one of the two outputs is needed.
+#'
+#' @keywords internal
+#' @importFrom dplyr %>% rename mutate summarise arrange filter bind_rows ungroup
+#' @importFrom stats median quantile
+#' @importFrom gplots ci2d
+#' @importFrom forcats fct_relevel
+.ensemble_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
+  model_results <- .jbplot_ensemble2(
+    kb = list_fit_models,
+    kbout = TRUE,
+    plot = FALSE
+  )
+
+  model_results <- model_results %>%
+    rename(Scenario = run) %>%
+    mutate(year = as.integer(year))
+
+  columns <- list(
+    BB0   = "BB0",
+    BBmsy = "stock",
+    FFmsy = "harvest",
+    Bdev  = "Bdev",
+    B = "B",
+    H = "H",
+    Catch = "Catch",
+    BBfrac = "BBfrac",
+    Bref = "Bref"
+  )
+
+  result_list <- lapply(names(columns), function(var_name) {
+
+    var_col <- columns[[var_name]]
+
+    model_results %>%
+      summarise(
+        mu   = median(.data[[var_col]]),
+        lcl  = quantile(.data[[var_col]], probs = 0.025),
+        ucl  = quantile(.data[[var_col]], probs = 0.975),
+        lcl2 = quantile(.data[[var_col]], probs = 0.1),
+        ucl2 = quantile(.data[[var_col]], probs = 0.9),
+        indicator = var_name,
+        .by = c(year, Scenario)
+      )
+  })
+
+  results_traj <- bind_rows(result_list) %>%
+    ungroup()
+
+  tmp11 <- model_results %>%
+    summarise(
+      Fratio = median(harvest),
+      Bratio = median(stock),
+      .by = c(year, Scenario)
+    ) %>%
+    arrange(Scenario, year)
+
+  max_x <- ceiling(max(tmp11$Bratio))
+  max_y <- ceiling(max(tmp11$Fratio))
+  
+  col01 <- data.frame(
+    xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
+    col = "yellow"
+  )
+  col02 <- data.frame(
+    xmin = c(1, 1), xmax = c(max_x, max_x), 
+    ymin = c(1, 1), ymax = c(max_y, max_y), 
+    col = "orange"
+  )
+  col03 <- data.frame(
+    xmin = c(0, 0), xmax = c(1, 1), ymin = c(1, 1), ymax = c(max_y, max_y), 
+    col = "red"
+  )
+  col04 <- data.frame(
+    xmin = c(1, 1), xmax = c(max_x, max_x), ymin = c(0, 0), ymax = c(1, 1), 
+    col = "#00FF00"
+  )
+
+  max_year <- max(model_results$year)
+  min_year <- min(model_results$year)
+  mid_year <- round(min_year + (max_year - min_year)/2)
+
+  tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
+  tmp11c <- filter(model_results, year == max_year)
+
+  k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
+  for(i in unique(model_results$Scenario)) {
+    x <- filter(model_results, Scenario == i)
+    x <- filter(x, year == max_year)
+    kernelF <- ci2d(
+      x$stock, 
+      x$harvest, 
+      nbins = 151,
+      factor = 1.5,
+      ci.levels = ci_levels,
+      show = "none",
+      col = 1
+    )
+
+    tmp00 <- lapply(
+      ci_levels, function(ci) {
+        q <- kernelF$contours[[as.character(ci)]]
+        q$Scenario <- i
+        q$q <- paste0(ci*100, "%")
+        q
+      })
+    
+    tmp <- do.call(rbind, tmp00)
+
+    k.out <- rbind(
+      k.out, 
+      data.frame(
+        x = tmp$x,
+        y = tmp$y,
+        Scenario = tmp$Scenario,
+        q = fct_relevel(tmp$q, sort(unique(tmp$q), decreasing = TRUE))
+      )
+    )
+  }
+  
+  results_kobe <- list(
+    col01 = col01[1, , drop = FALSE],
+    col02 = col02[1, , drop = FALSE],
+    col03 = col03[1, , drop = FALSE],
+    col04 = col04[1, , drop = FALSE],
+    k.out = k.out,
+    tmp11 = tmp11,
+    tmp11b = tmp11b
+  )
+
+  results <- list(
+    trajectories_df = results_traj,
+    kobe_dfs = results_kobe
+  )
+
+  class(results) <- c("JAGGdata", class(results))
+
+  if (all(is.na(results))) {
+    stop("Data frame only have NA data.")
+  }
+
+  return(results)
+}
+
 #' Format rho values into a data frame
 #'
 #' Internal helper that converts rho outputs into a structured 
@@ -134,15 +307,11 @@
 #' 
 #' @keywords internal
 .is_hindcast_jabba <- function(obj) {
-  if(!is.list(obj)) {
+  if(!is.list(obj) || length(obj) == 0) {
     return(FALSE)
   }
 
-  if (length(obj) == 0) return(FALSE)
-  
-  elem <- obj[[1]]
-
-  .is_fit_jabba(elem)
+  any(grepl("^-[0-9]{4}$", names(obj)))
 }
 
 #' .jbplot_ensemble2()
@@ -938,7 +1107,7 @@ get_mase <- function(df_lists) {
   temp00 <- lapply(
     fit_list,
     function(fit) {
-      jbmase(fit) %>% 
+      jbmase(fit, verbose = FALSE) %>% 
         mutate(
           Scenario = fit[[1]]$scenario
         )

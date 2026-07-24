@@ -9,6 +9,8 @@
 #'   containing the model objects to be loaded (e.g. results from \pkg{JABBA}). 
 #' @param dir A character string with the directory where \code{filename} is 
 #'   located. Defaults to the currente working directory (\code{getwd()}).
+#' @param verbose A boolean value that if TRUE, shows progress through messages 
+#'   in console. Defaults to FALSE.
 #' 
 #' @return 
 #' Invisibly launch the interactive dashboard in the default viewer/browser.
@@ -51,36 +53,47 @@
 #' @importFrom rlang flatten
 #' @importFrom dplyr filter
 #' @importFrom scales alpha
-create_report <- function(filename, dir = getwd()) {
+create_report <- function(filename, dir = getwd(), verbose = FALSE) {
   path <- file.path(dir, filename)
 
   if (!file.exists(path)) {
     stop("File not found: ", path, call. = FALSE)
   }
+  if (verbose) cat("File found")
 
   env <- new.env(parent = emptyenv())
+  if (verbose) cat("\nLoading file")
   objects <- load(path, envir = env)
 
+  if (verbose) cat("\nGeting data from file\n")
   data <- mget(objects, envir = env)
 
   fits_list <- list()
   hc_list <- list()
   ignored_list <- list()
 
+  name_width <- max(nchar(objects))
+
   for (name in objects) {
-
-    cat("Checking:", name, "\n")
-
     obj <- get(name, envir = env)
 
     if (.is_fit_jabba(obj)) {
       fits_list <- append(fits_list, list(obj))
+      status <- "Identified as fit jabba"
     }
     else if (.is_hindcast_jabba(obj)) {
       hc_list <- append(hc_list, list(obj))
+      status <- "Identified as hindcast jabba"
     }
     else {
       ignored_list <- append(ignored_list, list(obj))
+      status <- "Ignored file"
+    }
+
+    if (verbose) {
+      message(sprintf(
+        "Checking: %-*s | %s", name_width, name, status
+      ))
     }
   }
 
@@ -98,17 +111,26 @@ create_report <- function(filename, dir = getwd()) {
 
   fits_df <- fits_df %>%
     mutate(Year = as.integer(Year))
+  if (verbose) message("Fits data was sucessfully obtained")
   hind_df <- hindcast_data(hc_list)
-  kobe_df <- kobe_data(fits_list)
+  if (verbose) message("Hindcast data was sucessfully obtained")
   pp_df <- priors_posteriors_data(fits_list)
+  if (verbose) message("Priors x Posterior data was sucessfully obtained")
   ra_df <- retrospective_analysis_data(hc_list)
+  if (verbose) message("Retrospective Analysis data was sucessfully obtained")
   res_df <- runs_tests_data(fits_list)
-  traj_df <- trajectories_data(fits_list)
+  if (verbose) message("Residuals data was sucessfully obtained")
+  ensemble_df <- .ensemble_data(fits_list)
+  kobe_df <- ensemble_df$kobe_dfs
+  if (verbose) message("Kobe data was sucessfully obtained")
+  traj_df <- ensemble_df$trajectories_df
+  if (verbose) message("Trajectories data was sucessfully obtained")
   
   env <- environment()
 
   sys.source(file.path("R", "server.R"), envir = env)
   sys.source(file.path("R", "ui.R"), envir = env)
 
+  if (verbose) message("Initializing Interactive Data Visualization")
   shinyApp(ui, server)
 }
