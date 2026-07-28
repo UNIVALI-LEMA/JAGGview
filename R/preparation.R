@@ -167,7 +167,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
-hindcast_data <- function(list_hc_models) {
+hindcast_data <- function(list_hc_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
   if (.is_hindcast_jabba(list_hc_models)) {
@@ -177,17 +177,32 @@ hindcast_data <- function(list_hc_models) {
   ######@> Plot hindcasting...
   hc <- .process_hindcasts(list_hc_models)
 
-  min_year <- as.integer(gsub("-", "", min(hc$Peel))) - 1
+  min_year <- as.integer(gsub("-", "", min(hc$Peel))) - 1  
+
+  #####@> MASE analysis...
+  mase <- .process_mase(list_hc_models)
+
+  na_index <- mase %>%
+    filter(is.na(MASE)) %>%
+    pull(unique(Index))
 
   #####@> Extracting data...
   tmp14 <- hc %>%
-    rename(retro = Peel) %>%
-    mutate(
-      retro = fct_relevel(retro, sort(unique(retro), decreasing = TRUE))
-    ) %>%
     rename(
+      retro = Peel,
       Scenario = level,
       Index = name
+    )
+  
+  if (!is.null(indices_factor)) {
+    .validate_indices(unique(tmp14$Index), indices_factor)
+  }
+
+  tmp14 <- tmp14 %>% 
+    filter(!Index %in% na_index) %>%
+    mutate(
+      retro = fct_relevel(retro, sort(unique(retro), decreasing = TRUE)),
+      Index = fct_relevel(Index, indices_factor)
     )
   
   tmp15 <- tmp14 %>%
@@ -197,19 +212,12 @@ hindcast_data <- function(list_hc_models) {
     ungroup()
   
   tmp16 <- .filter_by_condition(tmp14, "retro.peels", "hindcast", "year")
-
-  #####@> MASE analysis...
-  mase <- .process_mase(list_hc_models)
-
-  na_index <- mase %>%
-    filter(is.na(MASE)) %>%
-    pull(unique(Index))
   
   results <- list(
-    data = tmp14 %>% filter(!Index %in% na_index),
-    hindcast_data_1 = tmp15 %>% filter(!Index %in% na_index),
-    hindcast_data_2 = tmp16 %>% filter(!Index %in% na_index),
-    mase_data = mase %>% filter(!Index %in% na_index),
+    data = tmp14,
+    hindcast_data_1 = tmp15,
+    hindcast_data_2 = tmp16,
+    mase_data = mase,
     min_year_retro = min_year
   )
 

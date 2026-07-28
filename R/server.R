@@ -1,13 +1,4 @@
 server <- function(input, output, session) {
-  output$cpue_residuals_2 <- renderPlotly({
-    ggplotly(cpue_residuals_ggplot(res_df)) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
   output$cpue_residuals <- renderPlotly({
     df_lists <- res_df
 
@@ -247,15 +238,6 @@ server <- function(input, output, session) {
             )
           )
         )
-      )
-  })
-
-  output$fits_2 <- renderPlotly({
-    ggplotly(fits_ggplot(fits_df)) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
       )
   })
 
@@ -522,24 +504,15 @@ server <- function(input, output, session) {
       )
   })
   
-  output$hindcast_2 <- renderPlotly({
-    ggplotly(hindcast_ggplot(hind_df)) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-  
   output$hindcast <- renderPlotly({
     df_lists <- hind_df
 
     scenarios <- unique(df_lists$data$Scenario)
-    indices <- unique(df_lists$data$Index)
-
+    indices <- levels(df_lists$data$Index)
+    
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
-
+    
     nrow <- case_when(
       n_scenarios > n_indices ~ n_scenarios,
       n_scenarios < 3          ~ 1,
@@ -884,15 +857,6 @@ server <- function(input, output, session) {
       )
   })
 
-  output$kobe_2 <- renderPlotly({
-    ggplotly(kobe_ggplot(kobe_df)) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
   output$kobe <- renderPlotly({
     df_lists <- kobe_df
 
@@ -1129,8 +1093,8 @@ server <- function(input, output, session) {
             zeroline = FALSE,
             showgrid = FALSE
           ),
-          hovermode = "x unified",
-          hoverdistance = 1,
+          # hovermode = "x unified",
+          hoverdistance = -1,
           hoverlabel = list(font = list(size = 12)),
           margin = list(
             b = 50,
@@ -1184,33 +1148,6 @@ server <- function(input, output, session) {
             )
           )
         )
-      )
-  })
-
-  output$priors_posteriors_K_2 <- renderPlotly({
-    ggplotly(priors_posteriors_ggplot(pp_df, indicator_name = "K")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$priors_posteriors_r_2 <- renderPlotly({
-    ggplotly(priors_posteriors_ggplot(pp_df, indicator_name = "r")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$priors_posteriors_psi_2 <- renderPlotly({
-    ggplotly(priors_posteriors_ggplot(pp_df, indicator_name = "psi")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
       )
   })
 
@@ -1991,60 +1928,6 @@ server <- function(input, output, session) {
             )
           )
         )
-      )
-  })
-
-  output$retrospective_analysis_B_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "B")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$retrospective_analysis_F_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "F")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$retrospective_analysis_BBmsy_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "BBmsy")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$retrospective_analysis_FFmsy_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "FFmsy")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$retrospective_analysis_procB_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "procB")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$retrospective_analysis_MSY_2 <- renderPlotly({
-    ggplotly(retrospective_analysis_ggplot(ra_df, "MSY")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
       )
   })
 
@@ -3371,15 +3254,6 @@ server <- function(input, output, session) {
       )
   })
 
-  output$runs_tests_2 <- renderPlotly({
-    ggplotly(runs_tests_ggplot(res_df)) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
   output$runs_tests <- renderPlotly({
     df_lists <- res_df
     
@@ -3393,8 +3267,8 @@ server <- function(input, output, session) {
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
 
-    scenarios <- unique(df_lists$SE3$Scenario)
-    indices <- levels(df_lists$SE3$Index)
+    scenarios <- unique(df_lists$cpue_residuals$Scenario)
+    indices <- levels(df_lists$cpue_residuals$Index)
 
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
@@ -3673,69 +3547,6 @@ server <- function(input, output, session) {
             )
           )
         )
-      )
-  })
-
-  output$trajectories_BB0_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "BB0")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_BBmsy_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "BBmsy")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_FFmsy_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "FFmsy")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_Bdev_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "Bdev")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_B_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "B")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_H_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "H")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
-      )
-  })
-
-  output$trajectories_Catch_2 <- renderPlotly({
-    ggplotly(trajectories_ggplot(traj_df, indicator_name = "Catch")) %>% 
-      layout(
-        hovermode = "x unified",
-        hoverdistance = 1,
-        hoverlabel = list(font = list(size = 12))
       )
   })
 
