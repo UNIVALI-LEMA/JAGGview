@@ -96,35 +96,61 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
       ))
     }
   }
+  fits_NULL <- identical(fits_list, list())
+  hc_NULL <- identical(hc_list, list())
+  if (all(c(fits_NULL, hc_NULL))) {
+    stop(
+      paste0(
+        "No valid data found. The input must contain either fit or hindcast", 
+        " data from a JABBA model."
+      )
+    )
+  }
 
-  fits_df <- fits_data(fits_list)
+  if (!fits_NULL) {
+    fits_df <- fits_data(fits_list)
 
-  li_ui  <- fits_df$Li_Ui
-  ci_80  <- fits_df$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci)
-  ci_95  <- fits_df$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
+    li_ui  <- fits_df$Li_Ui
+    ci_80  <- fits_df$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci)
+    ci_95  <- fits_df$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
 
-  fits_df <- reduce(
-    list(li_ui, ci_80, ci_95),
-    full_join,
-    by = c("Year", "Scenario", "Index")
-  )
+    fits_df <- reduce(
+      list(li_ui, ci_80, ci_95),
+      full_join,
+      by = c("Year", "Scenario", "Index")
+    )
 
-  fits_df <- fits_df %>%
-    mutate(Year = as.integer(Year))
-  if (verbose) message("Fits data was sucessfully obtained")
-  hind_df <- hindcast_data(hc_list)
-  if (verbose) message("Hindcast data was sucessfully obtained")
-  pp_df <- priors_posteriors_data(fits_list)
-  if (verbose) message("Priors x Posterior data was sucessfully obtained")
-  ra_df <- retrospective_analysis_data(hc_list)
-  if (verbose) message("Retrospective Analysis data was sucessfully obtained")
-  res_df <- runs_tests_data(fits_list)
-  if (verbose) message("Residuals data was sucessfully obtained")
-  ensemble_df <- .ensemble_data(fits_list)
-  kobe_df <- ensemble_df$kobe_dfs
-  if (verbose) message("Kobe data was sucessfully obtained")
-  traj_df <- ensemble_df$trajectories_df
-  if (verbose) message("Trajectories data was sucessfully obtained")
+    fits_df <- fits_df %>%
+      mutate(Year = as.integer(Year))
+    if (verbose) message("Fits data was sucessfully obtained")
+    pp_df <- priors_posteriors_data(fits_list)
+    if (verbose) message("Priors x Posterior data was sucessfully obtained")
+    res_df <- runs_tests_data(fits_list)
+    if (verbose) message("Residuals data was sucessfully obtained")
+    ensemble_df <- .ensemble_data(fits_list)
+    kobe_df <- ensemble_df$kobe_dfs
+    if (verbose) message("Kobe data was sucessfully obtained")
+    traj_df <- ensemble_df$trajectories_df
+    if (verbose) message("Trajectories data was sucessfully obtained")
+  }
+  else {
+    fits_df <- list()
+    pp_df <- list()
+    res_df <- list()
+    kobe_df <- list()
+    traj_df <- list()
+  }
+
+  if (!hc_NULL) {
+    hind_df <- hindcast_data(hc_list)
+    if (verbose) message("Hindcast data was sucessfully obtained")
+    ra_df <- retrospective_analysis_data(hc_list)
+    if (verbose) message("Retrospective Analysis data was sucessfully obtained")
+  }
+  else {
+    hind_df <- list()
+    ra_df <- list()
+  }
   
   env <- environment()
 

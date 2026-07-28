@@ -138,6 +138,8 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'
 #' @param list_hc_models A list containing retrospective model outputs as 
 #' returned by the JABBA function \code{JABBA::hindcast_jabba()}.
+#' @param indices_factor Optional. A vector of indices_factor to include. Must 
+#'   exist in the \code{Index} column.
 #'
 #' @return A named list with four elements:
 #' \describe{

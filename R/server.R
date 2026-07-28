@@ -1,5 +1,9 @@
 server <- function(input, output, session) {
   output$cpue_residuals <- renderPlotly({
+    if (identical(res_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- res_df
 
     max_y_val <- .round_to_nearest(max(
@@ -242,6 +246,10 @@ server <- function(input, output, session) {
   })
 
   output$fits <- renderPlotly({
+    if (identical(fits_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     palette <- .resolve_palette(NULL, 1)
 
     df <- fits_df
@@ -505,6 +513,10 @@ server <- function(input, output, session) {
   })
   
   output$hindcast <- renderPlotly({
+    if (identical(hind_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- hind_df
 
     scenarios <- unique(df_lists$data$Scenario)
@@ -858,6 +870,10 @@ server <- function(input, output, session) {
   })
 
   output$kobe <- renderPlotly({
+    if (identical(kobe_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- kobe_df
 
     max_y <- df_lists$col02$ymax
@@ -1152,6 +1168,10 @@ server <- function(input, output, session) {
   })
 
   output$priors_posteriors_K <- renderPlotly({
+    if (identical(pp_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- pp_df
 
     palette <- .resolve_palette(NULL, 2)
@@ -1412,6 +1432,10 @@ server <- function(input, output, session) {
   })
 
   output$priors_posteriors_r <- renderPlotly({
+    if (identical(pp_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- pp_df
 
     palette <- .resolve_palette(NULL, 2)
@@ -1672,6 +1696,10 @@ server <- function(input, output, session) {
   })
 
   output$priors_posteriors_psi <- renderPlotly({
+    if (identical(pp_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- pp_df
 
     palette <- .resolve_palette(NULL, 2)
@@ -1932,6 +1960,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_B <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
@@ -2148,6 +2179,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_F <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
@@ -2364,6 +2398,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_BBmsy <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
@@ -2593,6 +2630,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_FFmsy <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
@@ -2822,6 +2862,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_procB <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$data
 
     scenarios <- unique(data$Scenario)
@@ -3051,6 +3094,9 @@ server <- function(input, output, session) {
   })
 
   output$retrospective_analysis_MSY <- renderPlotly({
+    if (identical(ra_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
     data <- ra_df$surplus_data
 
     scenarios <- unique(data$Scenario)
@@ -3255,6 +3301,10 @@ server <- function(input, output, session) {
   })
 
   output$runs_tests <- renderPlotly({
+    if (identical(res_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df_lists <- res_df
     
     max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
@@ -3447,19 +3497,6 @@ server <- function(input, output, session) {
             ),
             hoverinfo = "text+x",
             text = ~paste0("Residue: ", .international_system_prefixes(Res, 2))
-          ) %>%
-          add_segments(
-            x = x_lim[1],
-            xend = x_lim[2],
-            y = 0, 
-            yend = 0,
-            line = list(
-              color = "black",
-              width = 2,
-              dash = "20px,10px"
-            ),
-            showlegend = FALSE,
-            hoverinfo = "none"
           )
         
         if (nrow(SE3) != 0) {
@@ -3471,6 +3508,19 @@ server <- function(input, output, session) {
               text = ~paste0("p-value = ", pvalue),
               textfont = list(size = 16),
               hoverinfo = "skip"
+            ) %>%
+            add_segments(
+              x = x_lim[1],
+              xend = x_lim[2],
+              y = 0, 
+              yend = 0,
+              line = list(
+                color = "black",
+                width = 2,
+                dash = "20px,10px"
+              ),
+              showlegend = FALSE,
+              hoverinfo = "none"
             )
         }
         
@@ -3551,6 +3601,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_BB0 <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "BB0")
 
@@ -3750,6 +3804,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_BBmsy <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "BBmsy")
 
@@ -3975,6 +4033,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_FFmsy <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "FFmsy")
 
@@ -4187,6 +4249,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_Bdev <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "Bdev")
 
@@ -4399,6 +4465,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_B <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "B")
 
@@ -4598,6 +4668,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_H <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "H")
 
@@ -4797,6 +4871,10 @@ server <- function(input, output, session) {
   })
 
   output$trajectories_Catch <- renderPlotly({
+    if (identical(traj_df, list())) {
+      return(.empty_plotly("There is no data for this plot"))
+    }
+
     df <- traj_df %>%
       filter(indicator == "Catch")
 

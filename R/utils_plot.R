@@ -245,6 +245,37 @@
   return(table)
 }
 
+#' Create an empty placeholder plotly widget
+#'
+#' Internal helper function used to generate a blank \pkg{plotly} widget
+#' displaying only a centered title, typically used when no data is
+#' available to plot.
+#'
+#' @param title A character string with the title to display in place of
+#' the plot.
+#'
+#' @return
+#' A \code{plotly} object with no traces displayed and a centered title.
+#'
+#' @details
+#' This function is used as a fallback visual whenever the underlying data
+#' for a plot is missing or empty, avoiding rendering errors while still
+#' informing the user through the displayed title. Dragging/zooming
+#' interactions are disabled since there is no data to explore.
+#'
+#' @keywords internal
+#' @importFrom plotly plotly_empty layout
+.empty_plotly <- function(title){
+  plotly_empty(type = "scatter", mode = "markers") %>%
+    layout(
+      title = list(
+        text = title,
+        y = 0.5
+      ),
+      dragmode = FALSE
+    )
+}
+
 #' Format numeric values with custom separators
 #'
 #' Internal helper that formats numeric values with a specified number of 
