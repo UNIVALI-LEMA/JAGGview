@@ -359,6 +359,11 @@
   sapply(number, format_single)
 }
 
+#' @keywords internal
+.is_empty <- function(x) {
+  is.null(x) || length(x) == 0
+}
+
 #' Validate color palette
 #'
 #' Checks whether all elements in a character vector are valid R colors.
@@ -558,7 +563,7 @@
 #' 
 #' @keywords internal
 .resolve_palette <- function(palette, num) {
-  if (is.null(palette)) {
+  if (.is_empty(palette) || anyNA(palette) || any(palette == "", na.rm = TRUE)) {
     return(.make_index_palette(num))
   } else {
     .is_palette_valid(palette)
@@ -570,7 +575,7 @@
       ))
     }
     else {
-      return(palette)
+      return(palette[seq_len(num)])
     }
   }
 }

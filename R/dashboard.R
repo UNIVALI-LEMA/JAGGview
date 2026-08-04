@@ -43,16 +43,19 @@
 #' @importFrom purrr reduce map
 #' @importFrom bs4Dash dashboardPage dashboardHeader dashboardBrand navbarMenu 
 #' navbarTab dashboardSidebar dashboardBody tabItems tabItem tabsetPanel 
-#' dashboardControlbar controlbarMenu controlbarItem
+#' dashboardControlbar controlbarMenu controlbarItem updateControlbar 
+#' actionButton
 #' @importFrom shiny icon tabPanel conditionalPanel selectInput textInput 
-#' numericInput shinyApp
+#' numericInput shinyApp addResourcePath uiOutput reactiveVal reactiveValues
+#' observeEvent reactive reactiveValuesToList req renderUI
 #' @importFrom plotly plotlyOutput renderPlotly add_segments add_markers 
 #' add_lines add_ribbons add_text layout subplot ggplotly plot_ly add_trace
 #' @importFrom colourpicker colourInput
-#' @importFrom htmltools div strong tags
+#' @importFrom htmltools div strong tags tagList
 #' @importFrom rlang flatten
 #' @importFrom dplyr filter
 #' @importFrom scales alpha
+#' @importFrom shinyjs enable disable useShinyjs
 create_report <- function(filename, dir = getwd(), verbose = FALSE) {
   path <- file.path(dir, filename)
 
@@ -134,13 +137,12 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     if (verbose) message("Trajectories data was sucessfully obtained")
   }
   else {
-    fits_df <- list()
+    fits_df <- data.frame()
     pp_df <- list()
     res_df <- list()
     kobe_df <- list()
-    traj_df <- list()
+    traj_df <- data.frame()
   }
-
   if (!hc_NULL) {
     hind_df <- hindcast_data(hc_list)
     if (verbose) message("Hindcast data was sucessfully obtained")
@@ -154,8 +156,25 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
   
   env <- environment()
 
-  sys.source(file.path("R", "server.R"), envir = env)
-  sys.source(file.path("R", "ui.R"), envir = env)
+  server <- .build_server(
+    fits_df = fits_df,
+    pp_df = pp_df,
+    res_df = res_df,
+    kobe_df = kobe_df,
+    traj_df = traj_df,
+    hind_df = hind_df,
+    ra_df = ra_df
+  )
+  
+  ui <- .build_ui(
+    fits_df = fits_df,
+    pp_df = pp_df,
+    res_df = res_df,
+    kobe_df = kobe_df,
+    traj_df = traj_df,
+    hind_df = hind_df,
+    ra_df = ra_df
+  )
 
   if (verbose) message("Initializing Interactive Data Visualization")
   shinyApp(ui, server)
