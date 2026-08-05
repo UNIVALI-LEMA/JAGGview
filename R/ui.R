@@ -487,6 +487,231 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             )
           ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_K'",
+            selectInput(
+              inputId = "pp_K_scenarios",
+              label = "Scenarios: ",
+              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "pp_K_title_x",
+              label = "Title X:",
+              placeholder = "Carrying capacity (K)"
+            ),
+            textInput(
+              inputId = "pp_K_title_y",
+              label = "Title Y:",
+              placeholder = "Density"
+            ),
+            uiOutput("pp_K_color_inputs"),
+            numericInput(
+              inputId = "pp_K_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_K_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_K_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_K_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_K_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_r'",
+            selectInput(
+              inputId = "pp_r_scenarios",
+              label = "Scenarios: ",
+              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "pp_r_title_x",
+              label = "Title X:",
+              placeholder = "Intrinsic growth rate (r)"
+            ),
+            textInput(
+              inputId = "pp_r_title_y",
+              label = "Title Y:",
+              placeholder = "Density"
+            ),
+            uiOutput("pp_r_color_inputs"),
+            numericInput(
+              inputId = "pp_r_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_r_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_r_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_r_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_r_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_psi'",
+            selectInput(
+              inputId = "pp_psi_scenarios",
+              label = "Scenarios: ",
+              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "pp_psi_title_x",
+              label = "Title X:",
+              placeholder = "Initial biomass depletion ratio (psi)"
+            ),
+            textInput(
+              inputId = "pp_psi_title_y",
+              label = "Title Y:",
+              placeholder = "Density"
+            ),
+            uiOutput("pp_psi_color_inputs"),
+            numericInput(
+              inputId = "pp_psi_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_psi_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_psi_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "pp_psi_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "pp_psi_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
           div(
             style = "display: flex; margin-top: 25px; margin-bottom: 25px; justify-content: center; align-items: center; width: 100%; height: 100%;",
             actionButton(

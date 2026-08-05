@@ -36,7 +36,7 @@
     indices_current = unique(res_df$cpue_residuals$Index),
     title_x_current = NA,
     title_y_current = NA,
-    color_current = "#1B4F8A",
+    color_current = NULL,
     text_size_current = 16,
     x_min_current = NA,
     x_max_current = NA,
@@ -79,15 +79,6 @@
       cpue_res_change$title_y_changed = FALSE
     }
   }, ignoreInit = TRUE)
-
-  # observeEvent(input$cpue_res_color, {
-  #   if (!setequal(input$cpue_res_color, cpue_res_values$color_current)) {
-  #     cpue_res_change$color_changed = TRUE
-  #   }
-  #   else {
-  #     cpue_res_change$color_changed = FALSE
-  #   }
-  # }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_text_size, {
     if (!identical(input$cpue_res_text_size, cpue_res_values$text_size_current)) {
@@ -134,26 +125,6 @@
     }
   }, ignoreInit = TRUE)
 
-  status_sliders_cpue_res <- reactive({
-    vec <- unlist(reactiveValuesToList(cpue_res_change))
-
-    empty_condition <- .is_empty(input$cpue_res_scenarios)|| .is_empty(input$cpue_res_indices)
-    
-    enable <- any(vec) && !empty_condition
-
-
-    return(enable)
-  })
-
-  observeEvent(status_sliders_cpue_res(), {
-
-    if (status_sliders_cpue_res()) {
-      enable("confirm_button")
-    } else {
-      disable("confirm_button")
-    }
-  })
-
   current_colors_cpue_res <- reactive({
     n <- length(unique(res_df$cpue_residuals$Index))
     req(n > 0)
@@ -190,6 +161,26 @@
     })
 
     tagList(color_inputs)
+  })
+
+  status_sliders_cpue_res <- reactive({
+    vec <- unlist(reactiveValuesToList(cpue_res_change))
+
+    empty_condition <- .is_empty(input$cpue_res_scenarios)|| .is_empty(input$cpue_res_indices)
+    
+    enable <- any(vec) && !empty_condition
+
+
+    return(enable)
+  })
+
+  observeEvent(status_sliders_cpue_res(), {
+
+    if (status_sliders_cpue_res()) {
+      enable("confirm_button")
+    } else {
+      disable("confirm_button")
+    }
   })
 
   observeEvent(input$confirm_button, {
