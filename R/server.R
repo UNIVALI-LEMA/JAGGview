@@ -667,1346 +667,920 @@
     
     .priors_posteriors_psi_server(input, output, session, pp_df)
 
-    output$retrospective_analysis_B <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$data
+    .retrospective_analysis_B_server(input, output, session, ra_df)
 
-      scenarios <- unique(data$Scenario)
+    .retrospective_analysis_F_server(input, output, session, ra_df)
 
-      n_scenarios <- length(scenarios)
+    .retrospective_analysis_BBmsy_server(input, output, session, ra_df)
 
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
+    # output$retrospective_analysis_BBmsy <- renderPlotly({
+    #   if (identical(ra_df, list())) {
+    #     return(.empty_plotly("There is no data for this plot"))
+    #   }
+    #   data <- ra_df$data
 
-      palette <- .resolve_palette(NULL, length(scenarios))
+    #   scenarios <- unique(data$Scenario)
 
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "B", ]
+    #   n_scenarios <- length(scenarios)
 
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var[data_var$teste == TRUE, ]
-      rho_var <- rho_data[rho_data$Index == "B", ]
+    #   nrow <- if (n_scenarios < 3) {
+    #     1
+    #   } else if (n_scenarios < 8) {
+    #     2
+    #   } else {
+    #     3
+    #   }
 
-      max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-      x_lim <- c(min_x_val, max_x_val)
+    #   palette <- .resolve_palette(NULL, length(scenarios))
 
-      y_lim <- .expand_range(y_lim)
-      x_lim <- .expand_range(x_lim)
+    #   rho_data <- ra_df$rho_data
+    #   data_var <- data[data$Index == "BBmsy", ]
+
+    #   data_ref <- data_var[data_var$id == "Ref", ]
+    #   data_lines <- data_var[data_var$teste == TRUE, ]
+    #   rho_var <- rho_data[rho_data$Index == "BBmsy", ]
+
+    #   max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
+    #   min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
+    #   y_lim <- c(min_y_val, max_y_val)
+    #   max_x_val <- max(max(data_ref$Year), max(data_var$Year))
+    #   min_x_val <- min(min(data_ref$Year), min(data_var$Year))
+    #   x_lim <- c(min_x_val, max_x_val)
+
+    #   y_lim <- .expand_range(y_lim)
+    #   x_lim <- .expand_range(x_lim)
       
-      pos <- .auto_text_position(
-        data_list = data_ref,
-        col_x = "Year",
-        col_y = "uci",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.05
-      )
+    #   pos <- .auto_text_position(
+    #     data_list = data_ref,
+    #     col_x = "Year",
+    #     col_y = "uci",
+    #     xlim = x_lim,
+    #     ylim = y_lim,
+    #     margin = 0.05
+    #   )
 
-      plots <- map(scenarios, function(s) {
-        data_ref <- data_ref %>%
-          filter(Scenario == s)
+    #   plots <- map(scenarios, function(s) {
+    #     data_ref <- data_ref %>%
+    #       filter(Scenario == s)
 
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
+    #     data_lines <- data_lines %>%
+    #       filter(Scenario == s)
 
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
+    #     rho_var <- rho_var %>%
+    #       filter(Scenario == s)
           
-        shapes <- list()
+    #     shapes <- list()
 
-        annotations <- list()
+    #     annotations <- list()
         
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
-
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
-
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_ribbons(
-            data = data_ref,
-            x = ~Year,
-            ymin = ~lci,
-            ymax = ~uci,
-            fillcolor = "rgba(182, 186, 187, 0.64)",
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95): (", .international_system_prefixes(lci, 2), 
-              ") - (", .international_system_prefixes(uci, 2), ")"
-            )
-          ) %>%
-          add_lines(
-            data = data_lines,
-            x = ~Year,
-            y = ~mu,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "mu (", id,"): ", .international_system_prefixes(mu, 2)
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "bottom left",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>% 
-        flatten()
-
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Year",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "Biomass (t)",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
-
-    output$retrospective_analysis_F <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$data
-
-      scenarios <- unique(data$Scenario)
-
-      n_scenarios <- length(scenarios)
-
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
-
-      palette <- .resolve_palette(NULL, length(scenarios))
-
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "F", ]
-
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var[data_var$teste == TRUE, ]
-      rho_var <- rho_data[rho_data$Index == "F", ]
-
-      max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-      x_lim <- c(min_x_val, max_x_val)
-
-      y_lim <- .expand_range(y_lim)
-      x_lim <- .expand_range(x_lim)
-      
-      pos <- .auto_text_position(
-        data_list = data_ref,
-        col_x = "Year",
-        col_y = "uci",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.05
-      )
-
-      plots <- map(scenarios, function(s) {
-        data_ref <- data_ref %>%
-          filter(Scenario == s)
-
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
-
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
-          
-        shapes <- list()
-
-        annotations <- list()
-        
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
-
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
-
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_ribbons(
-            data = data_ref,
-            x = ~Year,
-            ymin = ~lci,
-            ymax = ~uci,
-            fillcolor = "rgba(182, 186, 187, 0.64)",
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95): (", .international_system_prefixes(lci, 2), 
-              ") - (", .international_system_prefixes(uci, 2), ")"
-            )
-          ) %>%
-          add_lines(
-            data = data_lines,
-            x = ~Year,
-            y = ~mu,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "mu (", id,"): ", .international_system_prefixes(mu, 2)
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "middle center",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>% 
-        flatten()
-
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Year",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "Fishing Mortality (F)",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
-
-    output$retrospective_analysis_BBmsy <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$data
-
-      scenarios <- unique(data$Scenario)
-
-      n_scenarios <- length(scenarios)
-
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
-
-      palette <- .resolve_palette(NULL, length(scenarios))
-
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "BBmsy", ]
-
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var[data_var$teste == TRUE, ]
-      rho_var <- rho_data[rho_data$Index == "BBmsy", ]
-
-      max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-      x_lim <- c(min_x_val, max_x_val)
-
-      y_lim <- .expand_range(y_lim)
-      x_lim <- .expand_range(x_lim)
-      
-      pos <- .auto_text_position(
-        data_list = data_ref,
-        col_x = "Year",
-        col_y = "uci",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.05
-      )
-
-      plots <- map(scenarios, function(s) {
-        data_ref <- data_ref %>%
-          filter(Scenario == s)
-
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
-
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
-          
-        shapes <- list()
-
-        annotations <- list()
-        
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
-
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
-
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_ribbons(
-            data = data_ref,
-            x = ~Year,
-            ymin = ~lci,
-            ymax = ~uci,
-            fillcolor = "rgba(182, 186, 187, 0.64)",
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95): (", .international_system_prefixes(lci, 2), 
-              ") - (", .international_system_prefixes(uci, 2), ")"
-            )
-          ) %>%
-          add_segments(
-            x = x_lim[1],
-            xend = x_lim[2],
-            y = 1, 
-            yend = 1,
-            line = list(
-              color = "black",
-              width = 2,
-              dash = "20px,10px"
-            ),
-            showlegend = FALSE,
-            hoverinfo = "none"
-          ) %>%
-          add_lines(
-            data = data_lines,
-            x = ~Year,
-            y = ~mu,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "mu (", id,"): ", .international_system_prefixes(mu, 2)
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "middle center",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>% 
-        flatten()
-
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Year",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "B/Bmsy",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
-
-    output$retrospective_analysis_FFmsy <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$data
-
-      scenarios <- unique(data$Scenario)
-
-      n_scenarios <- length(scenarios)
-
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
-
-      palette <- .resolve_palette(NULL, length(scenarios))
-
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "FFmsy", ]
-
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var[data_var$teste == TRUE, ]
-      rho_var <- rho_data[rho_data$Index == "FFmsy", ]
-
-      max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-      x_lim <- c(min_x_val, max_x_val)
-
-      y_lim <- .expand_range(y_lim)
-      x_lim <- .expand_range(x_lim)
-      
-      pos <- .auto_text_position(
-        data_list = data_ref,
-        col_x = "Year",
-        col_y = "uci",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.05
-      )
-
-      plots <- map(scenarios, function(s) {
-        data_ref <- data_ref %>%
-          filter(Scenario == s)
-
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
-
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
-          
-        shapes <- list()
-
-        annotations <- list()
-        
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
-
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
-
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_ribbons(
-            data = data_ref,
-            x = ~Year,
-            ymin = ~lci,
-            ymax = ~uci,
-            fillcolor = "rgba(182, 186, 187, 0.64)",
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95): (", .international_system_prefixes(lci, 2), 
-              ") - (", .international_system_prefixes(uci, 2), ")"
-            )
-          ) %>%
-          add_segments(
-            x = x_lim[1],
-            xend = x_lim[2],
-            y = 1, 
-            yend = 1,
-            line = list(
-              color = "black",
-              width = 2,
-              dash = "20px,10px"
-            ),
-            showlegend = FALSE,
-            hoverinfo = "none"
-          ) %>%
-          add_lines(
-            data = data_lines,
-            x = ~Year,
-            y = ~mu,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "mu (", id,"): ", .international_system_prefixes(mu, 2)
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "middle center",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>% 
-        flatten()
-
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Year",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "F/Fmsy",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
-
-    output$retrospective_analysis_procB <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$data
-
-      scenarios <- unique(data$Scenario)
-
-      n_scenarios <- length(scenarios)
-
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
-
-      palette <- .resolve_palette(NULL, length(scenarios))
-
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "procB", ]
-
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var[data_var$teste == TRUE, ]
-      rho_var <- rho_data[rho_data$Index == "procB", ]
-
-      max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-      x_lim <- c(min_x_val, max_x_val)
-
-      y_lim <- .expand_range(y_lim)
-      x_lim <- .expand_range(x_lim)
-      
-      pos <- .auto_text_position(
-        data_list = data_ref,
-        col_x = "Year",
-        col_y = "uci",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.05
-      )
-
-      plots <- map(scenarios, function(s) {
-        data_ref <- data_ref %>%
-          filter(Scenario == s)
-
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
-
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
-          
-        shapes <- list()
-
-        annotations <- list()
-        
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
-
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
-
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_ribbons(
-            data = data_ref,
-            x = ~Year,
-            ymin = ~lci,
-            ymax = ~uci,
-            fillcolor = "rgba(182, 186, 187, 0.64)",
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95): (", .international_system_prefixes(lci, 2), 
-              ") - (", .international_system_prefixes(uci, 2), ")"
-            )
-          ) %>%
-          add_segments(
-            x = x_lim[1],
-            xend = x_lim[2],
-            y = 0, 
-            yend = 0,
-            line = list(
-              color = "black",
-              width = 2,
-              dash = "20px,10px"
-            ),
-            showlegend = FALSE,
-            hoverinfo = "none"
-          ) %>%
-          add_lines(
-            data = data_lines,
-            x = ~Year,
-            y = ~mu,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "mu (", id,"): ", .international_system_prefixes(mu, 2)
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "middle left",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>% 
-        flatten()
-
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Year",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "Process error on log(Biomass)",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
-
-    output$retrospective_analysis_MSY <- renderPlotly({
-      if (identical(ra_df, list())) {
-        return(.empty_plotly("There is no data for this plot"))
-      }
-      data <- ra_df$surplus_data
-
-      scenarios <- unique(data$Scenario)
-
-      n_scenarios <- length(scenarios)
-
-      nrow <- if (n_scenarios < 3) {
-        1
-      } else if (n_scenarios < 8) {
-        2
-      } else {
-        3
-      }
-
-      palette <- .resolve_palette(NULL, length(scenarios))
-
-      rho_data <- ra_df$rho_data
-      data_var <- data[data$Index == "MSY", ]
-
-      data_ref <- data_var[data_var$id == "Ref", ]
-      data_lines <- data_var
-      rho_var <- rho_data[rho_data$Index == "MSY", ]
-
-      max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
-      min_y_val <- .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
-      y_lim <- c(min_y_val, max_y_val)
-
-      max_x_val <- max(max(data_ref$SB_i), max(data_var$SB_i))
-      min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
-      x_lim <- c(min_x_val, max_x_val)
-
-      x_lim <- .expand_range(x_lim)
+    #     shapes <- append(
+    #       shapes,
+    #       list(
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           y0 = 0, 
+    #           y1 = 1,
+    #           line = list(width = 1)
+    #         ),
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           yanchor = 1,
+    #           y0 = 0, 
+    #           y1 = 28,
+    #           ysizemode = "pixel",
+    #           line = list(width = 1),
+    #           fillcolor = "black"
+    #         )
+    #       )
+    #     )
+
+    #     annotations <- append(
+    #       annotations,
+    #       list(
+    #         list(
+    #           x = 0.5,
+    #           y = 1,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = 25,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = s,
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20,
+    #             color = "white"
+    #           )
+    #         )
+    #       )
+    #     )
+
+    #     plot_ly(colors = c("black", ss3col(8))) %>%
+    #       add_ribbons(
+    #         data = data_ref,
+    #         x = ~Year,
+    #         ymin = ~lci,
+    #         ymax = ~uci,
+    #         fillcolor = "rgba(182, 186, 187, 0.64)",
+    #         line = list(width = 0),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "CI(95): (", .international_system_prefixes(lci, 2), 
+    #           ") - (", .international_system_prefixes(uci, 2), ")"
+    #         )
+    #       ) %>%
+    #       add_segments(
+    #         x = x_lim[1],
+    #         xend = x_lim[2],
+    #         y = 1, 
+    #         yend = 1,
+    #         line = list(
+    #           color = "black",
+    #           width = 2,
+    #           dash = "20px,10px"
+    #         ),
+    #         showlegend = FALSE,
+    #         hoverinfo = "none"
+    #       ) %>%
+    #       add_lines(
+    #         data = data_lines,
+    #         x = ~Year,
+    #         y = ~mu,
+    #         color = ~as.factor(id),
+    #         type = "scatter",
+    #         mode = "lines",
+    #         line = list(width = 3),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "mu (", id,"): ", .international_system_prefixes(mu, 2)
+    #         )
+    #       ) %>%
+    #       add_text(
+    #         data = rho_var,
+    #         x = pos$x,
+    #         y = pos$y,
+    #         text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
+    #         textfont = list(size = 16),
+    #         textposition = "middle center",
+    #         hoverinfo = "skip"
+    #       ) %>%
+    #       layout(
+    #         showlegend = FALSE,
+    #         xaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = x_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         yaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = y_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         hovermode = "x unified",
+    #         hoverdistance = 1,
+    #         hoverlabel = list(font = list(size = 12)),
+    #         margin = list(
+    #           b = 50,
+    #           t = 60,
+    #           l = 60,
+    #           r = 50
+    #         ),
+    #         shapes = shapes,
+    #         annotations = annotations
+    #       )
+    #   }) %>% 
+    #     flatten()
+
+    #   subplot(
+    #     plots,
+    #     nrows = nrow,
+    #     shareX = TRUE, 
+    #     shareY = TRUE,
+    #     titleX = TRUE,
+    #     titleY = TRUE, 
+    #     margin = 0.005
+    #   ) %>%
+    #     layout(
+    #       annotations = list(
+    #         list(
+    #           x = 0.5,
+    #           y = 0,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = -20,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Year",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         ),
+    #         list(
+    #           x = 0,
+    #           y = 0.5,
+    #           textangle = -90,
+    #           xanchor = "right",
+    #           yanchor = "middle",
+    #           xshift = -30,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "B/Bmsy",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         )
+    #       )
+    #     )
+    # })
+
+    .retrospective_analysis_FFmsy_server(input, output, session, ra_df)
     
-      pos <- .auto_text_position(
-        data_list = data_lines,
-        col_x = "SB_i",
-        col_y = "SP",
-        xlim = x_lim,
-        ylim = y_lim,
-        margin = 0.2
-      )
+    # output$retrospective_analysis_FFmsy <- renderPlotly({
+    #   if (identical(ra_df, list())) {
+    #     return(.empty_plotly("There is no data for this plot"))
+    #   }
+    #   data <- ra_df$data
 
-      plots <- map(scenarios, function(s) {
-        data_lines <- data_lines %>%
-          filter(Scenario == s)
+    #   scenarios <- unique(data$Scenario)
 
-        rho_var <- rho_var %>%
-          filter(Scenario == s)
+    #   n_scenarios <- length(scenarios)
+
+    #   nrow <- if (n_scenarios < 3) {
+    #     1
+    #   } else if (n_scenarios < 8) {
+    #     2
+    #   } else {
+    #     3
+    #   }
+
+    #   palette <- .resolve_palette(NULL, length(scenarios))
+
+    #   rho_data <- ra_df$rho_data
+    #   data_var <- data[data$Index == "FFmsy", ]
+
+    #   data_ref <- data_var[data_var$id == "Ref", ]
+    #   data_lines <- data_var[data_var$teste == TRUE, ]
+    #   rho_var <- rho_data[rho_data$Index == "FFmsy", ]
+
+    #   max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
+    #   min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
+    #   y_lim <- c(min_y_val, max_y_val)
+    #   max_x_val <- max(max(data_ref$Year), max(data_var$Year))
+    #   min_x_val <- min(min(data_ref$Year), min(data_var$Year))
+    #   x_lim <- c(min_x_val, max_x_val)
+
+    #   y_lim <- .expand_range(y_lim)
+    #   x_lim <- .expand_range(x_lim)
+      
+    #   pos <- .auto_text_position(
+    #     data_list = data_ref,
+    #     col_x = "Year",
+    #     col_y = "uci",
+    #     xlim = x_lim,
+    #     ylim = y_lim,
+    #     margin = 0.05
+    #   )
+
+    #   plots <- map(scenarios, function(s) {
+    #     data_ref <- data_ref %>%
+    #       filter(Scenario == s)
+
+    #     data_lines <- data_lines %>%
+    #       filter(Scenario == s)
+
+    #     rho_var <- rho_var %>%
+    #       filter(Scenario == s)
           
-        shapes <- list()
+    #     shapes <- list()
 
-        annotations <- list()
+    #     annotations <- list()
         
-        shapes <- append(
-          shapes,
-          list(
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              y0 = 0, 
-              y1 = 1,
-              line = list(width = 1)
-            ),
-            list(
-              type = "rect",
-              xref = "paper",
-              yref = "paper",
-              x0 = 0,
-              x1 = 1,
-              yanchor = 1,
-              y0 = 0, 
-              y1 = 28,
-              ysizemode = "pixel",
-              line = list(width = 1),
-              fillcolor = "black"
-            )
-          )
-        )
+    #     shapes <- append(
+    #       shapes,
+    #       list(
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           y0 = 0, 
+    #           y1 = 1,
+    #           line = list(width = 1)
+    #         ),
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           yanchor = 1,
+    #           y0 = 0, 
+    #           y1 = 28,
+    #           ysizemode = "pixel",
+    #           line = list(width = 1),
+    #           fillcolor = "black"
+    #         )
+    #       )
+    #     )
 
-        annotations <- append(
-          annotations,
-          list(
-            list(
-              x = 0.5,
-              y = 1,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = 25,
-              xref = "paper",
-              yref = "paper",
-              text = s,
-              showarrow = FALSE,
-              font = list(
-                size = 20,
-                color = "white"
-              )
-            )
-          )
-        )
+    #     annotations <- append(
+    #       annotations,
+    #       list(
+    #         list(
+    #           x = 0.5,
+    #           y = 1,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = 25,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = s,
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20,
+    #             color = "white"
+    #           )
+    #         )
+    #       )
+    #     )
 
-        data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
+    #     plot_ly(colors = c("black", ss3col(8))) %>%
+    #       add_ribbons(
+    #         data = data_ref,
+    #         x = ~Year,
+    #         ymin = ~lci,
+    #         ymax = ~uci,
+    #         fillcolor = "rgba(182, 186, 187, 0.64)",
+    #         line = list(width = 0),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "CI(95): (", .international_system_prefixes(lci, 2), 
+    #           ") - (", .international_system_prefixes(uci, 2), ")"
+    #         )
+    #       ) %>%
+    #       add_segments(
+    #         x = x_lim[1],
+    #         xend = x_lim[2],
+    #         y = 1, 
+    #         yend = 1,
+    #         line = list(
+    #           color = "black",
+    #           width = 2,
+    #           dash = "20px,10px"
+    #         ),
+    #         showlegend = FALSE,
+    #         hoverinfo = "none"
+    #       ) %>%
+    #       add_lines(
+    #         data = data_lines,
+    #         x = ~Year,
+    #         y = ~mu,
+    #         color = ~as.factor(id),
+    #         type = "scatter",
+    #         mode = "lines",
+    #         line = list(width = 3),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "mu (", id,"): ", .international_system_prefixes(mu, 2)
+    #         )
+    #       ) %>%
+    #       add_text(
+    #         data = rho_var,
+    #         x = pos$x,
+    #         y = pos$y,
+    #         text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
+    #         textfont = list(size = 16),
+    #         textposition = "middle center",
+    #         hoverinfo = "skip"
+    #       ) %>%
+    #       layout(
+    #         showlegend = FALSE,
+    #         xaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = x_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         yaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = y_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         hovermode = "x unified",
+    #         hoverdistance = 1,
+    #         hoverlabel = list(font = list(size = 12)),
+    #         margin = list(
+    #           b = 50,
+    #           t = 60,
+    #           l = 60,
+    #           r = 50
+    #         ),
+    #         shapes = shapes,
+    #         annotations = annotations
+    #       )
+    #   }) %>% 
+    #     flatten()
 
-        plot_ly(colors = c("black", ss3col(8))) %>%
-          add_lines(
-            data = data_lines,
-            x = ~SB_i,
-            y = ~SP,
-            color = ~as.factor(id),
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 3),
-            hoverinfo = "text",
-            text = ~paste0(
-              "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
-              "t<br>Surplus Production (", id,"): ", 
-              .international_system_prefixes(SP, 2), "t" 
-            )
-          ) %>%
-          add_text(
-            data = rho_var,
-            x = pos$x,
-            y = pos$y,
-            text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-            textfont = list(size = 16),
-            textposition = "middle left",
-            hoverinfo = "skip"
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          )
-      }) %>%
-        flatten()
+    #   subplot(
+    #     plots,
+    #     nrows = nrow,
+    #     shareX = TRUE, 
+    #     shareY = TRUE,
+    #     titleX = TRUE,
+    #     titleY = TRUE, 
+    #     margin = 0.005
+    #   ) %>%
+    #     layout(
+    #       annotations = list(
+    #         list(
+    #           x = 0.5,
+    #           y = 0,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = -20,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Year",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         ),
+    #         list(
+    #           x = 0,
+    #           y = 0.5,
+    #           textangle = -90,
+    #           xanchor = "right",
+    #           yanchor = "middle",
+    #           xshift = -30,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "F/Fmsy",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         )
+    #       )
+    #     )
+    # })
 
-      subplot(
-        plots,
-        nrows = nrow,
-        shareX = TRUE, 
-        shareY = TRUE,
-        titleX = TRUE,
-        titleY = TRUE, 
-        margin = 0.005
-      ) %>%
-        layout(
-          annotations = list(
-            list(
-              x = 0.5,
-              y = 0,
-              xanchor = "center",
-              yanchor = "top",
-              yshift = -20,
-              xref = "paper",
-              yref = "paper",
-              text = "Biomass (t)",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            ),
-            list(
-              x = 0,
-              y = 0.5,
-              textangle = -90,
-              xanchor = "right",
-              yanchor = "middle",
-              xshift = -30,
-              xref = "paper",
-              yref = "paper",
-              text = "Surplus Production (t)",
-              showarrow = FALSE,
-              font = list(
-                size = 20
-              )
-            )
-          )
-        )
-    })
+    .retrospective_analysis_procB_server(input, output, session, ra_df)
+
+    # output$retrospective_analysis_procB <- renderPlotly({
+    #   if (identical(ra_df, list())) {
+    #     return(.empty_plotly("There is no data for this plot"))
+    #   }
+    #   data <- ra_df$data
+
+    #   scenarios <- unique(data$Scenario)
+
+    #   n_scenarios <- length(scenarios)
+
+    #   nrow <- if (n_scenarios < 3) {
+    #     1
+    #   } else if (n_scenarios < 8) {
+    #     2
+    #   } else {
+    #     3
+    #   }
+
+    #   palette <- .resolve_palette(NULL, length(scenarios))
+
+    #   rho_data <- ra_df$rho_data
+    #   data_var <- data[data$Index == "procB", ]
+
+    #   data_ref <- data_var[data_var$id == "Ref", ]
+    #   data_lines <- data_var[data_var$teste == TRUE, ]
+    #   rho_var <- rho_data[rho_data$Index == "procB", ]
+
+    #   max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
+    #   min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
+    #   y_lim <- c(min_y_val, max_y_val)
+    #   max_x_val <- max(max(data_ref$Year), max(data_var$Year))
+    #   min_x_val <- min(min(data_ref$Year), min(data_var$Year))
+    #   x_lim <- c(min_x_val, max_x_val)
+
+    #   y_lim <- .expand_range(y_lim)
+    #   x_lim <- .expand_range(x_lim)
+      
+    #   pos <- .auto_text_position(
+    #     data_list = data_ref,
+    #     col_x = "Year",
+    #     col_y = "uci",
+    #     xlim = x_lim,
+    #     ylim = y_lim,
+    #     margin = 0.05
+    #   )
+
+    #   plots <- map(scenarios, function(s) {
+    #     data_ref <- data_ref %>%
+    #       filter(Scenario == s)
+
+    #     data_lines <- data_lines %>%
+    #       filter(Scenario == s)
+
+    #     rho_var <- rho_var %>%
+    #       filter(Scenario == s)
+          
+    #     shapes <- list()
+
+    #     annotations <- list()
+        
+    #     shapes <- append(
+    #       shapes,
+    #       list(
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           y0 = 0, 
+    #           y1 = 1,
+    #           line = list(width = 1)
+    #         ),
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           yanchor = 1,
+    #           y0 = 0, 
+    #           y1 = 28,
+    #           ysizemode = "pixel",
+    #           line = list(width = 1),
+    #           fillcolor = "black"
+    #         )
+    #       )
+    #     )
+
+    #     annotations <- append(
+    #       annotations,
+    #       list(
+    #         list(
+    #           x = 0.5,
+    #           y = 1,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = 25,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = s,
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20,
+    #             color = "white"
+    #           )
+    #         )
+    #       )
+    #     )
+
+    #     plot_ly(colors = c("black", ss3col(8))) %>%
+    #       add_ribbons(
+    #         data = data_ref,
+    #         x = ~Year,
+    #         ymin = ~lci,
+    #         ymax = ~uci,
+    #         fillcolor = "rgba(182, 186, 187, 0.64)",
+    #         line = list(width = 0),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "CI(95): (", .international_system_prefixes(lci, 2), 
+    #           ") - (", .international_system_prefixes(uci, 2), ")"
+    #         )
+    #       ) %>%
+    #       add_segments(
+    #         x = x_lim[1],
+    #         xend = x_lim[2],
+    #         y = 0, 
+    #         yend = 0,
+    #         line = list(
+    #           color = "black",
+    #           width = 2,
+    #           dash = "20px,10px"
+    #         ),
+    #         showlegend = FALSE,
+    #         hoverinfo = "none"
+    #       ) %>%
+    #       add_lines(
+    #         data = data_lines,
+    #         x = ~Year,
+    #         y = ~mu,
+    #         color = ~as.factor(id),
+    #         type = "scatter",
+    #         mode = "lines",
+    #         line = list(width = 3),
+    #         hoverinfo = "text+x",
+    #         text = ~paste0(
+    #           "mu (", id,"): ", .international_system_prefixes(mu, 2)
+    #         )
+    #       ) %>%
+    #       add_text(
+    #         data = rho_var,
+    #         x = pos$x,
+    #         y = pos$y,
+    #         text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
+    #         textfont = list(size = 16),
+    #         textposition = "middle left",
+    #         hoverinfo = "skip"
+    #       ) %>%
+    #       layout(
+    #         showlegend = FALSE,
+    #         xaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = x_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         yaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = y_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         hovermode = "x unified",
+    #         hoverdistance = 1,
+    #         hoverlabel = list(font = list(size = 12)),
+    #         margin = list(
+    #           b = 50,
+    #           t = 60,
+    #           l = 60,
+    #           r = 50
+    #         ),
+    #         shapes = shapes,
+    #         annotations = annotations
+    #       )
+    #   }) %>% 
+    #     flatten()
+
+    #   subplot(
+    #     plots,
+    #     nrows = nrow,
+    #     shareX = TRUE, 
+    #     shareY = TRUE,
+    #     titleX = TRUE,
+    #     titleY = TRUE, 
+    #     margin = 0.005
+    #   ) %>%
+    #     layout(
+    #       annotations = list(
+    #         list(
+    #           x = 0.5,
+    #           y = 0,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = -20,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Year",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         ),
+    #         list(
+    #           x = 0,
+    #           y = 0.5,
+    #           textangle = -90,
+    #           xanchor = "right",
+    #           yanchor = "middle",
+    #           xshift = -30,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Process error on log(Biomass)",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         )
+    #       )
+    #     )
+    # })
+
+    .retrospective_analysis_MSY_server(input, output, session, ra_df)
+
+    # output$retrospective_analysis_MSY <- renderPlotly({
+    #   if (identical(ra_df, list())) {
+    #     return(.empty_plotly("There is no data for this plot"))
+    #   }
+    #   data <- ra_df$surplus_data
+
+    #   scenarios <- unique(data$Scenario)
+
+    #   n_scenarios <- length(scenarios)
+
+    #   nrow <- if (n_scenarios < 3) {
+    #     1
+    #   } else if (n_scenarios < 8) {
+    #     2
+    #   } else {
+    #     3
+    #   }
+
+    #   palette <- .resolve_palette(NULL, length(scenarios))
+
+    #   rho_data <- ra_df$rho_data
+    #   data_var <- data[data$Index == "MSY", ]
+
+    #   data_ref <- data_var[data_var$id == "Ref", ]
+    #   data_lines <- data_var
+    #   rho_var <- rho_data[rho_data$Index == "MSY", ]
+
+    #   max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
+    #   min_y_val <- .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
+    #   y_lim <- c(min_y_val, max_y_val)
+
+    #   max_x_val <- max(max(data_ref$SB_i), max(data_var$SB_i))
+    #   min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
+    #   x_lim <- c(min_x_val, max_x_val)
+
+    #   x_lim <- .expand_range(x_lim)
+    
+    #   pos <- .auto_text_position(
+    #     data_list = data_lines,
+    #     col_x = "SB_i",
+    #     col_y = "SP",
+    #     xlim = x_lim,
+    #     ylim = y_lim,
+    #     margin = 0.2
+    #   )
+
+    #   plots <- map(scenarios, function(s) {
+    #     data_lines <- data_lines %>%
+    #       filter(Scenario == s)
+
+    #     rho_var <- rho_var %>%
+    #       filter(Scenario == s)
+          
+    #     shapes <- list()
+
+    #     annotations <- list()
+        
+    #     shapes <- append(
+    #       shapes,
+    #       list(
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           y0 = 0, 
+    #           y1 = 1,
+    #           line = list(width = 1)
+    #         ),
+    #         list(
+    #           type = "rect",
+    #           xref = "paper",
+    #           yref = "paper",
+    #           x0 = 0,
+    #           x1 = 1,
+    #           yanchor = 1,
+    #           y0 = 0, 
+    #           y1 = 28,
+    #           ysizemode = "pixel",
+    #           line = list(width = 1),
+    #           fillcolor = "black"
+    #         )
+    #       )
+    #     )
+
+    #     annotations <- append(
+    #       annotations,
+    #       list(
+    #         list(
+    #           x = 0.5,
+    #           y = 1,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = 25,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = s,
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20,
+    #             color = "white"
+    #           )
+    #         )
+    #       )
+    #     )
+
+    #     data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
+
+    #     plot_ly(colors = c("black", ss3col(8))) %>%
+    #       add_lines(
+    #         data = data_lines,
+    #         x = ~SB_i,
+    #         y = ~SP,
+    #         color = ~as.factor(id),
+    #         type = "scatter",
+    #         mode = "lines",
+    #         line = list(width = 3),
+    #         hoverinfo = "text",
+    #         text = ~paste0(
+    #           "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
+    #           "t<br>Surplus Production (", id,"): ", 
+    #           .international_system_prefixes(SP, 2), "t" 
+    #         )
+    #       ) %>%
+    #       add_text(
+    #         data = rho_var,
+    #         x = pos$x,
+    #         y = pos$y,
+    #         text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
+    #         textfont = list(size = 16),
+    #         textposition = "middle left",
+    #         hoverinfo = "skip"
+    #       ) %>%
+    #       layout(
+    #         showlegend = FALSE,
+    #         xaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = x_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         yaxis = list(
+    #           tickfont = list(size = 16),
+    #           title = list(font = list(size = 20)),
+    #           range = y_lim,
+    #           zeroline = FALSE
+    #         ),
+    #         hovermode = "x unified",
+    #         hoverdistance = 1,
+    #         hoverlabel = list(font = list(size = 12)),
+    #         margin = list(
+    #           b = 50,
+    #           t = 60,
+    #           l = 60,
+    #           r = 50
+    #         ),
+    #         shapes = shapes,
+    #         annotations = annotations
+    #       )
+    #   }) %>%
+    #     flatten()
+
+    #   subplot(
+    #     plots,
+    #     nrows = nrow,
+    #     shareX = TRUE, 
+    #     shareY = TRUE,
+    #     titleX = TRUE,
+    #     titleY = TRUE, 
+    #     margin = 0.005
+    #   ) %>%
+    #     layout(
+    #       annotations = list(
+    #         list(
+    #           x = 0.5,
+    #           y = 0,
+    #           xanchor = "center",
+    #           yanchor = "top",
+    #           yshift = -20,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Biomass (t)",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         ),
+    #         list(
+    #           x = 0,
+    #           y = 0.5,
+    #           textangle = -90,
+    #           xanchor = "right",
+    #           yanchor = "middle",
+    #           xshift = -30,
+    #           xref = "paper",
+    #           yref = "paper",
+    #           text = "Surplus Production (t)",
+    #           showarrow = FALSE,
+    #           font = list(
+    #             size = 20
+    #           )
+    #         )
+    #       )
+    #     )
+    # })
 
     .runs_tests_server(input, output, session, res_df)
 

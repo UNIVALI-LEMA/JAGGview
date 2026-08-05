@@ -431,7 +431,6 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               label = "Title Y:",
               placeholder = "Residuals"
             ),
-            uiOutput("cpue_res_color_inputs"),
             numericInput(
               inputId = "cpue_res_text_size",
               label = "Select text size: ",
@@ -581,7 +580,6 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               label = "Title Y:",
               placeholder = "Density"
             ),
-            uiOutput("pp_r_color_inputs"),
             numericInput(
               inputId = "pp_r_text_size",
               label = "Select text size: ",
@@ -656,7 +654,6 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               label = "Title Y:",
               placeholder = "Density"
             ),
-            uiOutput("pp_psi_color_inputs"),
             numericInput(
               inputId = "pp_psi_text_size",
               label = "Select text size: ",
@@ -705,6 +702,450 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 ),
                 numericInput(
                   inputId = "pp_psi_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_B'",
+            selectInput(
+              inputId = "ra_B_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_B_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "ra_B_title_y",
+              label = "Title Y:",
+              placeholder = "Biomass (t)"
+            ),
+            numericInput(
+              inputId = "ra_B_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_B_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_B_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_B_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_B_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_F'",
+            selectInput(
+              inputId = "ra_F_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_F_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "ra_F_title_y",
+              label = "Title Y:",
+              placeholder = "Fishing Mortality (F)"
+            ),
+            numericInput(
+              inputId = "ra_F_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_F_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_F_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_F_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_F_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_BBmsy'",
+            selectInput(
+              inputId = "ra_BBmsy_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_BBmsy_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "ra_BBmsy_title_y",
+              label = "Title Y:",
+              placeholder = "B/Bmsy"
+            ),
+            numericInput(
+              inputId = "ra_BBmsy_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_BBmsy_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_BBmsy_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_BBmsy_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_BBmsy_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_FFmsy'",
+            selectInput(
+              inputId = "ra_FFmsy_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_FFmsy_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "ra_FFmsy_title_y",
+              label = "Title Y:",
+              placeholder = "F/Fmsy"
+            ),
+            numericInput(
+              inputId = "ra_FFmsy_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_FFmsy_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_FFmsy_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_FFmsy_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_FFmsy_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_procB'",
+            selectInput(
+              inputId = "ra_procB_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_procB_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "ra_procB_title_y",
+              label = "Title Y:",
+              placeholder = "Process error on log(Biomass)"
+            ),
+            numericInput(
+              inputId = "ra_procB_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_procB_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_procB_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_procB_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_procB_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_MSY'",
+            selectInput(
+              inputId = "ra_MSY_scenarios",
+              label = "Scenarios: ",
+              choices = unique(ra_df$data$Scenario),
+              selected = unique(ra_df$data$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "ra_MSY_title_x",
+              label = "Title X:",
+              placeholder = "Biomass (t)"
+            ),
+            textInput(
+              inputId = "ra_MSY_title_y",
+              label = "Title Y:",
+              placeholder = "Surplus Production (t)"
+            ),
+            numericInput(
+              inputId = "ra_MSY_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_MSY_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_MSY_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "ra_MSY_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "ra_MSY_y_max",
                   label = NULL,
                   value = NULL,
                   width = "100%"
