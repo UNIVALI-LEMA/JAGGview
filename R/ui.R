@@ -1153,6 +1153,87 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             )
           ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_hindcast'",
+            selectInput(
+              inputId = "hc_scenarios",
+              label = "Scenarios: ",
+              choices = unique(hind_df$data$Scenario),
+              selected = unique(hind_df$data$Scenario),
+              multiple = TRUE
+            ),
+            selectInput(
+              inputId = "hc_indices",
+              label = "Indices: ",
+              choices = unique(hind_df$data$Index),
+              selected = unique(hind_df$data$Index),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "hc_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "hc_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            numericInput(
+              inputId = "hc_text_size",
+              label = "Select text size: ",
+              value = 16,
+              width = "100%"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "hc_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "hc_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "hc_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "hc_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
           div(
             style = "display: flex; margin-top: 25px; margin-bottom: 25px; justify-content: center; align-items: center; width: 100%; height: 100%;",
             actionButton(
