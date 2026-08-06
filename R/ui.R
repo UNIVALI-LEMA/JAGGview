@@ -242,9 +242,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
     controlbar = dashboardControlbar(
       controlbarMenu(
         id = "controlbarMenu",
+        type = "hidden",
         controlbarItem(
-          title = "Filter",
-          icon = icon("filter"),
+          # title = "Filter",
+          # icon = icon("filter"),
           conditionalPanel(
             condition = "input.navmenu == 'tab_fits'",
             selectInput(
@@ -1178,7 +1179,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "hc_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Index"
             ),
             numericInput(
               inputId = "hc_text_size",
@@ -1252,7 +1253,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_BB0_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "B/B0"
             ),
             colourInput(
               inputId = "traj_BB0_color",
@@ -1325,7 +1326,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_BBmsy_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "B/Bmsy"
             ),
             colourInput(
               inputId = "traj_BBmsy_color",
@@ -1398,7 +1399,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_FFmsy_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "F/Fmsy"
             ),
             colourInput(
               inputId = "traj_FFmsy_color",
@@ -1471,7 +1472,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_Bdev_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Process Error on log(Biomass)"
             ),
             colourInput(
               inputId = "traj_Bdev_color",
@@ -1544,7 +1545,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_B_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Biomass (t)"
             ),
             colourInput(
               inputId = "traj_B_color",
@@ -1617,7 +1618,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_H_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Harvest rate"
             ),
             colourInput(
               inputId = "traj_H_color",
@@ -1690,7 +1691,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_Catch_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Catch"
             ),
             colourInput(
               inputId = "traj_Catch_color",
@@ -1739,6 +1740,74 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 ),
                 numericInput(
                   inputId = "traj_Catch_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_kobe'",
+            selectInput(
+              inputId = "kobe_scenarios",
+              label = "Scenarios: ",
+              choices = unique(kobe_df$k.out$Scenario),
+              selected = unique(kobe_df$k.out$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "kobe_title_x",
+              label = "Title X:",
+              placeholder = "B/Bmsy"
+            ),
+            textInput(
+              inputId = "kobe_title_y",
+              label = "Title Y:",
+              placeholder = "F/Fmsy"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "kobe_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "kobe_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "kobe_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "kobe_y_max",
                   label = NULL,
                   value = NULL,
                   width = "100%"
