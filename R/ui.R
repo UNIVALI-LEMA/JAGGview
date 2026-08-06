@@ -171,6 +171,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
         tabItem(
           tabName = "tab_trajectories",
           tabsetPanel(
+            id = "trajectories_tabs",
             tabPanel(
               title = "BB0",
               value = "tab_traj_BB0",
@@ -1227,6 +1228,517 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 ),
                 numericInput(
                   inputId = "hc_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_BB0'",
+            selectInput(
+              inputId = "traj_BB0_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_BB0_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_BB0_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_BB0_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_BB0_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_BB0_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_BB0_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_BB0_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_BBmsy'",
+            selectInput(
+              inputId = "traj_BBmsy_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_BBmsy_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_BBmsy_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_BBmsy_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_BBmsy_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_BBmsy_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_BBmsy_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_BBmsy_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_FFmsy'",
+            selectInput(
+              inputId = "traj_FFmsy_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_FFmsy_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_FFmsy_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_FFmsy_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_FFmsy_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_FFmsy_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_FFmsy_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_FFmsy_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_Bdev'",
+            selectInput(
+              inputId = "traj_Bdev_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_Bdev_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_Bdev_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_Bdev_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_Bdev_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_Bdev_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_Bdev_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_Bdev_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_B'",
+            selectInput(
+              inputId = "traj_B_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_B_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_B_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_B_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_B_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_B_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_B_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_B_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_H'",
+            selectInput(
+              inputId = "traj_H_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_H_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_H_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_H_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_H_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_H_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_H_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_H_y_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            )
+          ),
+          conditionalPanel(
+            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_Catch'",
+            selectInput(
+              inputId = "traj_Catch_scenarios",
+              label = "Scenarios: ",
+              choices = unique(traj_df$Scenario),
+              selected = unique(traj_df$Scenario),
+              multiple = TRUE
+            ),
+            textInput(
+              inputId = "traj_Catch_title_x",
+              label = "Title X:",
+              placeholder = "Year"
+            ),
+            textInput(
+              inputId = "traj_Catch_title_y",
+              label = "Title Y:",
+              placeholder = "Abundance index"
+            ),
+            colourInput(
+              inputId = "traj_Catch_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            div(
+              div(
+                strong("X limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_Catch_x_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_Catch_x_max",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                )
+              )
+            ),
+            div(
+              div(
+                strong("Y limits:")
+              ),
+              div(
+                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                numericInput(
+                  inputId = "traj_Catch_y_min",
+                  label = NULL,
+                  value = NULL,
+                  width = "100%"
+                ), 
+                tags$span(
+                  "-",
+                  style = "font-size: 20px; color: white; padding: 0 5px;"
+                ),
+                numericInput(
+                  inputId = "traj_Catch_y_max",
                   label = NULL,
                   value = NULL,
                   width = "100%"
