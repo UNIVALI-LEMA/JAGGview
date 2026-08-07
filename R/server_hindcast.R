@@ -1,20 +1,20 @@
 #' @keywords internal
 .hindcast_server <- function(input, output, session, hind_df) { 
-  filtered_hc <- reactiveVal({hind_df})
+  filtered_hc <- reactiveVal(hind_df)
 
-  title_x_hc <- reactiveVal({NULL})
+  title_x_hc <- reactiveVal(NULL)
 
-  title_y_hc <- reactiveVal({NULL})
+  title_y_hc <- reactiveVal(NULL)
 
-  text_size_hc <- reactiveVal({16})
+  text_size_hc <- reactiveVal(16)
 
-  x_lim_min_hc <- reactiveVal({NULL})
+  x_lim_min_hc <- reactiveVal(NULL)
 
-  x_lim_max_hc <- reactiveVal({NULL})
+  x_lim_max_hc <- reactiveVal(NULL)
 
-  y_lim_min_hc <- reactiveVal({NULL})
+  y_lim_min_hc <- reactiveVal(NULL)
 
-  y_lim_max_hc <- reactiveVal({NULL})
+  y_lim_max_hc <- reactiveVal(NULL)
 
   hc_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -124,23 +124,20 @@
   status_sliders_hc <- reactive({
     vec <- unlist(reactiveValuesToList(hc_change))
 
-
     empty_condition <- .is_empty(input$hc_scenarios)|| .is_empty(input$hc_indices)
     
     enable <- any(vec) && !empty_condition
-
 
     return(enable)
   })
 
   observeEvent(status_sliders_hc(), {
-
     if (status_sliders_hc()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -199,9 +196,10 @@
       y_lim_min_hc(input$hc_y_min)
       y_lim_max_hc(input$hc_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$hindcast <- renderPlotly({
+    req(filtered_hc())
     if (identical(filtered_hc(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -221,34 +219,61 @@
       TRUE                     ~ 3
     )
   
-    if (is.null(x_lim_min_hc()) || x_lim_min_hc() == "" || is.na(x_lim_min_hc())) {
-      x_lim_min_hc(min(df_lists$data$year))
-    }
+    # if (is.null(x_lim_min_hc()) || x_lim_min_hc() == "" || is.na(x_lim_min_hc())) {
+    #   x_lim_min_hc(min(df_lists$data$year))
+    # }
 
-    if (is.null(x_lim_max_hc()) || x_lim_max_hc() == "" || is.na(x_lim_max_hc())) {
-      x_lim_max_hc(max(df_lists$data$year))
-    }
-    x_lim <- c(x_lim_min_hc(), x_lim_max_hc())
+    # if (is.null(x_lim_max_hc()) || x_lim_max_hc() == "" || is.na(x_lim_max_hc())) {
+    #   x_lim_max_hc(max(df_lists$data$year))
+    # }
+    # x_lim <- c(x_lim_min_hc(), x_lim_max_hc())
 
-    if (is.null(y_lim_min_hc()) || y_lim_min_hc() == "" || is.na(y_lim_min_hc())) {
-      y_lim_min_hc(.round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE))
-    }
+    # if (is.null(y_lim_min_hc()) || y_lim_min_hc() == "" || is.na(y_lim_min_hc())) {
+    #   y_lim_min_hc(.round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE))
+    # }
 
-    if (is.null(y_lim_max_hc()) || y_lim_max_hc() == "" || is.na(y_lim_max_hc())) {
-      y_lim_max_hc(.round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE))
-    }
-    y_lim <- c(y_lim_min_hc(), y_lim_max_hc())
+    # if (is.null(y_lim_max_hc()) || y_lim_max_hc() == "" || is.na(y_lim_max_hc())) {
+    #   y_lim_max_hc(.round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE))
+    # }
+    # y_lim <- c(y_lim_min_hc(), y_lim_max_hc())
+
+    # y_lim <- .expand_range(y_lim)
+    # x_lim <- .expand_range(x_lim)
+
+    # if(is.null(title_x_hc()) || title_x_hc() == "") {
+    #   title_x_hc("Year")
+    # }
+
+    # if (is.null(title_y_hc()) || title_y_hc() == "") {
+    #   title_y_hc("Index")
+    # }
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_hc, min(df_lists$data$year)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_hc, max(df_lists$data$year)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_hc, 
+      .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_hc, 
+      .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
 
-    if(is.null(title_x_hc()) || title_x_hc() == "") {
-      title_x_hc("Year")
-    }
+    title_x <- .get_value_or_default(title_x_hc, "Year")
 
-    if (is.null(title_y_hc()) || title_y_hc() == "") {
-      title_y_hc("Index")
-    }
+    title_y <- .get_value_or_default(title_y_hc, "Index")
 
     pos <- .auto_text_position(
       df_lists$data, 
@@ -551,7 +576,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_hc(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -566,7 +591,7 @@
             xshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_y_hc(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

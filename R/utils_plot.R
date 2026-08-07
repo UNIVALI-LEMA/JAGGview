@@ -623,7 +623,19 @@
   return(result)
 }
 
+#' @keywords internal
 .expand_range <- function(lim, mult = 0.05) {
   d <- diff(lim)
   lim + c(-1, 1) * d * mult
+}
+
+#' @keywords internal
+.get_value_or_default <- function(reactive_val, default) {
+  val <- reactive_val()
+  if (is.null(val) || val == "" || is.na(val)) {
+    default
+  }
+  else {
+    val
+  }
 }

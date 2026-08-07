@@ -1,20 +1,20 @@
 #' @keywords internal
 .fits_server <- function(input, output, session, fits_df) { 
-  filtered_fits <- reactiveVal({fits_df})
+  filtered_fits <- reactiveVal(fits_df)
 
-  title_x_fits <- reactiveVal({NULL})
+  title_x_fits <- reactiveVal(NULL)
 
-  title_y_fits <- reactiveVal({NULL})
+  title_y_fits <- reactiveVal(NULL)
 
-  palette_fits <- reactiveVal({NULL})
+  palette_fits <- reactiveVal(NULL)
 
-  x_lim_min_fits <- reactiveVal({NULL})
+  x_lim_min_fits <- reactiveVal(NULL)
 
-  x_lim_max_fits <- reactiveVal({NULL})
+  x_lim_max_fits <- reactiveVal(NULL)
 
-  y_lim_min_fits <- reactiveVal({NULL})
+  y_lim_min_fits <- reactiveVal(NULL)
 
-  y_lim_max_fits <- reactiveVal({NULL})
+  y_lim_max_fits <- reactiveVal(NULL)
 
   fits_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -43,136 +43,101 @@
   observeEvent(input$fits_scenarios, {
     if (!setequal(input$fits_scenarios, fits_values$scenarios_current)) {
       fits_change$scenarios_changed = TRUE
-      # print("scenarios_changed = TRUE")
     }
     else {
       fits_change$scenarios_changed = FALSE
-      # print("scenarios_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_indices, {
     if (!setequal(input$fits_indices, fits_values$indices_current)) {
       fits_change$indices_changed = TRUE
-      # print("indices_changed = TRUE")
     }
     else {
       fits_change$indices_changed = FALSE
-      # print("indices_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_title_x, {
-    # title_x_fits(input$fits_title_x)
     if (!identical(input$fits_title_x, fits_values$title_x_current)) {
       fits_change$title_x_changed = TRUE
-      # print("title_x_changed = TRUE")
     }
     else {
       fits_change$title_x_changed = FALSE
-      # print("title_x_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_title_y, {
-    # title_y_fits(input$fits_title_y)
     if (!identical(input$fits_title_y, fits_values$title_y_current)) {
       fits_change$title_y_changed = TRUE
-      # print("title_y_changed = TRUE")
     }
     else {
       fits_change$title_y_changed = FALSE
-      # print("title_y_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_color, {
-    # palette_fits(input$fits_color)
     if (!identical(input$fits_color, fits_values$color_current)) {
       fits_change$color_changed = TRUE
-      # print("color_changed = TRUE")
     }
     else {
       fits_change$color_changed = FALSE
-      # print("color_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_min, {
-    # x_lim_min_fits(input$fits_x_min)
     if (!identical(input$fits_x_min, fits_values$x_min_current)) {
       fits_change$x_min_changed = TRUE
-      # print("x_min_changed = TRUE")
     }
     else {
       fits_change$x_min_changed = FALSE
-      # print("x_min_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_max, {
-    # x_lim_max_fits(input$fits_x_max)
     if (!identical(input$fits_x_max, fits_values$x_max_current)) {
       fits_change$x_max_changed = TRUE
-      # print("x_max_changed = TRUE")
     }
     else {
       fits_change$x_max_changed = FALSE
-      # print("x_max_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_min, {
-    # y_lim_min_fits(input$fits_y_min)
-    # print(paste0("input$fits_y_min: ", input$fits_y_min))
-    # print(paste0("fits_values$y_min_current: ", fits_values$y_min_current))
     if (!identical(input$fits_y_min, fits_values$y_min_current)) {
       fits_change$y_min_changed = TRUE
-      # print("y_min_changed = TRUE")
     }
     else {
       fits_change$y_min_changed = FALSE
-      # print("y_min_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_max, {
-    # y_lim_max_fits(input$fits_y_max)
     if (!identical(input$fits_y_max, fits_values$y_max_current)) {
       fits_change$y_max_changed = TRUE
-      # print("y_max_changed = TRUE")
     }
     else {
       fits_change$y_max_changed = FALSE
-      # print("y_max_changed = FALSE")
     }
   }, ignoreInit = TRUE)
 
   status_sliders_fits <- reactive({
     vec <- unlist(reactiveValuesToList(fits_change))
 
-    # print(paste0("vec: ", vec))
-
     empty_condition <- .is_empty(input$fits_scenarios)|| .is_empty(input$fits_indices)
     
     enable <- any(vec) && !empty_condition
-
-    # print(paste0("any(vec): ", any(vec), "!empty_condition: ", !empty_condition))
-    # print(paste0("enable: ", enable))
 
     return(enable)
   })
 
   observeEvent(status_sliders_fits(), {
-
     if (status_sliders_fits()) {
-      # print("enable button")
       enable("confirm_button")
     } else {
-      # print("disable button")
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -214,9 +179,10 @@
       y_lim_min_fits(input$fits_y_min)
       y_lim_max_fits(input$fits_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$fits <- renderPlotly({
+    req(filtered_fits())
     if (nrow(filtered_fits()) == 0) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -225,23 +191,23 @@
 
     df <- filtered_fits()
 
-    if (is.null(x_lim_min_fits()) || x_lim_min_fits() == "" || is.na(x_lim_min_fits())) {
-      x_lim_min_fits(min(df$Year, na.rm = TRUE))
-    }
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_fits, min(df$Year, na.rm = TRUE)
+    )
 
-    if (is.null(x_lim_max_fits()) || x_lim_max_fits() == "" || is.na(x_lim_max_fits())) {
-      x_lim_max_fits(max(df$Year, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_fits(), x_lim_max_fits())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_fits, max(df$Year, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if (is.null(y_lim_min_fits()) || y_lim_min_fits() == "" || is.na(y_lim_min_fits())) {
-      y_lim_min_fits(.round_to_nearest(min(df$lci_95, na.rm = TRUE), FALSE))
-    }
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_fits, .round_to_nearest(min(df$lci_95, na.rm = TRUE), FALSE)
+    )
 
-    if (is.null(y_lim_max_fits()) || y_lim_max_fits() == "" || is.na(y_lim_max_fits())) {
-      y_lim_max_fits(.round_to_nearest(max(df$uci_95, na.rm = TRUE), TRUE))
-    }
-    y_lim <- c(y_lim_min_fits(), y_lim_max_fits())
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_fits, .round_to_nearest(max(df$uci_95, na.rm = TRUE), TRUE)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -252,13 +218,9 @@
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
-    if(is.null(title_x_fits()) || title_x_fits() == "") {
-      title_x_fits("Year")
-    }
+    title_x <- .get_value_or_default(title_x_fits, "Year")
 
-    if (is.null(title_y_fits()) || title_y_fits() == "") {
-      title_y_fits("Abundance index")
-    }
+    title_y <- .get_value_or_default(title_y_fits, "Abundance index")
 
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -477,7 +439,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_fits(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -492,7 +454,7 @@
             xshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_y_fits(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

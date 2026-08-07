@@ -1,24 +1,24 @@
 #' @keywords internal
 .priors_posteriors_psi_server <- function(input, output, session, pp_df) {
-  filtered_pp_psi <- reactiveVal({pp_df})
+  filtered_pp_psi <- reactiveVal(pp_df)
 
-  title_x_pp_psi <- reactiveVal({NULL})
+  title_x_pp_psi <- reactiveVal(NULL)
 
-  title_y_pp_psi <- reactiveVal({NULL})
+  title_y_pp_psi <- reactiveVal(NULL)
 
-  prior_color_pp_psi <- reactiveVal({NULL})
+  prior_color_pp_psi <- reactiveVal(NULL)
   
-  posterior_color_pp_psi <- reactiveVal({NULL})
+  posterior_color_pp_psi <- reactiveVal(NULL)
 
-  text_size_pp_psi <- reactiveVal({16})
+  text_size_pp_psi <- reactiveVal(16)
 
-  x_lim_min_pp_psi <- reactiveVal({NULL})
+  x_lim_min_pp_psi <- reactiveVal(NULL)
 
-  x_lim_max_pp_psi <- reactiveVal({NULL})
+  x_lim_max_pp_psi <- reactiveVal(NULL)
 
-  y_lim_min_pp_psi <- reactiveVal({NULL})
+  y_lim_min_pp_psi <- reactiveVal(NULL)
 
-  y_lim_max_pp_psi <- reactiveVal({NULL})
+  y_lim_max_pp_psi <- reactiveVal(NULL)
 
   pp_psi_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -143,18 +143,16 @@
     
     enable <- any(vec) && !empty_condition
 
-
     return(enable)
   })
 
   observeEvent(status_sliders_pp_psi(), {
-
     if (status_sliders_pp_psi()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -214,16 +212,17 @@
       y_lim_min_pp_psi(input$pp_psi_y_min)
       y_lim_max_pp_psi(input$pp_psi_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$priors_posteriors_psi <- renderPlotly({
+    req(filtered_pp_psi())
     if (identical(filtered_pp_psi(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 
     df_lists <- filtered_pp_psi()
 
-    palette <- .resolve_palette(NULL, 2)
+    palette <- .resolve_palette(c(prior_color_pp_psi(), posterior_color_pp_psi()), 2)
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
 
@@ -243,29 +242,31 @@
     posterior <- df_lists$posterior %>%
       select(Scenario, psi01, psi02)
 
-    if(is.null(x_lim_min_pp_psi()) || x_lim_min_pp_psi() == "" || is.na(x_lim_min_pp_psi())) {
-      x_lim_min_pp_psi(min(prior$psi01, posterior$psi01, na.rm = TRUE))
-    }
-    if(is.null(x_lim_max_pp_psi()) || x_lim_max_pp_psi() == "" || is.na(x_lim_max_pp_psi())) {
-      x_lim_max_pp_psi(max(prior$psi01, posterior$psi01, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_pp_psi(), x_lim_max_pp_psi())
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_pp_psi, min(prior$psi01, posterior$psi01, na.rm = TRUE)
+    )
 
-    if(is.null(y_lim_min_pp_psi()) || y_lim_min_pp_psi() == "" || is.na(y_lim_min_pp_psi())) {
-      y_lim_min_pp_psi(.round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), TRUE, 1.1))
-    }
-    if(is.null(y_lim_max_pp_psi()) || y_lim_max_pp_psi() == "" || is.na(y_lim_max_pp_psi())) {
-      y_lim_max_pp_psi(.round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_pp_psi(), y_lim_max_pp_psi())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_pp_psi, max(prior$psi01, posterior$psi01, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if(is.null(title_x_pp_psi()) || title_x_pp_psi() == "") {
-      title_x_pp_psi("Initial biomass depletion ratio (psi)")
-    }
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_pp_psi, 
+      .round_to_nearest(min(prior$psi02, posterior$psi02, na.rm = TRUE), FALSE, 1.1)
+    )
 
-    if (is.null(title_y_pp_psi()) || title_y_pp_psi() == "") {
-      title_y_pp_psi("Density")
-    }
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_pp_psi, 
+      .round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(
+      title_x_pp_psi, "Initial biomass depletion ratio (psi)"
+    )
+
+    title_y <- .get_value_or_default(title_y_pp_psi, "Density")
 
     pos <- .auto_text_position(
       data_list = list(prior, posterior), 
@@ -280,7 +281,6 @@
       select(Scenario, psi) %>%
       mutate(x = pos$x, y = pos$y)
 
-
     PPVR <- df_lists$PPVR %>%
       select(Scenario, psi) %>%
       mutate(x = pos$x, y = pos$y)
@@ -294,7 +294,6 @@
 
       PPMR <- PPMR %>%
         filter(Scenario == s)
-
 
       PPVR <- PPVR %>%
         filter(Scenario == s)
@@ -454,7 +453,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_pp_psi(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -469,7 +468,7 @@
             xshift = -10,
             xref = "paper",
             yref = "paper",
-            text = title_y_pp_psi(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

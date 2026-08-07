@@ -244,8 +244,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
         id = "controlbarMenu",
         type = "hidden",
         controlbarItem(
-          # title = "Filter",
-          # icon = icon("filter"),
+          title = "Filter",
+          icon = icon("filter"),
           conditionalPanel(
             condition = "input.navmenu == 'tab_fits'",
             selectInput(
@@ -423,6 +423,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(res_df$cpue_residuals$Index),
               multiple = TRUE
             ),
+            uiOutput("cpue_res_color_inputs"),
             textInput(
               inputId = "cpue_res_title_x",
               label = "Title X:",
@@ -507,7 +508,16 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               label = "Title Y:",
               placeholder = "Density"
             ),
-            uiOutput("pp_K_color_inputs"),
+            colourInput(
+              inputId = "pp_K_prior_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            colourInput(
+              inputId = "pp_K_posterior_color",
+              label = "Select color: ",
+              value = "#2A9D5C"
+            ),
             numericInput(
               inputId = "pp_K_text_size",
               label = "Select text size: ",
@@ -582,6 +592,16 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               label = "Title Y:",
               placeholder = "Density"
             ),
+            colourInput(
+              inputId = "pp_r_prior_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            colourInput(
+              inputId = "pp_r_posterior_color",
+              label = "Select color: ",
+              value = "#2A9D5C"
+            ),
             numericInput(
               inputId = "pp_r_text_size",
               label = "Select text size: ",
@@ -655,6 +675,16 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               inputId = "pp_psi_title_y",
               label = "Title Y:",
               placeholder = "Density"
+            ),
+            colourInput(
+              inputId = "pp_psi_prior_color",
+              label = "Select color: ",
+              value = "#1B4F8A"
+            ),
+            colourInput(
+              inputId = "pp_psi_posterior_color",
+              label = "Select color: ",
+              value = "#2A9D5C"
             ),
             numericInput(
               inputId = "pp_psi_text_size",

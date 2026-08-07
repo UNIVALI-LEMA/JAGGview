@@ -1,18 +1,18 @@
 #' @keywords internal
 .kobe_server <- function(input, output, session, kobe_df) {
-  filtered_kobe <- reactiveVal({kobe_df})
+  filtered_kobe <- reactiveVal(kobe_df)
 
-  title_x_kobe <- reactiveVal({NULL})
+  title_x_kobe <- reactiveVal(NULL)
 
-  title_y_kobe <- reactiveVal({NULL})
+  title_y_kobe <- reactiveVal(NULL)
 
-  x_lim_min_kobe <- reactiveVal({NULL})
+  x_lim_min_kobe <- reactiveVal(NULL)
 
-  x_lim_max_kobe <- reactiveVal({NULL})
+  x_lim_max_kobe <- reactiveVal(NULL)
 
-  y_lim_min_kobe <- reactiveVal({NULL})
+  y_lim_min_kobe <- reactiveVal(NULL)
 
-  y_lim_max_kobe <- reactiveVal({NULL})
+  y_lim_max_kobe <- reactiveVal(NULL)
 
   kobe_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -108,23 +108,19 @@
 
   status_sliders_kobe <- reactive({
     vec <- unlist(reactiveValuesToList(kobe_change))
-
-    empty_condition <- .is_empty(input$kobe_scenarios)
     
-    enable <- any(vec) && !empty_condition
-
+    enable <- any(vec) && !.is_empty(input$kobe_scenarios)
 
     return(enable)
   })
 
   observeEvent(status_sliders_kobe(), {
-
     if (status_sliders_kobe()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -166,15 +162,6 @@
             filter(
               Scenario %in% input$kobe_scenarios
             )
-          # cpue_residuals = kobe_df$cpue_residuals %>% filter(
-          #   Scenario %in% input$kobe_scenarios
-          # ) %>% droplevels(),
-          # SE3 = kobe_df$SE3 %>% filter(
-          #   Scenario %in% input$kobe_scenarios
-          # ) %>% droplevels(),
-          # RMSE_data = kobe_df$RMSE_data %>% filter(
-          #   Scenario %in% input$kobe_scenarios
-          # )
         )
       )
       title_x_kobe(input$kobe_title_x)
@@ -184,30 +171,27 @@
       y_lim_min_kobe(input$kobe_y_min)
       y_lim_max_kobe(input$kobe_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$kobe <- renderPlotly({
+    req(filtered_kobe())
     if (identical(filtered_kobe(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 
     df_lists <- filtered_kobe()
 
-    if (is.null(x_lim_min_kobe()) || x_lim_min_kobe() == "" || is.na(x_lim_min_kobe())) {
-      x_lim_min_kobe(0)
-    }
-    if (is.null(x_lim_max_kobe()) || x_lim_max_kobe() == "" || is.na(x_lim_max_kobe())) {
-      x_lim_max_kobe(df_lists$col02$xmax)
-    }
-    x_lim <- c(x_lim_min_kobe(), x_lim_max_kobe())
+    x_lim_min <- .get_value_or_default(x_lim_min_kobe, 0)
+    x_lim_max <- .get_value_or_default(x_lim_max_kobe, df_lists$col02$xmax)
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if (is.null(y_lim_min_kobe()) || y_lim_min_kobe() == "" || is.na(y_lim_min_kobe())) {
-      y_lim_min_kobe(0)
-    }
-    if (is.null(y_lim_max_kobe()) || y_lim_max_kobe() == "" || is.na(y_lim_max_kobe())) {
-      y_lim_max_kobe(df_lists$col02$ymax)
-    }
-    y_lim <- c(y_lim_min_kobe(), y_lim_max_kobe())
+    y_lim_min <- .get_value_or_default(y_lim_min_kobe, 0)
+    y_lim_max <- .get_value_or_default(y_lim_max_kobe, df_lists$col02$ymax)
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_kobe, "B/Bmsy")
+
+    title_y <- .get_value_or_default(title_y_kobe, "F/Fmsy")
 
     scenarios <- unique(df_lists$k.out$Scenario)
 
@@ -224,14 +208,6 @@
     }
 
     palette <- colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
-
-    if(is.null(title_x_kobe()) || title_x_kobe() == "") {
-      title_x_kobe("B/Bmsy")
-    }
-
-    if (is.null(title_y_kobe()) || title_y_kobe() == "") {
-      title_y_kobe("F/Fmsy")
-    }
 
     plots <- map(scenarios, function(s) {
       line_data <- df_lists$tmp11 %>%
@@ -476,7 +452,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_kobe(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -491,7 +467,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_kobe(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

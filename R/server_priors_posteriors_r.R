@@ -143,12 +143,10 @@
     
     enable <- any(vec) && !empty_condition
 
-
     return(enable)
   })
 
   observeEvent(status_sliders_pp_r(), {
-
     if (status_sliders_pp_r()) {
       enable("confirm_button")
     } else {
@@ -243,29 +241,29 @@
     posterior <- df_lists$posterior %>%
       select(Scenario, r01, r02)
 
-    if(is.null(x_lim_min_pp_r()) || x_lim_min_pp_r() == "" || is.na(x_lim_min_pp_r())) {
-      x_lim_min_pp_r(min(prior$r01, posterior$r01, na.rm = TRUE))
-    }
-    if(is.null(x_lim_max_pp_r()) || x_lim_max_pp_r() == "" || is.na(x_lim_max_pp_r())) {
-      x_lim_max_pp_r(max(prior$r01, posterior$r01, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_pp_r(), x_lim_max_pp_r())
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_pp_r, min(prior$r01, posterior$r01, na.rm = TRUE)
+    )
 
-    if(is.null(y_lim_min_pp_r()) || y_lim_min_pp_r() == "" || is.na(y_lim_min_pp_r())) {
-      y_lim_min_pp_r(.round_to_nearest(max(prior$r02, posterior$r02, na.rm = TRUE), TRUE, 1.1))
-    }
-    if(is.null(y_lim_max_pp_r()) || y_lim_max_pp_r() == "" || is.na(y_lim_max_pp_r())) {
-      y_lim_max_pp_r(.round_to_nearest(max(prior$r02, posterior$r02, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_pp_r(), y_lim_max_pp_r())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_pp_r, max(prior$r01, posterior$r01, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if(is.null(title_x_pp_r()) || title_x_pp_r() == "") {
-      title_x_pp_r("Intrinsic growth rate (r)")
-    }
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_pp_r, 
+      .round_to_nearest(min(prior$r02, posterior$r02, na.rm = TRUE), FALSE, 1.1)
+    )
 
-    if (is.null(title_y_pp_r()) || title_y_pp_r() == "") {
-      title_y_pp_r("Density")
-    }
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_pp_r, 
+      .round_to_nearest(max(prior$r02, posterior$r02, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_pp_r, "Intrinsic growth rate (r)")
+
+    title_y <- .get_value_or_default(title_y_pp_r, "Density")
 
     pos <- .auto_text_position(
       data_list = list(prior, posterior), 
@@ -454,7 +452,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_pp_r(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -469,7 +467,7 @@
             xshift = -10,
             xref = "paper",
             yref = "paper",
-            text = title_y_pp_r(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

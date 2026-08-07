@@ -1,20 +1,20 @@
 #' @keywords internal
 .traj_Catch_server <- function(input, output, session, traj_df) { 
-  filtered_traj_Catch <- reactiveVal({traj_df})
+  filtered_traj_Catch <- reactiveVal(traj_df)
 
-  title_x_traj_Catch <- reactiveVal({NULL})
+  title_x_traj_Catch <- reactiveVal(NULL)
 
-  title_y_traj_Catch <- reactiveVal({NULL})
+  title_y_traj_Catch <- reactiveVal(NULL)
 
-  palette_traj_Catch <- reactiveVal({NULL})
+  palette_traj_Catch <- reactiveVal(NULL)
 
-  x_lim_min_traj_Catch <- reactiveVal({NULL})
+  x_lim_min_traj_Catch <- reactiveVal(NULL)
 
-  x_lim_max_traj_Catch <- reactiveVal({NULL})
+  x_lim_max_traj_Catch <- reactiveVal(NULL)
 
-  y_lim_min_traj_Catch <- reactiveVal({NULL})
+  y_lim_min_traj_Catch <- reactiveVal(NULL)
 
-  y_lim_max_traj_Catch <- reactiveVal({NULL})
+  y_lim_max_traj_Catch <- reactiveVal(NULL)
 
   traj_Catch_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_traj_Catch(), {
-
     if (status_sliders_traj_Catch()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -164,9 +163,10 @@
       y_lim_min_traj_Catch(input$traj_Catch_y_min)
       y_lim_max_traj_Catch(input$traj_Catch_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$trajectories_Catch <- renderPlotly({
+    req(filtered_traj_Catch())
     if (identical(filtered_traj_Catch(), data.frame())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -188,34 +188,61 @@
 
     palette <- .resolve_palette(palette_traj_Catch(), 1)
 
-    if (is.null(x_lim_min_traj_Catch()) || x_lim_min_traj_Catch() == "" || is.na(x_lim_min_traj_Catch())) {
-      x_lim_min_traj_Catch(min(df$year, na.rm = TRUE))
-    }
+    # if (is.null(x_lim_min_traj_Catch()) || x_lim_min_traj_Catch() == "" || is.na(x_lim_min_traj_Catch())) {
+    #   x_lim_min_traj_Catch(min(df$year, na.rm = TRUE))
+    # }
 
-    if (is.null(x_lim_max_traj_Catch()) || x_lim_max_traj_Catch() == "" || is.na(x_lim_max_traj_Catch())) {
-      x_lim_max_traj_Catch(max(df$year, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_traj_Catch(), x_lim_max_traj_Catch())
+    # if (is.null(x_lim_max_traj_Catch()) || x_lim_max_traj_Catch() == "" || is.na(x_lim_max_traj_Catch())) {
+    #   x_lim_max_traj_Catch(max(df$year, na.rm = TRUE))
+    # }
+    # x_lim <- c(x_lim_min_traj_Catch(), x_lim_max_traj_Catch())
 
-    if (is.null(y_lim_min_traj_Catch()) || y_lim_min_traj_Catch() == "" || is.na(y_lim_min_traj_Catch())) {
-      y_lim_min_traj_Catch(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
-    }
+    # if (is.null(y_lim_min_traj_Catch()) || y_lim_min_traj_Catch() == "" || is.na(y_lim_min_traj_Catch())) {
+    #   y_lim_min_traj_Catch(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
+    # }
 
-    if (is.null(y_lim_max_traj_Catch()) || y_lim_max_traj_Catch() == "" || is.na(y_lim_max_traj_Catch())) {
-      y_lim_max_traj_Catch(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_traj_Catch(), y_lim_max_traj_Catch())
+    # if (is.null(y_lim_max_traj_Catch()) || y_lim_max_traj_Catch() == "" || is.na(y_lim_max_traj_Catch())) {
+    #   y_lim_max_traj_Catch(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
+    # }
+    # y_lim <- c(y_lim_min_traj_Catch(), y_lim_max_traj_Catch())
+
+    # y_lim <- .expand_range(y_lim)
+    # x_lim <- .expand_range(x_lim)
+  
+    # if(is.null(title_x_traj_Catch()) || title_x_traj_Catch() == "") {
+    #   title_x_traj_Catch("Year")
+    # }
+
+    # if (is.null(title_y_traj_Catch()) || title_y_traj_Catch() == "") {
+    #   title_y_traj_Catch("Catch")
+    # }
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_traj_Catch, min(df$year, na.rm = TRUE)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_traj_Catch, max(df$year, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_traj_Catch, 
+      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_traj_Catch, 
+      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_traj_Catch, "Year")
+
+    title_y <- .get_value_or_default(title_y_traj_Catch, "Catch")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
-  
-    if(is.null(title_x_traj_Catch()) || title_x_traj_Catch() == "") {
-      title_x_traj_Catch("Year")
-    }
-
-    if (is.null(title_y_traj_Catch()) || title_y_traj_Catch() == "") {
-      title_y_traj_Catch("Catch")
-    }
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -362,7 +389,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_traj_Catch(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -377,7 +404,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_traj_Catch(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

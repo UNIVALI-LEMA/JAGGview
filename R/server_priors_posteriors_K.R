@@ -1,24 +1,24 @@
 #' @keywords internal
 .priors_posteriors_K_server <- function(input, output, session, pp_df) {
-  filtered_pp_K <- reactiveVal({pp_df})
+  filtered_pp_K <- reactiveVal(pp_df)
 
-  title_x_pp_K <- reactiveVal({NULL})
+  title_x_pp_K <- reactiveVal(NULL)
 
-  title_y_pp_K <- reactiveVal({NULL})
+  title_y_pp_K <- reactiveVal(NULL)
 
-  prior_color_pp_K <- reactiveVal({NULL})
+  prior_color_pp_K <- reactiveVal(NULL)
   
-  posterior_color_pp_K <- reactiveVal({NULL})
+  posterior_color_pp_K <- reactiveVal(NULL)
 
-  text_size_pp_K <- reactiveVal({16})
+  text_size_pp_K <- reactiveVal(16)
 
-  x_lim_min_pp_K <- reactiveVal({NULL})
+  x_lim_min_pp_K <- reactiveVal(NULL)
 
-  x_lim_max_pp_K <- reactiveVal({NULL})
+  x_lim_max_pp_K <- reactiveVal(NULL)
 
-  y_lim_min_pp_K <- reactiveVal({NULL})
+  y_lim_min_pp_K <- reactiveVal(NULL)
 
-  y_lim_max_pp_K <- reactiveVal({NULL})
+  y_lim_max_pp_K <- reactiveVal(NULL)
 
   pp_K_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -143,18 +143,16 @@
     
     enable <- any(vec) && !empty_condition
 
-
     return(enable)
   })
 
   observeEvent(status_sliders_pp_K(), {
-
     if (status_sliders_pp_K()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -214,9 +212,10 @@
       y_lim_min_pp_K(input$pp_K_y_min)
       y_lim_max_pp_K(input$pp_K_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$priors_posteriors_K <- renderPlotly({
+    req(filtered_pp_K())
     if (identical(filtered_pp_K(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -243,29 +242,29 @@
     posterior <- df_lists$posterior %>%
       select(Scenario, K01, K02)
 
-    if(is.null(x_lim_min_pp_K()) || x_lim_min_pp_K() == "" || is.na(x_lim_min_pp_K())) {
-      x_lim_min_pp_K(min(prior$K01, posterior$K01, na.rm = TRUE))
-    }
-    if(is.null(x_lim_max_pp_K()) || x_lim_max_pp_K() == "" || is.na(x_lim_max_pp_K())) {
-      x_lim_max_pp_K(max(prior$K01, posterior$K01, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_pp_K(), x_lim_max_pp_K())
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_pp_K, min(prior$K01, posterior$K01, na.rm = TRUE)
+    )
 
-    if(is.null(y_lim_min_pp_K()) || y_lim_min_pp_K() == "" || is.na(y_lim_min_pp_K())) {
-      y_lim_min_pp_K(.round_to_nearest(max(prior$K02, posterior$K02, na.rm = TRUE), TRUE, 1.1))
-    }
-    if(is.null(y_lim_max_pp_K()) || y_lim_max_pp_K() == "" || is.na(y_lim_max_pp_K())) {
-      y_lim_max_pp_K(.round_to_nearest(max(prior$K02, posterior$K02, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_pp_K(), y_lim_max_pp_K())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_pp_K, max(prior$K01, posterior$K01, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if(is.null(title_x_pp_K()) || title_x_pp_K() == "") {
-      title_x_pp_K("Carrying capacity (K)")
-    }
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_pp_K, 
+      .round_to_nearest(min(prior$K02, posterior$K02, na.rm = TRUE), FALSE, 1.1)
+    )
 
-    if (is.null(title_y_pp_K()) || title_y_pp_K() == "") {
-      title_y_pp_K("Density")
-    }
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_pp_K, 
+      .round_to_nearest(max(prior$K02, posterior$K02, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_pp_K, "Carrying capacity (K)")
+
+    title_y <- .get_value_or_default(title_y_pp_K, "Density")
 
     pos <- .auto_text_position(
       data_list = list(prior, posterior), 
@@ -454,7 +453,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_pp_K(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -469,7 +468,7 @@
             xshift = -10,
             xref = "paper",
             yref = "paper",
-            text = title_y_pp_K(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

@@ -1,20 +1,20 @@
 #' @keywords internal
 .retrospective_analysis_MSY_server <- function(input, output, session, ra_df) {
-  filtered_ra_MSY <- reactiveVal({ra_df})
+  filtered_ra_MSY <- reactiveVal(ra_df)
 
-  title_x_ra_MSY <- reactiveVal({NULL})
+  title_x_ra_MSY <- reactiveVal(NULL)
 
-  title_y_ra_MSY <- reactiveVal({NULL})
+  title_y_ra_MSY <- reactiveVal(NULL)
 
-  text_size_ra_MSY <- reactiveVal({16})
+  text_size_ra_MSY <- reactiveVal(16)
 
-  x_lim_min_ra_MSY <- reactiveVal({NULL})
+  x_lim_min_ra_MSY <- reactiveVal(NULL)
 
-  x_lim_max_ra_MSY <- reactiveVal({NULL})
+  x_lim_max_ra_MSY <- reactiveVal(NULL)
 
-  y_lim_min_ra_MSY <- reactiveVal({NULL})
+  y_lim_min_ra_MSY <- reactiveVal(NULL)
 
-  y_lim_max_ra_MSY <- reactiveVal({NULL})
+  y_lim_max_ra_MSY <- reactiveVal(NULL)
 
   ra_MSY_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_ra_MSY(), {
-
     if (status_sliders_ra_MSY()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -172,9 +171,10 @@
       y_lim_min_ra_MSY(input$ra_MSY_y_min)
       y_lim_max_ra_MSY(input$ra_MSY_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$retrospective_analysis_MSY <- renderPlotly({
+    req(filtered_ra_MSY())
     if (identical(filtered_ra_MSY(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -200,45 +200,58 @@
     data_ref <- data_var %>%
       filter(id == "Ref")
 
-    # data_ref <- data_var[data_var$id == "Ref", ]
-
     data_lines <- data_var
 
     rho_var <- rho_data %>% 
       filter(Index == "MSY")
-    # rho_var <- rho_data[rho_data$Index == "MSY", ]
 
-    # max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
-    # min_y_val <- .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
-    # y_lim <- c(min_y_val, max_y_val)
+    # if (is.null(x_lim_min_ra_MSY()) || x_lim_min_ra_MSY() == "" || is.na(x_lim_min_ra_MSY())) {
+    #   x_lim_min_ra_MSY(min(data_ref$SB_i, data_var$SB_i))
+    # }
+    # if (is.null(x_lim_max_ra_MSY()) || x_lim_max_ra_MSY() == "" || is.na(x_lim_max_ra_MSY())) {
+    #   x_lim_max_ra_MSY(max(data_ref$SB_i, data_var$SB_i))
+    # }
+    # x_lim <- c(x_lim_min_ra_MSY(), x_lim_max_ra_MSY())
 
-    # max_x_val <- max(max(data_ref$SB_i), max(data_var$SB_i))
-    # min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
-    # x_lim <- c(min_x_val, max_x_val)
+    # if (is.null(y_lim_min_ra_MSY()) || y_lim_min_ra_MSY() == "" || is.na(y_lim_min_ra_MSY())) {
+    #   y_lim_min_ra_MSY(.round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1))
+    # }
+    # if (is.null(y_lim_max_ra_MSY()) || y_lim_max_ra_MSY() == "" || is.na(y_lim_max_ra_MSY())) {
+    #   y_lim_max_ra_MSY(.round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1))
+    # }
+    # y_lim <- c(y_lim_min_ra_MSY(), y_lim_max_ra_MSY())
 
-    if (is.null(x_lim_min_ra_MSY()) || x_lim_min_ra_MSY() == "" || is.na(x_lim_min_ra_MSY())) {
-      x_lim_min_ra_MSY(min(data_ref$SB_i, data_var$SB_i))
-    }
-    if (is.null(x_lim_max_ra_MSY()) || x_lim_max_ra_MSY() == "" || is.na(x_lim_max_ra_MSY())) {
-      x_lim_max_ra_MSY(max(data_ref$SB_i, data_var$SB_i))
-    }
-    x_lim <- c(x_lim_min_ra_MSY(), x_lim_max_ra_MSY())
+    # if(is.null(title_x_ra_MSY()) || title_x_ra_MSY() == "") {
+    #   title_x_ra_MSY("Year")
+    # }
 
-    if (is.null(y_lim_min_ra_MSY()) || y_lim_min_ra_MSY() == "" || is.na(y_lim_min_ra_MSY())) {
-      y_lim_min_ra_MSY(.round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1))
-    }
-    if (is.null(y_lim_max_ra_MSY()) || y_lim_max_ra_MSY() == "" || is.na(y_lim_max_ra_MSY())) {
-      y_lim_max_ra_MSY(.round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_ra_MSY(), y_lim_max_ra_MSY())
+    # if (is.null(title_y_ra_MSY()) || title_y_ra_MSY() == "") {
+    #   title_y_ra_MSY("Process error on log(Biomass)")
+    # }
 
-    if(is.null(title_x_ra_MSY()) || title_x_ra_MSY() == "") {
-      title_x_ra_MSY("Year")
-    }
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_ra_MSY, min(data_ref$SB_i, data_var$SB_i)
+    )
 
-    if (is.null(title_y_ra_MSY()) || title_y_ra_MSY() == "") {
-      title_y_ra_MSY("Process error on log(Biomass)")
-    }
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_ra_MSY, max(data_ref$SB_i, data_var$SB_i)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_ra_MSY, 
+      .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_ra_MSY, 
+      .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_ra_MSY, "Biomass (t)")
+
+    title_y <- .get_value_or_default(title_y_ra_MSY, "Surplus Production (t)")
 
     x_lim <- .expand_range(x_lim)
   
@@ -390,7 +403,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_ra_MSY(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -405,7 +418,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_ra_MSY(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

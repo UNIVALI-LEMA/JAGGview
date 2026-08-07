@@ -1,20 +1,20 @@
 #' @keywords internal
 .retrospective_analysis_B_server <- function(input, output, session, ra_df) {
-  filtered_ra_B <- reactiveVal({ra_df})
+  filtered_ra_B <- reactiveVal(ra_df)
 
-  title_x_ra_B <- reactiveVal({NULL})
+  title_x_ra_B <- reactiveVal(NULL)
 
-  title_y_ra_B <- reactiveVal({NULL})
+  title_y_ra_B <- reactiveVal(NULL)
 
-  text_size_ra_B <- reactiveVal({16})
+  text_size_ra_B <- reactiveVal(16)
 
-  x_lim_min_ra_B <- reactiveVal({NULL})
+  x_lim_min_ra_B <- reactiveVal(NULL)
 
-  x_lim_max_ra_B <- reactiveVal({NULL})
+  x_lim_max_ra_B <- reactiveVal(NULL)
 
-  y_lim_min_ra_B <- reactiveVal({NULL})
+  y_lim_min_ra_B <- reactiveVal(NULL)
 
-  y_lim_max_ra_B <- reactiveVal({NULL})
+  y_lim_max_ra_B <- reactiveVal(NULL)
 
   ra_B_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_ra_B(), {
-
     if (status_sliders_ra_B()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -172,9 +171,10 @@
       y_lim_min_ra_B(input$ra_B_y_min)
       y_lim_max_ra_B(input$ra_B_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$retrospective_analysis_B <- renderPlotly({
+    req(filtered_ra_B())
     if (identical(filtered_ra_B(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -206,29 +206,29 @@
     rho_var <- rho_data %>%
       filter(Index == "B")
 
-    if (is.null(x_lim_min_ra_B()) || x_lim_min_ra_B() == "" || is.na(x_lim_min_ra_B())) {
-      x_lim_min_ra_B(min(data_ref$Year, data_var$Year))
-    }
-    if (is.null(x_lim_max_ra_B()) || x_lim_max_ra_B() == "" || is.na(x_lim_max_ra_B())) {
-      x_lim_max_ra_B(max(data_ref$Year, data_var$Year))
-    }
-    x_lim <- c(x_lim_min_ra_B(), x_lim_max_ra_B())
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_ra_B, min(data_ref$Year, data_var$Year)
+    )
 
-    if (is.null(y_lim_min_ra_B()) || y_lim_min_ra_B() == "" || is.na(y_lim_min_ra_B())) {
-      y_lim_min_ra_B(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
-    }
-    if (is.null(y_lim_max_ra_B()) || y_lim_max_ra_B() == "" || is.na(y_lim_max_ra_B())) {
-      y_lim_max_ra_B(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_ra_B(), y_lim_max_ra_B())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_ra_B, max(data_ref$Year, data_var$Year)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
 
-    if(is.null(title_x_ra_B()) || title_x_ra_B() == "") {
-      title_x_ra_B("Year")
-    }
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_ra_B, 
+      .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
+    )
 
-    if (is.null(title_y_ra_B()) || title_y_ra_B() == "") {
-      title_y_ra_B("Biomass (t)")
-    }
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_ra_B, 
+      .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_ra_B, "Year")
+
+    title_y <- .get_value_or_default(title_y_ra_B, "Biomass (t)")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -390,7 +390,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_ra_B(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -405,7 +405,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_ra_B(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

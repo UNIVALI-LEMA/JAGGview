@@ -1,20 +1,20 @@
 #' @keywords internal
 .retrospective_analysis_procB_server <- function(input, output, session, ra_df) {
-  filtered_ra_procB <- reactiveVal({ra_df})
+  filtered_ra_procB <- reactiveVal(ra_df)
 
-  title_x_ra_procB <- reactiveVal({NULL})
+  title_x_ra_procB <- reactiveVal(NULL)
 
-  title_y_ra_procB <- reactiveVal({NULL})
+  title_y_ra_procB <- reactiveVal(NULL)
 
-  text_size_ra_procB <- reactiveVal({16})
+  text_size_ra_procB <- reactiveVal(16)
 
-  x_lim_min_ra_procB <- reactiveVal({NULL})
+  x_lim_min_ra_procB <- reactiveVal(NULL)
 
-  x_lim_max_ra_procB <- reactiveVal({NULL})
+  x_lim_max_ra_procB <- reactiveVal(NULL)
 
-  y_lim_min_ra_procB <- reactiveVal({NULL})
+  y_lim_min_ra_procB <- reactiveVal(NULL)
 
-  y_lim_max_ra_procB <- reactiveVal({NULL})
+  y_lim_max_ra_procB <- reactiveVal(NULL)
 
   ra_procB_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_ra_procB(), {
-
     if (status_sliders_ra_procB()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -172,9 +171,10 @@
       y_lim_min_ra_procB(input$ra_procB_y_min)
       y_lim_max_ra_procB(input$ra_procB_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$retrospective_analysis_procB <- renderPlotly({
+    req(filtered_ra_procB())
     if (identical(filtered_ra_procB(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -206,29 +206,53 @@
     rho_var <- rho_data %>%
       filter(Index == "procB")
 
-    if (is.null(x_lim_min_ra_procB()) || x_lim_min_ra_procB() == "" || is.na(x_lim_min_ra_procB())) {
-      x_lim_min_ra_procB(min(data_ref$Year, data_var$Year))
-    }
-    if (is.null(x_lim_max_ra_procB()) || x_lim_max_ra_procB() == "" || is.na(x_lim_max_ra_procB())) {
-      x_lim_max_ra_procB(max(data_ref$Year, data_var$Year))
-    }
-    x_lim <- c(x_lim_min_ra_procB(), x_lim_max_ra_procB())
+    # if (is.null(x_lim_min_ra_procB()) || x_lim_min_ra_procB() == "" || is.na(x_lim_min_ra_procB())) {
+    #   x_lim_min_ra_procB(min(data_ref$Year, data_var$Year))
+    # }
+    # if (is.null(x_lim_max_ra_procB()) || x_lim_max_ra_procB() == "" || is.na(x_lim_max_ra_procB())) {
+    #   x_lim_max_ra_procB(max(data_ref$Year, data_var$Year))
+    # }
+    # x_lim <- c(x_lim_min_ra_procB(), x_lim_max_ra_procB())
 
-    if (is.null(y_lim_min_ra_procB()) || y_lim_min_ra_procB() == "" || is.na(y_lim_min_ra_procB())) {
-      y_lim_min_ra_procB(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
-    }
-    if (is.null(y_lim_max_ra_procB()) || y_lim_max_ra_procB() == "" || is.na(y_lim_max_ra_procB())) {
-      y_lim_max_ra_procB(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_ra_procB(), y_lim_max_ra_procB())
+    # if (is.null(y_lim_min_ra_procB()) || y_lim_min_ra_procB() == "" || is.na(y_lim_min_ra_procB())) {
+    #   y_lim_min_ra_procB(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
+    # }
+    # if (is.null(y_lim_max_ra_procB()) || y_lim_max_ra_procB() == "" || is.na(y_lim_max_ra_procB())) {
+    #   y_lim_max_ra_procB(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
+    # }
+    # y_lim <- c(y_lim_min_ra_procB(), y_lim_max_ra_procB())
 
-    if(is.null(title_x_ra_procB()) || title_x_ra_procB() == "") {
-      title_x_ra_procB("Year")
-    }
+    # if(is.null(title_x_ra_procB()) || title_x_ra_procB() == "") {
+    #   title_x_ra_procB("Year")
+    # }
 
-    if (is.null(title_y_ra_procB()) || title_y_ra_procB() == "") {
-      title_y_ra_procB("Process error on log(Biomass)")
-    }
+    # if (is.null(title_y_ra_procB()) || title_y_ra_procB() == "") {
+    #   title_y_ra_procB("Process error on log(Biomass)")
+    # }
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_ra_procB, min(data_ref$Year, data_var$Year)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_ra_procB, max(data_ref$Year, data_var$Year)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_ra_procB, 
+      .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_ra_procB, 
+      .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_ra_procB, "Year")
+
+    title_y <- .get_value_or_default(title_y_ra_procB, "Process error on log(Biomass)")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -390,7 +414,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_ra_procB(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -405,7 +429,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_ra_procB(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

@@ -1,20 +1,20 @@
 #' @keywords internal
 .traj_Bdev_server <- function(input, output, session, traj_df) { 
-  filtered_traj_Bdev <- reactiveVal({traj_df})
+  filtered_traj_Bdev <- reactiveVal(traj_df)
 
-  title_x_traj_Bdev <- reactiveVal({NULL})
+  title_x_traj_Bdev <- reactiveVal(NULL)
 
-  title_y_traj_Bdev <- reactiveVal({NULL})
+  title_y_traj_Bdev <- reactiveVal(NULL)
 
-  palette_traj_Bdev <- reactiveVal({NULL})
+  palette_traj_Bdev <- reactiveVal(NULL)
 
-  x_lim_min_traj_Bdev <- reactiveVal({NULL})
+  x_lim_min_traj_Bdev <- reactiveVal(NULL)
 
-  x_lim_max_traj_Bdev <- reactiveVal({NULL})
+  x_lim_max_traj_Bdev <- reactiveVal(NULL)
 
-  y_lim_min_traj_Bdev <- reactiveVal({NULL})
+  y_lim_min_traj_Bdev <- reactiveVal(NULL)
 
-  y_lim_max_traj_Bdev <- reactiveVal({NULL})
+  y_lim_max_traj_Bdev <- reactiveVal(NULL)
 
   traj_Bdev_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_traj_Bdev(), {
-
     if (status_sliders_traj_Bdev()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -164,9 +163,10 @@
       y_lim_min_traj_Bdev(input$traj_Bdev_y_min)
       y_lim_max_traj_Bdev(input$traj_Bdev_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$trajectories_Bdev <- renderPlotly({
+    req(filtered_traj_Bdev())
     if (identical(filtered_traj_Bdev(), data.frame())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -188,34 +188,62 @@
 
     palette <- .resolve_palette(palette_traj_Bdev(), 1)
 
-    if (is.null(x_lim_min_traj_Bdev()) || x_lim_min_traj_Bdev() == "" || is.na(x_lim_min_traj_Bdev())) {
-      x_lim_min_traj_Bdev(min(df$year, na.rm = TRUE))
-    }
+    # if (is.null(x_lim_min_traj_Bdev()) || x_lim_min_traj_Bdev() == "" || is.na(x_lim_min_traj_Bdev())) {
+    #   x_lim_min_traj_Bdev(min(df$year, na.rm = TRUE))
+    # }
 
-    if (is.null(x_lim_max_traj_Bdev()) || x_lim_max_traj_Bdev() == "" || is.na(x_lim_max_traj_Bdev())) {
-      x_lim_max_traj_Bdev(max(df$year, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_traj_Bdev(), x_lim_max_traj_Bdev())
+    # if (is.null(x_lim_max_traj_Bdev()) || x_lim_max_traj_Bdev() == "" || is.na(x_lim_max_traj_Bdev())) {
+    #   x_lim_max_traj_Bdev(max(df$year, na.rm = TRUE))
+    # }
+    # x_lim <- c(x_lim_min_traj_Bdev(), x_lim_max_traj_Bdev())
 
-    if (is.null(y_lim_min_traj_Bdev()) || y_lim_min_traj_Bdev() == "" || is.na(y_lim_min_traj_Bdev())) {
-      y_lim_min_traj_Bdev(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
-    }
+    # if (is.null(y_lim_min_traj_Bdev()) || y_lim_min_traj_Bdev() == "" || is.na(y_lim_min_traj_Bdev())) {
+    #   y_lim_min_traj_Bdev(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
+    # }
 
-    if (is.null(y_lim_max_traj_Bdev()) || y_lim_max_traj_Bdev() == "" || is.na(y_lim_max_traj_Bdev())) {
-      y_lim_max_traj_Bdev(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_traj_Bdev(), y_lim_max_traj_Bdev())
+    # if (is.null(y_lim_max_traj_Bdev()) || y_lim_max_traj_Bdev() == "" || is.na(y_lim_max_traj_Bdev())) {
+    #   y_lim_max_traj_Bdev(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
+    # }
+    # y_lim <- c(y_lim_min_traj_Bdev(), y_lim_max_traj_Bdev())
+
+    # y_lim <- .expand_range(y_lim)
+    # x_lim <- .expand_range(x_lim)
+  
+    # if(is.null(title_x_traj_Bdev()) || title_x_traj_Bdev() == "") {
+    #   title_x_traj_Bdev("Year")
+    # }
+
+    # if (is.null(title_y_traj_Bdev()) || title_y_traj_Bdev() == "") {
+    #   title_y_traj_Bdev("Process Error on log(Biomass)")
+    # }
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_traj_Bdev, min(df$year, na.rm = TRUE)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_traj_Bdev, max(df$year, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_traj_Bdev, 
+      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_traj_Bdev, 
+      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_traj_Bdev, "Year")
+
+    title_y <- .get_value_or_default(title_y_traj_Bdev, 
+      "Process Error on log(Biomass)")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
-  
-    if(is.null(title_x_traj_Bdev()) || title_x_traj_Bdev() == "") {
-      title_x_traj_Bdev("Year")
-    }
-
-    if (is.null(title_y_traj_Bdev()) || title_y_traj_Bdev() == "") {
-      title_y_traj_Bdev("Process Error on log(Biomass)")
-    }
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -375,7 +403,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_traj_Bdev(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -390,7 +418,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_traj_Bdev(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

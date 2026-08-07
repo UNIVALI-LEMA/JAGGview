@@ -1,22 +1,22 @@
 #' @keywords internal
 .cpue_res_server <- function(input, output, session, res_df) {
-  filtered_cpue_res <- reactiveVal({res_df})
+  filtered_cpue_res <- reactiveVal(res_df)
 
-  title_x_cpue_res <- reactiveVal({NULL})
+  title_x_cpue_res <- reactiveVal(NULL)
 
-  title_y_cpue_res <- reactiveVal({NULL})
+  title_y_cpue_res <- reactiveVal(NULL)
 
-  palette_cpue_res <- reactiveVal({NULL})
+  palette_cpue_res <- reactiveVal(NULL)
 
-  text_size_cpue_res <- reactiveVal({16})
+  text_size_cpue_res <- reactiveVal(16)
 
-  x_lim_min_cpue_res <- reactiveVal({NULL})
+  x_lim_min_cpue_res <- reactiveVal(NULL)
 
-  x_lim_max_cpue_res <- reactiveVal({NULL})
+  x_lim_max_cpue_res <- reactiveVal(NULL)
 
-  y_lim_min_cpue_res <- reactiveVal({NULL})
+  y_lim_min_cpue_res <- reactiveVal(NULL)
 
-  y_lim_max_cpue_res <- reactiveVal({NULL})
+  y_lim_max_cpue_res <- reactiveVal(NULL)
 
   cpue_res_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -170,18 +170,16 @@
     
     enable <- any(vec) && !empty_condition
 
-
     return(enable)
   })
 
   observeEvent(status_sliders_cpue_res(), {
-
     if (status_sliders_cpue_res()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -236,30 +234,35 @@
       y_lim_min_cpue_res(input$cpue_res_y_min)
       y_lim_max_cpue_res(input$cpue_res_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$cpue_residuals <- renderPlotly({
+    req(filtered_cpue_res())
     if (identical(filtered_cpue_res(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 
     df_lists <- filtered_cpue_res()
-  
-    if (is.null(x_lim_min_cpue_res()) || x_lim_min_cpue_res() == "" || is.na(x_lim_min_cpue_res())) {
-      x_lim_min_cpue_res(min(df_lists$cpue_residuals$Year, na.rm = TRUE))
-    }
-    if (is.null(x_lim_max_cpue_res()) || x_lim_max_cpue_res() == "" || is.na(x_lim_max_cpue_res())) {
-      x_lim_max_cpue_res(max(df_lists$cpue_residuals$Year, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_cpue_res(), x_lim_max_cpue_res())
-  
-    if (is.null(y_lim_min_cpue_res()) || y_lim_min_cpue_res() == "" || is.na(y_lim_min_cpue_res())) {
-      y_lim_min_cpue_res(.round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE))
-    }
-    if (is.null(y_lim_max_cpue_res()) || y_lim_max_cpue_res() == "" || is.na(y_lim_max_cpue_res())) {
-      y_lim_max_cpue_res(.round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE))
-    }
-    y_lim <- c(y_lim_min_cpue_res(), y_lim_max_cpue_res())
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_cpue_res, min(df_lists$cpue_residuals$Year, na.rm = TRUE)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_cpue_res, max(df_lists$cpue_residuals$Year, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_cpue_res, 
+      .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_cpue_res, 
+      .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -269,14 +272,10 @@
     n_indices <- length(unique(df_lists$cpue_residuals$Index))
 
     n_scenarios <- length(scenarios)
+    
+    title_x <- .get_value_or_default(title_x_cpue_res, "Year")
 
-    if(is.null(title_x_cpue_res()) || title_x_cpue_res() == "") {
-      title_x_cpue_res("Year")
-    }
-
-    if (is.null(title_y_cpue_res()) || title_y_cpue_res() == "") {
-      title_y_cpue_res("Residuals")
-    }
+    title_y <- .get_value_or_default(title_y_cpue_res, "Residuals")
 
     nrow <- if (n_scenarios < 3) {
       1
@@ -285,7 +284,6 @@
     } else {
       3
     }
-
     palette <- .resolve_palette(palette_cpue_res(), n_indices)
 
     pos <- .auto_text_position(
@@ -473,7 +471,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_cpue_res(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -488,7 +486,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_cpue_res(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

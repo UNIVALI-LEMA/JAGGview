@@ -1,20 +1,20 @@
 #' @keywords internal
 .runs_tests_server <- function(input, output, session, res_df) {
-  filtered_runs_tests <- reactiveVal({res_df})
+  filtered_runs_tests <- reactiveVal(res_df)
 
-  title_x_runs_tests <- reactiveVal({NULL})
+  title_x_runs_tests <- reactiveVal(NULL)
 
-  title_y_runs_tests <- reactiveVal({NULL})
+  title_y_runs_tests <- reactiveVal(NULL)
 
-  text_size_runs_tests <- reactiveVal({16})
+  text_size_runs_tests <- reactiveVal(16)
 
-  x_lim_min_runs_tests <- reactiveVal({NULL})
+  x_lim_min_runs_tests <- reactiveVal(NULL)
 
-  x_lim_max_runs_tests <- reactiveVal({NULL})
+  x_lim_max_runs_tests <- reactiveVal(NULL)
 
-  y_lim_min_runs_tests <- reactiveVal({NULL})
+  y_lim_min_runs_tests <- reactiveVal(NULL)
 
-  y_lim_max_runs_tests <- reactiveVal({NULL})
+  y_lim_max_runs_tests <- reactiveVal(NULL)
 
   runs_tests_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -128,18 +128,16 @@
     
     enable <- any(vec) && !empty_condition
 
-
     return(enable)
   })
 
   observeEvent(status_sliders_runs_tests(), {
-
     if (status_sliders_runs_tests()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -188,30 +186,35 @@
       y_lim_min_runs_tests(input$runs_tests_y_min)
       y_lim_max_runs_tests(input$runs_tests_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$runs_tests <- renderPlotly({
+    req(filtered_runs_tests())
     if (identical(filtered_runs_tests(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 
     df_lists <- filtered_runs_tests()
     
-    if (is.null(x_lim_min_runs_tests()) || x_lim_min_runs_tests() == "" || is.na(x_lim_min_runs_tests())) {
-      x_lim_min_runs_tests(min(df_lists$SE3$ymin))
-    }
-    if (is.null(x_lim_max_runs_tests()) || x_lim_max_runs_tests() == "" || is.na(x_lim_max_runs_tests())) {
-      x_lim_max_runs_tests(max(df_lists$SE3$ymax))
-    }
-    x_lim <- c(x_lim_min_runs_tests(), x_lim_max_runs_tests())
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_runs_tests, min(df_lists$SE3$ymin)
+    )
 
-    if (is.null(y_lim_min_runs_tests()) || y_lim_min_runs_tests() == "" || is.na(y_lim_min_runs_tests())) {
-      y_lim_min_runs_tests(.round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5))
-    }
-    if (is.null(y_lim_max_runs_tests()) || y_lim_max_runs_tests() == "" || is.na(y_lim_max_runs_tests())) {
-      y_lim_max_runs_tests(.round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5))
-    }
-    y_lim <- c(y_lim_min_runs_tests(), y_lim_max_runs_tests())
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_runs_tests, max(df_lists$SE3$ymax)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_runs_tests, 
+      .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_runs_tests, 
+      .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -222,13 +225,9 @@
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
-    if(is.null(title_x_runs_tests()) || title_x_runs_tests() == "") {
-      title_x_runs_tests("Year")
-    }
+    title_x <- .get_value_or_default(title_x_runs_tests, "Year")
 
-    if (is.null(title_y_runs_tests()) || title_y_runs_tests() == "") {
-      title_y_runs_tests("Residuals")
-    }
+    title_y <- .get_value_or_default(title_y_runs_tests, "Residuals")
 
     pos <- .auto_text_position(
       data_list = df_lists$cpue_residuals,
@@ -482,7 +481,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_runs_tests(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -497,7 +496,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_runs_tests(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20

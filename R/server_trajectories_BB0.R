@@ -1,20 +1,20 @@
 #' @keywords internal
 .traj_BB0_server <- function(input, output, session, traj_df) { 
-  filtered_traj_BB0 <- reactiveVal({traj_df})
+  filtered_traj_BB0 <- reactiveVal(traj_df)
 
-  title_x_traj_BB0 <- reactiveVal({NULL})
+  title_x_traj_BB0 <- reactiveVal(NULL)
 
-  title_y_traj_BB0 <- reactiveVal({NULL})
+  title_y_traj_BB0 <- reactiveVal(NULL)
 
-  palette_traj_BB0 <- reactiveVal({NULL})
+  palette_traj_BB0 <- reactiveVal(NULL)
 
-  x_lim_min_traj_BB0 <- reactiveVal({NULL})
+  x_lim_min_traj_BB0 <- reactiveVal(NULL)
 
-  x_lim_max_traj_BB0 <- reactiveVal({NULL})
+  x_lim_max_traj_BB0 <- reactiveVal(NULL)
 
-  y_lim_min_traj_BB0 <- reactiveVal({NULL})
+  y_lim_min_traj_BB0 <- reactiveVal(NULL)
 
-  y_lim_max_traj_BB0 <- reactiveVal({NULL})
+  y_lim_max_traj_BB0 <- reactiveVal(NULL)
 
   traj_BB0_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -119,13 +119,12 @@
   })
 
   observeEvent(status_sliders_traj_BB0(), {
-
     if (status_sliders_traj_BB0()) {
       enable("confirm_button")
     } else {
       disable("confirm_button")
     }
-  })
+  }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
@@ -164,9 +163,10 @@
       y_lim_min_traj_BB0(input$traj_BB0_y_min)
       y_lim_max_traj_BB0(input$traj_BB0_y_max)
     }
-  })
+  }, ignoreInit = TRUE)
 
   output$trajectories_BB0 <- renderPlotly({
+    req(filtered_traj_BB0())
     if (identical(filtered_traj_BB0(), data.frame())) {
       return(.empty_plotly("There is no data for this plot"))
     }
@@ -188,34 +188,61 @@
 
     palette <- .resolve_palette(palette_traj_BB0(), 1)
 
-    if (is.null(x_lim_min_traj_BB0()) || x_lim_min_traj_BB0() == "" || is.na(x_lim_min_traj_BB0())) {
-      x_lim_min_traj_BB0(min(df$year, na.rm = TRUE))
-    }
+    # if (is.null(x_lim_min_traj_BB0()) || x_lim_min_traj_BB0() == "" || is.na(x_lim_min_traj_BB0())) {
+    #   x_lim_min_traj_BB0(min(df$year, na.rm = TRUE))
+    # }
 
-    if (is.null(x_lim_max_traj_BB0()) || x_lim_max_traj_BB0() == "" || is.na(x_lim_max_traj_BB0())) {
-      x_lim_max_traj_BB0(max(df$year, na.rm = TRUE))
-    }
-    x_lim <- c(x_lim_min_traj_BB0(), x_lim_max_traj_BB0())
+    # if (is.null(x_lim_max_traj_BB0()) || x_lim_max_traj_BB0() == "" || is.na(x_lim_max_traj_BB0())) {
+    #   x_lim_max_traj_BB0(max(df$year, na.rm = TRUE))
+    # }
+    # x_lim <- c(x_lim_min_traj_BB0(), x_lim_max_traj_BB0())
 
-    if (is.null(y_lim_min_traj_BB0()) || y_lim_min_traj_BB0() == "" || is.na(y_lim_min_traj_BB0())) {
-      y_lim_min_traj_BB0(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
-    }
+    # if (is.null(y_lim_min_traj_BB0()) || y_lim_min_traj_BB0() == "" || is.na(y_lim_min_traj_BB0())) {
+    #   y_lim_min_traj_BB0(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
+    # }
 
-    if (is.null(y_lim_max_traj_BB0()) || y_lim_max_traj_BB0() == "" || is.na(y_lim_max_traj_BB0())) {
-      y_lim_max_traj_BB0(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
-    }
-    y_lim <- c(y_lim_min_traj_BB0(), y_lim_max_traj_BB0())
+    # if (is.null(y_lim_max_traj_BB0()) || y_lim_max_traj_BB0() == "" || is.na(y_lim_max_traj_BB0())) {
+    #   y_lim_max_traj_BB0(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
+    # }
+    # y_lim <- c(y_lim_min_traj_BB0(), y_lim_max_traj_BB0())
+
+    # y_lim <- .expand_range(y_lim)
+    # x_lim <- .expand_range(x_lim)
+  
+    # if(is.null(title_x_traj_BB0()) || title_x_traj_BB0() == "") {
+    #   title_x_traj_BB0("Year")
+    # }
+
+    # if (is.null(title_y_traj_BB0()) || title_y_traj_BB0() == "") {
+    #   title_y_traj_BB0("B/B0")
+    # }
+
+    x_lim_min <- .get_value_or_default(
+      x_lim_min_traj_BB0, min(df$year, na.rm = TRUE)
+    )
+
+    x_lim_max <- .get_value_or_default(
+      x_lim_max_traj_BB0, max(df$year, na.rm = TRUE)
+    )
+    x_lim <- c(x_lim_min, x_lim_max)
+
+    y_lim_min <- .get_value_or_default(
+      y_lim_min_traj_BB0, 
+      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
+    )
+
+    y_lim_max <- .get_value_or_default(
+      y_lim_max_traj_BB0, 
+      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
+    )
+    y_lim <- c(y_lim_min, y_lim_max)
+
+    title_x <- .get_value_or_default(title_x_traj_BB0, "Year")
+
+    title_y <- .get_value_or_default(title_y_traj_BB0, "B/B0")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
-  
-    if(is.null(title_x_traj_BB0()) || title_x_traj_BB0() == "") {
-      title_x_traj_BB0("Year")
-    }
-
-    if (is.null(title_y_traj_BB0()) || title_y_traj_BB0() == "") {
-      title_y_traj_BB0("B/B0")
-    }
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -362,7 +389,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_traj_BB0(),
+            text = title_x,
             showarrow = FALSE,
             font = list(
               size = 20
@@ -377,7 +404,7 @@
             xshift = -30,
             xref = "paper",
             yref = "paper",
-            text = title_y_traj_BB0(),
+            text = title_y,
             showarrow = FALSE,
             font = list(
               size = 20
