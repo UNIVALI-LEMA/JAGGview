@@ -64,6 +64,8 @@ install_github("jabbamodel/JABBA")
 
 ```r
 install_github("UNIVALI-LEMA/JAGGview")
+# Download specific branch
+install_github("UNIVALI-LEMA/JAGGview@branch_name")
 ```
 
 ### Option 2: Install from a local clone
