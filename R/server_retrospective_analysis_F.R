@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_F") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_F") {
       ra_F_values$scenarios_current = input$ra_F_scenarios
       ra_F_values$indices_current = input$ra_F_indices
       ra_F_values$title_x_current = input$ra_F_title_x
@@ -205,30 +206,6 @@
     
     rho_var <- rho_data %>%
       filter(Index == "F")
-
-    # if (is.null(x_lim_min_ra_F()) || x_lim_min_ra_F() == "" || is.na(x_lim_min_ra_F())) {
-    #   x_lim_min_ra_F(min(data_ref$Year, data_var$Year))
-    # }
-    # if (is.null(x_lim_max_ra_F()) || x_lim_max_ra_F() == "" || is.na(x_lim_max_ra_F())) {
-    #   x_lim_max_ra_F(max(data_ref$Year, data_var$Year))
-    # }
-    # x_lim <- c(x_lim_min_ra_F(), x_lim_max_ra_F())
-
-    # if (is.null(y_lim_min_ra_F()) || y_lim_min_ra_F() == "" || is.na(y_lim_min_ra_F())) {
-    #   y_lim_min_ra_F(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
-    # }
-    # if (is.null(y_lim_max_ra_F()) || y_lim_max_ra_F() == "" || is.na(y_lim_max_ra_F())) {
-    #   y_lim_max_ra_F(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
-    # }
-    # y_lim <- c(y_lim_min_ra_F(), y_lim_max_ra_F())
-
-    # if(is.null(title_x_ra_F()) || title_x_ra_F() == "") {
-    #   title_x_ra_F("Year")
-    # }
-
-    # if (is.null(title_y_ra_F()) || title_y_ra_F() == "") {
-    #   title_y_ra_F("Fishing Mortality (F)")
-    # }
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_ra_F, min(data_ref$Year, data_var$Year)

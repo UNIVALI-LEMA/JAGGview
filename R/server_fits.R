@@ -124,7 +124,8 @@
   status_sliders_fits <- reactive({
     vec <- unlist(reactiveValuesToList(fits_change))
 
-    empty_condition <- .is_empty(input$fits_scenarios)|| .is_empty(input$fits_indices)
+    empty_condition <- .is_empty(input$fits_scenarios)|| 
+      .is_empty(input$fits_indices)
     
     enable <- any(vec) && !empty_condition
 
@@ -331,92 +332,92 @@
         }
         
         plot_ly(
-            data = df,
-            x = ~Year
-          ) %>%
-          add_ribbons(
-            ymin = ~lci_95,
-            ymax = ~uci_95,
-            fillcolor = palette[1],
-            opacity = 0.3,
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(95%): ", 
-              .international_system_prefixes(lci_95, 2), "-", 
-              .international_system_prefixes(uci_95, 2)
+          data = df,
+          x = ~Year
+        ) %>%
+        add_ribbons(
+          ymin = ~lci_95,
+          ymax = ~uci_95,
+          fillcolor = palette[1],
+          opacity = 0.3,
+          line = list(width = 0),
+          hoverinfo = "text+x",
+          text = ~paste0(
+            "CI(95%): ", 
+            .international_system_prefixes(lci_95, 2), "-", 
+            .international_system_prefixes(uci_95, 2)
+          )
+        ) %>%
+        add_ribbons(
+          ymin = ~lci_80,
+          ymax = ~uci_80,
+          fillcolor = palette[1],
+          opacity = 0.3,
+          line = list(width = 0),
+          hoverinfo = "text+x",
+          text = ~paste0(
+            "CI(80%): ", 
+            .international_system_prefixes(lci_80, 2), "-", 
+            .international_system_prefixes(uci_80, 2)  
+          )
+        ) %>%
+        add_lines(
+          y = ~mu_80,
+          type = "scatter",
+          mode = "lines",
+          line = list(width = 2, color = "black"),
+          hoverinfo = "text+x",
+          text = ~paste0(
+            "Mean: ", .international_system_prefixes(mu_80, 2)
+          )
+        ) %>%
+        add_markers(
+          y = ~Mean,
+          marker = list(
+            color = "white",
+            line = list(
+              color = "black",
+              width = 2
             )
-          ) %>%
-          add_ribbons(
-            ymin = ~lci_80,
-            ymax = ~uci_80,
-            fillcolor = palette[1],
-            opacity = 0.3,
-            line = list(width = 0),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "CI(80%): ", 
-              .international_system_prefixes(lci_80, 2), "-", 
-              .international_system_prefixes(uci_80, 2)  
-            )
-          ) %>%
-          add_lines(
-            y = ~mu_80,
-            type = "scatter",
-            mode = "lines",
-            line = list(width = 2, color = "black"),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "Mean: ", .international_system_prefixes(mu_80, 2)
-            )
-          ) %>%
-          add_markers(
-            y = ~Mean,
-            marker = list(
-              color = "white",
-              line = list(
-                color = "black",
-                width = 2
-              )
-            ),
-            error_y = list(
-              type = "data",
-              array = ~error,
-              color = "black"
-            ),
-            hoverinfo = "text+x",
-            text = ~paste0(
-              "Point: ", .international_system_prefixes(Mean, 2), 
-              "<br>Interval: ", .international_system_prefixes(Li, 2), "-", 
-              .international_system_prefixes(Ui, 2)
-            )
-          ) %>%
-          layout(
-            showlegend = FALSE,
-            xaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = x_lim,
-              zeroline = FALSE
-            ),
-            yaxis = list(
-              tickfont = list(size = 16),
-              title = list(font = list(size = 20)),
-              range = y_lim,
-              zeroline = FALSE
-            ),
-            hovermode = "x unified",
-            hoverdistance = 1,
-            hoverlabel = list(font = list(size = 12)),
-            margin = list(
-              b = 50,
-              t = 60,
-              l = 60,
-              r = 50
-            ),
-            shapes = shapes,
-            annotations = annotations
-          ) 
+          ),
+          error_y = list(
+            type = "data",
+            array = ~error,
+            color = "black"
+          ),
+          hoverinfo = "text+x",
+          text = ~paste0(
+            "Point: ", .international_system_prefixes(Mean, 2), 
+            "<br>Interval: ", .international_system_prefixes(Li, 2), "-", 
+            .international_system_prefixes(Ui, 2)
+          )
+        ) %>%
+        layout(
+          showlegend = FALSE,
+          xaxis = list(
+            tickfont = list(size = 16),
+            title = list(font = list(size = 20)),
+            range = x_lim,
+            zeroline = FALSE
+          ),
+          yaxis = list(
+            tickfont = list(size = 16),
+            title = list(font = list(size = 20)),
+            range = y_lim,
+            zeroline = FALSE
+          ),
+          hovermode = "x unified",
+          hoverdistance = 1,
+          hoverlabel = list(font = list(size = 12)),
+          margin = list(
+            b = 50,
+            t = 60,
+            l = 60,
+            r = 50
+          ),
+          shapes = shapes,
+          annotations = annotations
+        ) 
       })
     }) %>% flatten()
 

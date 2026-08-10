@@ -306,8 +306,8 @@
 #' 
 #' @param number A numeric value (or a numeric vector of values) to be 
 #'   formated using SI prefixes.
-#' @param decimals Optional. An integer indicating the number of decimals places to 
-#'   display in the formatted string.  
+#' @param decimals Optional. An integer indicating the number of decimals 
+#'   places to display in the formatted string.  
 #' 
 #' @return A character value (or a character vector of values) appended with 
 #'   their corresponding SI unit symbol.
@@ -552,9 +552,9 @@
 #' Resolve plotting palette
 #' 
 #' Returns the palette to be used in a plot. If \code{palette} is \code{NULL}, 
-#' a default palette is generated using \code{.make_index_palette()}. Otherwise, 
-#' the supplied palette is validated and checked to ensure that it contains at 
-#' least \code{num} colors.
+#' a default palette is generated using \code{.make_index_palette()}. 
+#' Otherwise, the supplied palette is validated and checked to ensure that it 
+#' contains at least \code{num} colors.
 #' 
 #' @param palette Optional character vector of hexadecimal color codes.
 #' @param num Minimum number of colors required.
@@ -563,7 +563,7 @@
 #' 
 #' @keywords internal
 .resolve_palette <- function(palette, num) {
-  if (.is_empty(palette) || anyNA(palette) || any(palette == "", na.rm = TRUE)) {
+  if(.is_empty(palette) || anyNA(palette) || any(palette == "", na.rm = TRUE)) {
     return(.make_index_palette(num))
   } else {
     .is_palette_valid(palette)

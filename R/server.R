@@ -1,5 +1,7 @@
 #' @keywords internal
-.build_server <- function(fits_df, hind_df, pp_df, res_df, kobe_df, traj_df, ra_df) {
+.build_server <- function(
+  fits_df, hind_df, pp_df, res_df, kobe_df, traj_df, ra_df
+) {
   function(input, output, session) {
 
     .cpue_res_server(input, output, session, res_df)

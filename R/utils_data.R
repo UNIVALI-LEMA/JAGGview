@@ -59,7 +59,8 @@
 #' directly if only one of the two outputs is needed.
 #'
 #' @keywords internal
-#' @importFrom dplyr %>% rename mutate summarise arrange filter bind_rows ungroup
+#' @importFrom dplyr %>% rename mutate summarise arrange filter bind_rows 
+#' ungroup
 #' @importFrom stats median quantile
 #' @importFrom gplots ci2d
 #' @importFrom forcats fct_relevel

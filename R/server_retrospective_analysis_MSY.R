@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_MSY") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_MSY") {
       ra_MSY_values$scenarios_current = input$ra_MSY_scenarios
       ra_MSY_values$indices_current = input$ra_MSY_indices
       ra_MSY_values$title_x_current = input$ra_MSY_title_x
@@ -204,30 +205,6 @@
 
     rho_var <- rho_data %>% 
       filter(Index == "MSY")
-
-    # if (is.null(x_lim_min_ra_MSY()) || x_lim_min_ra_MSY() == "" || is.na(x_lim_min_ra_MSY())) {
-    #   x_lim_min_ra_MSY(min(data_ref$SB_i, data_var$SB_i))
-    # }
-    # if (is.null(x_lim_max_ra_MSY()) || x_lim_max_ra_MSY() == "" || is.na(x_lim_max_ra_MSY())) {
-    #   x_lim_max_ra_MSY(max(data_ref$SB_i, data_var$SB_i))
-    # }
-    # x_lim <- c(x_lim_min_ra_MSY(), x_lim_max_ra_MSY())
-
-    # if (is.null(y_lim_min_ra_MSY()) || y_lim_min_ra_MSY() == "" || is.na(y_lim_min_ra_MSY())) {
-    #   y_lim_min_ra_MSY(.round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1))
-    # }
-    # if (is.null(y_lim_max_ra_MSY()) || y_lim_max_ra_MSY() == "" || is.na(y_lim_max_ra_MSY())) {
-    #   y_lim_max_ra_MSY(.round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1))
-    # }
-    # y_lim <- c(y_lim_min_ra_MSY(), y_lim_max_ra_MSY())
-
-    # if(is.null(title_x_ra_MSY()) || title_x_ra_MSY() == "") {
-    #   title_x_ra_MSY("Year")
-    # }
-
-    # if (is.null(title_y_ra_MSY()) || title_y_ra_MSY() == "") {
-    #   title_y_ra_MSY("Process error on log(Biomass)")
-    # }
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_ra_MSY, min(data_ref$SB_i, data_var$SB_i)
@@ -324,8 +301,6 @@
           )
         )
       )
-
-      # data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
 
       data_lines <- data_lines %>%
         filter(!is.na(SB_i), !is.na(SP))

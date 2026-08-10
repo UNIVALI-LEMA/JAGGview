@@ -124,7 +124,8 @@
   status_sliders_hc <- reactive({
     vec <- unlist(reactiveValuesToList(hc_change))
 
-    empty_condition <- .is_empty(input$hc_scenarios)|| .is_empty(input$hc_indices)
+    empty_condition <- .is_empty(input$hc_scenarios)|| 
+      .is_empty(input$hc_indices)
     
     enable <- any(vec) && !empty_condition
 
@@ -214,40 +215,11 @@
     
     nrow <- case_when(
       n_scenarios > n_indices ~ n_scenarios,
-      n_scenarios < 3          ~ 1,
-      n_scenarios < 8          ~ 2,
-      TRUE                     ~ 3
+      n_scenarios < 3         ~ 1,
+      n_scenarios < 8         ~ 2,
+      TRUE                    ~ 3
     )
-  
-    # if (is.null(x_lim_min_hc()) || x_lim_min_hc() == "" || is.na(x_lim_min_hc())) {
-    #   x_lim_min_hc(min(df_lists$data$year))
-    # }
-
-    # if (is.null(x_lim_max_hc()) || x_lim_max_hc() == "" || is.na(x_lim_max_hc())) {
-    #   x_lim_max_hc(max(df_lists$data$year))
-    # }
-    # x_lim <- c(x_lim_min_hc(), x_lim_max_hc())
-
-    # if (is.null(y_lim_min_hc()) || y_lim_min_hc() == "" || is.na(y_lim_min_hc())) {
-    #   y_lim_min_hc(.round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE))
-    # }
-
-    # if (is.null(y_lim_max_hc()) || y_lim_max_hc() == "" || is.na(y_lim_max_hc())) {
-    #   y_lim_max_hc(.round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE))
-    # }
-    # y_lim <- c(y_lim_min_hc(), y_lim_max_hc())
-
-    # y_lim <- .expand_range(y_lim)
-    # x_lim <- .expand_range(x_lim)
-
-    # if(is.null(title_x_hc()) || title_x_hc() == "") {
-    #   title_x_hc("Year")
-    # }
-
-    # if (is.null(title_y_hc()) || title_y_hc() == "") {
-    #   title_y_hc("Index")
-    # }
-
+    
     x_lim_min <- .get_value_or_default(
       x_lim_min_hc, min(df_lists$data$year)
     )

@@ -1,5 +1,5 @@
 #' @keywords internal
-.retrospective_analysis_BBmsy_server <- function(input, output, session, ra_df) {
+.retrospective_analysis_BBmsy_server <- function(input, output, session, ra_df){
   filtered_ra_BBmsy <- reactiveVal(ra_df)
 
   title_x_ra_BBmsy <- reactiveVal(NULL)
@@ -39,7 +39,7 @@
   )
 
   observeEvent(input$ra_BBmsy_scenarios, {
-    if (!setequal(input$ra_BBmsy_scenarios, ra_BBmsy_values$scenarios_current)) {
+    if(!setequal(input$ra_BBmsy_scenarios, ra_BBmsy_values$scenarios_current)) {
       ra_BBmsy_change$scenarios_changed = TRUE
     }
     else {
@@ -66,7 +66,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_BBmsy_text_size, {
-    if (!identical(input$ra_BBmsy_text_size, ra_BBmsy_values$text_size_current)) {
+    if(!identical(input$ra_BBmsy_text_size, ra_BBmsy_values$text_size_current)){
       ra_BBmsy_change$text_size_changed = TRUE
     }
     else {
@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_BBmsy") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_BBmsy") {
       ra_BBmsy_values$scenarios_current = input$ra_BBmsy_scenarios
       ra_BBmsy_values$indices_current = input$ra_BBmsy_indices
       ra_BBmsy_values$title_x_current = input$ra_BBmsy_title_x

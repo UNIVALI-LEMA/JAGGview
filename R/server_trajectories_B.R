@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_trajectories" && input$trajectories_tabs == "tab_traj_B") {
+    if (input$navmenu == "tab_trajectories" && 
+      input$trajectories_tabs == "tab_traj_B") {
       traj_B_values$scenarios_current = input$traj_B_scenarios
       traj_B_values$title_x_current = input$traj_B_title_x
       traj_B_values$title_y_current = input$traj_B_title_y

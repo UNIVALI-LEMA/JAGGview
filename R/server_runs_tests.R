@@ -41,7 +41,8 @@
   )
 
   observeEvent(input$runs_tests_scenarios, {
-    if (!setequal(input$runs_tests_scenarios, runs_tests_values$scenarios_current)) {
+    if (!setequal(input$runs_tests_scenarios, 
+      runs_tests_values$scenarios_current)) {
       runs_tests_change$scenarios_changed = TRUE
     }
     else {
@@ -50,7 +51,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_indices, {
-    if (!setequal(input$runs_tests_indices, runs_tests_values$indices_current)) {
+    if(!setequal(input$runs_tests_indices, runs_tests_values$indices_current)) {
       runs_tests_change$indices_changed = TRUE
     }
     else {
@@ -59,7 +60,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_title_x, {
-    if (!identical(input$runs_tests_title_x, runs_tests_values$title_x_current)) {
+    if(!identical(input$runs_tests_title_x, runs_tests_values$title_x_current)){
       runs_tests_change$title_x_changed = TRUE
     }
     else {
@@ -68,7 +69,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_title_y, {
-    if (!identical(input$runs_tests_title_y, runs_tests_values$title_y_current)) {
+    if(!identical(input$runs_tests_title_y, runs_tests_values$title_y_current)){
       runs_tests_change$title_y_changed = TRUE
     }
     else {
@@ -124,7 +125,8 @@
   status_sliders_runs_tests <- reactive({
     vec <- unlist(reactiveValuesToList(runs_tests_change))
 
-    empty_condition <- .is_empty(input$runs_tests_scenarios)|| .is_empty(input$runs_tests_indices)
+    empty_condition <- .is_empty(input$runs_tests_scenarios)|| 
+      .is_empty(input$runs_tests_indices)
     
     enable <- any(vec) && !empty_condition
 

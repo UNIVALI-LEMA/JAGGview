@@ -1,5 +1,5 @@
 #' @keywords internal
-.retrospective_analysis_procB_server <- function(input, output, session, ra_df) {
+.retrospective_analysis_procB_server <- function(input, output, session, ra_df){
   filtered_ra_procB <- reactiveVal(ra_df)
 
   title_x_ra_procB <- reactiveVal(NULL)
@@ -39,7 +39,7 @@
   )
 
   observeEvent(input$ra_procB_scenarios, {
-    if (!setequal(input$ra_procB_scenarios, ra_procB_values$scenarios_current)) {
+    if (!setequal(input$ra_procB_scenarios, ra_procB_values$scenarios_current)){
       ra_procB_change$scenarios_changed = TRUE
     }
     else {
@@ -66,7 +66,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_procB_text_size, {
-    if (!identical(input$ra_procB_text_size, ra_procB_values$text_size_current)) {
+    if(!identical(input$ra_procB_text_size, ra_procB_values$text_size_current)){
       ra_procB_change$text_size_changed = TRUE
     }
     else {
@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_procB") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_procB") {
       ra_procB_values$scenarios_current = input$ra_procB_scenarios
       ra_procB_values$indices_current = input$ra_procB_indices
       ra_procB_values$title_x_current = input$ra_procB_title_x
@@ -206,30 +207,6 @@
     rho_var <- rho_data %>%
       filter(Index == "procB")
 
-    # if (is.null(x_lim_min_ra_procB()) || x_lim_min_ra_procB() == "" || is.na(x_lim_min_ra_procB())) {
-    #   x_lim_min_ra_procB(min(data_ref$Year, data_var$Year))
-    # }
-    # if (is.null(x_lim_max_ra_procB()) || x_lim_max_ra_procB() == "" || is.na(x_lim_max_ra_procB())) {
-    #   x_lim_max_ra_procB(max(data_ref$Year, data_var$Year))
-    # }
-    # x_lim <- c(x_lim_min_ra_procB(), x_lim_max_ra_procB())
-
-    # if (is.null(y_lim_min_ra_procB()) || y_lim_min_ra_procB() == "" || is.na(y_lim_min_ra_procB())) {
-    #   y_lim_min_ra_procB(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
-    # }
-    # if (is.null(y_lim_max_ra_procB()) || y_lim_max_ra_procB() == "" || is.na(y_lim_max_ra_procB())) {
-    #   y_lim_max_ra_procB(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
-    # }
-    # y_lim <- c(y_lim_min_ra_procB(), y_lim_max_ra_procB())
-
-    # if(is.null(title_x_ra_procB()) || title_x_ra_procB() == "") {
-    #   title_x_ra_procB("Year")
-    # }
-
-    # if (is.null(title_y_ra_procB()) || title_y_ra_procB() == "") {
-    #   title_y_ra_procB("Process error on log(Biomass)")
-    # }
-
     x_lim_min <- .get_value_or_default(
       x_lim_min_ra_procB, min(data_ref$Year, data_var$Year)
     )
@@ -252,7 +229,10 @@
 
     title_x <- .get_value_or_default(title_x_ra_procB, "Year")
 
-    title_y <- .get_value_or_default(title_y_ra_procB, "Process error on log(Biomass)")
+    title_y <- .get_value_or_default(
+      title_y_ra_procB, 
+      "Process error on log(Biomass)"
+    )
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)

@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_B") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_B") {
       ra_B_values$scenarios_current = input$ra_B_scenarios
       ra_B_values$indices_current = input$ra_B_indices
       ra_B_values$title_x_current = input$ra_B_title_x

@@ -231,8 +231,10 @@ hindcast_ggplot <- function(
   .axis_limit(x_lim)
 
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
-    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), 
+    TRUE)
+    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), 
+    FALSE)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -507,7 +509,9 @@ kobe_ggplot <- function(
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_fit_models)
-#' priors_posteriors_ggplot(df, "K", TRUE, palette = c("#4285f4", "#34a853"))
+#' priors_posteriors_ggplot(
+#'   df, "K", TRUE, palette = c("#4285f4", "#34a853")
+#' )
 #' }
 #'
 #' @export
@@ -905,8 +909,10 @@ runs_tests_ggplot <- function(
   .axis_limit(x_lim)
 
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
-    min_y_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE,2.5)
+    max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 
+    2.5)
+    min_y_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 
+    2.5)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -1002,7 +1008,7 @@ runs_tests_ggplot <- function(
 #' \dontrun{
 #' summary_table(get_mase(hindcast_data(list_hc_models)))
 #' 
-#' summary_table(get_ppmr(priors_posteriors_data(list_fit_models)), show = "png")
+#' summary_table(get_ppmr(priors_posteriors_data(list_fit_models)), "png")
 #' 
 #' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 #' }

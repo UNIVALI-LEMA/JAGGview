@@ -39,7 +39,8 @@
   )
 
   observeEvent(input$traj_FFmsy_scenarios, {
-    if (!setequal(input$traj_FFmsy_scenarios, traj_FFmsy_values$scenarios_current)) {
+    if (!setequal(input$traj_FFmsy_scenarios, 
+      traj_FFmsy_values$scenarios_current)) {
       traj_FFmsy_change$scenarios_changed = TRUE
     }
     else {
@@ -48,7 +49,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_x, {
-    if (!identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)) {
+    if(!identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)){
       traj_FFmsy_change$title_x_changed = TRUE
     }
     else {
@@ -57,7 +58,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_y, {
-    if (!identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)) {
+    if(!identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)){
       traj_FFmsy_change$title_y_changed = TRUE
     }
     else {
@@ -129,7 +130,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_trajectories" && input$trajectories_tabs == "tab_traj_FFmsy") {
+    if (input$navmenu == "tab_trajectories" && 
+      input$trajectories_tabs == "tab_traj_FFmsy") {
       traj_FFmsy_values$scenarios_current = input$traj_FFmsy_scenarios
       traj_FFmsy_values$title_x_current = input$traj_FFmsy_title_x
       traj_FFmsy_values$title_y_current = input$traj_FFmsy_title_y
@@ -187,35 +189,6 @@
     }
 
     palette <- .resolve_palette(palette_traj_FFmsy(), 1)
-
-    # if (is.null(x_lim_min_traj_FFmsy()) || x_lim_min_traj_FFmsy() == "" || is.na(x_lim_min_traj_FFmsy())) {
-    #   x_lim_min_traj_FFmsy(min(df$year, na.rm = TRUE))
-    # }
-
-    # if (is.null(x_lim_max_traj_FFmsy()) || x_lim_max_traj_FFmsy() == "" || is.na(x_lim_max_traj_FFmsy())) {
-    #   x_lim_max_traj_FFmsy(max(df$year, na.rm = TRUE))
-    # }
-    # x_lim <- c(x_lim_min_traj_FFmsy(), x_lim_max_traj_FFmsy())
-
-    # if (is.null(y_lim_min_traj_FFmsy()) || y_lim_min_traj_FFmsy() == "" || is.na(y_lim_min_traj_FFmsy())) {
-    #   y_lim_min_traj_FFmsy(.round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1))
-    # }
-
-    # if (is.null(y_lim_max_traj_FFmsy()) || y_lim_max_traj_FFmsy() == "" || is.na(y_lim_max_traj_FFmsy())) {
-    #   y_lim_max_traj_FFmsy(.round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1))
-    # }
-    # y_lim <- c(y_lim_min_traj_FFmsy(), y_lim_max_traj_FFmsy())
-
-    # y_lim <- .expand_range(y_lim)
-    # x_lim <- .expand_range(x_lim)
-  
-    # if(is.null(title_x_traj_FFmsy()) || title_x_traj_FFmsy() == "") {
-    #   title_x_traj_FFmsy("Year")
-    # }
-
-    # if (is.null(title_y_traj_FFmsy()) || title_y_traj_FFmsy() == "") {
-    #   title_y_traj_FFmsy("F/Fmsy")
-    # }
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_traj_FFmsy, min(df$year, na.rm = TRUE)

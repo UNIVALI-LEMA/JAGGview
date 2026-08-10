@@ -34,7 +34,8 @@
   )
 
   pp_K_values <- reactiveValues(
-    scenarios_current = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+    scenarios_current = unique(c(pp_df$prior$Scenario, 
+      pp_df$posterior$Scenario)),
     title_x_current = NA,
     title_y_current = NA,
     prior_color_current = "#1B4F8A",
@@ -83,7 +84,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_posterior_color, {
-    if (!identical(input$pp_K_posterior_color, pp_K_values$posterior_color_current)) {
+    if (!identical(input$pp_K_posterior_color, 
+      pp_K_values$posterior_color_current)) {
       pp_K_change$posterior_color_changed = TRUE
     }
     else {
@@ -157,7 +159,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_priors_posteriors" && input$priors_posteriors_tabs == "tab_pp_K") {
+    if (input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_K") {
       pp_K_values$scenarios_current = input$pp_K_scenarios
       pp_K_values$indices_current = input$pp_K_indices
       pp_K_values$title_x_current = input$pp_K_title_x
@@ -222,7 +225,10 @@
 
     df_lists <- filtered_pp_K()
 
-    palette <- .resolve_palette(c(prior_color_pp_K(), posterior_color_pp_K()), 2)
+    palette <- .resolve_palette(
+      c(prior_color_pp_K(), posterior_color_pp_K()), 
+      2
+    )
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
 

@@ -86,7 +86,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_pp_K",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("priors_posteriors_K", width = "100%", height = "100%")
+                plotlyOutput(
+                  "priors_posteriors_K", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -94,7 +96,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_pp_r",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("priors_posteriors_r", width = "100%", height = "100%")
+                plotlyOutput(
+                  "priors_posteriors_r", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -102,7 +106,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_pp_psi",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("priors_posteriors_psi", width = "100%", height = "100%")
+                plotlyOutput(
+                  "priors_posteriors_psi", width = "100%", height = "100%"
+                )
               )
             )
           )
@@ -116,7 +122,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_B",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_B", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_B", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -124,7 +132,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_F",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_F", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_F", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -132,7 +142,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_BBmsy",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_BBmsy", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_BBmsy", 
+                  width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -140,7 +153,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_FFmsy",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_FFmsy", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_FFmsy", 
+                  width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -148,7 +164,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_procB",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_procB", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_procB", 
+                  width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -156,7 +175,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_ra_MSY",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("retrospective_analysis_MSY", width = "100%", height = "100%")
+                plotlyOutput(
+                  "retrospective_analysis_MSY", width = "100%", height = "100%"
+                )
               )
             )
           )
@@ -177,7 +198,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_traj_BB0",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("trajectories_BB0", width = "100%", height = "100%")
+                plotlyOutput(
+                  "trajectories_BB0", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -185,7 +208,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_traj_BBmsy",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("trajectories_BBmsy", width = "100%", height = "100%")
+                plotlyOutput(
+                  "trajectories_BBmsy", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -193,7 +218,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_traj_FFmsy",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("trajectories_FFmsy", width = "100%", height = "100%")
+                plotlyOutput(
+                  "trajectories_FFmsy", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -201,7 +228,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_traj_Bdev",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("trajectories_Bdev", width = "100%", height = "100%")
+                plotlyOutput(
+                  "trajectories_Bdev", width = "100%", height = "100%"
+                )
               )
             ),
             tabPanel(
@@ -225,7 +254,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               value = "tab_traj_Catch",
               div(
                 style = paste("height:", plot_height_tab),
-                plotlyOutput("trajectories_Catch", width = "100%", height = "100%")
+                plotlyOutput(
+                  "trajectories_Catch", width = "100%", height = "100%"
+                )
               )
             )
           )
@@ -282,7 +313,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px; ",
                 numericInput(
                   inputId = "fits_x_min",
                   label = NULL,
@@ -306,7 +340,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "fits_y_min",
                   label = NULL,
@@ -363,7 +400,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "runs_tests_x_min",
                   label = NULL,
@@ -387,7 +427,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "runs_tests_y_min",
                   label = NULL,
@@ -445,7 +488,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "cpue_res_x_min",
                   label = NULL,
@@ -469,7 +515,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "cpue_res_y_min",
                   label = NULL,
@@ -490,7 +539,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_K'",
+            condition = "input.navmenu == 'tab_priors_posteriors' && 
+              input.priors_posteriors_tabs == 'tab_pp_K'",
             selectInput(
               inputId = "pp_K_scenarios",
               label = "Scenarios: ",
@@ -529,7 +579,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_K_x_min",
                   label = NULL,
@@ -553,7 +606,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_K_y_min",
                   label = NULL,
@@ -574,12 +630,17 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_r'",
+            condition = "input.navmenu == 'tab_priors_posteriors' && 
+              input.priors_posteriors_tabs == 'tab_pp_r'",
             selectInput(
               inputId = "pp_r_scenarios",
               label = "Scenarios: ",
-              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
-              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              choices = unique(
+                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+              ),
+              selected = unique(
+                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+              ),
               multiple = TRUE
             ),
             textInput(
@@ -613,7 +674,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_r_x_min",
                   label = NULL,
@@ -637,7 +701,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_r_y_min",
                   label = NULL,
@@ -658,12 +725,17 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_priors_posteriors' && input.priors_posteriors_tabs == 'tab_pp_psi'",
+            condition = "input.navmenu == 'tab_priors_posteriors' && 
+              input.priors_posteriors_tabs == 'tab_pp_psi'",
             selectInput(
               inputId = "pp_psi_scenarios",
               label = "Scenarios: ",
-              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
-              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              choices = unique(
+                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+              ),
+              selected = unique(
+                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+              ),
               multiple = TRUE
             ),
             textInput(
@@ -697,7 +769,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_psi_x_min",
                   label = NULL,
@@ -721,7 +796,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "pp_psi_y_min",
                   label = NULL,
@@ -742,7 +820,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_B'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_B'",
             selectInput(
               inputId = "ra_B_scenarios",
               label = "Scenarios: ",
@@ -771,7 +850,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_B_x_min",
                   label = NULL,
@@ -795,7 +877,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_B_y_min",
                   label = NULL,
@@ -816,7 +901,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_F'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_F'",
             selectInput(
               inputId = "ra_F_scenarios",
               label = "Scenarios: ",
@@ -845,7 +931,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_F_x_min",
                   label = NULL,
@@ -869,7 +958,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_F_y_min",
                   label = NULL,
@@ -890,7 +982,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_BBmsy'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_BBmsy'",
             selectInput(
               inputId = "ra_BBmsy_scenarios",
               label = "Scenarios: ",
@@ -919,7 +1012,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_BBmsy_x_min",
                   label = NULL,
@@ -943,7 +1039,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_BBmsy_y_min",
                   label = NULL,
@@ -964,7 +1063,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_FFmsy'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_FFmsy'",
             selectInput(
               inputId = "ra_FFmsy_scenarios",
               label = "Scenarios: ",
@@ -993,7 +1093,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_FFmsy_x_min",
                   label = NULL,
@@ -1017,7 +1120,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_FFmsy_y_min",
                   label = NULL,
@@ -1038,7 +1144,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_procB'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_procB'",
             selectInput(
               inputId = "ra_procB_scenarios",
               label = "Scenarios: ",
@@ -1067,7 +1174,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_procB_x_min",
                   label = NULL,
@@ -1091,7 +1201,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_procB_y_min",
                   label = NULL,
@@ -1112,7 +1225,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_retrospective_analysis' && input.retrospective_analysis_tabs == 'tab_ra_MSY'",
+            condition = "input.navmenu == 'tab_retrospective_analysis' && 
+              input.retrospective_analysis_tabs == 'tab_ra_MSY'",
             selectInput(
               inputId = "ra_MSY_scenarios",
               label = "Scenarios: ",
@@ -1141,7 +1255,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_MSY_x_min",
                   label = NULL,
@@ -1165,7 +1282,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "ra_MSY_y_min",
                   label = NULL,
@@ -1222,7 +1342,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "hc_x_min",
                   label = NULL,
@@ -1246,7 +1369,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "hc_y_min",
                   label = NULL,
@@ -1267,7 +1393,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_BB0'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_BB0'",
             selectInput(
               inputId = "traj_BB0_scenarios",
               label = "Scenarios: ",
@@ -1295,7 +1422,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_BB0_x_min",
                   label = NULL,
@@ -1319,7 +1449,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_BB0_y_min",
                   label = NULL,
@@ -1340,7 +1473,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_BBmsy'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_BBmsy'",
             selectInput(
               inputId = "traj_BBmsy_scenarios",
               label = "Scenarios: ",
@@ -1368,7 +1502,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_BBmsy_x_min",
                   label = NULL,
@@ -1392,7 +1529,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_BBmsy_y_min",
                   label = NULL,
@@ -1413,7 +1553,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_FFmsy'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_FFmsy'",
             selectInput(
               inputId = "traj_FFmsy_scenarios",
               label = "Scenarios: ",
@@ -1441,7 +1582,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_FFmsy_x_min",
                   label = NULL,
@@ -1465,7 +1609,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_FFmsy_y_min",
                   label = NULL,
@@ -1486,7 +1633,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_Bdev'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_Bdev'",
             selectInput(
               inputId = "traj_Bdev_scenarios",
               label = "Scenarios: ",
@@ -1514,7 +1662,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_Bdev_x_min",
                   label = NULL,
@@ -1538,7 +1689,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_Bdev_y_min",
                   label = NULL,
@@ -1559,7 +1713,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_B'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_B'",
             selectInput(
               inputId = "traj_B_scenarios",
               label = "Scenarios: ",
@@ -1587,7 +1742,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_B_x_min",
                   label = NULL,
@@ -1611,7 +1769,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_B_y_min",
                   label = NULL,
@@ -1632,7 +1793,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_H'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_H'",
             selectInput(
               inputId = "traj_H_scenarios",
               label = "Scenarios: ",
@@ -1660,7 +1822,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_H_x_min",
                   label = NULL,
@@ -1684,7 +1849,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_H_y_min",
                   label = NULL,
@@ -1705,7 +1873,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           conditionalPanel(
-            condition = "input.navmenu == 'tab_trajectories' && input.trajectories_tabs == 'tab_traj_Catch'",
+            condition = "input.navmenu == 'tab_trajectories' && 
+              input.trajectories_tabs == 'tab_traj_Catch'",
             selectInput(
               inputId = "traj_Catch_scenarios",
               label = "Scenarios: ",
@@ -1733,7 +1902,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_Catch_x_min",
                   label = NULL,
@@ -1757,7 +1929,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "traj_Catch_y_min",
                   label = NULL,
@@ -1801,7 +1976,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("X limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "kobe_x_min",
                   label = NULL,
@@ -1825,7 +2003,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 strong("Y limits:")
               ),
               div(
-                style = "display: flex; align-items: center; justify-content: space-between; padding: 0px 15px; ",
+                style = "display: flex; 
+                align-items: center; 
+                justify-content: space-between; 
+                padding: 0px 15px;",
                 numericInput(
                   inputId = "kobe_y_min",
                   label = NULL,
@@ -1846,12 +2027,20 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             )
           ),
           div(
-            style = "display: flex; margin-top: 25px; margin-bottom: 25px; justify-content: center; align-items: center; width: 100%; height: 100%;",
+            style = "display: flex; 
+            margin-top: 25px; 
+            margin-bottom: 25px; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+            height: 100%;",
             actionButton(
               inputId = "confirm_button",
               label = "Confirm Changes",
               width = "90%",
-              style = "white-space: normal; paddding-left: 0px; padding-right: 0px;"
+              style = "white-space: normal; 
+              paddding-left: 0px; 
+              padding-right: 0px;"
             )
           )
         )

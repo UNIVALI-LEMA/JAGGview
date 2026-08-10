@@ -34,7 +34,8 @@
   )
 
   pp_psi_values <- reactiveValues(
-    scenarios_current = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+    scenarios_current = unique(c(pp_df$prior$Scenario, 
+      pp_df$posterior$Scenario)),
     title_x_current = NA,
     title_y_current = NA,
     prior_color_current = "#1B4F8A",
@@ -74,7 +75,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_prior_color, {
-    if (!identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)) {
+    if(!identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)){
       pp_psi_change$prior_color_changed = TRUE
     }
     else {
@@ -83,7 +84,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_posterior_color, {
-    if (!identical(input$pp_psi_posterior_color, pp_psi_values$posterior_color_current)) {
+    if (!identical(input$pp_psi_posterior_color, 
+      pp_psi_values$posterior_color_current)) {
       pp_psi_change$posterior_color_changed = TRUE
     }
     else {
@@ -157,7 +159,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_priors_posteriors" && input$priors_posteriors_tabs == "tab_pp_psi") {
+    if (input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_psi") {
       pp_psi_values$scenarios_current = input$pp_psi_scenarios
       pp_psi_values$indices_current = input$pp_psi_indices
       pp_psi_values$title_x_current = input$pp_psi_title_x
@@ -222,7 +225,10 @@
 
     df_lists <- filtered_pp_psi()
 
-    palette <- .resolve_palette(c(prior_color_pp_psi(), posterior_color_pp_psi()), 2)
+    palette <- .resolve_palette(
+      c(prior_color_pp_psi(), posterior_color_pp_psi()), 
+      2
+    )
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
 
@@ -253,12 +259,14 @@
 
     y_lim_min <- .get_value_or_default(
       y_lim_min_pp_psi, 
-      .round_to_nearest(min(prior$psi02, posterior$psi02, na.rm = TRUE), FALSE, 1.1)
+      .round_to_nearest(min(prior$psi02, posterior$psi02, na.rm = TRUE), 
+      FALSE, 1.1)
     )
 
     y_lim_max <- .get_value_or_default(
       y_lim_max_pp_psi, 
-      .round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), TRUE, 1.1)
+      .round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), 
+      TRUE, 1.1)
     )
     y_lim <- c(y_lim_min, y_lim_max)
 

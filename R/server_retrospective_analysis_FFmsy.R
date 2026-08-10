@@ -1,5 +1,5 @@
 #' @keywords internal
-.retrospective_analysis_FFmsy_server <- function(input, output, session, ra_df) {
+.retrospective_analysis_FFmsy_server <- function(input, output, session, ra_df){
   filtered_ra_FFmsy <- reactiveVal(ra_df)
 
   title_x_ra_FFmsy <- reactiveVal(NULL)
@@ -39,7 +39,7 @@
   )
 
   observeEvent(input$ra_FFmsy_scenarios, {
-    if (!setequal(input$ra_FFmsy_scenarios, ra_FFmsy_values$scenarios_current)) {
+    if(!setequal(input$ra_FFmsy_scenarios, ra_FFmsy_values$scenarios_current)) {
       ra_FFmsy_change$scenarios_changed = TRUE
     }
     else {
@@ -66,7 +66,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_FFmsy_text_size, {
-    if (!identical(input$ra_FFmsy_text_size, ra_FFmsy_values$text_size_current)) {
+    if(!identical(input$ra_FFmsy_text_size, ra_FFmsy_values$text_size_current)){
       ra_FFmsy_change$text_size_changed = TRUE
     }
     else {
@@ -129,7 +129,8 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    if (input$navmenu == "tab_retrospective_analysis" && input$retrospective_analysis_tabs == "tab_ra_FFmsy") {
+    if (input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_FFmsy") {
       ra_FFmsy_values$scenarios_current = input$ra_FFmsy_scenarios
       ra_FFmsy_values$indices_current = input$ra_FFmsy_indices
       ra_FFmsy_values$title_x_current = input$ra_FFmsy_title_x
@@ -205,30 +206,6 @@
     
     rho_var <- rho_data %>%
       filter(Index == "FFmsy")
-
-    # if (is.null(x_lim_min_ra_FFmsy()) || x_lim_min_ra_FFmsy() == "" || is.na(x_lim_min_ra_FFmsy())) {
-    #   x_lim_min_ra_FFmsy(min(data_ref$Year, data_var$Year))
-    # }
-    # if (is.null(x_lim_max_ra_FFmsy()) || x_lim_max_ra_FFmsy() == "" || is.na(x_lim_max_ra_FFmsy())) {
-    #   x_lim_max_ra_FFmsy(max(data_ref$Year, data_var$Year))
-    # }
-    # x_lim <- c(x_lim_min_ra_FFmsy(), x_lim_max_ra_FFmsy())
-
-    # if (is.null(y_lim_min_ra_FFmsy()) || y_lim_min_ra_FFmsy() == "" || is.na(y_lim_min_ra_FFmsy())) {
-    #   y_lim_min_ra_FFmsy(.round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1))
-    # }
-    # if (is.null(y_lim_max_ra_FFmsy()) || y_lim_max_ra_FFmsy() == "" || is.na(y_lim_max_ra_FFmsy())) {
-    #   y_lim_max_ra_FFmsy(.round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1))
-    # }
-    # y_lim <- c(y_lim_min_ra_FFmsy(), y_lim_max_ra_FFmsy())
-
-    # if(is.null(title_x_ra_FFmsy()) || title_x_ra_FFmsy() == "") {
-    #   title_x_ra_FFmsy("Year")
-    # }
-
-    # if (is.null(title_y_ra_FFmsy()) || title_y_ra_FFmsy() == "") {
-    #   title_y_ra_FFmsy("F/Fmsy")
-    # }
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_ra_FFmsy, min(data_ref$Year, data_var$Year)

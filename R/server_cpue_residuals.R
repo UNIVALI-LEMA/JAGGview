@@ -45,7 +45,7 @@
   )
 
   observeEvent(input$cpue_res_scenarios, {
-    if (!setequal(input$cpue_res_scenarios, cpue_res_values$scenarios_current)) {
+    if (!setequal(input$cpue_res_scenarios, cpue_res_values$scenarios_current)){
       cpue_res_change$scenarios_changed = TRUE
     }
     else {
@@ -81,7 +81,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_text_size, {
-    if (!identical(input$cpue_res_text_size, cpue_res_values$text_size_current)) {
+    if(!identical(input$cpue_res_text_size, cpue_res_values$text_size_current)){
       cpue_res_change$text_size_changed = TRUE
     }
     else {
@@ -166,7 +166,8 @@
   status_sliders_cpue_res <- reactive({
     vec <- unlist(reactiveValuesToList(cpue_res_change))
 
-    empty_condition <- .is_empty(input$cpue_res_scenarios)|| .is_empty(input$cpue_res_indices)
+    empty_condition <- .is_empty(input$cpue_res_scenarios)|| 
+      .is_empty(input$cpue_res_indices)
     
     enable <- any(vec) && !empty_condition
 
