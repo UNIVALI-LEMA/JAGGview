@@ -331,11 +331,10 @@
           )
         }
         
-        plot_ly(
-          data = df,
-          x = ~Year
-        ) %>%
+        plot_ly() %>%
         add_ribbons(
+          data = filter(df, !is.na(lci_95), !is.na(uci_95)),
+          x = ~Year,
           ymin = ~lci_95,
           ymax = ~uci_95,
           fillcolor = palette[1],
@@ -349,6 +348,8 @@
           )
         ) %>%
         add_ribbons(
+          data = filter(df, !is.na(lci_80), !is.na(uci_80)),
+          x = ~Year,
           ymin = ~lci_80,
           ymax = ~uci_80,
           fillcolor = palette[1],
@@ -362,6 +363,8 @@
           )
         ) %>%
         add_lines(
+          data = filter(df, !is.na(mu_80)),
+          x = ~Year,
           y = ~mu_80,
           type = "scatter",
           mode = "lines",
@@ -372,6 +375,8 @@
           )
         ) %>%
         add_markers(
+          data = filter(df, !is.na(Mean)),
+          x = ~Year,
           y = ~Mean,
           marker = list(
             color = "white",
