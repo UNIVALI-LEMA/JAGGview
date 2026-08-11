@@ -864,7 +864,7 @@ trajectories_data <- function(list_fit_models) {
     BBmsy = "stock",
     FFmsy = "harvest",
     Bdev  = "Bdev",
-    B = "B", # This and below are in development
+    B = "B",
     H = "H",
     Catch = "Catch",
     BBfrac = "BBfrac",

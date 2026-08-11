@@ -40,22 +40,22 @@
 #' 
 #' @export
 #' @importFrom dplyr rename
-#' @importFrom purrr reduce map
-#' @importFrom bs4Dash dashboardPage dashboardHeader dashboardBrand navbarMenu 
-#' navbarTab dashboardSidebar dashboardBody tabItems tabItem tabsetPanel 
-#' dashboardControlbar controlbarMenu controlbarItem updateControlbar 
-#' actionButton
-#' @importFrom shiny icon tabPanel conditionalPanel selectInput textInput 
-#' numericInput shinyApp addResourcePath uiOutput reactiveVal reactiveValues
-#' observeEvent reactive reactiveValuesToList req renderUI
-#' @importFrom plotly plotlyOutput renderPlotly add_segments add_markers 
-#' add_lines add_ribbons add_text layout subplot ggplotly plot_ly add_trace
+#' @importFrom purrr map reduce
+#' @importFrom bs4Dash actionButton controlbarItem controlbarMenu dashboardBody 
+#'   dashboardBrand dashboardControlbar dashboardHeader dashboardPage 
+#'   dashboardSidebar navbarMenu navbarTab tabItem tabItems tabsetPanel 
+#'   updateControlbar
+#' @importFrom shiny addResourcePath conditionalPanel icon numericInput 
+#'   observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
+#'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
+#' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
+#'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot
 #' @importFrom colourpicker colourInput
-#' @importFrom htmltools div strong tags tagList
+#' @importFrom htmltools div strong tagList tags
 #' @importFrom rlang flatten
 #' @importFrom dplyr filter
 #' @importFrom scales alpha
-#' @importFrom shinyjs enable disable useShinyjs
+#' @importFrom shinyjs disable enable useShinyjs
 create_report <- function(filename, dir = getwd(), verbose = FALSE) {
   path <- file.path(dir, filename)
 
