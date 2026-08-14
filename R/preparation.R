@@ -297,8 +297,15 @@ kobe_data <- function(
   # })
   model_results <- tryCatch({
     .safe_execute(
-      fn = function() .jbplot_ensemble2(
-        kb = list_fit_models, kbout = TRUE, plot = FALSE
+      fn = function(kb) {
+        .jbplot_ensemble2(
+          kb = kb,
+          kbout = TRUE,
+          plot = FALSE
+        )
+      },
+      args = list(
+        kb = list_fit_models
       ),
       reserve_mb = reserve_mb,
       poll_interval = poll_interval

@@ -606,18 +606,18 @@
 #' @importFrom ps ps_handle ps_is_running
 #' @importFrom memuse Sys.meminfo
 #' @importFrom tools pskill SIGINT
-.safe_execute <- function(
+.safe_execute_unix <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
 ) {
 
-  os <- Sys.info()[["sysname"]]
+  # os <- Sys.info()[["sysname"]]
   
-  if (!os %in% c("Linux", "Darwin")) {
-    stop(paste(
-      "This method (external SIGINT) requires Linux or macOS.",
-     "On Windows, use the variant with callr::r_bg (see the previous version)."
-    ))
-  }
+  # if (!os %in% c("Linux", "Darwin")) {
+  #   stop(paste(
+  #     "This method (external SIGINT) requires Linux or macOS.",
+  #    "On Windows, use the variant with callr::r_bg (see the previous version)."
+  #   ))
+  # }
 
   main_pid <- Sys.getpid()
 
@@ -656,4 +656,86 @@
 
   if (inherits(result, "memoryLimitExceeded")) stop(result)
   result
+}
+
+#' @importFrom callr r_bg
+#' @importFrom memuse Sys.meminfo
+#' @keywords internal
+.safe_execute_windows <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5,
+  package = TRUE
+) {
+
+  proc <- r_bg(
+    func = fn,
+    args = args,
+    package = package,
+    supervise = TRUE
+  )
+
+  on.exit(
+    if (proc$is_alive()) proc$kill(),
+    add = TRUE
+  )
+
+  memory_exceeded <- FALSE
+
+  repeat {
+    if (!proc$is_alive()) {
+      break
+    }
+
+    free_ram <- as.numeric(Sys.meminfo()$freeram) / 1024^2
+
+    if (free_ram < reserve_mb) {
+      proc$kill()
+      memory_exceeded <- TRUE
+      break
+    }
+
+    Sys.sleep(poll_interval)
+  }
+
+  if (memory_exceeded) {
+    stop(structure(
+      class = c(
+        "memoryLimitExceeded",
+        "error",
+        "condition"
+      ),
+      list(
+        message = "Execution interrupted: memory limit has been exceeded",
+        call = sys.call()
+      )
+    ))
+  }
+
+  exit_status <- proc$get_exit_status()
+
+  if (!identical(exit_status, 0L)) {
+
+    error <- proc$read_all_error()
+
+    stop(
+      "Error in background process: ",
+      paste(error, collapse = "\n")
+    )
+  }
+
+  proc$get_result()
+}
+
+.safe_execute <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
+) {
+
+  os <- Sys.info()[["sysname"]]
+
+  if (os %in% c("Linux", "Darwin")) {
+    .safe_execute_windows(fn, args, reserve_mb, poll_interval)
+  } else if (os == "Windows") {
+    .safe_execute_windows(fn, args, reserve_mb, poll_interval)
+  } else {
+    stop("Unsupported operating system: ", os)
+  }
 }
