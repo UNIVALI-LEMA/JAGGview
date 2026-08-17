@@ -577,3 +577,198 @@
   
   return(result)
 }
+
+#' Execute a heavy function with memory limit
+#'
+#' Internal helper that executes a function while monitoring the available 
+#' system memory in a background process. If the available memory falls bellow
+#' a specified safety threshold, the execution is interrupted to reduce the 
+#' risk of exhausting system memory. 
+#' 
+#' @param fn A function to be executed.
+#' @param args A named list of arguments passed to \code{fn}. 
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system. Defaults 
+#'   to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds, 
+#'   between memory availability checks. Defaults to 0.5.
+#' 
+#' @details
+#' This function is, currently, supported only on Linux and macOS, where the 
+#' monitored process can be interrupted by sending an external \code{SIGINT} 
+#' signal. A lightweight background R process periodically checks the amount of 
+#' available system using \pkg{memuse}. If the available memory drops below 
+#' \code{reserve_mb}, the main process is interrupted and a 
+#' \code{"memoryLimitExceed"} condition is raised.
+#' 
+#' @keywords internal
+#' @importFrom callr r_bg
+#' @importFrom ps ps_handle ps_is_running
+#' @importFrom memuse Sys.meminfo
+#' @importFrom tools pskill SIGINT
+.safe_execute_unix <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
+) {
+  main_pid <- Sys.getpid()
+
+  watcher <- r_bg(
+    func = function(pid ,reserve_mb, poll_interval) {
+      repeat {
+        handle <- tryCatch(ps::ps_handle(pid), error = function(e) NULL)
+        if (is.null(handle) || !ps::ps_is_running(handle)) break
+
+        free_ram <- as.numeric(memuse::Sys.meminfo()$freeram) / 1024^2
+
+        if (free_ram < reserve_mb) {
+          tools::pskill(pid,signal = tools::SIGINT)
+          break
+        }
+
+        Sys.sleep(poll_interval)
+      }
+    },
+    args = list(
+      pid = main_pid,
+      reserve_mb = reserve_mb,
+      poll_interval = poll_interval
+    )
+  )
+
+  on.exit(if (watcher$is_alive()) watcher$kill(), add = TRUE)
+
+  result <- tryCatch({do.call(fn, args)}, interrupt = function(i) {
+    structure(
+      class = c("memoryLimitExceeded", "error", "condition"),
+      list(
+        message ="Execution interrupted: memory limit has been exceeded",
+        call = sys.call()
+      )
+    )
+  })
+
+  if (inherits(result, "memoryLimitExceeded")) stop(result)
+
+  result
+}
+
+#' Execute a function in a background process with memory monitoring
+#'
+#' Internal helper that executes a function in a separate background process
+#' while monitoring the amount of available system memory. If the available
+#' memory falls below a specified safety threshold, the background process is
+#' interrupted to reduce the risk of exhausting system memory.
+#'
+#' @param fn A function to be executed in the background process.
+#' @param args A named list of arguments passed to \code{fn}.
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system.
+#'   Defaults to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds,
+#'   between memory availability checks. Defaults to 0.5.
+#' @param package A logical value indicating whether the background process
+#'   should be initialized with the current package environment. Defaults to
+#'   \code{TRUE}.
+#'
+#' @details
+#' The function uses \code{callr::r_bg()} to execute \code{fn} in a separate
+#' R process. While the process is running, the available system memory is
+#' periodically checked using \code{memuse::Sys.meminfo()}.
+#'
+#' If the amount of free memory falls below \code{reserve_mb}, the background
+#' process is terminated and a \code{"memoryLimitExceeded"} condition is
+#' raised. If the background process terminates with a non-zero exit status,
+#' its error output is collected and returned as an R error.
+#'
+#' The background process is also automatically terminated when the function
+#' exits, if it is still running.
+#'
+#' @return
+#' The result returned by \code{fn} when the background process completes
+#' successfully.
+#'
+#' @importFrom callr r_bg
+#' @importFrom memuse Sys.meminfo
+#' @keywords internal
+.safe_execute_windows <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5, package = TRUE
+) {
+  proc <- r_bg(func = fn, args = args, package = package, supervise = TRUE)
+
+  on.exit(if (proc$is_alive()) proc$kill(), add = TRUE)
+
+  memory_exceeded <- FALSE
+
+  repeat {
+    if (!proc$is_alive()) break
+
+    free_ram <- as.numeric(Sys.meminfo()$freeram) / 1024^2
+
+    if (free_ram < reserve_mb) {
+      proc$kill()
+      memory_exceeded <- TRUE
+      break
+    }
+
+    Sys.sleep(poll_interval)
+  }
+
+  if (memory_exceeded) {
+    stop(structure(
+      class = c("memoryLimitExceeded", "error", "condition"),
+      list(
+        message = "Execution interrupted: memory limit has been exceeded",
+        call = sys.call()
+      )
+    ))
+  }
+
+  exit_status <- proc$get_exit_status()
+
+  if (!identical(exit_status, 0L)) {
+    error <- proc$read_all_error()
+    stop("Error in background process: ", paste(error, collapse = "\n")
+    )
+  }
+
+  proc$get_result()
+}
+
+#' Execute a function with memory monitoring
+#'
+#' Internal wrapper that executes a function while monitoring available system
+#' memory. The appropriate execution method is selected according to the
+#' operating system.
+#'
+#' @param fn A function to be executed.
+#' @param args A named list of arguments passed to \code{fn}.
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system.
+#'   Defaults to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds,
+#'   between memory availability checks. Defaults to 0.5.
+#'
+#' @details
+#' The function identifies the operating system using \code{Sys.info()} and
+#' dispatches execution to the corresponding platform-specific helper.
+#'
+#' Linux and macOS systems use the Unix implementation, while Windows systems
+#' use the Windows implementation. An error is raised if the current operating
+#' system is not supported.
+#'
+#' @return
+#' The result returned by \code{fn} when the execution completes successfully.
+#'
+#' @keywords internal
+.safe_execute <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
+) {
+  os <- Sys.info()[["sysname"]]
+
+  if (os %in% c("Linux", "Darwin")) {
+    .safe_execute_unix(fn, args, reserve_mb, poll_interval)
+  } else if (os == "Windows") {
+    .safe_execute_windows(fn, args, reserve_mb, poll_interval)
+  } else {
+    stop("Unsupported operating system: ", os)
+  }
+}
