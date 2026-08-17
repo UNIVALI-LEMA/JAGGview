@@ -211,43 +211,46 @@
 #' 
 #' @keywords internal
 .international_system_prefixes <- function(number, decimals = NULL) {
-  format_single <- function(val) {
-    if (is.na(val) || val == 0) return("0")
-    
-    abs_val <- abs(val)
+  out <- character(length(number))
 
-    if (abs_val >= 1e6) {
-      divisor <- 1e6
-      suffix  <- "M"
-    } else if (abs_val >= 1e3) {
-      divisor <- 1e3
-      suffix  <- "k"
-    } else if (abs_val >= 1) {
-      divisor <- 1
-      suffix  <- ""
-    } else if (abs_val >= 1e-3) {
-      divisor <- 1e-3
-      suffix <- "m"
-    } else if (abs_val >= 1e-6) {
-      divisor <- 1e-6
-      suffix <- "\u00B5"
-    } else {
-      divisor <- 1e-9
-      suffix <- "n"
-    }
-    
-    scaled <- val / divisor
-    
-    dec <- if (is.null(decimals)) {
-      if (scaled == round(scaled)) 0 else 1
-    } else {
-      decimals
-    }
-    
-    paste0(format(round(scaled, dec), nsmall = dec, big.mark = ","), suffix)
-  }
+  zero_na <- is.na(number) | number == 0
+  out[zero_na] <- "0"
+
+  idx <- which(!zero_na)
+  if (length(idx) == 0L) return(out)
   
-  sapply(number, format_single)
+  val     <- number[idx]
+  abs_val <- abs(val)
+
+  thresholds <- c(1e-6, 1e-3, 1, 1e3, 1e6)
+  divisors   <- c(1e-9, 1e-6, 1e-3, 1, 1e3, 1e6)
+  suffixes   <- c("n", "\u00B5", "m", "", "k", "M")
+
+  bin    <- findInterval(abs_val, thresholds) + 1L
+  scaled <- val / divisors[bin]
+
+  formatted <- character(length (scaled))
+
+  if (is.null(decimals)) {
+    is_int <- scaled == round(scaled)
+    if (any(is_int)) {
+      formatted[is_int] <- formatC(
+        round(scaled[is_int]), format = "f", digits = 0, big.mark = ","
+      )
+    }
+    if (any(!is_int)) {
+      formatted[!is_int] <- formatC(
+        round(scaled[!is_int], 1), format = "f", digits = 2, big.mark = ","
+      )
+    }
+  } else {
+    formatted <- formatC(
+      round(scaled, decimals), format = "f", digits = decimals, big.mark = ","
+    )
+  }
+
+  out[idx] <- paste0(formatted, suffixes[bin])
+  out
 }
 
 #' Check if a value is empty

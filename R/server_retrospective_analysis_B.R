@@ -219,7 +219,6 @@
     
     data_lines <- data_var %>%
       filter(teste == TRUE)
-    print(nrow(data_lines))
     
     rho_var <- rho_data %>%
       filter(Index == "B")

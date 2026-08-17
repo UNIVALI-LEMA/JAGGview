@@ -217,12 +217,8 @@
     data_ref <- data_var %>%
       filter(id == "Ref")
 
-    print(unique(data_var$MSY))
-
     data_lines <- data_var %>%
       select(id, Scenario, SB_i, SP, Index)
-    # print(data_lines)
-    print(nrow(data_lines))
 
     rho_var <- rho_data %>% 
       filter(Index == "MSY")
@@ -257,62 +253,11 @@
     rho_var_split <- split(rho_var, rho_var$Scenario)
 
     plots <- map(scenarios, function(s) {
-      # data_lines <- data_lines %>%
-      #   filter(Scenario == s)
-
-      # rho_var <- rho_var %>%
-      #   filter(Scenario == s)
 
       data_lines <- data_lines_split[[s]]
       rho_var <- rho_var_split[[s]]
 
-      # shapes <- list(
-      #   list(
-      #     type = "rect",
-      #     xref = "paper",
-      #     yref = "paper",
-      #     x0 = 0,
-      #     x1 = 1,
-      #     y0 = 0, 
-      #     y1 = 1,
-      #     line = list(width = 1)
-      #   ),
-      #   list(
-      #     type = "rect",
-      #     xref = "paper",
-      #     yref = "paper",
-      #     x0 = 0,
-      #     x1 = 1,
-      #     yanchor = 1,
-      #     y0 = 0, 
-      #     y1 = 28,
-      #     ysizemode = "pixel",
-      #     line = list(width = 1),
-      #     fillcolor = "black"
-      #   )
-      # )
-
-      # annotations <- list(
-      #   list(
-      #     x = 0.5,
-      #     y = 1,
-      #     xanchor = "center",
-      #     yanchor = "top",
-      #     yshift = 25,
-      #     xref = "paper",
-      #     yref = "paper",
-      #     text = s,
-      #     showarrow = FALSE,
-      #     font = list(
-      #       size = 20,
-      #       color = "white"
-      #     )
-      #   )
-      # )
-
-        
       shapes <- list()
-
       annotations <- list()
       
       shapes <- append(
@@ -389,7 +334,8 @@
           type = "scattergl",
           mode = "lines",
           line = list(width = 3),
-          hoverinfo = "text=x+y",
+          # hoverinfo = "x+y"#,
+          hoverinfo = "text",
           text = ~paste0(
             "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
             "t<br>Surplus Production (", id,"): ", 
@@ -468,7 +414,7 @@
           )
         )
       ) %>%
-      plotly::toWebGL()
+      toWebGL()
     # toc()
     results
   })

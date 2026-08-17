@@ -49,7 +49,7 @@
 #'   observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
 #'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
-#'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot
+#'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot toWebGL
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
 #' @importFrom rlang flatten
@@ -130,13 +130,11 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     if (verbose) message("Priors x Posterior data was sucessfully obtained")
     res_df <- runs_tests_data(fits_list)
     if (verbose) message("Residuals data was sucessfully obtained")
-    # ensemble_df <- .ensemble_data(fits_list)
-    # kobe_df <- ensemble_df$kobe_dfs
-    # if (verbose) message("Kobe data was sucessfully obtained")
-    # traj_df <- ensemble_df$trajectories_df
-    # if (verbose) message("Trajectories data was sucessfully obtained")
-    kobe_df <- list()
-    traj_df <- data.frame()
+    ensemble_df <- .ensemble_data(fits_list)
+    kobe_df <- ensemble_df$kobe_dfs
+    if (verbose) message("Kobe data was sucessfully obtained")
+    traj_df <- ensemble_df$trajectories_df
+    if (verbose) message("Trajectories data was sucessfully obtained")
   }
   else {
     fits_df <- data.frame()
