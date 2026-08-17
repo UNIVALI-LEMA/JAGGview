@@ -34,3 +34,5 @@ Imports:
     stats,
     tidyr,
     tools
+Remotes:
+    jabbamodel/JABBA

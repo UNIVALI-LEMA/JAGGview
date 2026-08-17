@@ -283,18 +283,6 @@ kobe_data <- function(
   list_fit_models, ci_levels = c(0.5, 0.8, 0.95), reserve_mb = 2048, 
   poll_interval = 0.5
 ) {
-  # ###@> Filtering the expected data...
-  # .validate_jbplot_ensemble(model_results)
-  # model_results <- tryCatch({
-  #   .jbplot_ensemble2(
-  #     kb = list_fit_models,
-  #     kbout = TRUE,
-  #     plot = FALSE
-  #   )
-  # }, error = function(e) {
-  #   message("An error ocurred: ", e$message)
-  #   return(NULL)
-  # })
   model_results <- tryCatch({
     .safe_execute(
       fn = function(kb) {
