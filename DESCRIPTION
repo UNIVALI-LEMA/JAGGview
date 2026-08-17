@@ -18,7 +18,9 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
+    bs4Dash,
     callr,
+    colourpicker,
     dplyr,
     forcats,
     ggplot2,
@@ -26,11 +28,18 @@ Imports:
     gplots,
     grDevices,
     gt,
+    htmltools,
     JABBA,
     memuse,
     openxlsx,
+    plotly,
     ps,
+    purrr,
+    rlang,
     rstudioapi,
+    scales,
+    shiny,
+    shinyjs,
     stats,
     tidyr,
     tools

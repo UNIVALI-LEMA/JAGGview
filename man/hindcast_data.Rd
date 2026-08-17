@@ -4,11 +4,14 @@
 \alias{hindcast_data}
 \title{Prepare hindcast analysis data}
 \usage{
-hindcast_data(list_hc_models)
+hindcast_data(list_hc_models, indices_factor = NULL)
 }
 \arguments{
 \item{list_hc_models}{A list containing retrospective model outputs as
 returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
+
+\item{indices_factor}{Optional. A vector of indices_factor to include. Must
+exist in the \code{Index} column.}
 }
 \value{
 A named list with four elements:

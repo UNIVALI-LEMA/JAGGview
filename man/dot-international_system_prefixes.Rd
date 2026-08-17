@@ -10,8 +10,8 @@
 \item{number}{A numeric value (or a numeric vector of values) to be
 formated using SI prefixes.}
 
-\item{decimals}{Optional. An integer indicating the number of decimals places to
-display in the formatted string.}
+\item{decimals}{Optional. An integer indicating the number of decimals
+places to display in the formatted string.}
 }
 \value{
 A character value (or a character vector of values) appended with

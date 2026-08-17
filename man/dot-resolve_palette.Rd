@@ -16,8 +16,8 @@ A character vector of hexadecimal color codes.
 }
 \description{
 Returns the palette to be used in a plot. If \code{palette} is \code{NULL},
-a default palette is generated using \code{.make_index_palette()}. Otherwise,
-the supplied palette is validated and checked to ensure that it contains at
-least \code{num} colors.
+a default palette is generated using \code{.make_index_palette()}.
+Otherwise, the supplied palette is validated and checked to ensure that it
+contains at least \code{num} colors.
 }
 \keyword{internal}

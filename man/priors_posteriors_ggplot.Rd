@@ -68,7 +68,9 @@ for prior-posterior mean and variance ratios, and faceted views by scenario.
 \examples{
 \dontrun{
 df <- priors_posteriors_data(list_fit_models)
-priors_posteriors_ggplot(df, "K", TRUE, palette = c("#4285f4", "#34a853"))
+priors_posteriors_ggplot(
+  df, "K", TRUE, palette = c("#4285f4", "#34a853")
+)
 }
 
 }
