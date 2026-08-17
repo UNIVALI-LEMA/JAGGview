@@ -609,18 +609,13 @@
 .safe_execute_unix <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
 ) {
-
   main_pid <- Sys.getpid()
 
   watcher <- r_bg(
     func = function(pid ,reserve_mb, poll_interval) {
       repeat {
-        handle <- tryCatch(ps::ps_handle(pid),error = function(e) NULL)
-        if (
-          is.null(handle) || !ps::ps_is_running(handle)
-        ) {
-          break
-        }
+        handle <- tryCatch(ps::ps_handle(pid), error = function(e) NULL)
+        if (is.null(handle) || !ps::ps_is_running(handle)) break
 
         free_ram <- as.numeric(memuse::Sys.meminfo()$freeram) / 1024^2
 
@@ -639,16 +634,11 @@
     )
   )
 
-  on.exit(
-    if (watcher$is_alive()) {
-      watcher$kill()
-    },
-    add = TRUE
-  )
+  on.exit(if (watcher$is_alive()) watcher$kill(), add = TRUE)
 
   result <- tryCatch({do.call(fn, args)}, interrupt = function(i) {
     structure(
-      class = c("memoryLimitExceeded", "error", "condition" ),
+      class = c("memoryLimitExceeded", "error", "condition"),
       list(
         message ="Execution interrupted: memory limit has been exceeded",
         call = sys.call()
@@ -656,9 +646,7 @@
     )
   })
 
-  if (inherits(result, "memoryLimitExceeded")) {
-    stop(result)
-  }
+  if (inherits(result, "memoryLimitExceeded")) stop(result)
 
   result
 }
@@ -704,25 +692,14 @@
 .safe_execute_windows <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5, package = TRUE
 ) {
+  proc <- r_bg(func = fn, args = args, package = package, supervise = TRUE)
 
-  proc <- r_bg(
-    func = fn,
-    args = args,
-    package = package,
-    supervise = TRUE
-  )
-
-  on.exit(
-    if (proc$is_alive()) proc$kill(),
-    add = TRUE
-  )
+  on.exit(if (proc$is_alive()) proc$kill(), add = TRUE)
 
   memory_exceeded <- FALSE
 
   repeat {
-    if (!proc$is_alive()) {
-      break
-    }
+    if (!proc$is_alive()) break
 
     free_ram <- as.numeric(Sys.meminfo()$freeram) / 1024^2
 
@@ -737,11 +714,7 @@
 
   if (memory_exceeded) {
     stop(structure(
-      class = c(
-        "memoryLimitExceeded",
-        "error",
-        "condition"
-      ),
+      class = c("memoryLimitExceeded", "error", "condition"),
       list(
         message = "Execution interrupted: memory limit has been exceeded",
         call = sys.call()
@@ -752,12 +725,8 @@
   exit_status <- proc$get_exit_status()
 
   if (!identical(exit_status, 0L)) {
-
     error <- proc$read_all_error()
-
-    stop(
-      "Error in background process: ",
-      paste(error, collapse = "\n")
+    stop("Error in background process: ", paste(error, collapse = "\n")
     )
   }
 
@@ -793,7 +762,6 @@
 .safe_execute <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
 ) {
-
   os <- Sys.info()[["sysname"]]
 
   if (os %in% c("Linux", "Darwin")) {
