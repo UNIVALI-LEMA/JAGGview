@@ -18,7 +18,7 @@ JABBA function \code{JABBA::fit_jabba()}.
 function \code{JABBA::jbplot_ensemble()}.}
 
 \item{ci_levels}{A numeric vector containing the CI values between 0 and 1.
-Deafults to 0.5, 0.8, 0.95}
+Defaults to 0.5, 0.8, 0.95.}
 
 \item{reserve_mb}{A numeric value specifying the minimum amount of free
 system memory, in megabytes, to reserve for the operating system. Defaults

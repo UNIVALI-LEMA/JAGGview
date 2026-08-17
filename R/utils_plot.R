@@ -663,12 +663,46 @@
   result
 }
 
+#' Execute a function in a background process with memory monitoring
+#'
+#' Internal helper that executes a function in a separate background process
+#' while monitoring the amount of available system memory. If the available
+#' memory falls below a specified safety threshold, the background process is
+#' interrupted to reduce the risk of exhausting system memory.
+#'
+#' @param fn A function to be executed in the background process.
+#' @param args A named list of arguments passed to \code{fn}.
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system.
+#'   Defaults to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds,
+#'   between memory availability checks. Defaults to 0.5.
+#' @param package A logical value indicating whether the background process
+#'   should be initialized with the current package environment. Defaults to
+#'   \code{TRUE}.
+#'
+#' @details
+#' The function uses \code{callr::r_bg()} to execute \code{fn} in a separate
+#' R process. While the process is running, the available system memory is
+#' periodically checked using \code{memuse::Sys.meminfo()}.
+#'
+#' If the amount of free memory falls below \code{reserve_mb}, the background
+#' process is terminated and a \code{"memoryLimitExceeded"} condition is
+#' raised. If the background process terminates with a non-zero exit status,
+#' its error output is collected and returned as an R error.
+#'
+#' The background process is also automatically terminated when the function
+#' exits, if it is still running.
+#'
+#' @return
+#' The result returned by \code{fn} when the background process completes
+#' successfully.
+#'
 #' @importFrom callr r_bg
 #' @importFrom memuse Sys.meminfo
 #' @keywords internal
 .safe_execute_windows <- function(
-  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5,
-  package = TRUE
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5, package = TRUE
 ) {
 
   proc <- r_bg(
@@ -730,6 +764,32 @@
   proc$get_result()
 }
 
+#' Execute a function with memory monitoring
+#'
+#' Internal wrapper that executes a function while monitoring available system
+#' memory. The appropriate execution method is selected according to the
+#' operating system.
+#'
+#' @param fn A function to be executed.
+#' @param args A named list of arguments passed to \code{fn}.
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system.
+#'   Defaults to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds,
+#'   between memory availability checks. Defaults to 0.5.
+#'
+#' @details
+#' The function identifies the operating system using \code{Sys.info()} and
+#' dispatches execution to the corresponding platform-specific helper.
+#'
+#' Linux and macOS systems use the Unix implementation, while Windows systems
+#' use the Windows implementation. An error is raised if the current operating
+#' system is not supported.
+#'
+#' @return
+#' The result returned by \code{fn} when the execution completes successfully.
+#'
+#' @keywords internal
 .safe_execute <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
 ) {
