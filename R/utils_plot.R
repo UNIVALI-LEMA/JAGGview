@@ -578,118 +578,95 @@
   return(result)
 }
 
-# #' Execute a heavy function with memory limit
-# #'
-# #' Internal helper that executes a function while monitoring the available 
-# #' system memory in a background process. If the available memory falls bellow
-# #' a specified safety threshold, the execution is interrupted to reduce the 
-# #' risk of exhausting system memory. 
-# #' 
-# #' @param fn A function to be executed.
-# #' @param args A named list of arguments passed to \code{fn}. 
-# #' @param reserve_mb A numeric value specifying the minimum amount of free
-# #'   system memory, in megabytes, to reserve for the operating system. Defaults 
-# #'   to 2048.
-# #' @param poll_interval A numeric value giving the time interval, in seconds, 
-# #'   between memory availability checks. Defaults to 0.5.
-# #' 
-# #' @details
-# #' This function is, currently, supported only on Linux and macOS, where the 
-# #' monitored process can be interrupted by sending an external \code{SIGINT} 
-# #' signal. A lightweight background R process periodically checks the amount of 
-# #' available system using \pkg{memuse}. If the available memory drops below 
-# #' \code{reserve_mb}, the main process is interrupted and a 
-# #' \code{"memoryLimitExceed"} condition is raised.
-# #' 
-# #' @keywords internal
-# #' @importFrom callr r_bg
-# #' @importFrom ps ps_handle ps_is_running
-# #' @importFrom memuse Sys.meminfo
-# #' @importFrom tools pskill SIGINT
-# .safe_execute_unix <- function(
-#   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
-# ) {
+#' Execute a heavy function with memory limit
+#'
+#' Internal helper that executes a function while monitoring the available 
+#' system memory in a background process. If the available memory falls bellow
+#' a specified safety threshold, the execution is interrupted to reduce the 
+#' risk of exhausting system memory. 
+#' 
+#' @param fn A function to be executed.
+#' @param args A named list of arguments passed to \code{fn}. 
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system. Defaults 
+#'   to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds, 
+#'   between memory availability checks. Defaults to 0.5.
+#' 
+#' @details
+#' This function is, currently, supported only on Linux and macOS, where the 
+#' monitored process can be interrupted by sending an external \code{SIGINT} 
+#' signal. A lightweight background R process periodically checks the amount of 
+#' available system using \pkg{memuse}. If the available memory drops below 
+#' \code{reserve_mb}, the main process is interrupted and a 
+#' \code{"memoryLimitExceed"} condition is raised.
+#' 
+#' @keywords internal
+#' @importFrom callr r_bg
+#' @importFrom ps ps_handle ps_is_running
+#' @importFrom memuse Sys.meminfo
+#' @importFrom tools pskill SIGINT
+.safe_execute_unix <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
+) {
 
-#   # main_pid <- Sys.getpid()
+  main_pid <- Sys.getpid()
 
-#   # # Light process, only receives PID and limit 
-#   # watcher <- r_bg(
-#   #   func = function(pid, reserve_mb, poll_interval) {
-#   #     repeat {
-#   #       handle <- tryCatch(ps_handle(pid), error = function(e) NULL)
-#   #       if (is.null(handle) || !ps_is_running(handle)) break
+  watcher <- r_bg(
+    func = function(pid ,reserve_mb, poll_interval) {
+      repeat {
+        handle <- tryCatch(ps::ps_handle(pid),error = function(e) NULL)
+        if (
+          is.null(handle) || !ps::ps_is_running(handle)
+        ) {
+          break
+        }
 
-#   #       free_ram <- as.numeric(Sys.meminfo()$freeram) / 1024^2
-#   #       if (free_ram < reserve_mb) {
-#   #         pskill(pid, signal = SIGINT)
-#   #         break
-#   #       }
+        free_ram <- as.numeric(memuse::Sys.meminfo()$freeram) / 1024^2
 
-#   #       Sys.sleep(poll_interval)
-#   #     }
+        if (free_ram < reserve_mb) {
+          tools::pskill(pid,signal = tools::SIGINT)
+          break
+        }
 
-#   #   },
-#   #   args = list(
-#   #     pid = main_pid, reserve_mb = reserve_mb, poll_interval = poll_interval
-#   #   )
-#   # )
-#   # on.exit(if (watcher$is_alive()) watcher$kill(), add = TRUE)
+        Sys.sleep(poll_interval)
+      }
+    },
+    args = list(
+      pid = main_pid,
+      reserve_mb = reserve_mb,
+      poll_interval = poll_interval
+    )
+  )
 
-#   # result <- tryCatch({
-#   #   do.call(fn, args)
-#   # }, interrupt = function(i) {
-#   #   structure(
-#   #     class = c("memoryLimitExceeded", "error", "condition"),
-#   #     list(message = "Execution interrupted: memory limit has been exceeded",
-#   #          call = sys.call())
-#   #   )
-#   # })
+  on.exit(
+    if (watcher$is_alive()) {
+      watcher$kill()
+    },
+    add = TRUE
+  )
 
-#   # if (inherits(result, "memoryLimitExceeded")) stop(result)
-#   # result
-#   main_pid <- Sys.getpid()
+  result <- tryCatch({do.call(fn, args)}, interrupt = function(i) {
+    structure(
+      class = c("memoryLimitExceeded", "error", "condition" ),
+      list(
+        message ="Execution interrupted: memory limit has been exceeded",
+        call = sys.call()
+      )
+    )
+  })
 
-#   # Light process, only receives PID and limit 
-#   watcher <- r_bg(
-#     func = function(pid, reserve_mb, poll_interval) {
-#       repeat {
-#         handle <- tryCatch(ps_handle(pid), error = function(e) NULL)
-#         if (is.null(handle) || !ps_is_running(handle)) break
+  if (inherits(result, "memoryLimitExceeded")) {
+    stop(result)
+  }
 
-#         free_ram <- as.numeric(Sys.meminfo()$freeram) / 1024^2
-#         if (free_ram < reserve_mb) {
-#           pskill(pid, signal = SIGINT)
-#           break
-#         }
-
-#         Sys.sleep(poll_interval)
-#       }
-
-#     },
-#     args = list(
-#       pid = main_pid, reserve_mb = reserve_mb, poll_interval = poll_interval
-#     )
-#   )
-#   on.exit(if (watcher$is_alive()) watcher$kill(), add = TRUE)
-
-#   result <- tryCatch({
-#     do.call(fn, args)
-#   }, interrupt = function(i) {
-#     structure(
-#       class = c("memoryLimitExceeded", "error", "condition"),
-#       list(message = "Execution interrupted: memory limit has been exceeded",
-#            call = sys.call())
-#     )
-#   })
-
-#   if (inherits(result, "memoryLimitExceeded")) stop(result)
-#   result
-# }
+  result
+}
 
 #' @importFrom callr r_bg
 #' @importFrom memuse Sys.meminfo
 #' @keywords internal
-.safe_execute <- function(
+.safe_execute_windows <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5,
   package = TRUE
 ) {
@@ -753,17 +730,17 @@
   proc$get_result()
 }
 
-# .safe_execute <- function(
-#   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
-# ) {
+.safe_execute <- function(
+  fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
+) {
 
-#   os <- Sys.info()[["sysname"]]
+  os <- Sys.info()[["sysname"]]
 
-#   if (os %in% c("Linux", "Darwin")) {
-#     .safe_execute_unix(fn, args, reserve_mb, poll_interval)
-#   } else if (os == "Windows") {
-#     .safe_execute_windows(fn, args, reserve_mb, poll_interval)
-#   } else {
-#     stop("Unsupported operating system: ", os)
-#   }
-# }
+  if (os %in% c("Linux", "Darwin")) {
+    .safe_execute_unix(fn, args, reserve_mb, poll_interval)
+  } else if (os == "Windows") {
+    .safe_execute_windows(fn, args, reserve_mb, poll_interval)
+  } else {
+    stop("Unsupported operating system: ", os)
+  }
+}
