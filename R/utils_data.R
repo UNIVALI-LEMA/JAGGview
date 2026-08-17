@@ -1398,6 +1398,6 @@ get_mase <- function(df_lists) {
 #' @keywords internal
 .validate_indices <- function(data_indices, factor_indices) {
   if (!all(factor_indices %in% data_indices)) {
-    stop("All indices past in 'indices' must exist in the data.")
+    stop("All indices past in the parameter 'indices' must exist in the data.")
   }
 }

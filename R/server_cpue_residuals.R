@@ -18,6 +18,8 @@
 
   y_lim_max_cpue_res <- reactiveVal(NULL)
 
+  position_cpue_res <- reactiveVal("top-left")
+
   cpue_res_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -28,7 +30,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    position_changed = FALSE
   )
 
   cpue_res_values <- reactiveValues(
@@ -41,7 +44,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    position_current = "top-left"
   )
 
   observeEvent(input$cpue_res_scenarios, {
@@ -125,6 +129,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$cpue_res_position, {
+    if (!identical(input$cpue_res_position, cpue_res_values$position_current)) {
+      cpue_res_change$position_changed = TRUE
+    }
+    else {
+      cpue_res_change$position_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   current_colors_cpue_res <- reactive({
     n <- length(unique(res_df$cpue_residuals$Index))
     req(n > 0)
@@ -199,6 +212,7 @@
       cpue_res_values$x_max_current = input$cpue_res_x_max
       cpue_res_values$y_min_current = input$cpue_res_y_min
       cpue_res_values$y_max_current = input$cpue_res_y_max
+      cpue_res_values$position_current = input$cpue_res_position
 
       cpue_res_change$scenarios_changed = FALSE
       cpue_res_change$indices_changed = FALSE
@@ -210,6 +224,7 @@
       cpue_res_change$x_max_changed = FALSE
       cpue_res_change$y_min_changed = FALSE
       cpue_res_change$y_max_changed = FALSE
+      cpue_res_change$position_changed = FALSE
 
       filtered_cpue_res(
         list(
@@ -234,6 +249,7 @@
       x_lim_max_cpue_res(input$cpue_res_x_max)
       y_lim_min_cpue_res(input$cpue_res_y_min)
       y_lim_max_cpue_res(input$cpue_res_y_max)
+      position_cpue_res(input$cpue_res_position)
     }
   }, ignoreInit = TRUE)
 
@@ -287,15 +303,6 @@
     }
     palette <- .resolve_palette(palette_cpue_res(), n_indices)
 
-    pos <- .auto_text_position(
-      data_list = df_lists$cpue_residuals,
-      col_x = "Year",
-      col_y = "Res",
-      xlim = x_lim,
-      ylim = y_lim,
-      margin = 0.25
-    )
-
     plots <- map(scenarios, function(s) {
       cpue_residuals <- df_lists$cpue_residuals %>%
           filter(Scenario == s)
@@ -335,7 +342,7 @@
           )
         )
       )
-
+      
       annotations <- append(
         annotations,
         list(
@@ -356,6 +363,18 @@
           )
         )
       )
+      position <- position_cpue_res()
+
+      table <- .build_metric_table(
+        RMSE_data, text_size_cpue_res(), 
+        str_split_i(position, "-", 2),
+        str_split_i(position, "-", 1), 
+        "Value", "RMSE", "%"
+      )
+
+      shapes <- append(shapes, table$shapes)
+
+      annotations <- append(annotations, table$annotations)
       
       plot_ly(
         data = cpue_residuals,
@@ -403,15 +422,6 @@
             .international_system_prefixes(upper, 2), ")"
           ) 
         ) %>%
-        add_text(
-          inherit = FALSE,
-          data = RMSE_data,
-          x = pos$x,
-          y = pos$y,
-          text = ~paste0("RMSE = ", Value, "%"),
-          textfont = list(size = text_size_cpue_res()),
-          hoverinfo = "none"
-        ) %>%
           add_segments(
             x = x_lim[1],
             xend = x_lim[2],
@@ -452,8 +462,9 @@
           annotations = annotations
         )
     }) %>% flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = nrow,
       shareX = TRUE, 
@@ -495,5 +506,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

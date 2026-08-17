@@ -426,7 +426,7 @@
       })
     }) %>% flatten()
 
-    subplot(
+    results <- subplot(
       plots, 
       nrows = length(scenarios),
       shareX = TRUE, 
@@ -468,5 +468,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

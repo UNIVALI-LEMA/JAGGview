@@ -16,9 +16,7 @@
 
   x_lim_max_pp_psi <- reactiveVal(NULL)
 
-  y_lim_min_pp_psi <- reactiveVal(NULL)
-
-  y_lim_max_pp_psi <- reactiveVal(NULL)
+  position_pp_psi <- reactiveVal("top-left")
 
   pp_psi_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -29,8 +27,7 @@
     text_size_changed = FALSE,
     x_min_changed = FALSE,
     x_max_changed = FALSE,
-    y_min_changed = FALSE,
-    y_max_changed = FALSE
+    position_changed = FALSE
   )
 
   pp_psi_values <- reactiveValues(
@@ -43,8 +40,7 @@
     text_size_current = 16,
     x_min_current = NA,
     x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA
+    position_current = "top-left"
   )
 
   observeEvent(input$pp_psi_scenarios, {
@@ -120,21 +116,12 @@
     }
   }, ignoreInit = TRUE)
 
-  observeEvent(input$pp_psi_y_min, {
-    if (!identical(input$pp_psi_y_min, pp_psi_values$y_min_current)) {
-      pp_psi_change$y_min_changed = TRUE
+  observeEvent(input$pp_psi_position, {
+    if (!identical(input$pp_psi_position, pp_psi_values$position_current)) {
+      pp_psi_change$position_changed = TRUE
     }
     else {
-      pp_psi_change$y_min_changed = FALSE
-    }
-  }, ignoreInit = TRUE)
-
-  observeEvent(input$pp_psi_y_max, {
-    if (!identical(input$pp_psi_y_max, pp_psi_values$y_max_current)) {
-      pp_psi_change$y_max_changed = TRUE
-    }
-    else {
-      pp_psi_change$y_max_changed = FALSE
+      pp_psi_change$position_changed = FALSE
     }
   }, ignoreInit = TRUE)
 
@@ -170,8 +157,7 @@
       pp_psi_values$text_size = input$pp_psi_text_size
       pp_psi_values$x_min_current = input$pp_psi_x_min
       pp_psi_values$x_max_current = input$pp_psi_x_max
-      pp_psi_values$y_min_current = input$pp_psi_y_min
-      pp_psi_values$y_max_current = input$pp_psi_y_max
+      pp_psi_values$position_current = input$pp_psi_position
 
       pp_psi_change$scenarios_changed = FALSE
       pp_psi_change$indices_changed = FALSE
@@ -181,8 +167,7 @@
       pp_psi_change$text_size_changed = FALSE
       pp_psi_change$x_min_changed = FALSE
       pp_psi_change$x_max_changed = FALSE
-      pp_psi_change$y_min_changed = FALSE
-      pp_psi_change$y_max_changed = FALSE
+      pp_psi_change$position_changed = FALSE
 
       filtered_pp_psi(
         list(
@@ -212,8 +197,7 @@
       text_size_pp_psi(input$pp_psi_text_size)
       x_lim_min_pp_psi(input$pp_psi_x_min)
       x_lim_max_pp_psi(input$pp_psi_x_max)
-      y_lim_min_pp_psi(input$pp_psi_y_min)
-      y_lim_max_pp_psi(input$pp_psi_y_max)
+      position_pp_psi(input$pp_psi_position)
     }
   }, ignoreInit = TRUE)
 
@@ -231,7 +215,6 @@
     )
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
-
     n_scenarios <- length(scenarios)
 
     nrow <- if (n_scenarios < 3) {
@@ -242,31 +225,25 @@
       3
     }
 
-    prior <- df_lists$prior %>%
-      select(Scenario, psi01, psi02)
+    prior_all <- df_lists$prior %>% select(Scenario, psi01, psi02)
 
-    posterior <- df_lists$posterior %>%
-      select(Scenario, psi01, psi02)
+    posterior_all <- df_lists$posterior %>% select(Scenario, psi01, psi02)
 
     x_lim_min <- .get_value_or_default(
-      x_lim_min_pp_psi, min(prior$psi01, posterior$psi01, na.rm = TRUE)
+      x_lim_min_pp_psi, min(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)
     )
 
     x_lim_max <- .get_value_or_default(
-      x_lim_max_pp_psi, max(prior$psi01, posterior$psi01, na.rm = TRUE)
+      x_lim_max_pp_psi, max(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)
     )
     x_lim <- c(x_lim_min, x_lim_max)
 
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_pp_psi, 
-      .round_to_nearest(min(prior$psi02, posterior$psi02, na.rm = TRUE), 
-      FALSE, 1.1)
+    y_lim_min <- .round_to_nearest(
+      min(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), FALSE, 1.1
     )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_pp_psi, 
-      .round_to_nearest(max(prior$psi02, posterior$psi02, na.rm = TRUE), 
-      TRUE, 1.1)
+    
+    y_lim_max <- .round_to_nearest(
+      max(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), TRUE, 1.1
     )
     y_lim <- c(y_lim_min, y_lim_max)
 
@@ -276,35 +253,45 @@
 
     title_y <- .get_value_or_default(title_y_pp_psi, "Density")
 
-    pos <- .auto_text_position(
-      data_list = list(prior, posterior), 
-      col_x = "psi01", 
-      col_y = "psi02",
-      xlim = x_lim,
-      ylim = y_lim, 
-      margin = 0.25
-    )
+    # PPMR <- df_lists$PPMR %>%
+    #   select(Scenario, psi)
 
-    PPMR <- df_lists$PPMR %>%
-      select(Scenario, psi) %>%
-      mutate(x = pos$x, y = pos$y)
+    # PPVR <- df_lists$PPVR %>%
+    #   select(Scenario, psi)
 
-    PPVR <- df_lists$PPVR %>%
-      select(Scenario, psi) %>%
-      mutate(x = pos$x, y = pos$y)
+    df_text_all <- df_lists$PPMR %>%
+      select(Scenario, ppmr_value = psi) %>%
+      full_join(
+        df_lists$PPVR %>% select(Scenario, ppvr_value = psi),
+        by = "Scenario"
+      )
+    
+    prior_split <- split(prior_all, prior_all$Scenario)
+    posterior_split <- split(posterior_all, posterior_all$Scenario)
+    df_text_split <- split(df_text_all, df_text_all$Scenario)
 
     plots <- map(scenarios, function(s) {
-      prior <- prior %>%
-        filter(Scenario == s)
+      prior <- prior_split[[s]]
+      posterior <- posterior_split[[s]]
+      df_text <- df_text_split[[s]]
+      # prior <- prior %>%
+      #   filter(Scenario == s)
 
-      posterior <- posterior %>%
-        filter(Scenario == s)
+      # posterior <- posterior %>%
+      #   filter(Scenario == s)
 
-      PPMR <- PPMR %>%
-        filter(Scenario == s)
+      # PPMR <- PPMR %>%
+      #   filter(Scenario == s)
 
-      PPVR <- PPVR %>%
-        filter(Scenario == s)
+      # PPVR <- PPVR %>%
+      #   filter(Scenario == s)
+
+      # df_text <- PPMR %>%
+      #   select(Scenario, ppmr_value = all_of("psi")) %>%
+      #   full_join(
+      #     PPVR %>%
+      #       select(Scenario, ppvr_value = all_of("psi")), by = "Scenario"
+      #   )
         
       shapes <- list()
 
@@ -359,6 +346,19 @@
           )
         )
       )
+      position <- position_pp_psi()
+
+      table <- .build_metric_table(
+        df_text, text_size_pp_psi(), 
+        str_split_i(position, "-", 2),
+        str_split_i(position, "-", 1), 
+        c("ppmr_value", "ppvr_value"), 
+        c("PPMR", "PPVR"), decimals = 3
+      )
+
+      shapes <- append(shapes, table$shapes)
+
+      annotations <- append(annotations, table$annotations)
 
       plot_ly() %>%
         add_trace(
@@ -375,8 +375,7 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Prior<br>psi01: ", .international_system_prefixes(psi01), 
-            "<br>psi02: ", .international_system_prefixes(psi02)
+            "Prior<br>psi: ", .international_system_prefixes(psi01)
           )
         ) %>%
         add_trace(
@@ -393,25 +392,8 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Posterior<br>psi01: ", .international_system_prefixes(psi01), 
-            "<br>psi02: ", .international_system_prefixes(psi02)
+            "Posterior<br>psi: ", .international_system_prefixes(psi01)
           )
-        ) %>%
-        add_text(
-          data = PPMR,
-          x = ~x,
-          y = ~y,
-          text = ~paste0("PPMR = ", psi),
-          textfont = list(size = text_size_pp_psi()),
-          textposition = "top left"
-        ) %>%
-        add_text(
-          data = PPVR,
-          x = ~x,
-          y = ~y,
-          text = ~paste0("PPVR = ", psi),
-          textfont = list(size = text_size_pp_psi()),
-          textposition = "bottom left"
         ) %>%
         layout(
           showlegend = FALSE,
@@ -441,8 +423,9 @@
         )
     }) %>%
       flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = nrow,
       shareX = TRUE, 
@@ -484,5 +467,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

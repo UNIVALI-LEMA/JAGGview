@@ -16,6 +16,8 @@
 
   y_lim_max_hc <- reactiveVal(NULL)
 
+  position_hc <- reactiveVal("top-left")
+
   hc_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -25,7 +27,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    position_changed = FALSE
   )
 
   hc_values <- reactiveValues(
@@ -37,7 +40,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    position_current = "top-left"
   )
 
   observeEvent(input$hc_scenarios, {
@@ -121,6 +125,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$hc_position, {
+    if (!identical(input$hc_position, hc_values$position_current)) {
+      hc_change$position_changed = TRUE
+    }
+    else {
+      hc_change$position_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_hc <- reactive({
     vec <- unlist(reactiveValuesToList(hc_change))
 
@@ -153,6 +166,7 @@
       hc_values$x_max_current = input$hc_x_max
       hc_values$y_min_current = input$hc_y_min
       hc_values$y_max_current = input$hc_y_max
+      hc_values$position_current = input$hc_position
 
       hc_change$scenarios_changed = FALSE
       hc_change$indices_changed = FALSE
@@ -163,6 +177,7 @@
       hc_change$x_max_changed = FALSE
       hc_change$y_min_changed = FALSE
       hc_change$y_max_changed = FALSE
+      hc_change$position_changed = FALSE
 
       filtered_hc(
         list(
@@ -196,6 +211,7 @@
       x_lim_max_hc(input$hc_x_max)
       y_lim_min_hc(input$hc_y_min)
       y_lim_max_hc(input$hc_y_max)
+      position_hc(input$hc_position)
     }
   }, ignoreInit = TRUE)
 
@@ -246,14 +262,6 @@
     title_x <- .get_value_or_default(title_x_hc, "Year")
 
     title_y <- .get_value_or_default(title_y_hc, "Index")
-
-    pos <- .auto_text_position(
-      df_lists$data, 
-      "year", 
-      "hat.uci", 
-      xlim = x_lim,
-      ylim = y_lim
-    )
 
     min_year_hc <- min(df_lists$hindcast_data_2$year) - 1
 
@@ -374,6 +382,20 @@
             )
           )
         }
+        if (nrow(mase_data)) {
+          position <- position_hc()
+
+          table <- .build_metric_table(
+            mase_data, text_size_hc(), 
+            str_split_i(position, "-", 2),
+            str_split_i(position, "-", 1), 
+            "MASE", "MASE", decimals = 3
+          )
+
+          shapes <- append(shapes, table$shapes)
+
+          annotations <- append(annotations, table$annotations)
+        }
 
         p <- plot_ly(colors = c("black", ss3col(8))) %>%
           add_ribbons(
@@ -484,21 +506,7 @@
               "hindcast hat (", retro,"): ", 
               .international_system_prefixes(hat, 2)
             )
-          ) 
-        if (nrow(mase_data)) {
-          p <- p %>%
-            add_text(
-              data = mase_data,
-              x = pos$x,
-              y = pos$y,
-              hoverinfo = "none",
-              textfont = list(size = text_size_hc()),
-              text = ~paste0(
-                "MASE = ", .international_system_prefixes(MASE, decimals = 3)
-              )
-            )
-        }
-        p <- p %>%
+          ) %>%
           layout(
             showlegend = FALSE,
             xaxis = list(
@@ -528,8 +536,9 @@
         p
       })
     }) %>% flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots, 
       nrows = nrow,
       shareX = TRUE, 
@@ -571,5 +580,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

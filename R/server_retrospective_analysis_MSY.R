@@ -16,6 +16,8 @@
 
   y_lim_max_ra_MSY <- reactiveVal(NULL)
 
+  position_ra_MSY <- reactiveVal("top-left")
+
   ra_MSY_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -24,7 +26,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    position_changed = FALSE
   )
 
   ra_MSY_values <- reactiveValues(
@@ -35,7 +38,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    position_current = "top-left"
   )
 
   observeEvent(input$ra_MSY_scenarios, {
@@ -110,6 +114,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$ra_MSY_position, {
+    if (!identical(input$ra_MSY_position, ra_MSY_values$position_current)) {
+      ra_MSY_change$position_changed = TRUE
+    }
+    else {
+      ra_MSY_change$position_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_ra_MSY <- reactive({
     vec <- unlist(reactiveValuesToList(ra_MSY_change))
     
@@ -140,6 +153,7 @@
       ra_MSY_values$x_max_current = input$ra_MSY_x_max
       ra_MSY_values$y_min_current = input$ra_MSY_y_min
       ra_MSY_values$y_max_current = input$ra_MSY_y_max
+      ra_MSY_values$position_current = input$ra_MSY_position
 
       ra_MSY_change$scenarios_changed = FALSE
       ra_MSY_change$indices_changed = FALSE
@@ -150,6 +164,7 @@
       ra_MSY_change$x_max_changed = FALSE
       ra_MSY_change$y_min_changed = FALSE
       ra_MSY_change$y_max_changed = FALSE
+      ra_MSY_change$position_changed = FALSE
 
       filtered_ra_MSY(
         list(
@@ -171,6 +186,7 @@
       x_lim_max_ra_MSY(input$ra_MSY_x_max)
       y_lim_min_ra_MSY(input$ra_MSY_y_min)
       y_lim_max_ra_MSY(input$ra_MSY_y_max)
+      position_ra_MSY(input$ra_MSY_position)
     }
   }, ignoreInit = TRUE)
 
@@ -201,7 +217,12 @@
     data_ref <- data_var %>%
       filter(id == "Ref")
 
-    data_lines <- data_var
+    print(unique(data_var$MSY))
+
+    data_lines <- data_var %>%
+      select(id, Scenario, SB_i, SP, Index)
+    # print(data_lines)
+    print(nrow(data_lines))
 
     rho_var <- rho_data %>% 
       filter(Index == "MSY")
@@ -231,22 +252,64 @@
     title_y <- .get_value_or_default(title_y_ra_MSY, "Surplus Production (t)")
 
     x_lim <- .expand_range(x_lim)
-  
-    pos <- .auto_text_position(
-      data_list = data_lines,
-      col_x = "SB_i",
-      col_y = "SP",
-      xlim = x_lim,
-      ylim = y_lim,
-      margin = 0.2
-    )
+
+    data_lines_split <- split(data_lines, data_lines$Scenario)
+    rho_var_split <- split(rho_var, rho_var$Scenario)
 
     plots <- map(scenarios, function(s) {
-      data_lines <- data_lines %>%
-        filter(Scenario == s)
+      # data_lines <- data_lines %>%
+      #   filter(Scenario == s)
 
-      rho_var <- rho_var %>%
-        filter(Scenario == s)
+      # rho_var <- rho_var %>%
+      #   filter(Scenario == s)
+
+      data_lines <- data_lines_split[[s]]
+      rho_var <- rho_var_split[[s]]
+
+      # shapes <- list(
+      #   list(
+      #     type = "rect",
+      #     xref = "paper",
+      #     yref = "paper",
+      #     x0 = 0,
+      #     x1 = 1,
+      #     y0 = 0, 
+      #     y1 = 1,
+      #     line = list(width = 1)
+      #   ),
+      #   list(
+      #     type = "rect",
+      #     xref = "paper",
+      #     yref = "paper",
+      #     x0 = 0,
+      #     x1 = 1,
+      #     yanchor = 1,
+      #     y0 = 0, 
+      #     y1 = 28,
+      #     ysizemode = "pixel",
+      #     line = list(width = 1),
+      #     fillcolor = "black"
+      #   )
+      # )
+
+      # annotations <- list(
+      #   list(
+      #     x = 0.5,
+      #     y = 1,
+      #     xanchor = "center",
+      #     yanchor = "top",
+      #     yshift = 25,
+      #     xref = "paper",
+      #     yref = "paper",
+      #     text = s,
+      #     showarrow = FALSE,
+      #     font = list(
+      #       size = 20,
+      #       color = "white"
+      #     )
+      #   )
+      # )
+
         
       shapes <- list()
 
@@ -301,6 +364,18 @@
           )
         )
       )
+      position <- position_ra_MSY()
+
+      table <- .build_metric_table(
+        rho_var, text_size_ra_MSY(), 
+        str_split_i(position, "-", 2),
+        str_split_i(position, "-", 1), 
+        "rho", "\u03c1", decimals = 3
+      )
+
+      shapes <- append(shapes, table$shapes)
+
+      annotations <- append(annotations, table$annotations)
 
       data_lines <- data_lines %>%
         filter(!is.na(SB_i), !is.na(SP))
@@ -311,24 +386,15 @@
           x = ~SB_i,
           y = ~SP,
           color = ~as.factor(id),
-          type = "scatter",
+          type = "scattergl",
           mode = "lines",
           line = list(width = 3),
-          hoverinfo = "text",
+          hoverinfo = "text=x+y",
           text = ~paste0(
             "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
             "t<br>Surplus Production (", id,"): ", 
             .international_system_prefixes(SP, 2), "t" 
           )
-        ) %>%
-        add_text(
-          data = rho_var,
-          x = pos$x,
-          y = pos$y,
-          text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-          textfont = list(size = text_size_ra_MSY()),
-          textposition = "middle left",
-          hoverinfo = "skip"
         ) %>%
         layout(
           showlegend = FALSE,
@@ -358,8 +424,9 @@
         )
     }) %>%
       flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = nrow,
       shareX = TRUE, 
@@ -400,6 +467,9 @@
             )
           )
         )
-      )
+      ) %>%
+      plotly::toWebGL()
+    # toc()
+    results
   })
 }
