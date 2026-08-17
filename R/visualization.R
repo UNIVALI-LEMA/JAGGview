@@ -164,10 +164,10 @@ fits_ggplot <- function(
     geom_ribbon(data = df_lists$CI_95,
         aes(x = Year, ymin = lci, ymax = uci),
         alpha = 0.3, fill = palette[1]) +
-    geom_line(data = df_lists$CI_80,
-        aes(x = Year, y = mu)) +
+    geom_line(data = df_lists$CI_80, aes(x = Year, y = mu)) +
     geom_errorbar(data = df_lists$Li_Ui, 
-                  aes(x = Year, ymin = Li, ymax = Ui), width = 1.5) +
+                  aes(x = Year, ymin = Li, ymax = Ui
+                  ), width = 1.5) +
     geom_point(data = df_lists$Li_Ui,
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 
@@ -231,8 +231,10 @@ hindcast_ggplot <- function(
   .axis_limit(x_lim)
 
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
-    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
+    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), 
+    TRUE)
+    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), 
+    FALSE)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -507,7 +509,9 @@ kobe_ggplot <- function(
 #' @examples
 #' \dontrun{
 #' df <- priors_posteriors_data(list_fit_models)
-#' priors_posteriors_ggplot(df, "K", TRUE, palette = c("#4285f4", "#34a853"))
+#' priors_posteriors_ggplot(
+#'   df, "K", TRUE, palette = c("#4285f4", "#34a853")
+#' )
 #' }
 #'
 #' @export
@@ -893,7 +897,8 @@ retrospective_analysis_ggplot <- function(
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
 runs_tests_ggplot <- function(
-  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", x_lim = NULL, y_lim = NULL
+  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -904,8 +909,10 @@ runs_tests_ggplot <- function(
   .axis_limit(x_lim)
 
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
-    min_y_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE,2.5)
+    max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 
+    2.5)
+    min_y_val <- .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 
+    2.5)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -1001,7 +1008,7 @@ runs_tests_ggplot <- function(
 #' \dontrun{
 #' summary_table(get_mase(hindcast_data(list_hc_models)))
 #' 
-#' summary_table(get_ppmr(priors_posteriors_data(list_fit_models)), show = "png")
+#' summary_table(get_ppmr(priors_posteriors_data(list_fit_models)), "png")
 #' 
 #' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 #' }

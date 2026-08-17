@@ -245,6 +245,61 @@
   return(table)
 }
 
+#' Create an empty placeholder plotly widget
+#'
+#' Internal helper function used to generate a blank \pkg{plotly} widget
+#' displaying only a centered title, typically used when no data is
+#' available to plot.
+#'
+#' @param title A character string with the title to display in place of
+#' the plot.
+#'
+#' @return
+#' A \code{plotly} object with no traces displayed and a centered title.
+#'
+#' @details
+#' This function is used as a fallback visual whenever the underlying data
+#' for a plot is missing or empty, avoiding rendering errors while still
+#' informing the user through the displayed title. Dragging/zooming
+#' interactions are disabled since there is no data to explore.
+#'
+#' @keywords internal
+#' @importFrom plotly plotly_empty layout
+.empty_plotly <- function(title){
+  plotly_empty(type = "scatter", mode = "markers") %>%
+    layout(
+      title = list(
+        text = title,
+        y = 0.5
+      ),
+      dragmode = FALSE
+    )
+}
+
+#' Expand range of the available data
+#' 
+#' Internal helper that simmetrically expands  a numeric range (3.g., the 
+#' limits of a plot axis) by given fraction of it's span, adding a visual 
+#' margin around the data.
+#' 
+#' @param lim A numeric vector of length 2 giving the lower and upper bounds of 
+#'   the range to be expanded
+#' @param mult A numeric value giving the fraction of the range's span to add 
+#'   as margin on each side. Defaults to \code{0.05}.
+#' 
+#' @return A numeric vector of length 2 with expanded lower and upper bounds.
+#' 
+#' @details
+#' The expansion is computed as the difference between the bounds of \code{lim}
+#' multiplied by \code{mult} , and aplied symmetrically to both ends of the 
+#' range.
+#' 
+#' @keywords internal
+.expand_range <- function(lim, mult = 0.05) {
+  d <- diff(lim)
+  lim + c(-1, 1) * d * mult
+}
+
 #' Format numeric values with custom separators
 #'
 #' Internal helper that formats numeric values with a specified number of 
@@ -271,12 +326,41 @@
   )
 }
 
+#' Get a reactive value or fall back to a default
+#' 
+#' Internal helper that evaluates a reactive value and returns it, unless it is 
+#' \code{NULL}, an empty string, or \code{NA}, in which case a default value is 
+#' returned instead
+#' 
+#' @param reactive_val A reactive expression (e.g., a Shiny \code{reactive()} 
+#'   or \code{input}) to be evaluated.
+#' @param default A value to be returned when \code{reactive_val} evaluates to 
+#'   \code{NULL}, \code{""}, or \code{NA}.
+#' 
+#' @return The evaluated value of \code{reactive_val}, or \code{default} if it 
+#'   is missing.
+#' 
+#' @details
+#' This function is typically used to provide fallback values for Shiny inputs 
+#' that have not yet been set or have been cleared by the user.
+#' 
+#' @keywords internal
+.get_value_or_default <- function(reactive_val, default) {
+  val <- reactive_val()
+  if (is.null(val) || val == "" || is.na(val)) {
+    default
+  }
+  else {
+    val
+  }
+}
+
 #' International System of Prefixes
 #' 
 #' @param number A numeric value (or a numeric vector of values) to be 
 #'   formated using SI prefixes.
-#' @param decimals Optional. An integer indicating the number of decimals places to 
-#'   display in the formatted string.  
+#' @param decimals Optional. An integer indicating the number of decimals 
+#'   places to display in the formatted string.  
 #' 
 #' @return A character value (or a character vector of values) appended with 
 #'   their corresponding SI unit symbol.
@@ -293,16 +377,25 @@
     if (is.na(val) || val == 0) return("0")
     
     abs_val <- abs(val)
-    
+
     if (abs_val >= 1e6) {
       divisor <- 1e6
       suffix  <- "M"
     } else if (abs_val >= 1e3) {
       divisor <- 1e3
       suffix  <- "k"
-    } else {
+    } else if (abs_val >= 1) {
       divisor <- 1
       suffix  <- ""
+    } else if (abs_val >= 1e-3) {
+      divisor <- 1e-3
+      suffix <- "m"
+    } else if (abs_val >= 1e-6) {
+      divisor <- 1e-6
+      suffix <- "\u00B5"
+    } else {
+      divisor <- 1e-9
+      suffix <- "n"
     }
     
     scaled <- val / divisor
@@ -317,6 +410,21 @@
   }
   
   sapply(number, format_single)
+}
+
+#' Check if a value is empty
+#' 
+#' Internal helper that checks whether a value is \code{NULL} or has zero 
+#' length, useful for validating inputs before further processing.
+#' 
+#' @param x A value to be checked.
+#' 
+#' @return A logical value: \code{TRUE} if \code{NULL} or has length zero, 
+#'   \code{FALSE} otherwise.
+#' 
+#' @keywords internal
+.is_empty <- function(x) {
+  is.null(x) || length(x) == 0
 }
 
 #' Validate color palette
@@ -507,9 +615,9 @@
 #' Resolve plotting palette
 #' 
 #' Returns the palette to be used in a plot. If \code{palette} is \code{NULL}, 
-#' a default palette is generated using \code{.make_index_palette()}. Otherwise, 
-#' the supplied palette is validated and checked to ensure that it contains at 
-#' least \code{num} colors.
+#' a default palette is generated using \code{.make_index_palette()}. 
+#' Otherwise, the supplied palette is validated and checked to ensure that it 
+#' contains at least \code{num} colors.
 #' 
 #' @param palette Optional character vector of hexadecimal color codes.
 #' @param num Minimum number of colors required.
@@ -518,7 +626,7 @@
 #' 
 #' @keywords internal
 .resolve_palette <- function(palette, num) {
-  if (is.null(palette)) {
+  if(.is_empty(palette) || anyNA(palette) || any(palette == "", na.rm = TRUE)) {
     return(.make_index_palette(num))
   } else {
     .is_palette_valid(palette)
@@ -530,7 +638,7 @@
       ))
     }
     else {
-      return(palette)
+      return(palette[seq_len(num)])
     }
   }
 }
