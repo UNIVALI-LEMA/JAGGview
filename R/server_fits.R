@@ -122,6 +122,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_fits <- reactive({
+    req(input$navmenu == "tab_fits")
     vec <- unlist(reactiveValuesToList(fits_change))
 
     empty_condition <- .is_empty(input$fits_scenarios)|| 

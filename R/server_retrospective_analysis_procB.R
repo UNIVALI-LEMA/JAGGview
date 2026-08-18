@@ -132,6 +132,8 @@
   })
 
   observeEvent(status_sliders_ra_procB(), {
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_procB")
     if (status_sliders_ra_procB()) {
       enable("confirm_button")
     } else {

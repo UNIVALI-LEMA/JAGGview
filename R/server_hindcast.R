@@ -135,6 +135,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_hc <- reactive({
+    req(input$navmenu == "tab_cpue_residuals")
     vec <- unlist(reactiveValuesToList(hc_change))
 
     empty_condition <- .is_empty(input$hc_scenarios)|| 

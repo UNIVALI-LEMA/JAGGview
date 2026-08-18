@@ -107,6 +107,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_kobe <- reactive({
+    req(input$navmenu == "tab_kobe")
     vec <- unlist(reactiveValuesToList(kobe_change))
     
     enable <- any(vec) && !.is_empty(input$kobe_scenarios)

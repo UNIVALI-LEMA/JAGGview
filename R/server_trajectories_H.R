@@ -111,6 +111,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_traj_H <- reactive({
+    req(input$navmenu == "tab_trajectories" && 
+      input$trajectories_tabs == "tab_traj_H")
     vec <- unlist(reactiveValuesToList(traj_H_change))
     
     enable <- any(vec) && !.is_empty(input$traj_H_scenarios)

@@ -126,6 +126,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_pp_r <- reactive({
+    req(input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_r")
     vec <- unlist(reactiveValuesToList(pp_r_change))
 
     empty_condition <- .is_empty(input$pp_r_scenarios)

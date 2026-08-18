@@ -177,6 +177,7 @@
   })
 
   status_sliders_cpue_res <- reactive({
+    req(input$navmenu == "tab_cpue_residuals")
     vec <- unlist(reactiveValuesToList(cpue_res_change))
 
     empty_condition <- .is_empty(input$cpue_res_scenarios)|| 

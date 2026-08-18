@@ -110,7 +110,8 @@
     }
   }, ignoreInit = TRUE)
 
-  status_sliders_traj_BB0 <- reactive({
+  status_sliders_traj_BB0 <- reactive({(input$navmenu == "tab_trajectories" && 
+      input$trajectories_tabs == "tab_traj_BB0")
     vec <- unlist(reactiveValuesToList(traj_BB0_change))
     
     enable <- any(vec) && !.is_empty(input$traj_BB0_scenarios)

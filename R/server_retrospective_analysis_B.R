@@ -124,6 +124,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_ra_B <- reactive({
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_B")
     vec <- unlist(reactiveValuesToList(ra_B_change))
     
     enable <- any(vec) && !.is_empty(input$ra_B_scenarios)

@@ -136,6 +136,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_runs_tests <- reactive({
+    req(input$navmenu == "tab_runs_tests")
     vec <- unlist(reactiveValuesToList(runs_tests_change))
 
     empty_condition <- .is_empty(input$runs_tests_scenarios)|| 

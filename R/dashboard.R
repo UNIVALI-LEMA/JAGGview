@@ -50,6 +50,7 @@
 #'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot toWebGL
+#'   animation_slider animation_button 
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
 #' @importFrom rlang flatten
@@ -67,29 +68,28 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
   env <- new.env(parent = emptyenv())
   if (verbose) cat("\nLoading file")
   objects <- load(path, envir = env)
-
-  if (verbose) cat("\nGeting data from file\n")
-  data <- mget(objects, envir = env)
+  rm(path)
 
   fits_list <- list()
   hc_list <- list()
-  ignored_list <- list()
+  ignored_names <- character(0)
 
   name_width <- max(nchar(objects))
 
   for (name in objects) {
     obj <- get(name, envir = env)
+    rm(list = name, envir = env)
 
     if (.is_fit_jabba(obj)) {
-      fits_list <- append(fits_list, list(obj))
+      fits_list[[length(fits_list) + 1]] <- obj
       status <- "Identified as fit jabba"
     }
     else if (.is_hindcast_jabba(obj)) {
-      hc_list <- append(hc_list, list(obj))
+      hc_list[[length(hc_list) + 1]] <- obj
       status <- "Identified as hindcast jabba"
     }
     else {
-      ignored_list <- append(ignored_list, list(obj))
+      ignored_names <- c(ignored_names, name)
       status <- "Ignored file"
     }
 
@@ -99,6 +99,8 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
       ))
     }
   }
+  rm(env, name_width, objects)
+  gc()
   fits_NULL <- identical(fits_list, list())
   hc_NULL <- identical(hc_list, list())
   if (all(c(fits_NULL, hc_NULL))) {
@@ -112,17 +114,15 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
 
   if (!fits_NULL) {
     fits_df <- fits_data(fits_list)
-
-    li_ui  <- fits_df$Li_Ui
-    ci_80  <- fits_df$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci)
-    ci_95  <- fits_df$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
-
     fits_df <- reduce(
-      list(li_ui, ci_80, ci_95),
+      list(
+        fits_df$Li_Ui, 
+        fits_df$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci), 
+        fits_df$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
+      ),
       full_join,
       by = c("Year", "Scenario", "Index")
     )
-
     fits_df <- fits_df %>%
       mutate(Year = as.integer(Year))
     if (verbose) message("Fits data was sucessfully obtained")
@@ -135,6 +135,7 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     if (verbose) message("Kobe data was sucessfully obtained")
     traj_df <- ensemble_df$trajectories_df
     if (verbose) message("Trajectories data was sucessfully obtained")
+    rm(ensemble_df)
   }
   else {
     fits_df <- data.frame()
@@ -143,6 +144,8 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     kobe_df <- list()
     traj_df <- data.frame()
   }
+  rm(fits_list, fits_NULL)
+  gc()
   if (!hc_NULL) {
     hind_df <- hindcast_data(hc_list)
     if (verbose) message("Hindcast data was sucessfully obtained")
@@ -153,8 +156,8 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     hind_df <- list()
     ra_df <- list()
   }
-  
-  env <- environment()
+  rm(hc_list, hc_NULL)
+  gc()
 
   server <- .build_server(
     fits_df = fits_df,
@@ -175,7 +178,6 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     hind_df = hind_df,
     ra_df = ra_df
   )
-
   if (verbose) message("Initializing Interactive Data Visualization")
   shinyApp(ui, server)
 }

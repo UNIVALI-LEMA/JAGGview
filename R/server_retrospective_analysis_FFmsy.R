@@ -124,6 +124,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_ra_FFmsy <- reactive({
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_FFmsy")
     vec <- unlist(reactiveValuesToList(ra_FFmsy_change))
     
     enable <- any(vec) && !.is_empty(input$ra_FFmsy_scenarios)
