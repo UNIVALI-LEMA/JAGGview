@@ -16,6 +16,8 @@
 
   y_lim_max_runs_tests <- reactiveVal(NULL)
 
+  position_runs_tests <- reactiveVal("top-left")
+
   runs_tests_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -25,7 +27,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    position_changed = FALSE
   )
 
   runs_tests_values <- reactiveValues(
@@ -37,7 +40,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    position_current = "top-left"
   )
 
   observeEvent(input$runs_tests_scenarios, {
@@ -122,6 +126,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$runs_tests_position, {
+    if (!identical(input$runs_tests_position, runs_tests_values$position_current)) {
+      runs_tests_change$position_changed = TRUE
+    }
+    else {
+      runs_tests_change$position_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_runs_tests <- reactive({
     vec <- unlist(reactiveValuesToList(runs_tests_change))
 
@@ -154,6 +167,7 @@
       runs_tests_values$x_max_current = input$runs_tests_x_max
       runs_tests_values$y_min_current = input$runs_tests_y_min
       runs_tests_values$y_max_current = input$runs_tests_y_max
+      runs_tests_values$position_current = input$runs_tests_position
 
       runs_tests_change$scenarios_changed = FALSE
       runs_tests_change$indices_changed = FALSE
@@ -164,6 +178,7 @@
       runs_tests_change$x_max_changed = FALSE
       runs_tests_change$y_min_changed = FALSE
       runs_tests_change$y_max_changed = FALSE
+      runs_tests_change$position_changed = FALSE
 
       filtered_runs_tests(
         list(
@@ -187,6 +202,7 @@
       x_lim_max_runs_tests(input$runs_tests_x_max)
       y_lim_min_runs_tests(input$runs_tests_y_min)
       y_lim_max_runs_tests(input$runs_tests_y_max)
+      position_runs_tests(input$runs_tests_position)
     }
   }, ignoreInit = TRUE)
 
@@ -230,15 +246,6 @@
     title_x <- .get_value_or_default(title_x_runs_tests, "Year")
 
     title_y <- .get_value_or_default(title_y_runs_tests, "Residuals")
-
-    pos <- .auto_text_position(
-      data_list = df_lists$cpue_residuals,
-      col_x = "Year",
-      col_y = "Res",
-      margin = 0.4,
-      xlim = x_lim,
-      ylim = y_lim
-    )
 
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -409,14 +416,6 @@
         
         if (nrow(SE3) != 0) {
           p <- p %>%
-            add_text(
-              data = SE3,
-              x = pos$x,
-              y = pos$y,
-              text = ~paste0("p-value = ", pvalue),
-              textfont = list(size = text_size_runs_tests()),
-              hoverinfo = "skip"
-            ) %>%
             add_segments(
               x = x_lim[1],
               xend = x_lim[2],
@@ -430,6 +429,17 @@
               showlegend = FALSE,
               hoverinfo = "none"
             )
+          position <- position_runs_tests()
+          
+          table <- .build_metric_table(
+            SE3, text_size_runs_tests(), 
+            str_split_i(position, "-", 2),
+            str_split_i(position, "-", 1), 
+            "pvalue", "p-value", decimals = 3
+          )
+          shapes <- append(shapes, table$shapes)
+
+          annotations <- append(annotations, table$annotations)
         }
         
         p <- p %>%
@@ -463,8 +473,9 @@
         
       })
     }) %>% flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = length(scenarios),
       shareX = TRUE, 
@@ -506,5 +517,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

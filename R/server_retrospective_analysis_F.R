@@ -16,6 +16,8 @@
 
   y_lim_max_ra_F <- reactiveVal(NULL)
 
+  position_ra_F <- reactiveVal("top-left")
+
   ra_F_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -24,7 +26,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    position_changed = FALSE
   )
 
   ra_F_values <- reactiveValues(
@@ -35,7 +38,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    position_current = "top-left"
   )
 
   observeEvent(input$ra_F_scenarios, {
@@ -110,6 +114,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$ra_F_position, {
+    if (!identical(input$ra_F_position, ra_F_values$position_current)) {
+      ra_F_change$position_changed = TRUE
+    }
+    else {
+      ra_F_change$position_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_ra_F <- reactive({
     vec <- unlist(reactiveValuesToList(ra_F_change))
     
@@ -140,6 +153,7 @@
       ra_F_values$x_max_current = input$ra_F_x_max
       ra_F_values$y_min_current = input$ra_F_y_min
       ra_F_values$y_max_current = input$ra_F_y_max
+      ra_F_values$position_current = input$ra_F_position
 
       ra_F_change$scenarios_changed = FALSE
       ra_F_change$indices_changed = FALSE
@@ -150,6 +164,7 @@
       ra_F_change$x_max_changed = FALSE
       ra_F_change$y_min_changed = FALSE
       ra_F_change$y_max_changed = FALSE
+      ra_F_change$position_changed = FALSE
 
       filtered_ra_F(
         list(
@@ -171,6 +186,7 @@
       x_lim_max_ra_F(input$ra_F_x_max)
       y_lim_min_ra_F(input$ra_F_y_min)
       y_lim_max_ra_F(input$ra_F_y_max)
+      position_ra_F(input$ra_F_position)
     }
   }, ignoreInit = TRUE)
 
@@ -233,15 +249,6 @@
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
-    
-    pos <- .auto_text_position(
-      data_list = data_ref,
-      col_x = "Year",
-      col_y = "uci",
-      xlim = x_lim,
-      ylim = y_lim,
-      margin = 0.05
-    )
 
     plots <- map(scenarios, function(s) {
       data_ref <- data_ref %>%
@@ -306,6 +313,18 @@
           )
         )
       )
+      position <- position_ra_F()
+
+      table <- .build_metric_table(
+        rho_var, text_size_ra_F(), 
+        str_split_i(position, "-", 2),
+        str_split_i(position, "-", 1), 
+        "rho", "\u03c1", decimals = 3
+      )
+
+      shapes <- append(shapes, table$shapes)
+
+      annotations <- append(annotations, table$annotations)
 
       plot_ly(colors = c("black", ss3col(8))) %>%
         add_ribbons(
@@ -333,15 +352,6 @@
           text = ~paste0(
             "mu (", id,"): ", .international_system_prefixes(mu, 2)
           )
-        ) %>%
-        add_text(
-          data = rho_var,
-          x = pos$x,
-          y = pos$y,
-          text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-          textfont = list(size = text_size_ra_F()),
-          textposition = "bottom left",
-          hoverinfo = "skip"
         ) %>%
         layout(
           showlegend = FALSE,
@@ -371,8 +381,9 @@
         )
     }) %>% 
       flatten()
+    
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = nrow,
       shareX = TRUE, 
@@ -414,5 +425,7 @@
           )
         )
       )
+    # toc()
+    results
   })
 }

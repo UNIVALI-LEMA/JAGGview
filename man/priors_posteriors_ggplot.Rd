@@ -8,7 +8,8 @@ priors_posteriors_ggplot(
   df_lists,
   indicator_name,
   n_col = 3,
-  text_size = 4,
+  position = "top-left",
+  text_size = 6,
   title_y = "Density",
   use_si_suffix = FALSE,
   palette = NULL,
@@ -27,8 +28,18 @@ Supported values include "K", "r", and "psi".}
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
 
+\item{position}{A character string specifying the table's position within
+each plot panel, combining a vertical and a horizontal keyword separated
+by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+component must be one of \code{"top"}, \code{"middle"}, or
+\code{"bottom"}; the horizontal component must be one of \code{"left"},
+\code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
+\code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
+\code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
+\code{"bottom-center"}, and \code{"bottom-right"}.}
+
 \item{text_size}{An integer value that determines the size of the text.
-Defaults to 4.}
+Defaults to 6.}
 
 \item{title_y}{A character string for the y-axis label. Defaults to
 "Density".}
@@ -69,7 +80,7 @@ for prior-posterior mean and variance ratios, and faceted views by scenario.
 \dontrun{
 df <- priors_posteriors_data(list_fit_models)
 priors_posteriors_ggplot(
-  df, "K", TRUE, palette = c("#4285f4", "#34a853")
+  df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
 )
 }
 

@@ -448,6 +448,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "runs_tests_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -536,6 +545,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "cpue_res_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -601,32 +619,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            div(
-              div(
-                strong("Y limits:")
-              ),
-              div(
-                style = "display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
-                padding: 0px 15px;",
-                numericInput(
-                  inputId = "pp_K_y_min",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                ), 
-                tags$span(
-                  "-",
-                  style = "font-size: 20px; color: white; padding: 0 5px;"
-                ),
-                numericInput(
-                  inputId = "pp_K_y_max",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                )
-              )
+            selectInput(
+              inputId = "pp_K_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -696,32 +696,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            div(
-              div(
-                strong("Y limits:")
-              ),
-              div(
-                style = "display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
-                padding: 0px 15px;",
-                numericInput(
-                  inputId = "pp_r_y_min",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                ), 
-                tags$span(
-                  "-",
-                  style = "font-size: 20px; color: white; padding: 0 5px;"
-                ),
-                numericInput(
-                  inputId = "pp_r_y_max",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                )
-              )
+            selectInput(
+              inputId = "pp_r_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -791,32 +773,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            div(
-              div(
-                strong("Y limits:")
-              ),
-              div(
-                style = "display: flex; 
-                align-items: center; 
-                justify-content: space-between; 
-                padding: 0px 15px;",
-                numericInput(
-                  inputId = "pp_psi_y_min",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                ), 
-                tags$span(
-                  "-",
-                  style = "font-size: 20px; color: white; padding: 0 5px;"
-                ),
-                numericInput(
-                  inputId = "pp_psi_y_max",
-                  label = NULL,
-                  value = NULL,
-                  width = "100%"
-                )
-              )
+            selectInput(
+              inputId = "pp_psi_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -898,6 +862,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_B_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -979,6 +952,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_F_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -1060,6 +1042,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_BBmsy_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -1141,6 +1132,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_FFmsy_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -1222,6 +1222,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_procB_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -1303,6 +1312,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "ra_MSY_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(
@@ -1390,6 +1408,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            selectInput(
+              inputId = "hc_position",
+              label = "Position:",
+              choices = c("top-left", "top-center", "top-right", "bottom-left", 
+              "bottom-center", "bottom-right"),
+              selected = "top-left",
+              multiple = FALSE,
+              width = "100%"
             )
           ),
           conditionalPanel(

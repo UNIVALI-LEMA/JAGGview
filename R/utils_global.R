@@ -9,5 +9,5 @@ utils::globalVariables(c(
   "indices", "ppmr_value", "ppvr_value", "jbs", "prefix", "output.dir", "k", 
   "bmsy", "fmsy", "msy", "res_df", "fits_df", "hind_df", "kobe_df", "pp_df", 
   "K01", "K02", "r01", "r02", "psi01", "psi02", "ra_df", "traj_df", "teste",
-  "lci_95", "uci_95", "lci_80", "uci_80", "mu_80"
+  "lci_95", "uci_95", "lci_80", "uci_80", "mu_80", "tb"
 ))

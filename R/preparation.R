@@ -214,12 +214,12 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
     ungroup()
   
   tmp16 <- .filter_by_condition(tmp14, "retro.peels", "hindcast", "year")
-  
+
   results <- list(
     data = tmp14,
     hindcast_data_1 = tmp15,
     hindcast_data_2 = tmp16,
-    mase_data = mase,
+    mase_data = mase  %>% filter(!Index %in% na_index),
     min_year_retro = min_year
   )
 
