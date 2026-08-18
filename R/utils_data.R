@@ -39,6 +39,11 @@
 #' JABBA function \code{JABBA::fit_jabba()}.
 #' @param ci_levels A numeric vector containing the CI values between 0 and 1,
 #' used for the Kobe plot's kernel density contours. Defaults to 0.5, 0.8, 0.95.
+#' @param reserve_mb A numeric value specifying the minimum amount of free
+#'   system memory, in megabytes, to reserve for the operating system. Defaults
+#'   to 2048.
+#' @param poll_interval A numeric value giving the time interval, in seconds, 
+#'   between memory availability checks. Defaults to 0.5.
 #'
 #' @return A named list containing:
 #' \describe{
@@ -64,12 +69,33 @@
 #' @importFrom stats median quantile
 #' @importFrom gplots ci2d
 #' @importFrom forcats fct_relevel
-.ensemble_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
-  model_results <- .jbplot_ensemble2(
-    kb = list_fit_models,
-    kbout = TRUE,
-    plot = FALSE
-  )
+.ensemble_data <- function(
+  list_fit_models, ci_levels = c(0.5, 0.8, 0.95), reserve_mb = 2048, 
+  poll_interval = 0.5
+) {
+  model_results <- tryCatch({
+    .safe_execute(
+      fn = function(kb) {
+        .jbplot_ensemble2(
+          kb = kb,
+          kbout = TRUE,
+          plot = FALSE
+        )
+      },
+      args = list(
+        kb = list_fit_models
+      ),
+      reserve_mb = reserve_mb,
+      poll_interval = poll_interval
+    )
+  }, memoryLimitExceeded = function(e) {
+    message("Process aborted for security, before crashing the system.")
+    NULL
+  })
+
+  if(is.null(model_results)) {
+    stop("Process terminated: insufficient RAM to execute the function.")
+  }
 
   model_results <- model_results %>%
     rename(Scenario = run) %>%

@@ -4,7 +4,12 @@
 \alias{.ensemble_data}
 \title{Combine trajectory and Kobe plot data for the dashboard}
 \usage{
-.ensemble_data(list_fit_models, ci_levels = c(0.5, 0.8, 0.95))
+.ensemble_data(
+  list_fit_models,
+  ci_levels = c(0.5, 0.8, 0.95),
+  reserve_mb = 2048,
+  poll_interval = 0.5
+)
 }
 \arguments{
 \item{list_fit_models}{A list containing model outputs as returned by the
@@ -12,6 +17,13 @@ JABBA function \code{JABBA::fit_jabba()}.}
 
 \item{ci_levels}{A numeric vector containing the CI values between 0 and 1,
 used for the Kobe plot's kernel density contours. Defaults to 0.5, 0.8, 0.95.}
+
+\item{reserve_mb}{A numeric value specifying the minimum amount of free
+system memory, in megabytes, to reserve for the operating system. Defaults
+to 2048.}
+
+\item{poll_interval}{A numeric value giving the time interval, in seconds,
+between memory availability checks. Defaults to 0.5.}
 }
 \value{
 A named list containing:
