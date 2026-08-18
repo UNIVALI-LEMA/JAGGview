@@ -6,7 +6,8 @@
 \usage{
 runs_tests_ggplot(
   df_lists,
-  text_size = 4,
+  position = "top-left",
+  text_size = 6,
   title_x = "Year",
   title_y = "Residuals",
   x_lim = NULL,
@@ -16,8 +17,18 @@ runs_tests_ggplot(
 \arguments{
 \item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
 
+\item{position}{A character string specifying the table's position within
+each plot panel, combining a vertical and a horizontal keyword separated
+by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+component must be one of \code{"top"}, \code{"middle"}, or
+\code{"bottom"}; the horizontal component must be one of \code{"left"},
+\code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
+\code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
+\code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
+\code{"bottom-center"}, and \code{"bottom-right"}.}
+
 \item{text_size}{An integer value that determines the size of the text.
-Defaults to 4.}
+Defaults to 6.}
 
 \item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 

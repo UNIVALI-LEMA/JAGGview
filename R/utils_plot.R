@@ -1,165 +1,3 @@
-#' Automatically determine a suitable position for text in plots
-#'
-#' Internal helper that computes an appropriate (x, y) position for placing
-#' text in a plot, based on the distribution of the data.
-#'
-#' The function combines one or more datasets, evaluates regions with lower
-#' values (based on a quantile threshold), and selects a position that avoids
-#' dense or high-value areas.
-#'
-#' @param data_list A data frame or a list of data frames containing the data.
-#' @param col_x A string indicating the name of the column to be used as the 
-#'   x-axis.
-#' @param col_y A string indicating the name of the column to be used as the 
-#'   y-axis.
-#' @param xlim A numeric vector of length 2, used to informn the x-axis limits 
-#'   of the plot.
-#' @param ylim A numeric vector of length 2, used to informn the y-axis limits 
-#'   of the plot.
-#' @param margin A numeric value (between 0 and 0.5) defining the proportion of 
-#'   the x-range to exclude from both ends when searching for candidate 
-#'   positions. Defaults to 0.1.
-#' @param low_quantile A numeric value (between 0 and 1) used to define 
-#'   low-value regions in the data. Positions are selected among values below 
-#'   this quantile.
-#'
-#' @return A list with two elements:
-#' \describe{
-#'   \item{x}{The selected x-coordinate for the text}
-#'   \item{y}{The selected y-coordinate for the text}
-#' }
-#'
-#' @details
-#' The function first aligns all datasets over a common x-axis and sums the
-#' corresponding y-values. It then excludes edge regions based on \code{margin}
-#' and identifies candidate positions where the combined y-values fall below
-#' a specified quantile (\code{low_quantile}). Among these, the rightmost
-#' candidate is selected. If no candidates are found, the global minimum is 
-#' used.
-#'
-#' @keywords internal
-.auto_text_position <- function(
-  data_list, col_x, col_y, xlim, ylim, margin = 0.1, low_quantile = 0.2, 
-  text_width_fraction = 0.15
-) {
-  
-  if (is.data.frame(data_list)) {
-    data_list <- list(data_list)
-  }
-  if (!is.list(data_list)) {
-    data_list <- list(data_list)
-  }
-  if (margin < 0 || margin > 0.5) {
-    stop("Expected parameter 'margin' to be between 0 and 0.5.")
-  }
-  if (low_quantile < 0 || low_quantile > 1) {
-    stop("Expected parameter 'low_quantile' to be between 0 and 1.")
-  }
-  .axis_limit(xlim)
-
-  .axis_limit(ylim)
-
-  all_x <- unique(unlist(lapply(data_list, function(d) d[[col_x]])))
-  all_x <- sort(all_x)
-
-  if (!is.null(xlim)) {
-    all_x <- all_x[all_x >= xlim[1] & all_x <= xlim[2]]
-  }
-
-  if (length(all_x) == 0) {
-    stop("No values left after applying xlim")
-  }
-
-  y_matrix <- sapply(data_list, function(d) {
-    x <- d[[col_x]]
-    y <- d[[col_y]]
-    
-    valid <- !is.na(x) & !is.na(y)
-    x <- x[valid]
-    y <- y[valid]
-
-    if (!is.null(xlim)) {
-      keep <- x >= xlim[1] & x <= xlim[2]
-      x <- x[keep]
-      y <- y[keep]
-    }
-    
-    y_full <- rep(0, length(all_x))
-    match_idx <- match(x, all_x)
-    y_full[match_idx] <- y
-    
-    return(y_full)
-  })
-
-  if (is.vector(y_matrix)) {
-    y_matrix <- matrix(y_matrix, ncol = 1)
-  }
-
-  y_combined <- rowSums(y_matrix)
-
-  x <- all_x
-  y <- y_combined
-
-  x_range <- range(x)
-  x_min <- x_range[1] + diff(x_range) * margin
-  x_max_eff <- x_range[2] - diff(x_range) * margin
-  
-  inside <- x >= x_min & x <= x_max_eff
-  
-  x_in <- x[inside]
-  y_in <- y[inside]
-
-  if (length(x_in) == 0) {
-    x_in <- x
-    y_in <- y
-  }
-
-  threshold <- quantile(y_in, low_quantile)
-
-  candidates <- which(y_in <= threshold)
-
-  text_width <- diff(x_range) * text_width_fraction
-
-  valid_candidates <- c()
-
-  for(i in candidates) {
-
-  x_right <- x_in[i]
-  x_left <- x_right - text_width
-
-  idx_window <- which(
-      x >= x_left &
-      x <= x_right
-    )
-
-    if (length(idx_window) == 0) {
-      next
-    }
-
-    if (max(y[idx_window]) <= threshold) {
-      valid_candidates <- c(valid_candidates, i)
-    }
-  }
-
-  if (length(valid_candidates) > 0) {
-    idx_x <- valid_candidates[
-      which.max(x_in[valid_candidates])
-    ]
-  } else if (length(candidates) > 0) {
-    idx_x <- candidates[
-      which.max(x_in[candidates])
-    ]
-  } else {
-    idx_x <- which.min(y_in)
-  }
-
-  x_pos <- x_in[idx_x]
-
-  y_pos <- ylim[2] - (ylim[2] - ylim[1]) * 0.1
-
-  return(list(x = x_pos, y = y_pos))
-}
-
 #' Validate axis limits
 #' 
 #' Internal helper to validate axis limit vectors. Checks whether the provided 
@@ -373,43 +211,46 @@
 #' 
 #' @keywords internal
 .international_system_prefixes <- function(number, decimals = NULL) {
-  format_single <- function(val) {
-    if (is.na(val) || val == 0) return("0")
-    
-    abs_val <- abs(val)
+  out <- character(length(number))
 
-    if (abs_val >= 1e6) {
-      divisor <- 1e6
-      suffix  <- "M"
-    } else if (abs_val >= 1e3) {
-      divisor <- 1e3
-      suffix  <- "k"
-    } else if (abs_val >= 1) {
-      divisor <- 1
-      suffix  <- ""
-    } else if (abs_val >= 1e-3) {
-      divisor <- 1e-3
-      suffix <- "m"
-    } else if (abs_val >= 1e-6) {
-      divisor <- 1e-6
-      suffix <- "\u00B5"
-    } else {
-      divisor <- 1e-9
-      suffix <- "n"
-    }
-    
-    scaled <- val / divisor
-    
-    dec <- if (is.null(decimals)) {
-      if (scaled == round(scaled)) 0 else 1
-    } else {
-      decimals
-    }
-    
-    paste0(format(round(scaled, dec), nsmall = dec, big.mark = ","), suffix)
-  }
+  zero_na <- is.na(number) | number == 0
+  out[zero_na] <- "0"
+
+  idx <- which(!zero_na)
+  if (length(idx) == 0L) return(out)
   
-  sapply(number, format_single)
+  val     <- number[idx]
+  abs_val <- abs(val)
+
+  thresholds <- c(1e-6, 1e-3, 1, 1e3, 1e6)
+  divisors   <- c(1e-9, 1e-6, 1e-3, 1, 1e3, 1e6)
+  suffixes   <- c("n", "\u00B5", "m", "", "k", "M")
+
+  bin    <- findInterval(abs_val, thresholds) + 1L
+  scaled <- val / divisors[bin]
+
+  formatted <- character(length (scaled))
+
+  if (is.null(decimals)) {
+    is_int <- scaled == round(scaled)
+    if (any(is_int)) {
+      formatted[is_int] <- formatC(
+        round(scaled[is_int]), format = "f", digits = 0, big.mark = ","
+      )
+    }
+    if (any(!is_int)) {
+      formatted[!is_int] <- formatC(
+        round(scaled[!is_int], 1), format = "f", digits = 2, big.mark = ","
+      )
+    }
+  } else {
+    formatted <- formatC(
+      round(scaled, decimals), format = "f", digits = decimals, big.mark = ","
+    )
+  }
+
+  out[idx] <- paste0(formatted, suffixes[bin])
+  out
 }
 
 #' Check if a value is empty
@@ -611,6 +452,84 @@
       complete = TRUE
     )
 }
+
+#' Prepare data for an NPC-positioned table annotation
+#' 
+#' Internal helper thta adds NPC (normalized parent coordinates) columns and a 
+#' nested table column to a data frame, so it can be used directly with 
+#' \code{geom_table_npc()} to place a small table annotation at a fixed 
+#' relative position within each plot panel.
+#' 
+#' @param data A data frame containing the column to be summarised in the table.
+#' @param pos_x A character string giving the horizontal NPC position. One of 
+#'   \code{"left"}, \code{"center"}, or \code{"right"}. Any other value 
+#'   defaults to \code{0} (left).
+#' @param pos_y A character string giving the vertical NPC position. One of 
+#'   \code{"top"}, \code{"middle"}, or \code{"bottom"}. Any other value 
+#'   defaults to \code{1} (top).
+#' @param col The (unquoted) column in \code{data} whose values will populate 
+#'   the table.
+#' @param col_name A character string giving the column name to be used in the 
+#'   resulting table (e.g., \code{"MASE"}, \code{"RMSE"}).
+#' @param suffix A character string appended to each formatted value (e.g., 
+#'   \code{"\%"}). Defaults to \code{""}.
+#' @param decimals A numeric value giving the number of decimals places used to 
+#'   round the values. Defaults to \code{2}.
+#' 
+#' @return The input \code{data} with three additional columns:
+#'   \itemize{
+#'     \item \code{x}: the NPC horizontal position (\code{0}, \code{0.5}, or 
+#'       \code{1}).
+#'     \item \code{y}: the NPC vertical position (\code{0}, \code{0.5}, or 
+#'       \code{1}).
+#'     \item \code{tb}: a list-column of one-row data frames, each holding a 
+#'       single formatted value, ready to be used as the \code{label} aesthetic 
+#'       in \code{geom_table_npc()}.
+#'   }
+#' 
+#' @details
+#' This function is used to annotate faceted plots with small summary tables 
+#' (e.g., goodness-of-fit metrics) positioned consistently at a corner or edge 
+#' of each panel, regardles of the underlying data range or axis expansion.
+#' 
+#' @keywords internal
+#' @importFrom purrr pmap
+.prepare_npc_table_data <- function(
+  data, pos_x, pos_y, col, col_name, suffix = "", decimals = 2
+) {
+
+  cols_data <- data %>% select({{col}})
+
+  if (ncol(cols_data) != length(col_name)) {
+    stop(paste0("Expected parameter 'col_name' to have the same length",
+    "as the number of columns selected in 'col'."))
+  }
+    data %>%
+      mutate(
+        x = case_when(
+          pos_x == "left" ~ 0,
+          pos_x == "right" ~ 1,
+          pos_x == "center" ~ 0.5,
+          TRUE ~ 0
+        ),
+        y = case_when(
+          pos_y == "top" ~ 1,
+          pos_y == "bottom" ~ 0,
+          pos_y == "middle" ~ 0.5,
+          TRUE ~ 1
+        ),
+        tb = pmap(
+          cols_data, 
+          function(...) {
+            vals <- c(...)
+            data.frame(
+              Metric = col_name,
+              Value = paste0(round(vals, decimals), suffix)
+            )
+          }
+        )
+      )
+  }
 
 #' Resolve plotting palette
 #' 
@@ -879,4 +798,255 @@
   } else {
     stop("Unsupported operating system: ", os)
   }
+}
+#' Build a compact metric table using plotly shapes and annotations
+#' 
+#' Internal helper that builds pixel-sized \pkg{plotly} shapes (cell borders) 
+#' and annotations (header and value text) for a small metric table, anchored 
+#' to the top-left corner of the panel, with dimensions based on the given font 
+#' size rather than the panel's dimensions. This allows the table to be used as 
+#' a substitute for \code{add_text()} when a fixed-size, panel-size independent 
+#' tabular annotation is desired, with one row per metric selected in 
+#' \code{col}.
+#' 
+#' @param data A data frame containing the column(s) to be summarised in the 
+#'   table.
+#' @param text_size A numeric value giving the font size, in the pixels, used 
+#'   for the table's text. Also used as the basis for computing row height, 
+#'   column width, and left padding (see \code{heigth_mult}, \code{width_mult}, 
+#'   and \code{left_pad_mult}).
+#' @param col One or more (unquoted) columns in \code{data} whose values will 
+#'   populate the table, selected with tidyselect syntax (e.g., \code{Value}, 
+#'   or \code{c(ppmr_value, ppvr_value)} for multiple rows).
+#' @param col_name A character vector giving the row label to be used in the 
+#'   resulting table for each column selected in \code{col}, in the same order 
+#'   (e.g., \code{c("PPMR", "PPVR")}). Must have the same length as the number 
+#'   of columns selected in \code{col}.
+#' @param suffix A character string appended to each formatted value (e.g., 
+#'   \code{"\%"}). Defaults to \code{""}.
+#' @param decimals A numeric value giving the number of decimal places used to 
+#'   round the values. Defaults to \code{2}.
+#' @param heigth_mult A numeric value giving the row height as a multiple of 
+#'   \code{text_size}, in pixels. Defaults to \code{1.2}.
+#' @param width_mult A numeric value giving each column's width as a multiple 
+#'   of \code{text_size}, in pixels. Defaults to \code{4}.
+#' @param left_pad_mult A numeric value giving the left padding applied to each 
+#'   column's text, as a multiple of \code{text_size}, in pixels. Defaults to 
+#'   \code{0.25}.
+#' 
+#' @return A named list with two elements:
+#'   \itemize{
+#'     \item \code{shapes}: a list of \pkg{plotly} shape specifications 
+#'       (\code{type = "rect"}) drawing the table's cell borders, one 
+#'       header row plus one row per metric.
+#'     \item \code{annotations}: a list of \pkg{plotly} annotation 
+#'       specifications with the header text (\code{"Metric"}, \code{"Value"}) 
+#'       and the formatted values for each metric.
+#'   }
+#'   Both elements are ready to be appended to a subplot's \code{shapes} and 
+#'   \code{annotations} lists, respectively, in a \code{layout()} call.
+#'
+#' @details
+#' All shapes and annotations are positioned in pixel units 
+#' (\code{xsizemode/ysizemode = "pixel"}), anchored to the top-left corner of 
+#' the panel (\code{xref = "paper"}, \code{yref = "paper"}, \code{xanchor = 0}, 
+#' \code{yanchor = 1}). This keeps the table's size fixed relative to 
+#' \code{text_size}, independent of the panel's actual pixel dimensions, so 
+#' the table does not stretch or shrink disproportionately when the plotting 
+#' area is resized.
+#'
+#' @keywords internal
+.build_metric_table <- function(
+  data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
+  heigth_mult = 1.2, width_mult = 4, left_pad_mult = 0.25, 
+  colors = c("#CCCCCC", "#F2F2F2")
+) {
+
+  cols_data <- data %>% select({{col}})
+
+  if (ncol(cols_data) != length(col_name)) {
+    stop(paste0("Expected parameter 'col_name' to have the same length",
+    "as the number of columns selected in 'col'."))
+  }
+
+  shapes <- list()
+  annotations <- list() 
+
+  n_rows <- ncol(cols_data)
+
+  heigth_line <- -heigth_mult*text_size
+  width_line <- width_mult*text_size
+  left_padding <- left_pad_mult*text_size
+  if (pos_x == "left") {
+    mult_x <- 1
+    xanchor <- 0
+    x0_2 <- mult_x*width_line
+    x1_2 <- mult_x*width_line*2
+    x_shift_1 <- left_padding
+    x_shift_2 <- width_line*2 - left_padding
+    x_shift_fix_1 <- width_line/2
+    x_shift_fix_2 <- width_line + width_line/2
+  } else if (pos_x == "right") {
+    mult_x <- -1
+    xanchor <- 1
+    x0_2 <- mult_x*width_line
+    x1_2 <- mult_x*width_line*2
+    x_shift_1 <- left_padding - width_line*2
+    x_shift_2 <- -left_padding
+    x_shift_fix_1 <- mult_x*(width_line + width_line/2)
+    x_shift_fix_2 <- mult_x*width_line/2
+  }
+  else if (pos_x == "center") {
+    mult_x <- 1
+    xanchor <- 0.5
+    x0_2 <- 0
+    x1_2 <- -1*width_line
+    x_shift_1 <- left_padding - width_line
+    x_shift_2 <- width_line - left_padding
+    x_shift_fix_1 <- -1*width_line/2
+    x_shift_fix_2 <- width_line/2
+  }
+
+  if (pos_y == "top") {
+    yanchor <- 1
+    mult_y <- 1
+    y_shift_1 <- 0
+  } else if (pos_y == "bottom") {
+    yanchor <- 0
+    mult_y <- -1
+    y_shift_1 <- -heigth_line*(n_rows+1)
+  }
+
+  for (r in 0:n_rows) {
+    y0 <- mult_y*r*heigth_line
+    y1 <- mult_y*(r+1)*heigth_line
+
+    color <- colors[(r %% 2)+1]
+
+    shapes <- append(
+      shapes,
+      list(
+        list(
+          type = "rect",
+          xref = "paper",
+          yref = "paper",
+          xsizemode = "pixel",
+          xanchor = xanchor,
+          x0 = 0,
+          x1 = mult_x*width_line,
+          yanchor = yanchor,
+          y0 = y0, 
+          y1 = y1,
+          ysizemode = "pixel",
+          line = list(width = 1),
+          fillcolor = color
+        ),
+        list(
+          type = "rect",
+          xref = "paper",
+          yref = "paper",
+          xsizemode = "pixel",
+          xanchor = xanchor,
+          x0 = x0_2,
+          x1 = x1_2,
+          yanchor = yanchor,
+          y0 = y0, 
+          y1 = y1,
+          ysizemode = "pixel",
+          line = list(width = 1),
+          fillcolor = color
+        )
+      )
+    )
+  }
+
+  annotations <- append(
+    annotations,
+    list(
+      list(
+        x = xanchor,
+        y = yanchor,
+        xanchor = "center",
+        xshift = x_shift_fix_1,
+        yanchor = "top",
+        yshift = y_shift_1,
+        xref = "paper",
+        yref = "paper",
+        text = "<b>Metric</b>",
+        showarrow = FALSE,
+        font = list(
+          size = text_size,
+          color = "black"
+        )
+      ),
+      list(
+        x = xanchor,
+        y = yanchor,
+        xshift = x_shift_fix_2,
+        xanchor = "center",
+        yanchor = "top",
+        yshift = y_shift_1,
+        xref = "paper",
+        yref = "paper",
+        text = "<b>Value</b>",
+        showarrow = FALSE,
+        font = list(
+          size = text_size,
+          color = "black"
+        )
+      )
+    )
+  )
+
+  for (r in seq_len(n_rows)) {
+    var <- if (pos_y == "bottom") {
+      n_rows + 1 - r
+    } else{
+      r
+    }
+    row_shift <- mult_y*var*heigth_line
+    val <- cols_data[[r]]
+    annotations <- append(
+      annotations,
+      list(
+        list(
+          x = xanchor,
+          y = yanchor,
+          xanchor = "left",
+          xshift = x_shift_1,
+          yanchor = "top",
+          yshift = row_shift,
+          xref = "paper",
+          yref = "paper",
+          text = col_name[r],
+          showarrow = FALSE,
+          font = list(
+            size = text_size,
+            color = "black"
+          )
+        ),
+        list(
+          x = xanchor,
+          y = yanchor,
+          xshift = x_shift_2,
+          xanchor = "right",
+          yanchor = "top",
+          yshift = row_shift,
+          xref = "paper",
+          yref = "paper",
+          text = paste0(round(val, decimals), suffix),
+          showarrow = FALSE,
+          font = list(
+            size = text_size,
+            color = "black"
+          )
+        )
+      )
+    )
+  }
+
+  list(
+    shapes = shapes,
+    annotations = annotations
+  )
 }

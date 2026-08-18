@@ -8,8 +8,17 @@
 #'   \code{runs_tests_data()}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
+#' @param position A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"}, \code{"middle"}, or 
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
+#'   \code{"bottom-center"}, and \code{"bottom-right"}.
 #' @param text_size An integer value that determines the size of the text. 
-#'   Defaults to 4.
+#'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. 
 #'   Defaults to "Residuals"
@@ -30,13 +39,14 @@
 #' and RMSE annotations for each scenario.
 #' 
 #' @export
-#' @importFrom ggplot2 ggplot geom_hline geom_segment aes geom_point geom_smooth
+#' @importFrom ggplot2 .pt ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
 #' theme geom_text
 #' @importFrom grDevices colorRampPalette
+#' @importFrom ggpp geom_table_npc ttheme_gtdefault
 cpue_residuals_ggplot <- function(
-  df_lists, n_col = 3, text_size = 4, title_x = "Year", title_y = "Residuals", 
-  palette = NULL, x_lim = NULL, y_lim = NULL
+  df_lists, n_col = 3, position = "top-left", text_size = 6, title_x = "Year", 
+  title_y = "Residuals", palette = NULL, x_lim = NULL, y_lim = NULL
 ) {
 
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
@@ -61,14 +71,14 @@ cpue_residuals_ggplot <- function(
     x_lim <- c(min_x_val, max_x_val)
   }
   
-  pos <- .auto_text_position(
-    data_list = df_lists$cpue_residuals,
-    col_x = "Year",
-    col_y = "Res",
-    xlim = x_lim,
-    ylim = y_lim,
-    margin = 0.25
-  ) 
+  table <- .prepare_npc_table_data(
+    data = df_lists$RMSE_data, 
+    pos_x = str_split_i(position, "-", 2), 
+    pos_y = str_split_i(position, "-", 1), 
+    col = Value, 
+    col_name = "RMSE", 
+    suffix = "%"
+  )
   
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
@@ -80,9 +90,10 @@ cpue_residuals_ggplot <- function(
                pch = 21, size = 2) +
     geom_smooth(data = df_lists$cpue_residuals, 
       aes(x = Year, y = Res), se = TRUE, colour = "black") +
-    geom_text(data = df_lists$RMSE_data,
-              aes(x = pos$x, y = pos$y,
-                  label = paste0("RMSE = ", Value, " %")), size = text_size) +
+    geom_table_npc(data = table,
+                  aes(npcx = x, npcy = y, label = tb), 
+                  size = text_size,
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
     scale_y_continuous(expand = c(0, 0)) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
@@ -184,17 +195,26 @@ fits_ggplot <- function(
 #' metrics (MASE).
 #'
 #' @param df_lists A named list as returned by \code{hindcast_data()}.
+#' @param position A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"}, \code{"middle"}, or 
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
+#'   \code{"bottom-center"}, and \code{"bottom-right"}.
 #' @param text_size An integer value that determines the size of the text. 
-#'   Defaults to 4.
+#'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to "Index".
+#' @param zoom Optional. A boolean value that if \code{TRUE} shows a subplot of 
+#'   a zoomed view of the hindcast window. Facets with no data for a given
+#'   Scenario and Index combination are left blank. Defaults to \code{FALSE}.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
-#' @param zoom Optional. A boolean value that if \code{TRUE} shows a subplot of 
-#'   a zoomed view of the hindcast window. Facets with no data for a given
-#'   Scenario and Index combination are left blank. Defaults to \code{FALSE}.
 #'
 #' @return A ggplot object displaying hindcast trajectories, observed data 
 #'   points, uncertainty ribbons, and MASE annotations, faceted by scenario and 
@@ -212,15 +232,16 @@ fits_ggplot <- function(
 #' }
 #'
 #' @export 
-#' @importFrom ggplot2 annotate annotation_custom ggplot geom_ribbon aes 
+#' @importFrom ggplot2 .pt annotate annotation_custom ggplot geom_ribbon aes 
 #' geom_line geom_point geom_text ggplotGrob labs facet_wrap scale_fill_manual 
 #' scale_colour_manual scale_y_continuous theme guides guide_legend
 #' @importFrom dplyr filter vars
 #' @importFrom JABBA ss3col
-#' @importFrom ggpp geom_plot
+#' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 hindcast_ggplot <- function(
-  df_lists, text_size = 4, title_x = "Year", title_y = "Index", x_lim = NULL, 
-  y_lim = NULL, zoom = FALSE
+  df_lists, position = "top-left", text_size = 6, title_x = "Year", 
+  title_y = "Index", zoom = FALSE, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -248,13 +269,15 @@ hindcast_ggplot <- function(
   y_min_zoom <- y_lim[2] - (y_lim[2] - y_lim[1]) * 0.5
 
   zoom_x_lim <- if(!zoom) x_lim else c(x_lim[1], x_min_zoom)
-
-  pos <- .auto_text_position(
-    df_lists$data, 
-    "year", 
-    "hat.uci", 
-    xlim = zoom_x_lim,
-    ylim = y_lim
+  
+  table <- .prepare_npc_table_data(
+    data = df_lists$mase_data, 
+    pos_x = str_split_i(position, "-", 2), 
+    pos_y = str_split_i(position, "-", 1), 
+    col = MASE, 
+    col_name = "MASE", 
+    suffix = "%", 
+    decimals = 3
   )
 
   min_year_hc <- min(df_lists$hindcast_data_2$year) - 1
@@ -285,10 +308,11 @@ hindcast_ggplot <- function(
     geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
                aes(x = year, y = hat, fill = retro),
                pch = 21, size = 2) +
-    geom_text(data = df_lists$mase_data,
-              aes(x = pos$x, y = pos$y,
-                  label = paste0("MASE = ", round(MASE, 3))), 
-                  size = text_size) +
+    geom_table_npc(data = table,
+                  aes(npcx = x, npcy = y, label = tb),
+                  size = text_size,
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    ) +
     labs(x = title_x, y = title_y, colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
               drop = FALSE) +
@@ -480,8 +504,17 @@ kobe_ggplot <- function(
 #'   Supported values include "K", "r", and "psi".
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
+#' @param position A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"}, \code{"middle"}, or 
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
+#'   \code{"bottom-center"}, and \code{"bottom-right"}.
 #' @param text_size An integer value that determines the size of the text. 
-#'   Defaults to 4.
+#'   Defaults to 6.
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Density".
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
@@ -510,18 +543,19 @@ kobe_ggplot <- function(
 #' \dontrun{
 #' df <- priors_posteriors_data(list_fit_models)
 #' priors_posteriors_ggplot(
-#'   df, "K", TRUE, palette = c("#4285f4", "#34a853")
+#'   df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
 #' )
 #' }
 #'
 #' @export
 #' @importFrom dplyr %>% filter select rename pull all_of
-#' @importFrom ggplot2 ggplot geom_area aes facet_wrap geom_text
+#' @importFrom ggplot2 .pt ggplot geom_area aes facet_wrap geom_text
 #' coord_cartesian labs scale_y_continuous theme element_blank
+#' @importFrom ggpp geom_table_npc ttheme_gtdefault
 priors_posteriors_ggplot <- function(
-  df_lists, indicator_name, n_col = 3, text_size = 4, title_y = "Density", 
-  use_si_suffix = FALSE, palette = NULL, title_x = NULL, x_decimals = NULL, 
-  x_lim = NULL, y_lim = NULL
+  df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
+  title_y = "Density", use_si_suffix = FALSE, palette = NULL, title_x = NULL, 
+  x_decimals = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -598,15 +632,6 @@ priors_posteriors_ggplot <- function(
     }
     y_lim <- c(min_y_val, max_y_val)
   }
-
-  pos <- .auto_text_position(
-    data_list = list(prior, posterior), 
-    col_x = "value_1", 
-    col_y = "value_2",
-    xlim = x_lim,
-    ylim = y_lim, 
-    margin = 0.2
-  )
   
   df_text <- df_lists$PPMR %>%
   select(Scenario, ppmr_value = all_of(indicator_name)) %>%
@@ -614,10 +639,15 @@ priors_posteriors_ggplot <- function(
     df_lists$PPVR %>%
       select(Scenario, ppvr_value = all_of(indicator_name)),
     by = "Scenario"
-  ) %>%
-  mutate(
-    x = pos$x,
-    y = pos$y
+  ) 
+
+  table <- .prepare_npc_table_data(
+    data = df_text,
+    pos_x = str_split_i(position, "-", 2), 
+    pos_y = str_split_i(position, "-", 1), 
+    col = c(ppmr_value, ppvr_value), 
+    col_name = c("PPMR", "PPVR"),
+    decimals = 3
   )
 
   x_labels <- if (use_si_suffix) {
@@ -631,14 +661,10 @@ priors_posteriors_ggplot <- function(
               fill = palette[1], alpha = 0.5, colour = "black") +
     geom_area(data = posterior, aes(x = value_1, y = value_2),
               fill = palette[2], alpha = 0.5, colour = "black") +
-    geom_text(data = df_text,
-              aes(x = x, y = y, label = paste0("PPMR = ", ppmr_value)), 
-              size = text_size
-    ) +
-    geom_text(data = df_text,
-              aes(x = x, y = y, label = paste0("PPVR = ", ppvr_value)), 
-              vjust = 2, size = text_size
-    ) +
+    geom_table_npc(data = table,
+                  aes(npcx = x, npcy = y, label = tb),
+                  size = text_size,
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     facet_wrap(~Scenario, ncol = n_col) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = title_y) +
@@ -661,10 +687,19 @@ priors_posteriors_ggplot <- function(
 #'   "procB", and "MSY".
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
+#' @param position A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"}, \code{"middle"}, or 
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
+#'   \code{"bottom-center"}, and \code{"bottom-right"}.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param text_size An integer value that determines the size of the text. 
-#'   Defaults to 4.
+#'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
 #' @param title_y A character string for the y-axis label. If \code{NULL}, a 
@@ -689,13 +724,15 @@ priors_posteriors_ggplot <- function(
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 element_text ggplot geom_line aes geom_ribbon geom_text 
+#' @importFrom ggplot2 .pt element_text ggplot geom_line aes geom_ribbon geom_text 
 #' guides guide_legend facet_wrap scale_colour_manual scale_y_continuous labs 
 #' theme  
 #' @importFrom JABBA ss3col
+#' @importFrom ggpp geom_table_npc ttheme_gtdefault
 retrospective_analysis_ggplot <- function(
-  df_lists, indicator_name, n_col = 3, text_size = 4, use_si_suffix = FALSE, 
-  title_x = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
+  df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
+  use_si_suffix = FALSE, title_x = NULL, title_y = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -753,14 +790,6 @@ retrospective_analysis_ggplot <- function(
       max_x_val <- max(max(data_ref$Year), max(data_var$Year))
       min_x_val <- min(min(data_ref$Year), min(data_var$Year))
     }
-    pos <- .auto_text_position(
-      data_list = data_ref,
-      col_x = "Year",
-      col_y = "uci",
-      xlim = x_lim,
-      ylim = y_lim,
-      margin = 0.15
-    )
   } else {
     max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
@@ -773,15 +802,7 @@ retrospective_analysis_ggplot <- function(
       min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
       x_lim <- c(min_x_val, max_x_val)
     }
-    
-    pos <- .auto_text_position(
-      data_list = data_lines,
-      col_x = "SB_i",
-      col_y = "SP",
-      xlim = x_lim,
-      ylim = y_lim,
-      margin = 0.2
-    )
+
     max_x_val <- .round_to_nearest(max(data_ref$SB_i, na.rm = TRUE), TRUE, 1.1)
     x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
     x_labels <- if (use_si_suffix) {
@@ -790,6 +811,14 @@ retrospective_analysis_ggplot <- function(
       function(x) .format_number(x, decimals = x_decimals)
     }
   }
+  table <- .prepare_npc_table_data(
+    data = rho_var, 
+    pos_x = str_split_i(position, "-", 2), 
+    pos_y = str_split_i(position, "-", 1), 
+    col = rho, 
+    col_name = "rho", 
+    decimals = 3
+  )
 
   y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
 
@@ -834,12 +863,10 @@ retrospective_analysis_ggplot <- function(
   }
   
   p <- p +
-    geom_text(
-      data = rho_var,
-      aes(x = pos$x, y = pos$y,
-        label = paste0("rho == ", round(rho, 3))), 
-        parse = TRUE,
-        size = text_size
+    geom_table_npc(data = table,
+                  aes(npcx = x, npcy = y, label = tb), 
+                  size = text_size,
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)
     ) +
     facet_wrap(~Scenario, ncol = n_col, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
@@ -869,8 +896,17 @@ retrospective_analysis_ggplot <- function(
 #' residuals, credibility limits, and p-values across scenarios and indices.
 #'
 #' @param df_lists A named list as returned by \code{runs_tests_data()}.
+#' @param position A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"}, \code{"middle"}, or 
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
+#'   \code{"bottom-center"}, and \code{"bottom-right"}.
 #' @param text_size An integer value that determines the size of the text. 
-#'   Defaults to 4.
+#'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Residuals".
@@ -894,11 +930,12 @@ retrospective_analysis_ggplot <- function(
 #' }
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_segment geom_text
+#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment geom_text
 #' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
+#' @importFrom ggpp geom_table_npc ttheme_gtdefault
 runs_tests_ggplot <- function(
-  df_lists, text_size = 4, title_x = "Year", title_y = "Residuals", 
-  x_lim = NULL, y_lim = NULL
+  df_lists, position = "top-left", text_size = 6, title_x = "Year", 
+  title_y = "Residuals", x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -922,13 +959,13 @@ runs_tests_ggplot <- function(
     x_lim <- c(min_x_val, max_x_val)
   }
 
-  pos <- .auto_text_position(
-    data_list = df_lists$cpue_residuals,
-    col_x = "Year",
-    col_y = "Res",
-    margin = 0.4,
-    xlim = x_lim,
-    ylim = y_lim
+  table <- .prepare_npc_table_data(
+    data = df_lists$SE3, 
+    pos_x = str_split_i(position, "-", 2), 
+    pos_y = str_split_i(position, "-", 1), 
+    col = pvalue, 
+    col_name = "p-value", 
+    decimals = 3
   )
 
   ggplot() +
@@ -936,9 +973,10 @@ runs_tests_ggplot <- function(
               aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
                   fill = class),
               alpha = 0.2) +
-    geom_text(data = df_lists$SE3,
-        aes(x = pos$x, y = pos$y,
-          label = paste0("p-value = ", round(pvalue, 3))), size = text_size) +
+    geom_table_npc(data = table,
+                  aes(npcx = x, npcy = y,label = tb), 
+                  size = text_size,
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
                  aes(x = Year, xend = Year, y = Ref, yend = Res)) +

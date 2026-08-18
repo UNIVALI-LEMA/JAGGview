@@ -8,7 +8,8 @@ retrospective_analysis_ggplot(
   df_lists,
   indicator_name,
   n_col = 3,
-  text_size = 4,
+  position = "top-left",
+  text_size = 6,
   use_si_suffix = FALSE,
   title_x = NULL,
   title_y = NULL,
@@ -27,8 +28,18 @@ indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
 
+\item{position}{A character string specifying the table's position within
+each plot panel, combining a vertical and a horizontal keyword separated
+by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+component must be one of \code{"top"}, \code{"middle"}, or
+\code{"bottom"}; the horizontal component must be one of \code{"left"},
+\code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
+\code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
+\code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
+\code{"bottom-center"}, and \code{"bottom-right"}.}
+
 \item{text_size}{An integer value that determines the size of the text.
-Defaults to 4.}
+Defaults to 6.}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}

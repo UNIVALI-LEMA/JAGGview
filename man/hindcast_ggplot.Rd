@@ -6,33 +6,44 @@
 \usage{
 hindcast_ggplot(
   df_lists,
-  text_size = 4,
+  position = "top-left",
+  text_size = 6,
   title_x = "Year",
   title_y = "Index",
+  zoom = FALSE,
   x_lim = NULL,
-  y_lim = NULL,
-  zoom = FALSE
+  y_lim = NULL
 )
 }
 \arguments{
 \item{df_lists}{A named list as returned by \code{hindcast_data()}.}
 
+\item{position}{A character string specifying the table's position within
+each plot panel, combining a vertical and a horizontal keyword separated
+by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+component must be one of \code{"top"}, \code{"middle"}, or
+\code{"bottom"}; the horizontal component must be one of \code{"left"},
+\code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
+\code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
+\code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
+\code{"bottom-center"}, and \code{"bottom-right"}.}
+
 \item{text_size}{An integer value that determines the size of the text.
-Defaults to 4.}
+Defaults to 6.}
 
 \item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
 \item{title_y}{A character string for the y-axis label. Defaults to "Index".}
+
+\item{zoom}{Optional. A boolean value that if \code{TRUE} shows a subplot of
+a zoomed view of the hindcast window. Facets with no data for a given
+Scenario and Index combination are left blank. Defaults to \code{FALSE}.}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the y-axis c(min, max) used to restrict the plotting range.}
-
-\item{zoom}{Optional. A boolean value that if \code{TRUE} shows a subplot of
-a zoomed view of the hindcast window. Facets with no data for a given
-Scenario and Index combination are left blank. Defaults to \code{FALSE}.}
 }
 \value{
 A ggplot object displaying hindcast trajectories, observed data

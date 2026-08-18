@@ -342,7 +342,7 @@
     }) %>%
       flatten()
 
-    subplot(
+    results <- subplot(
       plots,
       nrows = nrow,
       shareX = TRUE, 
@@ -384,5 +384,7 @@
           )
         )
       )
+    # toc()
+    results
     })
 }
