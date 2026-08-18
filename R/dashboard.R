@@ -50,7 +50,6 @@
 #'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot toWebGL
-#'   animation_slider animation_button 
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
 #' @importFrom rlang flatten
