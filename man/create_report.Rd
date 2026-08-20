@@ -4,7 +4,7 @@
 \alias{create_report}
 \title{Launch the report as a dashboard}
 \usage{
-create_report(filename, dir = getwd(), verbose = FALSE)
+create_report(filename, dir = getwd(), animation = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{filename}{A character string with the name of the \code{.RData} file
@@ -12,6 +12,9 @@ containing the model objects to be loaded (e.g. results from \pkg{JABBA}).}
 
 \item{dir}{A character string with the directory where \code{filename} is
 located. Defaults to the currente working directory (\code{getwd()}).}
+
+\item{animation}{A boolean value that if TRUE, shows animations in some
+plots. Defaults to TRUE.}
 
 \item{verbose}{A boolean value that if TRUE, shows progress through messages
 in console. Defaults to FALSE.}

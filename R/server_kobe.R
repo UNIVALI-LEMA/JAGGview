@@ -1,5 +1,5 @@
 #' @keywords internal
-.kobe_server <- function(input, output, session, kobe_df) {
+.kobe_server <- function(input, output, session, kobe_df, animation) {
   filtered_kobe <- reactiveVal(kobe_df)
 
   title_x_kobe <- reactiveVal(NULL)
@@ -182,6 +182,11 @@
 
     df_lists <- filtered_kobe()
 
+    min_year <- min(df_lists$tmp11$year, na.rm = TRUE)
+    max_year <- max(df_lists$tmp11$year, na.rm = TRUE)
+    range <- max_year - min_year
+    steps <- round(range / 25)
+
     x_lim_min <- .get_value_or_default(x_lim_min_kobe, 0)
     x_lim_max <- .get_value_or_default(x_lim_max_kobe, df_lists$col02$xmax)
     x_lim <- c(x_lim_min, x_lim_max)
@@ -213,6 +218,11 @@
     plots <- map(scenarios, function(s) {
       line_data <- df_lists$tmp11 %>%
         filter(Scenario == s)
+
+      if (animation) {
+        line_data <- line_data %>% 
+          .accumulate_by(year, step = steps)
+      }
 
       marker_data <- df_lists$tmp11b %>%
         filter(Scenario == s)
@@ -384,6 +394,7 @@
           type = "scatter",
           mode = "lines",
           line = list(color = "black", width = 1),
+          frame =  if (animation) ~frame else NULL,
           name = "Trajectories",
           hoverinfo = "text",
           text = ~paste0(
@@ -476,8 +487,25 @@
             )
           )
         )
-      )
+      ) 
+    if (animation) {
+      results <- results %>%
+        animation_slider(
+          hide = TRUE
+        ) %>%
+        animation_button(
+          visible = FALSE
+        ) %>%
+        onRender("
+          function(el,x){
+            Plotly.animate(el, null, {
+              frame: {duration: 100, redraw: false},
+              transition: {duration: 100}
+            });
+          }
+        ")
+    }
     # toc()
     results
-    })
+  })
 }

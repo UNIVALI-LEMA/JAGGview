@@ -1050,3 +1050,22 @@
     annotations = annotations
   )
 }
+
+#' @importFrom rlang eval_tidy enquo
+#' @importFrom dplyr bind_rows
+#' @keywords internal
+.accumulate_by <- function(dat, var, step = 1) {
+  var <- eval_tidy(enquo(var), dat)
+  lvls_full <- .get_levels(var)
+  idx <- unique(c(seq(1, length(lvls_full), by = step), length(lvls_full)))
+  lvls <- lvls_full[idx]
+  dats <- lapply(lvls, function(l) {
+    cbind(dat[var <= l, ], frame = l)
+  })
+  bind_rows(dats)
+}
+
+.get_levels <- function(x) {
+  if (is.factor(x)) return(levels(x))
+  sort(unique(x))
+}

@@ -1,5 +1,5 @@
 #' @keywords internal
-.traj_BBmsy_server <- function(input, output, session, traj_df) { 
+.traj_BBmsy_server <- function(input, output, session, traj_df, animation) { 
   filtered_traj_BBmsy <- reactiveVal(traj_df)
 
   title_x_traj_BBmsy <- reactiveVal(NULL)
@@ -192,13 +192,13 @@
 
     palette <- .resolve_palette(palette_traj_BBmsy(), 1)
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_traj_BBmsy, min(df$year, na.rm = TRUE)
-    )
+    min_x <- min(df$year, na.rm = TRUE)
+    max_x <- max(df$year, na.rm = TRUE)
+    range <- max_x - min_x
+    steps <- round(range / 25)
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_traj_BBmsy, max(df$year, na.rm = TRUE)
-    )
+    x_lim_min <- .get_value_or_default(x_lim_min_traj_BBmsy, min_x)
+    x_lim_max <- .get_value_or_default(x_lim_max_traj_BBmsy, max_x)
     x_lim <- c(x_lim_min, x_lim_max)
 
     y_lim_min <- .get_value_or_default(
@@ -222,6 +222,10 @@
     plots <- map(scenarios, function(s) {
       df <- df %>%
         filter(Scenario == s)
+      if (animation) {
+        df <- df %>%
+        .accumulate_by(year, step = steps)
+      }
         
       shapes <- list()
 
@@ -286,6 +290,7 @@
           fillcolor = palette[1],
           opacity = 0.3,
           line = list(width = 0),
+          frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(90): (", .international_system_prefixes(lcl2, 2), 
@@ -300,6 +305,7 @@
           fillcolor = palette[1],
           opacity = 0.3,
           line = list(width = 0),
+          frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(97,5): (", .international_system_prefixes(lcl, 2), 
@@ -310,9 +316,10 @@
           data = df,
           x = ~year,
           y = ~mu,
-          type = "scatter",
+          type = "scattergl",
           mode = "lines",
           line = list(width = 3, color = "black"),
+          frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0("Value: ", .international_system_prefixes(mu, 2))
         ) %>%
@@ -414,6 +421,23 @@
           )
         )
       )
+    if (animation) {
+      results <- results %>%
+        animation_slider(
+          hide = TRUE
+        ) %>%
+        animation_button(
+          visible = FALSE
+        ) %>%
+        onRender("
+          function(el,x){
+            Plotly.animate(el, null, {
+              frame: {duration: 5, redraw: false},
+              transition: {duration: 0}
+            });
+          }
+        ")
+    }
     # toc()
     results
     })

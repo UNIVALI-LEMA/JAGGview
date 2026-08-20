@@ -9,6 +9,8 @@
 #'   containing the model objects to be loaded (e.g. results from \pkg{JABBA}). 
 #' @param dir A character string with the directory where \code{filename} is 
 #'   located. Defaults to the currente working directory (\code{getwd()}).
+#' @param animation A boolean value that if TRUE, shows animations in some 
+#'   plots. Defaults to TRUE.
 #' @param verbose A boolean value that if TRUE, shows progress through messages 
 #'   in console. Defaults to FALSE.
 #' 
@@ -50,13 +52,17 @@
 #'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot toWebGL
+#'   animation_slider animation_button
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
+#' @importFrom htmlwidgets onRender
 #' @importFrom rlang flatten
 #' @importFrom dplyr filter
 #' @importFrom scales alpha
 #' @importFrom shinyjs disable enable useShinyjs
-create_report <- function(filename, dir = getwd(), verbose = FALSE) {
+create_report <- function(
+  filename, dir = getwd(), animation = TRUE, verbose = FALSE
+) {
   path <- file.path(dir, filename)
 
   if (!file.exists(path)) {
@@ -165,7 +171,8 @@ create_report <- function(filename, dir = getwd(), verbose = FALSE) {
     kobe_df = kobe_df,
     traj_df = traj_df,
     hind_df = hind_df,
-    ra_df = ra_df
+    ra_df = ra_df,
+    animation = animation
   )
   
   ui <- .build_ui(
