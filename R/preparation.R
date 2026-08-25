@@ -35,6 +35,9 @@
 #' accordingly. The function also ensures consistency across different
 #' model outputs and removes incomplete cases before returning results.
 #' 
+#' @family preparation functions
+#' @family fits functions
+#' 
 #' @examples
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
@@ -44,9 +47,6 @@
 #' result
 #' }
 #' 
-#' @family preparation functions
-#' @family fits functions
-#'
 #' @export
 #' @importFrom tidyr pivot_longer 
 #' @importFrom dplyr %>% select filter full_join 

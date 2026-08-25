@@ -26,6 +26,15 @@ component from each model and binds them by rows into a single data frame.
 This function is a convenience accessor to facilitate comparison and further
 analysis of reference points across multiple fitted models.
 }
+\examples{
+\dontrun{
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_fit_models <- list(fit.S01, fit.S02)
+get_refpts(lits_fit_models)
+}
+
+}
 \seealso{
 Other extraction functions: 
 \code{\link{get_mase}()},

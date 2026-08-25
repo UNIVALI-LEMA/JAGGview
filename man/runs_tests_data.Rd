@@ -10,8 +10,8 @@ runs_tests_data(list_fit_models, indices_factor = NULL)
 \item{list_fit_models}{A list containing model outputs as returned by the
 JABBA function \code{JABBA::fit_jabba()}.}
 
-\item{indices_factor}{Optional. A vector of indices to include. Must exist
-in the \code{Index} column.}
+\item{indices_factor}{Optional. A vector of indices_factor to include. Must
+exist in the \code{Index} column.}
 }
 \value{
 A named list with three elements:

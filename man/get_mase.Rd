@@ -23,6 +23,15 @@ The returned data frame is in wide format, with one row per combination of
 Index and Scenario. This function is a convenience acessor for extracting
 MASE results for further analysis or visualization.
 }
+\examples{
+\dontrun{
+hc_S01 <- hindcast_jabba()
+hc_S02 <- hindcast_jabba()
+df <- hindcast_data(list_hc_models)
+get_mase(df)
+}
+
+}
 \seealso{
 Other extraction functions: 
 \code{\link{get_pars}()},

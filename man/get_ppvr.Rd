@@ -28,6 +28,15 @@ The returned data frame is in wide format, with one row per scenario and one
 column per indicator. This function is a convenience accessor for extracting
 PPVR results for further analysis or visualization.
 }
+\examples{
+\dontrun{
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_fit_models <- list(fit.S01, fit.S02)
+get_ppvr(list_fit_models)
+}
+
+}
 \seealso{
 Other extraction functions: 
 \code{\link{get_mase}()},

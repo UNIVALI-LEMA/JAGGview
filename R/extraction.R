@@ -14,6 +14,14 @@
 #' Index and Scenario. This function is a convenience acessor for extracting
 #' MASE results for further analysis or visualization.
 #' 
+#' @examples
+#' \dontrun{
+#' hc_S01 <- hindcast_jabba()
+#' hc_S02 <- hindcast_jabba()
+#' df <- hindcast_data(list_hc_models)
+#' get_mase(df)
+#' }
+#' 
 #' @family extraction functions
 #' @family hindcasts functions
 #' 
@@ -42,6 +50,14 @@ get_mase <- function(df_lists) {
 #' 
 #' The resulting data frames are combined by rows into a single data frame,
 #' facilitating comparison of parameter estimates across scenarios or models.
+#' 
+#' @examples
+#' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' get_pars(list_fit_models)
+#' }
 #' 
 #' @family extraction functions
 #' 
@@ -90,6 +106,14 @@ get_pars <- function(list_fit_models) {
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPMR results for further analysis or visualization.
 #' 
+#' @examples
+#' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' get_pr(list_fit_models)
+#' }
+#' 
 #' @family extraction functions
 #' @family priors vs posteriors functions
 #'
@@ -119,6 +143,14 @@ get_ppmr <- function(df_lists) {
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPVR results for further analysis or visualization.
 #' 
+#' @examples
+#' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' get_ppvr(list_fit_models)
+#' }
+#' 
 #' @family extraction functions
 #' @family priors vs posteriors functions
 #'
@@ -145,6 +177,14 @@ get_ppvr <- function(df_lists) {
 #' 
 #' This function is a convenience accessor to facilitate comparison and further
 #' analysis of reference points across multiple fitted models.
+#' 
+#' @examples
+#' \dontrun{
+#' fit.S01 <- fit_jabba()
+#' fit.S02 <- fit_jabba()
+#' list_fit_models <- list(fit.S01, fit.S02)
+#' get_refpts(lits_fit_models)
+#' }
 #' 
 #' @family extraction functions
 #' 
@@ -198,6 +238,15 @@ get_refpts <- function(list_fit_models) {
 #' 
 #' This function is a convenience acessor for extracting retrospective analysis
 #' results for further analysis or visualization.
+#' 
+#' @examples
+#' \dontrun{
+#' hc_S01 <- hindcast_jabba()
+#' hc_S02 <- hindcast_jabba()
+#' list_hc_models <- list(hc_S01, hc_S02)
+#' df <- retrospective_analysis_data(list_hc_models)
+#' get_rho(df)
+#' }
 #' 
 #' @family extraction functions
 #' @family retrospective analysis functions
