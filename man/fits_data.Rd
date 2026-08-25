@@ -25,8 +25,9 @@ intervals.}
 }
 }
 \description{
-Processes model outputs to generate formatted data for fitted indices_factor,
-including mean values and credibility intervals (80\% and 95\%).
+Processes model outputs to generate formatted data for fitted
+indices_factor, including mean values and credibility intervals (80\% and
+95\%).
 }
 \details{
 Extracts index and uncertainty information from a list of model results,
@@ -54,3 +55,13 @@ result
 }
 
 }
+\seealso{
+Other data preparation: 
+\code{\link{hindcast_data}()},
+\code{\link{kobe_data}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{retrospective_analysis_data}()},
+\code{\link{runs_tests_data}()},
+\code{\link{trajectories_data}()}
+}
+\concept{data preparation}

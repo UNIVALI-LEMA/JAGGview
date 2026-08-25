@@ -10,6 +10,7 @@
 #' @return Invisibly returns 'NULL'. An error is thrown if the validation fails.
 #' 
 #' @keywords internal
+#' @noRd
 .axis_limit <- function(lim) {
   if (!is.null(lim)) {
     param_name <- deparse(substitute(lim))
@@ -38,7 +39,8 @@
 #' tables across package outputs.
 #' 
 #' @param data A data frame to be formatted as a \pkg{gt} table.
-#' @param digits A integer indicating the number of decimals places to display.
+#' @param digits A integer indicating the number of decimals places to display. 
+#'   Defaults to 2.
 #' 
 #' @return
 #' A formatted \code{gt} table object with bold column labels and alternating
@@ -49,10 +51,14 @@
 #' column headers and zebra-striping for improved readability.
 #' 
 #' @keywords internal
+#' @noRd
 #' @importFrom gt gt tab_style cell_text cells_body cell_fill html fmt_number
 #' cells_column_labels cols_label
 #' @importFrom dplyr where
-.default_table <- function(data, digits) {
+.default_table <- function(data, digits = 2) {
+  if (is.null(data) || nrow(data) == 0) {
+    stop("Argument 'data' cannot be NULL or empty.")
+  }
 
   label_map <- list(
     bmsy = html("B<sub>MSY</sub>"),
@@ -102,6 +108,7 @@
 #' interactions are disabled since there is no data to explore.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom plotly plotly_empty layout
 .empty_plotly <- function(title){
   plotly_empty(type = "scatter", mode = "markers") %>%
@@ -133,36 +140,38 @@
 #' range.
 #' 
 #' @keywords internal
+#' @noRd
 .expand_range <- function(lim, mult = 0.05) {
   d <- diff(lim)
   lim + c(-1, 1) * d * mult
 }
 
-#' Format numeric values with custom separators
-#'
-#' Internal helper that formats numeric values with a specified number of 
-#' decimal places and custom thousands and decimal separators.
-#'
-#' @param number A numeric value (or a numeric vector value).
-#' @param decimals Number of decimal places.
-#' @param big.mark Thousands separator.
-#' @param decimal.mark Decimal separator.
-#'
-#' @return A character value (or a chracter vector value) with formatted 
-#'   numbers.
-#'
-#' @keywords internal
-.format_number <- function(
-  number, decimals = 2, big.mark = ",", decimal.mark = "."
-) {
-  format(
-    round(number, decimals),
-    big.mark = big.mark,
-    decimal.mark = decimal.mark,
-    nsmall = decimals,
-    scientific = FALSE
-  )
-}
+# #' Format numeric values with custom separators
+# #'
+# #' Internal helper that formats numeric values with a specified number of 
+# #' decimal places and custom thousands and decimal separators.
+# #'
+# #' @param number A numeric value (or a numeric vector value).
+# #' @param decimals Number of decimal places.
+# #' @param big.mark Thousands separator.
+# #' @param decimal.mark Decimal separator.
+# #'
+# #' @return A character value (or a chracter vector value) with formatted 
+# #'   numbers.
+# #'
+# #' @keywords internal
+# #' @noRd
+# .format_number <- function(
+#   number, decimals = 2, big.mark = ",", decimal.mark = "."
+# ) {
+#   format(
+#     round(number, decimals),
+#     big.mark = big.mark,
+#     decimal.mark = decimal.mark,
+#     nsmall = decimals,
+#     scientific = FALSE
+#   )
+# }
 
 #' Get a reactive value or fall back to a default
 #' 
@@ -183,6 +192,7 @@
 #' that have not yet been set or have been cleared by the user.
 #' 
 #' @keywords internal
+#' @noRd
 .get_value_or_default <- function(reactive_val, default) {
   val <- reactive_val()
   if (is.null(val) || val == "" || is.na(val)) {
@@ -193,15 +203,33 @@
   }
 }
 
-#' International System of Prefixes
+#' Format numbers with International System (SI) of prefixes
+#' 
+#' Scales a numeric vector and appends the appropriate SI unit prefix (e.g., 
+#' "k" for thousands, "M" for millions). It automatically handles zeros and 
+#' missing values ('NA'), returning '"0"' for both.
 #' 
 #' @param number A numeric value (or a numeric vector of values) to be 
 #'   formated using SI prefixes.
 #' @param decimals Optional. An integer indicating the number of decimals 
-#'   places to display in the formatted string.  
+#'   places to display in the formatted string. If 'NULL', the function 
+#'   automatically determines the formatting: scaled integers will have 0 
+#'   decimal places, while non-integers will be displayed with 2 decimal 
+#'   places. Defaults to NULL.
 #' 
 #' @return A character value (or a character vector of values) appended with 
 #'   their corresponding SI unit symbol.
+#' 
+#' @details
+#' The function groups absolute vales into bins and applies the following 
+#' suffixes:
+#' * '< 1e-6': nano ('n')
+#' * '[1e-6, 1e-3)': micro ('u')
+#' * '[1e-3, 1)': milli ('m')
+#' * '[1, 1e3)': none (no suffix)
+#' * '[1e3, 1e6)': kilo ('k')
+#' * '>= 1e6': Mega ('M')
+#' 
 #' 
 #' @examples 
 #' \dontrun{
@@ -210,6 +238,7 @@
 #' }
 #' 
 #' @keywords internal
+#' @noRd
 .international_system_prefixes <- function(number, decimals = NULL) {
   out <- character(length(number))
 
@@ -264,6 +293,7 @@
 #'   \code{FALSE} otherwise.
 #' 
 #' @keywords internal
+#' @noRd
 .is_empty <- function(x) {
   is.null(x) || length(x) == 0
 }
@@ -283,6 +313,7 @@
 #' is raised.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom grDevices col2rgb
 .is_palette_valid <- function(pal) {
   res <- try(col2rgb(pal), silent = TRUE)
@@ -304,6 +335,8 @@
 #' @return A character vector of hexadecimal color codes.
 #' 
 #' @keywords internal
+#' @noRd
+#' @importFrom grDevices colorRampPalette
 .make_index_palette <- function(n) {
   base <- c(
     "#1B4F8A",
@@ -359,6 +392,11 @@
 #' empty panels from receiving an inset.
 #' 
 #' @keywords internal
+#' @noRd
+#' @importFrom dplyr filter
+#' @importFrom ggplot2 aes coord_cartesian geom_line geom_point geom_ribbon 
+#' ggplot labs scale_colour_manual scale_fill_manual theme
+#' @importFrom JABBA ss3col
 .make_zoom_plot <- function(df, scen, idx, min_year, max_year) {
   zoom_data <- df$data %>%
     filter(year >= min_year, Scenario == scen, Index == idx)
@@ -410,6 +448,7 @@
 #' @return A ggplot2 theme object.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom ggplot2 theme theme_bw element_line element_text element_blank 
 #' element_rect margin %+replace%
 .my_theme <- function(
@@ -431,7 +470,7 @@
       ),
       strip.text = element_text(
         colour = "white",
-        margin = ggplot2::margin(
+        margin = margin(
           0.3,
           0.3,
           0.3,
@@ -474,7 +513,7 @@
 #' @param suffix A character string appended to each formatted value (e.g., 
 #'   \code{"\%"}). Defaults to \code{""}.
 #' @param decimals A numeric value giving the number of decimals places used to 
-#'   round the values. Defaults to \code{2}.
+#'   round the values. Defaults to 2.
 #' 
 #' @return The input \code{data} with three additional columns:
 #'   \itemize{
@@ -493,7 +532,9 @@
 #' of each panel, regardles of the underlying data range or axis expansion.
 #' 
 #' @keywords internal
+#' @noRd
 #' @importFrom purrr pmap
+#' @importFrom dplyr case_when mutate select
 .prepare_npc_table_data <- function(
   data, pos_x, pos_y, col, col_name, suffix = "", decimals = 2
 ) {
@@ -544,6 +585,7 @@
 #' @return A character vector of hexadecimal color codes.
 #' 
 #' @keywords internal
+#' @noRd
 .resolve_palette <- function(palette, num) {
   if(.is_empty(palette) || anyNA(palette) || any(palette == "", na.rm = TRUE)) {
     return(.make_index_palette(num))
@@ -552,8 +594,7 @@
     n_pal <- length(palette)
     if (n_pal < num) {
       stop(paste0(
-        "The palette contains ", n_pal," color(s), but ", num, 
-        " are required."
+        "The palette contains ", n_pal," color(s), but ", num, " are required."
       ))
     }
     else {
@@ -575,7 +616,7 @@
 #'     \item \code{FALSE}: round down (used for lower axis limits).
 #'   }
 #' @param multiplier A number factor applied to the absolute value to create a 
-#'   margin for axis limits. 
+#'   margin for axis limits. Defaults to 1.2.
 #'
 #' @return A rounded numeric value.
 #' 
@@ -584,6 +625,7 @@
 #' appropriate, ensuring cleaner lower bounds in plots.
 #'
 #' @keywords internal
+#' @noRd
 .round_to_nearest <- function(value, max, multiplier = 1.2) {
   sign_val <- sign(value)
   value_abs <- abs(value)
@@ -621,14 +663,15 @@
 #'   between memory availability checks. Defaults to 0.5.
 #' 
 #' @details
-#' This function is, currently, supported only on Linux and macOS, where the 
-#' monitored process can be interrupted by sending an external \code{SIGINT} 
-#' signal. A lightweight background R process periodically checks the amount of 
-#' available system using \pkg{memuse}. If the available memory drops below 
+#' This function supports only on Linux and macOS, where the monitored process 
+#' can be interrupted by sending an external \code{SIGINT} signal. A 
+#' lightweight background R process periodically checks the amount of available 
+#' system using \pkg{memuse}. If the available memory drops below 
 #' \code{reserve_mb}, the main process is interrupted and a 
 #' \code{"memoryLimitExceed"} condition is raised.
 #' 
 #' @keywords internal
+#' @noRd
 #' @importFrom callr r_bg
 #' @importFrom ps ps_handle ps_is_running
 #' @importFrom memuse Sys.meminfo
@@ -713,9 +756,10 @@
 #' The result returned by \code{fn} when the background process completes
 #' successfully.
 #'
+#' @keywords internal
+#' @noRd
 #' @importFrom callr r_bg
 #' @importFrom memuse Sys.meminfo
-#' @keywords internal
 .safe_execute_windows <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5, package = TRUE
 ) {
@@ -786,6 +830,7 @@
 #' The result returned by \code{fn} when the execution completes successfully.
 #'
 #' @keywords internal
+#' @noRd
 .safe_execute <- function(
   fn, args = list(), reserve_mb = 1024 * 2, poll_interval = 0.5
 ) {
@@ -815,6 +860,12 @@
 #'   for the table's text. Also used as the basis for computing row height, 
 #'   column width, and left padding (see \code{heigth_mult}, \code{width_mult}, 
 #'   and \code{left_pad_mult}).
+#' @param pos_x A character string giving the horizontal NPC position. One of 
+#'   \code{"left"}, \code{"center"}, or \code{"right"}. Any other value 
+#'   defaults to \code{0} (left).
+#' @param pos_y A character string giving the vertical NPC position. One of 
+#'   \code{"top"}, \code{"middle"}, or \code{"bottom"}. Any other value 
+#'   defaults to \code{1} (top).
 #' @param col One or more (unquoted) columns in \code{data} whose values will 
 #'   populate the table, selected with tidyselect syntax (e.g., \code{Value}, 
 #'   or \code{c(ppmr_value, ppvr_value)} for multiple rows).
@@ -825,14 +876,14 @@
 #' @param suffix A character string appended to each formatted value (e.g., 
 #'   \code{"\%"}). Defaults to \code{""}.
 #' @param decimals A numeric value giving the number of decimal places used to 
-#'   round the values. Defaults to \code{2}.
+#'   round the values. Defaults to 2.
 #' @param heigth_mult A numeric value giving the row height as a multiple of 
-#'   \code{text_size}, in pixels. Defaults to \code{1.2}.
+#'   \code{text_size}, in pixels. Defaults to 1.2.
 #' @param width_mult A numeric value giving each column's width as a multiple 
-#'   of \code{text_size}, in pixels. Defaults to \code{4}.
+#'   of \code{text_size}, in pixels. Defaults to 4.
 #' @param left_pad_mult A numeric value giving the left padding applied to each 
 #'   column's text, as a multiple of \code{text_size}, in pixels. Defaults to 
-#'   \code{0.25}.
+#'   0.25.
 #' 
 #' @return A named list with two elements:
 #'   \itemize{
@@ -856,6 +907,7 @@
 #' area is resized.
 #'
 #' @keywords internal
+#' @noRd
 .build_metric_table <- function(
   data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
   heigth_mult = 1.2, width_mult = 4, left_pad_mult = 0.25, 
@@ -1051,20 +1103,57 @@
   )
 }
 
+#' Accumulate data by increasing levels of a variable
+#' 
+#' Builds a "cumulative" version of a data frame by replicating rows for 
+#' successive levels of 'var', adding a 'frame' column that records the elvel 
+#' threshold used for each replica. This is typically used to prepare data for 
+#' animated plots (e.g. with 'plotly::plot_ly(frame = ~frame)') where each 
+#' frame should show all observations up to a given level.
+#' 
+#' @param df A data frame.
+#' @param var Unquoted column name (in 'df') whose levels define the 
+#'   accumulation steps.
+#' @param step Integer. Step size used to subsamble the levels of 'var', so 
+#'   that not every single level generates its own frame. Defaults to 1.
+#' 
+#' @return A data frame with the same column as 'df' plus an additional 'frame' 
+#'   column, row-bound across all accumulated steps.
+#' 
+#' @details
+#' For each selected level 'l' of 'var', all rows where 'var <= l' are kept and 
+#' stacked with a 'frame = l' column identifying that step. The result is the 
+#' union of all these subsets.
+#' 
+#' @keywords internal
+#' @noRd
 #' @importFrom rlang eval_tidy enquo
 #' @importFrom dplyr bind_rows
-#' @keywords internal
-.accumulate_by <- function(dat, var, step = 1) {
-  var <- eval_tidy(enquo(var), dat)
+.accumulate_by <- function(df, var, step = 1) {
+  var <- eval_tidy(enquo(var), df)
   lvls_full <- .get_levels(var)
   idx <- unique(c(seq(1, length(lvls_full), by = step), length(lvls_full)))
   lvls <- lvls_full[idx]
   dats <- lapply(lvls, function(l) {
-    cbind(dat[var <= l, ], frame = l)
+    cbind(df[var <= l, ], frame = l)
   })
   bind_rows(dats)
 }
 
+#' Get sorted unique levels of a vector
+#'
+#' Helper used by [.accumulate_by()] to determine the ordered set of
+#' distinct values (or factor levels) over which to iterate.
+#'
+#' @param x A vector. If it is a factor, its 'levels()' are returned
+#'   (preserving factor order); otherwise, the sorted unique values of 'x'
+#'   are returned.
+#'
+#' @return A vector of unique levels, in factor order if 'x' is a factor,
+#'   or sorted order otherwise.
+#'
+#' @keywords internal
+#' @noRd
 .get_levels <- function(x) {
   if (is.factor(x)) return(levels(x))
   sort(unique(x))

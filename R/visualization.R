@@ -38,6 +38,8 @@
 #' The plot includes residual segments, observed values, a smoothed trend,
 #' and RMSE annotations for each scenario.
 #' 
+#' @family data visualization
+#' 
 #' @export
 #' @importFrom ggplot2 .pt ggplot geom_hline geom_segment aes geom_point geom_smooth
 #' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
@@ -138,6 +140,8 @@ cpue_residuals_ggplot <- function(
 #' df <- fits_data(list_fit_models)
 #' fits_ggplot(df, palette = "blue")
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
@@ -230,6 +234,8 @@ fits_ggplot <- function(
 #' df <- hindcast_data(list_hc_models)
 #' hindcast_ggplot(df)
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export 
 #' @importFrom ggplot2 .pt annotate annotation_custom ggplot geom_ribbon aes 
@@ -311,8 +317,7 @@ hindcast_ggplot <- function(
     geom_table_npc(data = table,
                   aes(npcx = x, npcy = y, label = tb),
                   size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)
-    ) +
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     labs(x = title_x, y = title_y, colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
               drop = FALSE) +
@@ -429,6 +434,8 @@ hindcast_ggplot <- function(
 #' df <- kobe_data(model_results)
 #' kobe_ggplot(df)
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline geom_polygon 
@@ -487,8 +494,7 @@ kobe_ggplot <- function(
     scale_fill_manual(
       values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
     ) +
-    labs(x = title_x, y = title_y, fill = "",
-         shape = "") +
+    labs(x = title_x, y = title_y, fill = "", shape = "") +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +
     theme(legend.position = "top")
@@ -546,6 +552,8 @@ kobe_ggplot <- function(
 #'   df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
 #' )
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom dplyr %>% filter select rename pull all_of
@@ -653,7 +661,10 @@ priors_posteriors_ggplot <- function(
   x_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = x_decimals)
+    function(x) {
+      format(1e6, digits = x_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
   
   ggplot() +
@@ -722,6 +733,8 @@ priors_posteriors_ggplot <- function(
 #' df <- retrospective_analysis_data(list_hc_models)
 #' retrospective_analysis_ggplot(df, indicator_name = "B")
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom ggplot2 .pt element_text ggplot geom_line aes geom_ribbon geom_text 
@@ -808,7 +821,10 @@ retrospective_analysis_ggplot <- function(
     x_labels <- if (use_si_suffix) {
       function(x) .international_system_prefixes(x)
     } else {
-      function(x) .format_number(x, decimals = x_decimals)
+      function(x) {
+        format(1e6, digits = x_decimals, scientific = FALSE, 
+          big.mark = ".", decimal.mark = ",")
+      }
     }
   }
   table <- .prepare_npc_table_data(
@@ -825,7 +841,10 @@ retrospective_analysis_ggplot <- function(
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = y_decimals)
+    function(x) {
+      format(1e6, digits = y_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
   
   p <- ggplot()
@@ -928,6 +947,8 @@ retrospective_analysis_ggplot <- function(
 #' df <- runs_tests_data(list_fit_models)
 #' runs_tests_ggplot(df)
 #' }
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment geom_text
@@ -1051,6 +1072,8 @@ runs_tests_ggplot <- function(
 #' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 #' }
 #' 
+#' @family data visualization
+#' 
 #' @export
 #' @importFrom gt gtsave
 #' @importFrom rstudioapi viewer isAvailable
@@ -1155,7 +1178,8 @@ summary_table <- function(
 #' df <- trajectories_data(out)
 #' trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 #' }
-#'
+#' 
+#' @family data visualization
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
@@ -1218,7 +1242,10 @@ trajectories_ggplot <- function(
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = y_decimals)
+    function(x) {
+      format(1e6, digits = y_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
 
   p <- ggplot() +

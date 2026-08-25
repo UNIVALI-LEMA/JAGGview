@@ -67,3 +67,15 @@ hindcast_ggplot(df)
 }
 
 }
+\seealso{
+Other data visualization: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+}
+\concept{data visualization}

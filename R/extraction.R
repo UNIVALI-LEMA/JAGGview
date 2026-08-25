@@ -1,10 +1,10 @@
 #' Extract MASE data from hindcast results
 #' 
-#' Retrieves the data frame containing MASE (Mean Absolute Scaled Errors) values
-#' for all indices and scenarios, as returned by \code{hindcast_data()}.
+#' Retrieves the data frame containing MASE (Mean Absolute Scaled Errors) 
+#' values for all indices and scenarios, as returned by \code{hindcast_data()}.
 #' 
-#' @param df_lists A named list object returned by \code{hindcast_data()}, which 
-#'   must contain a component named \code{"mase_data"}.
+#' @param df_lists A named list object returned by \code{hindcast_data()}, 
+#'   which must contain a component named \code{"mase_data"}.
 #' 
 #' @return A data frame containing Mean Absolute Scaled Error (MASE) metrics 
 #' for each index and scenario.
@@ -13,6 +13,8 @@
 #' The returned data frame is in wide format, with one row per combination of 
 #' Index and Scenario. This function is a convenience acessor for extracting
 #' MASE results for further analysis or visualization.
+#' 
+#' @family data extraction
 #' 
 #' @export
 get_mase <- function(df_lists) {
@@ -27,20 +29,23 @@ get_mase <- function(df_lists) {
 #' @param list_fit_models A list of fitted model objects returned by 
 #'   \code{fit_jabba()}, or a single fitted model object.
 #' 
-#' @return A data frame containing parameter estimates for each model, including
-#'   the parameter name and associated scenario.
+#' @return A data frame containing parameter estimates for each model, 
+#'   including the parameter name and associated scenario.
 #' 
 #' @details
-#' If a single fitted model is provided, it is automatically wrapped into a list
-#' to ensure consistent processing. For each model, the \code{pars} component is
-#' converted to a data frame, with row names extracted as an \code{indicator}
-#' column and the model \code{scenario} appended as an additional column.
+#' If a single fitted model is provided, it is automatically wrapped into a 
+#' list to ensure consistent processing. For each model, the \code{pars} 
+#' component is converted to a data frame, with row names extracted as an 
+#' \code{indicator} column and the model \code{scenario} appended as an 
+#' additional column.
 #' 
 #' The resulting data frames are combined by rows into a single data frame,
 #' facilitating comparison of parameter estimates across scenarios or models.
 #' 
-#' @importFrom dplyr bind_rows
+#' @family data extraction
+#' 
 #' @export
+#' @importFrom dplyr bind_rows
 get_pars <- function(list_fit_models) {
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
@@ -83,6 +88,8 @@ get_pars <- function(list_fit_models) {
 #' The returned data frame is in wide format, with one row per scenario and one 
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPMR results for further analysis or visualization.
+#' 
+#' @family data extraction
 #'
 #' @export
 get_ppmr <- function(df_lists) {
@@ -109,6 +116,8 @@ get_ppmr <- function(df_lists) {
 #' The returned data frame is in wide format, with one row per scenario and one 
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPVR results for further analysis or visualization.
+#' 
+#' @family data extraction
 #'
 #' @export
 get_ppvr <- function(df_lists) {
@@ -134,6 +143,8 @@ get_ppvr <- function(df_lists) {
 #' This function is a convenience accessor to facilitate comparison and further
 #' analysis of reference points across multiple fitted models.
 #' 
+#' @family data extraction
+#' 
 #' @export
 #' @importFrom dplyr bind_rows
 get_refpts <- function(list_fit_models) {
@@ -141,12 +152,8 @@ get_refpts <- function(list_fit_models) {
     list_fit_models <- list(list_fit_models)
   }
 
-  temp00 <- lapply(
-    list_fit_models,
-    function(fit) {
-      fit$refpts
-    }
-  )
+  temp00 <- lapply(list_fit_models, function(fit) fit$refpts)
+
   temp00 <- bind_rows(temp00) %>%
     mutate(
       across(
@@ -188,6 +195,8 @@ get_refpts <- function(list_fit_models) {
 #' 
 #' This function is a convenience acessor for extracting retrospective analysis
 #' results for further analysis or visualization.
+#' 
+#' @family data extraction
 #' 
 #' @export
 get_rho <- function(df_lists) {

@@ -26,3 +26,12 @@ component from each model and binds them by rows into a single data frame.
 This function is a convenience accessor to facilitate comparison and further
 analysis of reference points across multiple fitted models.
 }
+\seealso{
+Other data extraction: 
+\code{\link{get_mase}()},
+\code{\link{get_pars}()},
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{get_rho}()}
+}
+\concept{data extraction}

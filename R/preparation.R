@@ -1,7 +1,8 @@
 #' Prepare fitted index data and credibility intervals
 #'
-#' Processes model outputs to generate formatted data for fitted indices_factor,
-#' including mean values and credibility intervals (80% and 95%).
+#' Processes model outputs to generate formatted data for fitted 
+#' indices_factor, including mean values and credibility intervals (80% and 
+#' 95%).
 #'
 #' Extracts index and uncertainty information from a list of model results, 
 #' computes upper and lower credibility bounds, and organizes the data for 
@@ -42,6 +43,8 @@
 #' result <- fits_data(list_fit_models)
 #' result
 #' }
+#' 
+#' @family data preparation
 #'
 #' @export
 #' @importFrom tidyr pivot_longer 
@@ -51,9 +54,7 @@
 fits_data <- function(list_fit_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_fits_input_data(list_fit_models)
-  if (.is_fit_jabba(list_fit_models)) {
-    list_fit_models <- list(list_fit_models)
-  }
+  if (.is_fit_jabba(list_fit_models)) list_fit_models <- list(list_fit_models)
 
   ###@> Index...
   tmp01 <- .process_scenarios(list_fit_models, vars = "I")
@@ -166,15 +167,15 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' df <- hindcast_data(list_hc_models)
 #' df
 #' }
+#' 
+#' @family data preparation
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
 hindcast_data <- function(list_hc_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
-  if (.is_hindcast_jabba(list_hc_models)) {
-    list_hc_models <- list(list_hc_models)
-  }
+  if (.is_hindcast_jabba(list_hc_models)) list_hc_models <- list(list_hc_models)
 
   ######@> Plot hindcasting...
   hc <- .process_hindcasts(list_hc_models)
@@ -275,6 +276,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' uncertainty regions commonly displayed in Kobe plots.
 #'
 #' The output is designed to be used directly with \code{kobe_ggplot()}.
+#' 
+#' @family data preparation
 #'
 #' @examples
 #' \dontrun{
@@ -450,6 +453,8 @@ kobe_data <- function(
 #' df <- priors_posteriors_data(list_fit_models)
 #' df
 #' }
+#' 
+#' @family data preparation
 #'
 #' @export
 #' @importFrom dplyr %>% filter summarise
@@ -625,15 +630,15 @@ priors_posteriors_data <- function(list_fit_models) {
 #' df <- retrospective_analysis_data(list_hc_models)
 #' df
 #' }
+#' 
+#' @family data preparation
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate
 retrospective_analysis_data <- function(list_hc_models) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
-  if (.is_hindcast_jabba(list_hc_models)) {
-    list_hc_models <- list(list_hc_models)
-  }
+  if (.is_hindcast_jabba(list_hc_models)) list_hc_models <- list(list_hc_models)
 
   labels_index <- c(
     "B"      = "Biomass",
@@ -733,6 +738,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' df <- runs_tests_data(list_fit_models)
 #' df
 #' }
+#' 
+#' @family data preparation
 #'
 #' @export
 #' @importFrom dplyr %>% mutate filter left_join select
@@ -742,9 +749,7 @@ retrospective_analysis_data <- function(list_hc_models) {
 runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_fits_input_data(list_fit_models)
-  if (.is_fit_jabba(list_fit_models)) {
-    list_fit_models <- list(list_fit_models)
-  }
+  if (.is_fit_jabba(list_fit_models)) list_fit_models <- list(list_fit_models)
 
   tmp05 <- .process_runs(list_fit_models)
 
@@ -811,8 +816,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   tmp05$upper <- pred$fit + 1.96 * pred$se.fit
   tmp05$lower <- pred$fit - 1.96 * pred$se.fit
 
-  RMSE_data <- .process_stats(list_fit_models) %>%
-    filter(Stastistic == "RMSE")
+  RMSE_data <- .process_stats(list_fit_models) %>% filter(Stastistic == "RMSE")
 
   results <- list(
     cpue_residuals = tmp05,
@@ -870,6 +874,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' df <- trajectories_data(list_fit_models)
 #' df
 #' }
+#' 
+#' @family data preparation
 #' 
 #' @export
 #' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup
@@ -929,8 +935,7 @@ trajectories_data <- function(
       )
   })
 
-  results <- bind_rows(result_list) %>%
-    ungroup()
+  results <- bind_rows(result_list) %>% ungroup()
 
   class(results) <- c("JAGGdata", class(results))
 

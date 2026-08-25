@@ -11,19 +11,29 @@ get_pars(list_fit_models)
 \code{fit_jabba()}, or a single fitted model object.}
 }
 \value{
-A data frame containing parameter estimates for each model, including
-the parameter name and associated scenario.
+A data frame containing parameter estimates for each model,
+including the parameter name and associated scenario.
 }
 \description{
 Retrieves a combined data frame containing model parameters extracted from
 one or more fitted JABBA models returned by \code{fit_jabba()}.
 }
 \details{
-If a single fitted model is provided, it is automatically wrapped into a list
-to ensure consistent processing. For each model, the \code{pars} component is
-converted to a data frame, with row names extracted as an \code{indicator}
-column and the model \code{scenario} appended as an additional column.
+If a single fitted model is provided, it is automatically wrapped into a
+list to ensure consistent processing. For each model, the \code{pars}
+component is converted to a data frame, with row names extracted as an
+\code{indicator} column and the model \code{scenario} appended as an
+additional column.
 
 The resulting data frames are combined by rows into a single data frame,
 facilitating comparison of parameter estimates across scenarios or models.
 }
+\seealso{
+Other data extraction: 
+\code{\link{get_mase}()},
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{get_refpts}()},
+\code{\link{get_rho}()}
+}
+\concept{data extraction}

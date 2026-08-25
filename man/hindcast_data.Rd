@@ -46,3 +46,13 @@ df
 }
 
 }
+\seealso{
+Other data preparation: 
+\code{\link{fits_data}()},
+\code{\link{kobe_data}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{retrospective_analysis_data}()},
+\code{\link{runs_tests_data}()},
+\code{\link{trajectories_data}()}
+}
+\concept{data preparation}
