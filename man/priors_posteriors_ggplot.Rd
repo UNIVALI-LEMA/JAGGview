@@ -86,7 +86,7 @@ priors_posteriors_ggplot(
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{fits_ggplot}()},
 \code{\link{hindcast_ggplot}()},
@@ -95,5 +95,11 @@ Other data visualization:
 \code{\link{runs_tests_ggplot}()},
 \code{\link{summary_table}()},
 \code{\link{trajectories_ggplot}()}
+
+Other priors vs posteriors functions: 
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{priors_posteriors_data}()}
 }
-\concept{data visualization}
+\concept{priors vs posteriors functions}
+\concept{visualization functions}

@@ -29,11 +29,17 @@ column per indicator. This function is a convenience accessor for extracting
 PPMR results for further analysis or visualization.
 }
 \seealso{
-Other data extraction: 
+Other extraction functions: 
 \code{\link{get_mase}()},
 \code{\link{get_pars}()},
 \code{\link{get_ppvr}()},
 \code{\link{get_refpts}()},
 \code{\link{get_rho}()}
+
+Other priors vs posteriors functions: 
+\code{\link{get_ppvr}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{priors_posteriors_ggplot}()}
 }
-\concept{data extraction}
+\concept{extraction functions}
+\concept{priors vs posteriors functions}

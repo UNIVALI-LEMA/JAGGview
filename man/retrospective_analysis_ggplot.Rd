@@ -78,7 +78,7 @@ retrospective_analysis_ggplot(df, indicator_name = "B")
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{fits_ggplot}()},
 \code{\link{hindcast_ggplot}()},
@@ -87,5 +87,10 @@ Other data visualization:
 \code{\link{runs_tests_ggplot}()},
 \code{\link{summary_table}()},
 \code{\link{trajectories_ggplot}()}
+
+Other retrospective analysis functions: 
+\code{\link{get_rho}()},
+\code{\link{retrospective_analysis_data}()}
 }
-\concept{data visualization}
+\concept{retrospective analysis functions}
+\concept{visualization functions}

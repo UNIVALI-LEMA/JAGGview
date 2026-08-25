@@ -44,7 +44,8 @@
 #' result
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family fits functions
 #'
 #' @export
 #' @importFrom tidyr pivot_longer 
@@ -168,7 +169,8 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' df
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family hindcasts functions
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
@@ -277,7 +279,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #'
 #' The output is designed to be used directly with \code{kobe_ggplot()}.
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family kobe functions
 #'
 #' @examples
 #' \dontrun{
@@ -454,7 +457,8 @@ kobe_data <- function(
 #' df
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family priors vs posteriors functions
 #'
 #' @export
 #' @importFrom dplyr %>% filter summarise
@@ -631,7 +635,8 @@ priors_posteriors_data <- function(list_fit_models) {
 #' df
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family retrospective analysis functions
 #'
 #' @export
 #' @importFrom dplyr %>% filter mutate
@@ -739,7 +744,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' df
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family cpue residuals runs tests functions
 #'
 #' @export
 #' @importFrom dplyr %>% mutate filter left_join select
@@ -875,7 +881,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' df
 #' }
 #' 
-#' @family data preparation
+#' @family preparation functions
+#' @family trajectories functions
 #' 
 #' @export
 #' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup

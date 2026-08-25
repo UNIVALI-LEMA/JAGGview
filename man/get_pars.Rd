@@ -29,11 +29,11 @@ The resulting data frames are combined by rows into a single data frame,
 facilitating comparison of parameter estimates across scenarios or models.
 }
 \seealso{
-Other data extraction: 
+Other extraction functions: 
 \code{\link{get_mase}()},
 \code{\link{get_ppmr}()},
 \code{\link{get_ppvr}()},
 \code{\link{get_refpts}()},
 \code{\link{get_rho}()}
 }
-\concept{data extraction}
+\concept{extraction functions}

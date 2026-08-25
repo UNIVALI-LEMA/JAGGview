@@ -41,12 +41,18 @@ df
 
 }
 \seealso{
-Other data preparation: 
+Other preparation functions: 
 \code{\link{fits_data}()},
 \code{\link{hindcast_data}()},
 \code{\link{kobe_data}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{runs_tests_data}()},
 \code{\link{trajectories_data}()}
+
+Other priors vs posteriors functions: 
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{priors_posteriors_ggplot}()}
 }
-\concept{data preparation}
+\concept{preparation functions}
+\concept{priors vs posteriors functions}

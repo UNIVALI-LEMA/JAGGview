@@ -68,7 +68,7 @@ hindcast_ggplot(df)
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{fits_ggplot}()},
 \code{\link{kobe_ggplot}()},
@@ -77,5 +77,10 @@ Other data visualization:
 \code{\link{runs_tests_ggplot}()},
 \code{\link{summary_table}()},
 \code{\link{trajectories_ggplot}()}
+
+Other hindcasts functions: 
+\code{\link{get_mase}()},
+\code{\link{hindcast_data}()}
 }
-\concept{data visualization}
+\concept{hindcasts functions}
+\concept{visualization functions}

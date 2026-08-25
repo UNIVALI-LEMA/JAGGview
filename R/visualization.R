@@ -38,7 +38,8 @@
 #' The plot includes residual segments, observed values, a smoothed trend,
 #' and RMSE annotations for each scenario.
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family cpue residuals runs tests functions
 #' 
 #' @export
 #' @importFrom ggplot2 .pt ggplot geom_hline geom_segment aes geom_point geom_smooth
@@ -141,7 +142,8 @@ cpue_residuals_ggplot <- function(
 #' fits_ggplot(df, palette = "blue")
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family fits functions
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
@@ -235,7 +237,8 @@ fits_ggplot <- function(
 #' hindcast_ggplot(df)
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family hindcasts functions
 #'
 #' @export 
 #' @importFrom ggplot2 .pt annotate annotation_custom ggplot geom_ribbon aes 
@@ -435,7 +438,8 @@ hindcast_ggplot <- function(
 #' kobe_ggplot(df)
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family kobe functions
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline geom_polygon 
@@ -553,7 +557,8 @@ kobe_ggplot <- function(
 #' )
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family priors vs posteriors functions
 #'
 #' @export
 #' @importFrom dplyr %>% filter select rename pull all_of
@@ -734,7 +739,8 @@ priors_posteriors_ggplot <- function(
 #' retrospective_analysis_ggplot(df, indicator_name = "B")
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family retrospective analysis functions
 #'
 #' @export
 #' @importFrom ggplot2 .pt element_text ggplot geom_line aes geom_ribbon geom_text 
@@ -948,7 +954,8 @@ retrospective_analysis_ggplot <- function(
 #' runs_tests_ggplot(df)
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family cpue residuals runs tests functions
 #'
 #' @export
 #' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment geom_text
@@ -1072,7 +1079,7 @@ runs_tests_ggplot <- function(
 #' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
 #' 
 #' @export
 #' @importFrom gt gtsave
@@ -1179,7 +1186,8 @@ summary_table <- function(
 #' trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 #' }
 #' 
-#' @family data visualization
+#' @family visualization functions
+#' @family trajectories functions
 #'
 #' @export
 #' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 

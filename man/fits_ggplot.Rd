@@ -56,7 +56,7 @@ fits_ggplot(df, palette = "blue")
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{hindcast_ggplot}()},
 \code{\link{kobe_ggplot}()},
@@ -65,5 +65,9 @@ Other data visualization:
 \code{\link{runs_tests_ggplot}()},
 \code{\link{summary_table}()},
 \code{\link{trajectories_ggplot}()}
+
+Other fits functions: 
+\code{\link{fits_data}()}
 }
-\concept{data visualization}
+\concept{fits functions}
+\concept{visualization functions}

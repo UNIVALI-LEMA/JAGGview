@@ -70,12 +70,16 @@ str(df)
 
 }
 \seealso{
-Other data preparation: 
+Other preparation functions: 
 \code{\link{fits_data}()},
 \code{\link{hindcast_data}()},
 \code{\link{priors_posteriors_data}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{runs_tests_data}()},
 \code{\link{trajectories_data}()}
+
+Other kobe functions: 
+\code{\link{kobe_ggplot}()}
 }
-\concept{data preparation}
+\concept{kobe functions}
+\concept{preparation functions}

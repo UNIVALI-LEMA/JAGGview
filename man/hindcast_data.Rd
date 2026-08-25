@@ -47,12 +47,17 @@ df
 
 }
 \seealso{
-Other data preparation: 
+Other preparation functions: 
 \code{\link{fits_data}()},
 \code{\link{kobe_data}()},
 \code{\link{priors_posteriors_data}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{runs_tests_data}()},
 \code{\link{trajectories_data}()}
+
+Other hindcasts functions: 
+\code{\link{get_mase}()},
+\code{\link{hindcast_ggplot}()}
 }
-\concept{data preparation}
+\concept{hindcasts functions}
+\concept{preparation functions}

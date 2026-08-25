@@ -1,3 +1,40 @@
+#' Accumulate data by increasing levels of a variable
+#' 
+#' Builds a "cumulative" version of a data frame by replicating rows for 
+#' successive levels of 'var', adding a 'frame' column that records the elvel 
+#' threshold used for each replica. This is typically used to prepare data for 
+#' animated plots (e.g. with 'plotly::plot_ly(frame = ~frame)') where each 
+#' frame should show all observations up to a given level.
+#' 
+#' @param df A data frame.
+#' @param var Unquoted column name (in 'df') whose levels define the 
+#'   accumulation steps.
+#' @param step Integer. Step size used to subsamble the levels of 'var', so 
+#'   that not every single level generates its own frame. Defaults to 1.
+#' 
+#' @return A data frame with the same column as 'df' plus an additional 'frame' 
+#'   column, row-bound across all accumulated steps.
+#' 
+#' @details
+#' For each selected level 'l' of 'var', all rows where 'var <= l' are kept and 
+#' stacked with a 'frame = l' column identifying that step. The result is the 
+#' union of all these subsets.
+#' 
+#' @keywords internal
+#' @noRd
+#' @importFrom rlang eval_tidy enquo
+#' @importFrom dplyr bind_rows
+.accumulate_by <- function(df, var, step = 1) {
+  var <- eval_tidy(enquo(var), df)
+  lvls_full <- .get_levels(var)
+  idx <- unique(c(seq(1, length(lvls_full), by = step), length(lvls_full)))
+  lvls <- lvls_full[idx]
+  dats <- lapply(lvls, function(l) {
+    cbind(df[var <= l, ], frame = l)
+  })
+  bind_rows(dats)
+}
+
 #' Validate axis limits
 #' 
 #' Internal helper to validate axis limit vectors. Checks whether the provided 
@@ -146,32 +183,24 @@
   lim + c(-1, 1) * d * mult
 }
 
-# #' Format numeric values with custom separators
-# #'
-# #' Internal helper that formats numeric values with a specified number of 
-# #' decimal places and custom thousands and decimal separators.
-# #'
-# #' @param number A numeric value (or a numeric vector value).
-# #' @param decimals Number of decimal places.
-# #' @param big.mark Thousands separator.
-# #' @param decimal.mark Decimal separator.
-# #'
-# #' @return A character value (or a chracter vector value) with formatted 
-# #'   numbers.
-# #'
-# #' @keywords internal
-# #' @noRd
-# .format_number <- function(
-#   number, decimals = 2, big.mark = ",", decimal.mark = "."
-# ) {
-#   format(
-#     round(number, decimals),
-#     big.mark = big.mark,
-#     decimal.mark = decimal.mark,
-#     nsmall = decimals,
-#     scientific = FALSE
-#   )
-# }
+#' Get sorted unique levels of a vector
+#'
+#' Helper used by .accumulate_by() to determine the ordered set of
+#' distinct values (or factor levels) over which to iterate.
+#'
+#' @param x A vector. If it is a factor, its 'levels()' are returned
+#'   (preserving factor order); otherwise, the sorted unique values of 'x'
+#'   are returned.
+#'
+#' @return A vector of unique levels, in factor order if 'x' is a factor,
+#'   or sorted order otherwise.
+#'
+#' @keywords internal
+#' @noRd
+.get_levels <- function(x) {
+  if (is.factor(x)) return(levels(x))
+  sort(unique(x))
+}
 
 #' Get a reactive value or fall back to a default
 #' 
@@ -1101,60 +1130,4 @@
     shapes = shapes,
     annotations = annotations
   )
-}
-
-#' Accumulate data by increasing levels of a variable
-#' 
-#' Builds a "cumulative" version of a data frame by replicating rows for 
-#' successive levels of 'var', adding a 'frame' column that records the elvel 
-#' threshold used for each replica. This is typically used to prepare data for 
-#' animated plots (e.g. with 'plotly::plot_ly(frame = ~frame)') where each 
-#' frame should show all observations up to a given level.
-#' 
-#' @param df A data frame.
-#' @param var Unquoted column name (in 'df') whose levels define the 
-#'   accumulation steps.
-#' @param step Integer. Step size used to subsamble the levels of 'var', so 
-#'   that not every single level generates its own frame. Defaults to 1.
-#' 
-#' @return A data frame with the same column as 'df' plus an additional 'frame' 
-#'   column, row-bound across all accumulated steps.
-#' 
-#' @details
-#' For each selected level 'l' of 'var', all rows where 'var <= l' are kept and 
-#' stacked with a 'frame = l' column identifying that step. The result is the 
-#' union of all these subsets.
-#' 
-#' @keywords internal
-#' @noRd
-#' @importFrom rlang eval_tidy enquo
-#' @importFrom dplyr bind_rows
-.accumulate_by <- function(df, var, step = 1) {
-  var <- eval_tidy(enquo(var), df)
-  lvls_full <- .get_levels(var)
-  idx <- unique(c(seq(1, length(lvls_full), by = step), length(lvls_full)))
-  lvls <- lvls_full[idx]
-  dats <- lapply(lvls, function(l) {
-    cbind(df[var <= l, ], frame = l)
-  })
-  bind_rows(dats)
-}
-
-#' Get sorted unique levels of a vector
-#'
-#' Helper used by [.accumulate_by()] to determine the ordered set of
-#' distinct values (or factor levels) over which to iterate.
-#'
-#' @param x A vector. If it is a factor, its 'levels()' are returned
-#'   (preserving factor order); otherwise, the sorted unique values of 'x'
-#'   are returned.
-#'
-#' @return A vector of unique levels, in factor order if 'x' is a factor,
-#'   or sorted order otherwise.
-#'
-#' @keywords internal
-#' @noRd
-.get_levels <- function(x) {
-  if (is.factor(x)) return(levels(x))
-  sort(unique(x))
 }

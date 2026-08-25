@@ -62,7 +62,7 @@ runs_tests_ggplot(df)
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{fits_ggplot}()},
 \code{\link{hindcast_ggplot}()},
@@ -71,5 +71,10 @@ Other data visualization:
 \code{\link{retrospective_analysis_ggplot}()},
 \code{\link{summary_table}()},
 \code{\link{trajectories_ggplot}()}
+
+Other cpue residuals runs tests functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{runs_tests_data}()}
 }
-\concept{data visualization}
+\concept{cpue residuals runs tests functions}
+\concept{visualization functions}

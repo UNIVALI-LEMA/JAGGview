@@ -56,12 +56,16 @@ result
 
 }
 \seealso{
-Other data preparation: 
+Other preparation functions: 
 \code{\link{hindcast_data}()},
 \code{\link{kobe_data}()},
 \code{\link{priors_posteriors_data}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{runs_tests_data}()},
 \code{\link{trajectories_data}()}
+
+Other fits functions: 
+\code{\link{fits_ggplot}()}
 }
-\concept{data preparation}
+\concept{fits functions}
+\concept{preparation functions}

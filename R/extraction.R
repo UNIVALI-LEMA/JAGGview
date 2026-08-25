@@ -14,7 +14,8 @@
 #' Index and Scenario. This function is a convenience acessor for extracting
 #' MASE results for further analysis or visualization.
 #' 
-#' @family data extraction
+#' @family extraction functions
+#' @family hindcasts functions
 #' 
 #' @export
 get_mase <- function(df_lists) {
@@ -42,7 +43,7 @@ get_mase <- function(df_lists) {
 #' The resulting data frames are combined by rows into a single data frame,
 #' facilitating comparison of parameter estimates across scenarios or models.
 #' 
-#' @family data extraction
+#' @family extraction functions
 #' 
 #' @export
 #' @importFrom dplyr bind_rows
@@ -89,7 +90,8 @@ get_pars <- function(list_fit_models) {
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPMR results for further analysis or visualization.
 #' 
-#' @family data extraction
+#' @family extraction functions
+#' @family priors vs posteriors functions
 #'
 #' @export
 get_ppmr <- function(df_lists) {
@@ -117,7 +119,8 @@ get_ppmr <- function(df_lists) {
 #' column per indicator. This function is a convenience accessor for extracting 
 #' PPVR results for further analysis or visualization.
 #' 
-#' @family data extraction
+#' @family extraction functions
+#' @family priors vs posteriors functions
 #'
 #' @export
 get_ppvr <- function(df_lists) {
@@ -143,7 +146,7 @@ get_ppvr <- function(df_lists) {
 #' This function is a convenience accessor to facilitate comparison and further
 #' analysis of reference points across multiple fitted models.
 #' 
-#' @family data extraction
+#' @family extraction functions
 #' 
 #' @export
 #' @importFrom dplyr bind_rows
@@ -196,7 +199,8 @@ get_refpts <- function(list_fit_models) {
 #' This function is a convenience acessor for extracting retrospective analysis
 #' results for further analysis or visualization.
 #' 
-#' @family data extraction
+#' @family extraction functions
+#' @family retrospective analysis functions
 #' 
 #' @export
 get_rho <- function(df_lists) {

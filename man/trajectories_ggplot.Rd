@@ -80,7 +80,7 @@ trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 
 }
 \seealso{
-Other data visualization: 
+Other visualization functions: 
 \code{\link{cpue_residuals_ggplot}()},
 \code{\link{fits_ggplot}()},
 \code{\link{hindcast_ggplot}()},
@@ -89,5 +89,9 @@ Other data visualization:
 \code{\link{retrospective_analysis_ggplot}()},
 \code{\link{runs_tests_ggplot}()},
 \code{\link{summary_table}()}
+
+Other trajectories functions: 
+\code{\link{trajectories_data}()}
 }
-\concept{data visualization}
+\concept{trajectories functions}
+\concept{visualization functions}
