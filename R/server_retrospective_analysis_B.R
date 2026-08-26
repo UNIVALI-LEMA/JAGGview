@@ -381,8 +381,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>% 
-      flatten()
+    })
     
 
     results <- subplot(
@@ -392,7 +391,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.005
+      margin = 0.02
     ) %>%
       layout(
         annotations = list(

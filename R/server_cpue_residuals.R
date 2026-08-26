@@ -462,7 +462,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>% flatten()
+    })
     
 
     results <- subplot(
