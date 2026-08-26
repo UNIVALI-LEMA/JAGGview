@@ -336,7 +336,6 @@
           type = "scattergl",
           mode = "lines",
           line = list(width = 3),
-          # hoverinfo = "x+y"#,
           hoverinfo = "text",
           text = ~paste0(
             "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
@@ -372,7 +371,6 @@
         )
     }) %>%
       flatten()
-    
 
     results <- subplot(
       plots,

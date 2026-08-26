@@ -154,9 +154,7 @@
 
       filtered_traj_Bdev(
         traj_df %>%
-          filter(
-            Scenario %in% input$traj_Bdev_scenarios
-          ) %>%
+          filter(Scenario %in% input$traj_Bdev_scenarios) %>%
           droplevels()
       )
       title_x_traj_Bdev(input$traj_Bdev_title_x)
@@ -195,7 +193,6 @@
     min_x <- min(df$year, na.rm = TRUE)
     max_x <- max(df$year, na.rm = TRUE)
     range <- max_x - min_x
-    steps <- round(range / 25)
 
     x_lim_min <- .get_value_or_default(x_lim_min_traj_Bdev, min_x)
     x_lim_max <- .get_value_or_default(x_lim_max_traj_Bdev, max_x)
@@ -225,7 +222,7 @@
         filter(Scenario == s)
       if (animation) {
         df <- df %>%
-        .accumulate_by(year, step = steps)
+        .accumulate_by(year, step = round(range / 25))
       }
         
       shapes <- list()

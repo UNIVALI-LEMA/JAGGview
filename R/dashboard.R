@@ -41,25 +41,27 @@
 #' }
 #' 
 #' @export
-#' @importFrom dplyr rename
+#' @importFrom dplyr %>% case_when filter full_join mutate rename select
 #' @importFrom purrr map reduce
 #' @importFrom bs4Dash actionButton controlbarItem controlbarMenu dashboardBody 
-#'   dashboardBrand dashboardControlbar dashboardHeader dashboardPage 
-#'   dashboardSidebar navbarMenu navbarTab tabItem tabItems tabsetPanel 
-#'   updateControlbar
+#' dashboardBrand dashboardControlbar dashboardHeader dashboardPage 
+#' dashboardSidebar navbarMenu navbarTab tabItem tabItems tabsetPanel 
+#' updateControlbar
 #' @importFrom shiny addResourcePath conditionalPanel icon numericInput 
-#'   observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
-#'   renderUI req selectInput shinyApp tabPanel textInput uiOutput
+#' observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
+#' renderUI req selectInput shinyApp tabPanel textInput uiOutput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
-#'   add_trace ggplotly layout plot_ly plotlyOutput renderPlotly subplot toWebGL
-#'   animation_slider animation_button
+#' add_trace animation_button animation_slider ggplotly layout plot_ly 
+#' plotlyOutput renderPlotly subplot toWebGL
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
 #' @importFrom htmlwidgets onRender
 #' @importFrom rlang flatten
-#' @importFrom dplyr filter
 #' @importFrom scales alpha
 #' @importFrom shinyjs disable enable useShinyjs
+#' @importFrom stringr str_split_i
+#' @importFrom grDevices colorRampPalette
+#' @importFrom JABBA ss3col
 create_report <- function(
   filename, dir = getwd(), animation = TRUE, verbose = FALSE
 ) {

@@ -255,12 +255,6 @@
 
     title_y <- .get_value_or_default(title_y_pp_psi, "Density")
 
-    # PPMR <- df_lists$PPMR %>%
-    #   select(Scenario, psi)
-
-    # PPVR <- df_lists$PPVR %>%
-    #   select(Scenario, psi)
-
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = psi) %>%
       full_join(
@@ -276,24 +270,6 @@
       prior <- prior_split[[s]]
       posterior <- posterior_split[[s]]
       df_text <- df_text_split[[s]]
-      # prior <- prior %>%
-      #   filter(Scenario == s)
-
-      # posterior <- posterior %>%
-      #   filter(Scenario == s)
-
-      # PPMR <- PPMR %>%
-      #   filter(Scenario == s)
-
-      # PPVR <- PPVR %>%
-      #   filter(Scenario == s)
-
-      # df_text <- PPMR %>%
-      #   select(Scenario, ppmr_value = all_of("psi")) %>%
-      #   full_join(
-      #     PPVR %>%
-      #       select(Scenario, ppvr_value = all_of("psi")), by = "Scenario"
-      #   )
         
       shapes <- list()
 

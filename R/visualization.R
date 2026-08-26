@@ -42,9 +42,9 @@
 #' @family cpue residuals runs tests functions
 #' 
 #' @export
-#' @importFrom ggplot2 .pt ggplot geom_hline geom_segment aes geom_point geom_smooth
-#' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
-#' theme geom_text
+#' @importFrom ggplot2 .pt aes facet_wrap geom_hline geom_point geom_segment 
+#' geom_smooth ggplot labs scale_colour_manual scale_fill_manual 
+#' scale_y_continuous theme
 #' @importFrom grDevices colorRampPalette
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 cpue_residuals_ggplot <- function(
@@ -146,8 +146,8 @@ cpue_residuals_ggplot <- function(
 #' @family fits functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
-#' scale_y_continuous labs geom_point aes
+#' @importFrom ggplot2 aes coord_cartesian facet_grid geom_errorbar geom_line 
+#' geom_point geom_ribbon ggplot labs
 fits_ggplot <- function(
   df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, 
   x_lim = NULL, y_lim = NULL
@@ -241,10 +241,10 @@ fits_ggplot <- function(
 #' @family hindcasts functions
 #'
 #' @export 
-#' @importFrom ggplot2 .pt annotate annotation_custom ggplot geom_ribbon aes 
-#' geom_line geom_point geom_text ggplotGrob labs facet_wrap scale_fill_manual 
-#' scale_colour_manual scale_y_continuous theme guides guide_legend
-#' @importFrom dplyr filter vars
+#' @importFrom ggplot2 .pt aes coord_cartesian facet_wrap geom_line geom_point 
+#' geom_rect geom_ribbon ggplot guide_legend guides labs scale_colour_manual 
+#' scale_fill_manual theme
+#' @importFrom dplyr filter mutate select vars
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
@@ -442,9 +442,9 @@ hindcast_ggplot <- function(
 #' @family kobe functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline geom_polygon 
-#' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
-#' scale_shape_manual scale_fill_manual labs coord_cartesian theme
+#' @importFrom ggplot2 aes coord_cartesian facet_wrap geom_hline geom_path 
+#' geom_point geom_polygon geom_rect geom_vline ggplot labs scale_fill_manual 
+#' scale_shape_manual scale_x_continuous scale_y_continuous theme
 #' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(
   df_lists, n_col = 3, title_x = expression(B/B[MSY]), 
@@ -561,10 +561,11 @@ kobe_ggplot <- function(
 #' @family priors vs posteriors functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter select rename pull all_of
-#' @importFrom ggplot2 .pt ggplot geom_area aes facet_wrap geom_text
-#' coord_cartesian labs scale_y_continuous theme element_blank
+#' @importFrom dplyr %>% all_of filter full_join pull rename select
+#' @importFrom ggplot2 .pt aes coord_cartesian element_blank facet_wrap 
+#' geom_area ggplot labs scale_x_continuous scale_y_continuous theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 priors_posteriors_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
   title_y = "Density", use_si_suffix = FALSE, palette = NULL, title_x = NULL, 
@@ -743,11 +744,12 @@ priors_posteriors_ggplot <- function(
 #' @family retrospective analysis functions
 #'
 #' @export
-#' @importFrom ggplot2 .pt element_text ggplot geom_line aes geom_ribbon geom_text 
-#' guides guide_legend facet_wrap scale_colour_manual scale_y_continuous labs 
-#' theme  
+#' @importFrom ggplot2 .pt aes coord_cartesian element_text facet_wrap 
+#' geom_hline geom_line geom_ribbon ggplot guide_legend guides labs 
+#' scale_colour_manual scale_x_continuous scale_y_continuous theme
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 retrospective_analysis_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
   use_si_suffix = FALSE, title_x = NULL, title_y = NULL, x_lim = NULL, 
@@ -958,9 +960,10 @@ retrospective_analysis_ggplot <- function(
 #' @family cpue residuals runs tests functions
 #'
 #' @export
-#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment geom_text
-#' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
+#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment
+#' geom_point facet_grid scale_fill_manual labs theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 runs_tests_ggplot <- function(
   df_lists, position = "top-left", text_size = 6, title_x = "Year", 
   title_y = "Residuals", x_lim = NULL, y_lim = NULL
@@ -1083,7 +1086,7 @@ runs_tests_ggplot <- function(
 #' 
 #' @export
 #' @importFrom gt gtsave
-#' @importFrom rstudioapi viewer isAvailable
+#' @importFrom rstudioapi isAvailable viewer
 #' @importFrom openxlsx write.xlsx
 #' @importFrom utils browseURL
 summary_table <- function(
@@ -1190,8 +1193,8 @@ summary_table <- function(
 #' @family trajectories functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
-#' scale_y_continuous labs theme
+#' @importFrom ggplot2 aes coord_cartesian facet_wrap geom_hline geom_line 
+#' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
   df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
   palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL

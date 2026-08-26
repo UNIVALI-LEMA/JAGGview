@@ -61,7 +61,7 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr %>% rename mutate summarise arrange filter bind_rows 
+#' @importFrom dplyr %>% arrange bind_rows filter mutate rename summarise 
 #' ungroup
 #' @importFrom stats median quantile
 #' @importFrom gplots ci2d
@@ -260,7 +260,7 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr group_by across all_of group_modify filter ungroup
+#' @importFrom dplyr across all_of filter group_by group_modify ungroup
 .filter_by_condition <- function(df, group_col, condition_col, year_col) {
   df %>%
     group_by(across(all_of(group_col))) %>%

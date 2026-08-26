@@ -22,7 +22,7 @@
 #' 
 #' @keywords internal
 #' @noRd
-#' @importFrom rlang eval_tidy enquo
+#' @importFrom rlang enquo eval_tidy
 #' @importFrom dplyr bind_rows
 .accumulate_by <- function(df, var, step = 1) {
   var <- eval_tidy(enquo(var), df)
@@ -89,8 +89,8 @@
 #' 
 #' @keywords internal
 #' @noRd
-#' @importFrom gt gt tab_style cell_text cells_body cell_fill html fmt_number
-#' cells_column_labels cols_label
+#' @importFrom gt cell_fill cell_text cells_body cells_column_labels cols_label 
+#' fmt_number gt html tab_style
 #' @importFrom dplyr where
 .default_table <- function(data, digits = 2) {
   if (is.null(data) || nrow(data) == 0) {
@@ -146,7 +146,7 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom plotly plotly_empty layout
+#' @importFrom plotly layout plotly_empty
 .empty_plotly <- function(title){
   plotly_empty(type = "scatter", mode = "markers") %>%
     layout(
@@ -167,7 +167,7 @@
 #' @param lim A numeric vector of length 2 giving the lower and upper bounds of 
 #'   the range to be expanded
 #' @param mult A numeric value giving the fraction of the range's span to add 
-#'   as margin on each side. Defaults to \code{0.05}.
+#'   as margin on each side. Defaults to 0.05.
 #' 
 #' @return A numeric vector of length 2 with expanded lower and upper bounds.
 #' 
@@ -478,8 +478,8 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom ggplot2 theme theme_bw element_line element_text element_blank 
-#' element_rect margin %+replace%
+#' @importFrom ggplot2 %+replace% element_blank element_line element_rect 
+#' element_text margin theme theme_bw
 .my_theme <- function(
   base_size = 18, base_family = "Lato", rgb01 = "black", rgb02 = "black"
 ) {

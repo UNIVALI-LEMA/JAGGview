@@ -49,7 +49,7 @@
 #' 
 #' @export
 #' @importFrom tidyr pivot_longer 
-#' @importFrom dplyr %>% select filter full_join 
+#' @importFrom dplyr %>% full_join mutate select 
 #' @importFrom stats complete.cases
 #' @importFrom forcats fct_relevel
 fits_data <- function(list_fit_models, indices_factor = NULL) {
@@ -173,7 +173,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @family hindcasts functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
+#' @importFrom dplyr %>% filter group_by mutate pull rename ungroup
 hindcast_data <- function(list_hc_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
@@ -292,9 +292,10 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' }
 #'
 #' @export
-#' @importFrom dplyr %>% summarise arrange filter
+#' @importFrom dplyr %>% summarise arrange filter rename mutate
 #' @importFrom stats median
 #' @importFrom gplots ci2d
+#' @importFrom forcats fct_relevel
 kobe_data <- function(
   list_fit_models, ci_levels = c(0.5, 0.8, 0.95), reserve_mb = 2048, 
   poll_interval = 0.5
@@ -639,7 +640,8 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @family retrospective analysis functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter mutate
+#' @importFrom dplyr %>% filter mutate select
+#' @importFrom forcats fct_relevel
 retrospective_analysis_data <- function(list_hc_models) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
@@ -748,9 +750,10 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @family cpue residuals runs tests functions
 #'
 #' @export
+#' @importFrom tidyr pivot_longer
 #' @importFrom dplyr %>% mutate filter left_join select
 #' @importFrom JABBA jbruns_sig3
-#' @importFrom stats loess predict complete.cases
+#' @importFrom stats complete.cases loess predict
 #' @importFrom forcats fct_relevel
 runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
@@ -885,7 +888,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @family trajectories functions
 #' 
 #' @export
-#' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup
+#' @importFrom dplyr %>% bind_rows mutate rename summarise ungroup
 #' @importFrom stats median quantile
 trajectories_data <- function(
   list_fit_models, reserve_mb = 2048, poll_interval = 0.5

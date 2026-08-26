@@ -383,7 +383,6 @@
         )
     }) %>% 
       flatten()
-    
 
     results <- subplot(
       plots,

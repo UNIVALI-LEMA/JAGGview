@@ -306,7 +306,7 @@
 
     plots <- map(scenarios, function(s) {
       cpue_residuals <- df_lists$cpue_residuals %>%
-          filter(Scenario == s)
+        filter(Scenario == s)
 
       RMSE_data <- df_lists$RMSE_data %>%
         filter(Scenario == s)

@@ -355,15 +355,6 @@
             "mu (", id,"): ", .international_system_prefixes(mu, 2)
           )
         ) %>%
-        # add_text(
-        #   data = rho_var,
-        #   x = pos$x,
-        #   y = pos$y,
-        #   text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-        #   textfont = list(size = text_size_ra_BBmsy()),
-        #   textposition = "bottom left",
-        #   hoverinfo = "skip"
-        # ) %>%
         layout(
           showlegend = FALSE,
           xaxis = list(
@@ -392,7 +383,6 @@
         )
     }) %>% 
       flatten()
-    
 
     results <- subplot(
       plots,
