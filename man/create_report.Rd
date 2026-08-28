@@ -4,9 +4,46 @@
 \alias{create_report}
 \title{Launch the report as a dashboard}
 \usage{
-create_report(filename, dir = getwd(), animation = TRUE, verbose = FALSE)
+create_report(
+  fits_data = data.frame(),
+  hind_data = list(),
+  kobe_data = list(),
+  pp_data = list(),
+  ra_data = list(),
+  res_data = list(),
+  traj_data = data.frame(),
+  filename = NULL,
+  dir = getwd(),
+  animation = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
+\item{fits_data}{A named list of data frames as returned by
+\code{fits_data()}. It must contain the elements \code{Li_Ui},
+\code{CI_80}, and \code{CI_95}.}
+
+\item{hind_data}{A named list as returned by \code{hindcast_data()}. It must
+contain the elements \code{data}, \code{data_points},
+\code{data_lines} and \code{mase_data}.}
+
+\item{kobe_data}{A named list as returned by \code{kobe_data()}. It must
+contain the elements \code{col01}, \code{col02}, \code{col03},
+\code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.}
+
+\item{pp_data}{A named list as returned by \code{priors_posteriors_data()}.
+It must contain the elements \code{prior}, \code{posterior}, \code{PPVR}
+and \code{PPMR}.}
+
+\item{ra_data}{A named list as returned by
+\code{retrospective_analysis_data()}. It must contain the elements
+\code{data}, \code{surplus_data} and \code{rho_data}.}
+
+\item{res_data}{A named list as returned by \code{runs_tests_data()}. It
+must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
+
+\item{traj_data}{A data frame as returned by \code{trajectories_data()}.}
+
 \item{filename}{A character string with the name of the \code{.RData} file
 containing the model objects to be loaded (e.g. results from \pkg{JABBA}).}
 
@@ -20,35 +57,67 @@ plots. Defaults to TRUE.}
 in console. Defaults to FALSE.}
 }
 \value{
-Invisibly launch the interactive dashboard in the default viewer/browser.
+Invisibly launch the interactive dashboard, a \pkg{shiny} object produced by
+\code{shinyApp()}, in the default viewer/browser.
 }
 \description{
-Loads a saved model results file (\code{.RData}) and launches an interactive
-\pkg{shiny}/\pkg{bs4Dash} dashboard summarizing the model fits, hindcast,
-priors x posteriors, retrospective analysis, runs tests, kobe plots, and
-trajectories contained in the file.
+Launches an interactive \pkg{shiny}/\pkg{bs4Dash} dashboard summarizing
+model fits, hindcast, priors x posteriors, retrospective analysis, runs
+tests, kobe plots, and trajectories. There are two ways to supply the data
+for the dashboard: (i) the main one, passing each pre-computed data
+structure directly through \code{fits_data}, \code{hind_data},
+\code{kobe_data}, \code{pp_data}, \code{ra_data}, \code{res_data} and
+\code{traj_data}, as returned by the package's respective \code{*_data()}
+functions (see \strong{Examples}); or (ii) passing \code{filename} with the
+path(s) to one or more saved model results file(s)
+(\code{.RData}/\code{.rds}), from which all of those data structures are
+computed internally.#'
 }
 \details{
-The function loads all objects in \code{filename} and classifies each one as
-a model fit, a hindcast object, or an ignored object, using the internal
-helpers \code{.is_fit_jabba()} and \code{.is_hindcast_jabba()}.
+If \code{filename} is supplied, the function loads all objects contained in
+each \code{.Rdata}/\code{.rds} file and, through the internal helper
+\code{.classify_object()}, which classifies it as a model fit, a hindcast
+object, or an ignored object.
 
-From the classified fit and hindcast objects, the function pre-computes all
-data structures required by the dashboard panels, including model fits
-(\code{fits_data()}), hindcasts (\code{hindcast_data()}), kobe plots
-(\code{kobe_data()}), priors x posteriors (\code{priors_posteriors_data()}),
-retrospective analysis (\code{retrospective_analysis_data()}), runs tests
-(\code{runs_tests_data()}), and trajectories (\code{trajectories_data()}).
+From the classified fit objects, the function pre-computes model fits
+(\code{fits_data()}), priors x posteriors (\code{priors_posteriors_data()})
+and runs tests (\code{runs_tests_data()}), as well as kobe plots and
+trajectories, both obtained together via the internal helper
+\code{.ensemble_data()}. From #' the classified hindcast objects, it
+pre-computes hindcasts (\code{hindcast_data()}) and retrospective analysis
+(\code{retrospective_analysis_data()}).
 
-The \code{server.R} and \code{ui.R} files, bundled with the package under
-\code{R/}, are then sourced into the function's own enviroment (so that the
-pre-computed data objects above are directly available to them), and the
-resulting \code{ui} and \code{server} objects used to launch the Shiny
-application via \code{shinyApp()}.
+The internal helpers \code{.build_server()} and \code{.build_ui()} then use
+the pre-computed (or user-supplied) data objects above to assemble,
+respectively, the \code{server} and \code{ui} objects, which are passed to
+\code{shinyApp()} to build the Shiny application.
 }
 \examples{
 \dontrun{
-create_report("model_results.RData")
+fit.S01 <- fit_jabba()
+fit.S02 <- fit_jabba()
+list_fit_models <- list(fit.S01, fit.S02)
+hc_S01 <- hindcast_jabba()
+hc_S02 <- hindcast_jabba()
+list_hc_models <- list(hc_S01, hc_S02)
+
+fits_data <- fits_data(list_fit_models)
+hind_data <- hindcast_data(list_hc_models)
+kobe_data <- kobe_data(list_fit_models)
+pp_data <- priors_posteriors_data(list_fit_models)
+ra_data <- retrospective_analysis_data(list_hc_models)
+res_data <- runs_tests_data(list_fit_models)
+traj_data <- trajectories_data(list_fit_models)
+
+create_report(
+  fits_data = fits_data, hind_data =  hind_data, kobe_data =  kobe_data,
+  pp_data = pp_data, ra_data = ra_data, res_data = res_data, 
+  traj_data = traj_data, animation = FALSE
+)
+
+create_report(filename = "model_results.RData")
+
+create_report(filename = "model_results.RData", dir = "dev", verbose = TRUE)
 }
 
 }

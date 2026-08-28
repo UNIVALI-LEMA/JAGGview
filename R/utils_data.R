@@ -28,6 +28,64 @@
   return(result)
 }
 
+#' Classify a single loaded object and append it to the right collector
+#' 
+#' Internal helper shared by the \code{.RData}/\code{.rda} and \code{.rds} 
+#' loading branches of \code{create_report()}, so the fit/hindcast/ignored 
+#' classification logic (and its \code{verbose} messaging) is written once.
+#' 
+#' @param obj The R object to classify, as loaded from a \code{.RData}/
+#'   \code{.rds} file.
+#' @param name A character string with \code{obj}'s name. Used in the 
+#'   \code{verbose} message and, if \code{obj} is neither a fit nor a 
+#'   hindcast object, appended to \code{ignored_names}.
+#' @param name_width An integer giving the field width used to left-pad 
+#'   \code{name} (via \code{sprintf("\%-*s", ...)}) when printing the 
+#'   \code{verbose} message, so that object names line up in the console output.
+#' @param fits_list A list of previously identified \pkg{JABBA} fit objects. If 
+#'   \code{obj} is identified as a fit (via \code{.is_fit_jabba()}), it is 
+#'   appended to this list.
+#' @param hc_list A list of previously identified \pkg{JABBA} hindcast objects. 
+#'   If \code{obj} is identified as a hindcast (via 
+#'   \code{.is_hindcast_jabba()}), it is appended to this list.
+#' @param ignored_names A character vector with the names of previously ignored 
+#'   objects (i.e. neither fits nor hindcasts). If \code{obj} is ignored, 
+#'   \code{name} is appended to this vector.
+#' @param verbose A boolean value that if TRUE, prints (via \code{cat()}) a 
+#'   message to console reporting whether \code{obj} was identified as a fit, a 
+#'   hindcast, or ignored.
+#' 
+#' @return 
+#' A list with three elements, \code{fits_list}, \code{hc_list} and 
+#' \code{ignored_names}, corresponding to the input collectors above with 
+#' \code{obj} (or its \code{name}) added to the appropriate one. Since R has 
+#' copy-on-modify semantics, this function does not alter \code{fits_list}, 
+#' \code{hc_list} or \code{ignored_names} in place; the caller must reassign 
+#' them from the returned list.
+#' 
+#' @keywords internal
+#' @noRd
+.classify_object <- function(
+  obj, name, name_width, fits_list, hc_list, ignored_names, verbose
+) {
+  if (.is_fit_jabba(obj)) {
+    fits_list[[length(fits_list) + 1]] <- obj
+    status <- "Identified as fit jabba"
+  }
+  else if (.is_hindcast_jabba(obj)) {
+    hc_list[[length(hc_list) + 1]] <- obj
+    status <- "Identified as hindcast jabba"
+  }
+  else {
+    ignored_names <- c(ignored_names, name)
+    status <- "Ignored file"
+  }
+  if (verbose) {
+    cat(sprintf("\nChecking: %-*s | %s", name_width, name, status))
+  }
+  list(fits_list = fits_list, hc_list = hc_list, ignored_names = ignored_names)
+}
+
 #' Combine trajectory and Kobe plot data for the dashboard
 #'
 #' Internal helper that computes both the trajectory summaries (as in 
@@ -108,7 +166,7 @@
   results_traj <- bind_rows(result_list) %>%
     ungroup()
 
-  tmp11 <- model_results %>%
+  data_lines <- model_results %>%
     summarise(
       Fratio = median(harvest),
       Bratio = median(stock),
@@ -116,8 +174,8 @@
     ) %>%
     arrange(Scenario, year)
 
-  max_x <- ceiling(max(tmp11$Bratio))
-  max_y <- ceiling(max(tmp11$Fratio))
+  max_x <- ceiling(max(data_lines$Bratio))
+  max_y <- ceiling(max(data_lines$Fratio))
   
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
@@ -141,10 +199,10 @@
   min_year <- min(model_results$year)
   mid_year <- round(min_year + (max_year - min_year)/2)
 
-  tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
-  tmp11c <- filter(model_results, year == max_year)
+  highlight_years <- filter(data_lines, year %in% c(min_year, mid_year, max_year))
+  data_linesc <- filter(model_results, year == max_year)
 
-  k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
+  ci_data <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
   for(i in unique(model_results$Scenario)) {
     x <- filter(model_results, Scenario == i)
     x <- filter(x, year == max_year)
@@ -168,8 +226,8 @@
     
     tmp <- do.call(rbind, tmp00)
 
-    k.out <- rbind(
-      k.out, 
+    ci_data <- rbind(
+      ci_data, 
       data.frame(
         x = tmp$x,
         y = tmp$y,
@@ -184,9 +242,9 @@
     col02 = col02[1, , drop = FALSE],
     col03 = col03[1, , drop = FALSE],
     col04 = col04[1, , drop = FALSE],
-    k.out = k.out,
-    tmp11 = tmp11,
-    tmp11b = tmp11b
+    ci_data = ci_data,
+    data_lines = data_lines,
+    highlight_years = highlight_years
   )
 
   results <- list(

@@ -15,7 +15,8 @@ runs_tests_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
+\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
+must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
 
 \item{position}{A character string specifying the table's position within
 each plot panel, combining a vertical and a horizontal keyword separated

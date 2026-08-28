@@ -14,7 +14,9 @@ kobe_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A list as returned by \code{kobe_data()}.}
+\item{df_lists}{A named list as returned by \code{kobe_data()}. It must
+contain the elements \code{col01}, \code{col02}, \code{col03},
+\code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}

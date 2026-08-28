@@ -17,8 +17,8 @@ cpue_residuals_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list of data frames as returned by
-\code{runs_tests_data()}.}
+\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
+must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}

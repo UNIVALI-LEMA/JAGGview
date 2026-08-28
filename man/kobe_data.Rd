@@ -38,11 +38,11 @@ overfishing).}
 overfished and overfishing).}
 \item{col04}{Data frame defining the green quadrant (healthy stock
 conditions).}
-\item{k.out}{Data frame with kernel density contours (50\%, 80\%, 95\%)
+\item{ci_data}{Data frame with kernel density contours (50\%, 80\%, 95\%)
 for the terminal year.}
-\item{tmp11}{Time series of median biomass and fishing mortality
+\item{data_lines}{Time series of median biomass and fishing mortality
 ratios by year and scenario.}
-\item{tmp11b}{Subset of selected years (e.g., 1950, 1986, 2023) for
+\item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023) for
 highlighting points.}
 }
 }

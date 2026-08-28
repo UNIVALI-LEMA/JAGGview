@@ -400,7 +400,7 @@
 #' to the hindcast window defined by \code{min_year} and \code{max_year}.
 #'
 #' @param df A \code{JAGGdata} object containing the components \code{data},
-#'   \code{hindcast_data_1}, and \code{hindcast_data_2}, as returned by
+#'   \code{data_points}, and \code{data_lines}, as returned by
 #'   \code{hindcast_data()}.
 #' @param scen A character string specifying the scenario name to filter.
 #' @param idx A character string specifying the index name to filter.
@@ -416,7 +416,7 @@
 #' @details
 #' This function is called internally by \code{hindcast_ggplot()} via
 #' \code{Map()} to produce one inset per Scenario x Index facet. Combinations
-#' with no data in \code{hindcast_data_1}, \code{hindcast_data_2}, or the
+#' with no data in \code{data_points}, \code{data_lines}, or the
 #' ribbon data are silently skipped by returning \code{NULL}, which prevents
 #' empty panels from receiving an inset.
 #' 
@@ -433,10 +433,10 @@
   zoom_data_ribbon <- zoom_data %>%
     filter(retro.peels == 0)
 
-  hc_data_1 <- df$hindcast_data_1 %>%
+  hc_data_1 <- df$data_points %>%
     filter(Scenario == scen, Index == idx)
 
-  hc_data_2 <- df$hindcast_data_2 %>%
+  hc_data_2 <- df$data_lines %>%
     filter(Scenario == scen, Index == idx)
 
   if (nrow(zoom_data_ribbon) == 0 || nrow(hc_data_1) == 0

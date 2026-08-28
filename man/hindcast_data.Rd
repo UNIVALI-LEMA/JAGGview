@@ -18,9 +18,9 @@ A named list with four elements:
 \describe{
 \item{data}{A data frame containing full hindcast time series,
 including observed and predicted values.}
-\item{hindcast_data_1}{A data frame with selected hindcast points
+\item{data_points}{A data frame with selected hindcast points
 used for visualization of observed and predicted values.}
-\item{hindcast_data_2}{A data frame containing filtered hindcast
+\item{data_lines}{A data frame containing filtered hindcast
 trajectories for plotting purposes.}
 \item{mase_data}{A data frame containing Mean Absolute Scaled Error
 (MASE) metrics for each index and scenario.}

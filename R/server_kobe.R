@@ -151,15 +151,15 @@
           col02 = kobe_df$col02,
           col03 = kobe_df$col03,
           col04 = kobe_df$col04,
-          k.out = kobe_df$k.out %>%
+          ci_data = kobe_df$ci_data %>%
             filter(
               Scenario %in% input$kobe_scenarios
             ),
-          tmp11 = kobe_df$tmp11 %>%
+          data_lines = kobe_df$data_lines %>%
             filter(
               Scenario %in% input$kobe_scenarios
             ),
-          tmp11b = kobe_df$tmp11b %>%
+          highlight_years = kobe_df$highlight_years %>%
             filter(
               Scenario %in% input$kobe_scenarios
             )
@@ -182,8 +182,8 @@
 
     df_lists <- filtered_kobe()
 
-    min_year <- min(df_lists$tmp11$year, na.rm = TRUE)
-    max_year <- max(df_lists$tmp11$year, na.rm = TRUE)
+    min_year <- min(df_lists$data_lines$year, na.rm = TRUE)
+    max_year <- max(df_lists$data_lines$year, na.rm = TRUE)
     range <- max_year - min_year
     steps <- round(range / 25)
 
@@ -199,9 +199,9 @@
 
     title_y <- .get_value_or_default(title_y_kobe, "F/Fmsy")
 
-    scenarios <- unique(df_lists$k.out$Scenario)
+    scenarios <- unique(df_lists$ci_data$Scenario)
 
-    n_levels <- length(unique(df_lists$k.out$q))
+    n_levels <- length(unique(df_lists$ci_data$q))
 
     n_scenarios <- length(scenarios)
 
@@ -216,7 +216,7 @@
     palette <- colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
 
     plots <- map(scenarios, function(s) {
-      line_data <- df_lists$tmp11 %>%
+      line_data <- df_lists$data_lines %>%
         filter(Scenario == s)
 
       if (animation) {
@@ -224,10 +224,10 @@
           .accumulate_by(year, step = steps)
       }
 
-      marker_data <- df_lists$tmp11b %>%
+      marker_data <- df_lists$highlight_years %>%
         filter(Scenario == s)
 
-      ci_data <- df_lists$k.out %>%
+      ci_data <- df_lists$ci_data %>%
         filter(Scenario == s)
 
       shapes <- list()

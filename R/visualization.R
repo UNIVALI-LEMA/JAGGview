@@ -4,8 +4,8 @@
 #' years and scenarios, including reference lines, residual segments,
 #' smoothed trends, and RMSE annotations.
 #' 
-#' @param df_lists A named list of data frames as returned by
-#'   \code{runs_tests_data()}.
+#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
+#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param position A character string specifying the table's position within 
@@ -200,7 +200,9 @@ fits_ggplot <- function(
 #' observed and predicted values, uncertainty intervals, and model performance 
 #' metrics (MASE).
 #'
-#' @param df_lists A named list as returned by \code{hindcast_data()}.
+#' @param df_lists A named list as returned by \code{hindcast_data()}. It must
+#'   contain the elements \code{data}, \code{data_points}, 
+#'   \code{data_lines} and \code{mase_data}.
 #' @param position A character string specifying the table's position within 
 #'   each plot panel, combining a vertical and a horizontal keyword separated 
 #'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
@@ -289,9 +291,9 @@ hindcast_ggplot <- function(
     decimals = 3
   )
 
-  min_year_hc <- min(df_lists$hindcast_data_2$year) - 1
+  min_year_hc <- min(df_lists$data_lines$year) - 1
 
-  max_year_hc <- max(df_lists$hindcast_data_2$year)
+  max_year_hc <- max(df_lists$data_lines$year)
   
   p1 <- ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
@@ -304,17 +306,17 @@ hindcast_ggplot <- function(
                 fill = "gray30", alpha = 0.5) +
     geom_line(data = filter(df_lists$data, hindcast == FALSE),
               aes(x = year, y = hat, colour = retro), linewidth = 1) +
-    geom_line(data = df_lists$hindcast_data_2,
+    geom_line(data = df_lists$data_lines,
               aes(x = year, y = hat, group = retro.peels),
               linewidth = 1, colour = "white") +
     geom_point(data = filter(df_lists$data, retro.peels == 0, 
                             year < df_lists$min_year_retro),
                aes(x = year, y = obs), pch = 21, size = 4,
                fill = "white") +
-    geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
+    geom_point(data = df_lists$data_points, show.legend = FALSE,
                aes(x = year, y = obs, fill = retro),
                pch = 21, size = 4) +
-    geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
+    geom_point(data = df_lists$data_points, show.legend = FALSE,
                aes(x = year, y = hat, fill = retro),
                pch = 21, size = 2) +
     geom_table_npc(data = table,
@@ -367,11 +369,11 @@ hindcast_ggplot <- function(
   min_y_zoom_ribbon <- floor(min(zoom_ribbon_all$hat.lci) * 10) / 10
   max_y_zoom_ribbon <- ceiling(max(zoom_ribbon_all$hat.uci) * 10) / 10
 
-  min_y_zoom_points_1 <- floor(min(df_lists$hindcast_data_1$obs) * 10) / 10
-  max_y_zoom_points_1 <- ceiling(max(df_lists$hindcast_data_1$obs) * 10) / 10
+  min_y_zoom_points_1 <- floor(min(df_lists$data_points$obs) * 10) / 10
+  max_y_zoom_points_1 <- ceiling(max(df_lists$data_points$obs) * 10) / 10
 
-  min_y_zoom_points_2 <- floor(min(df_lists$hindcast_data_2$obs) * 10) / 10
-  max_y_zoom_points_2 <- ceiling(max(df_lists$hindcast_data_2$obs) * 10) / 10
+  min_y_zoom_points_2 <- floor(min(df_lists$data_lines$obs) * 10) / 10
+  max_y_zoom_points_2 <- ceiling(max(df_lists$data_lines$obs) * 10) / 10
 
   min_y_zoom <- min(min_y_zoom_ribbon, min_y_zoom_points_1, min_y_zoom_points_2)
   max_y_zoom <- max(max_y_zoom_ribbon, max_y_zoom_points_1, max_y_zoom_points_2)
@@ -408,7 +410,9 @@ hindcast_ggplot <- function(
 #' (B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and 
 #' temporal trajectories.
 #'
-#' @param df_lists A list as returned by \code{kobe_data()}.
+#' @param df_lists A named list as returned by \code{kobe_data()}. It must 
+#'   contain the elements \code{col01}, \code{col02}, \code{col03}, 
+#'   \code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param title_x A character string for the x-axis label. Defaults to "B/Bmsy".
@@ -468,7 +472,7 @@ kobe_ggplot <- function(
   if (x_lim[1] < 0) x_lim[1] <- 0
   if (y_lim[1] < 0) y_lim[1] <- 0
 
-  n_levels <- length(unique(df_lists$k.out$q))
+  n_levels <- length(unique(df_lists$ci_data$q))
   ggplot() +
     geom_rect(data = df_lists$col01, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
@@ -484,11 +488,11 @@ kobe_ggplot <- function(
       fill = "green") +
     geom_hline(yintercept = 1, linetype = "longdash") +
     geom_vline(xintercept = 1, linetype = "longdash") +
-    geom_polygon(data = df_lists$k.out,
+    geom_polygon(data = df_lists$ci_data,
                  aes(x = x, y = y, fill = q),
                  colour = "gray30") +
-    geom_path(data = df_lists$tmp11, aes(x = Bratio, y = Fratio)) +
-    geom_point(data = df_lists$tmp11b,
+    geom_path(data = df_lists$data_lines, aes(x = Bratio, y = Fratio)) +
+    geom_point(data = df_lists$highlight_years,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
     facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
@@ -509,7 +513,9 @@ kobe_ggplot <- function(
 #' Creates a ggplot2-based visualization comparing prior and posterior
 #' distributions for a selected parameter across scenarios.
 #'
-#' @param df_lists A named list as returned by \code{priors_posteriors_data()}.
+#' @param df_lists A named list as returned by \code{priors_posteriors_data()}. 
+#'   It must contain the elements \code{prior}, \code{posterior}, \code{PPVR} 
+#'   and \code{PPMR}.
 #' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
 #' @param n_col An integer value that determines the maximum number of columns
@@ -698,7 +704,8 @@ priors_posteriors_ggplot <- function(
 #' retrospective bias (rho) annotations.
 #'
 #' @param df_lists A named list as returned by
-#'   \code{retrospective_analysis_data()}.
+#'   \code{retrospective_analysis_data()}. It must contain the elements 
+#'   \code{data}, \code{surplus_data} and \code{rho_data}.
 #' @param indicator_name A character string specifying the name of the 
 #'   indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 #'   "procB", and "MSY".
@@ -922,7 +929,8 @@ retrospective_analysis_ggplot <- function(
 #' Creates a ggplot2-based visualization of runs test diagnostics, including 
 #' residuals, credibility limits, and p-values across scenarios and indices.
 #'
-#' @param df_lists A named list as returned by \code{runs_tests_data()}.
+#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
+#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
 #' @param position A character string specifying the table's position within 
 #'   each plot panel, combining a vertical and a horizontal keyword separated 
 #'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 

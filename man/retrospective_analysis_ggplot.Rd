@@ -19,7 +19,8 @@ retrospective_analysis_ggplot(
 }
 \arguments{
 \item{df_lists}{A named list as returned by
-\code{retrospective_analysis_data()}.}
+\code{retrospective_analysis_data()}. It must contain the elements
+\code{data}, \code{surplus_data} and \code{rho_data}.}
 
 \item{indicator_name}{A character string specifying the name of the
 indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",

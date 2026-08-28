@@ -16,7 +16,9 @@ hindcast_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{hindcast_data()}.}
+\item{df_lists}{A named list as returned by \code{hindcast_data()}. It must
+contain the elements \code{data}, \code{data_points},
+\code{data_lines} and \code{mase_data}.}
 
 \item{position}{A character string specifying the table's position within
 each plot panel, combining a vertical and a horizontal keyword separated

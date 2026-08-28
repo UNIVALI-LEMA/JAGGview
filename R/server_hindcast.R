@@ -187,12 +187,12 @@
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
             ) %>% droplevels(),
-          hindcast_data_1 = hind_df$hindcast_data_1 %>%
+          data_points = hind_df$data_points %>%
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
             ) %>% droplevels(),
-          hindcast_data_2 = hind_df$hindcast_data_2 %>%
+          data_lines = hind_df$data_lines %>%
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
@@ -264,19 +264,19 @@
 
     title_y <- .get_value_or_default(title_y_hc, "Index")
 
-    min_year_hc <- min(df_lists$hindcast_data_2$year) - 1
+    min_year_hc <- min(df_lists$data_lines$year) - 1
 
-    max_year_hc <- max(df_lists$hindcast_data_2$year)
+    max_year_hc <- max(df_lists$data_lines$year)
   
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
         data <- df_lists$data %>%
           filter(Scenario == s, Index == i)
 
-        hc_data_1 <- df_lists$hindcast_data_1 %>%
+        data_points <- df_lists$data_points %>%
           filter(Scenario == s, Index == i)
 
-        hc_data_2 <- df_lists$hindcast_data_2 %>%
+        data_lines <- df_lists$data_lines %>%
           filter(Scenario == s, Index == i)
 
         mase_data <- df_lists$mase_data %>%
@@ -441,7 +441,7 @@
             inherit = FALSE
           ) %>%
           add_lines(
-            data = hc_data_2,
+            data = data_lines,
             x = ~year,
             y = ~hat,
             type = "scattergl",
@@ -472,7 +472,7 @@
             )
           ) %>%
           add_markers(
-            data = hc_data_1,
+            data = data_points,
             x = ~year,
             y = ~obs,
             color = ~as.factor(retro),
@@ -491,7 +491,7 @@
             )
           ) %>%
           add_markers(
-            data = hc_data_1,
+            data = data_points,
             x = ~year,
             y = ~hat,
             color = ~as.factor(retro),

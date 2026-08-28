@@ -20,7 +20,9 @@ priors_posteriors_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{priors_posteriors_data()}.}
+\item{df_lists}{A named list as returned by \code{priors_posteriors_data()}.
+It must contain the elements \code{prior}, \code{posterior}, \code{PPVR}
+and \code{PPMR}.}
 
 \item{indicator_name}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
