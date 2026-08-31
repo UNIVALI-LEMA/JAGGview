@@ -4,8 +4,8 @@
 #' years and scenarios, including reference lines, residual segments,
 #' smoothed trends, and RMSE annotations.
 #' 
-#' @param df_lists A named list of data frames as returned by
-#'   \code{runs_tests_data()}.
+#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
+#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param position A character string specifying the table's position within 
@@ -38,10 +38,13 @@
 #' The plot includes residual segments, observed values, a smoothed trend,
 #' and RMSE annotations for each scenario.
 #' 
+#' @family visualization functions
+#' @family cpue residuals runs tests functions
+#' 
 #' @export
-#' @importFrom ggplot2 .pt ggplot geom_hline geom_segment aes geom_point geom_smooth
-#' facet_wrap scale_y_continuous scale_fill_manual scale_colour_manual labs 
-#' theme geom_text
+#' @importFrom ggplot2 .pt aes facet_wrap geom_hline geom_point geom_segment 
+#' geom_smooth ggplot labs scale_colour_manual scale_fill_manual 
+#' scale_y_continuous theme
 #' @importFrom grDevices colorRampPalette
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 cpue_residuals_ggplot <- function(
@@ -138,10 +141,13 @@ cpue_residuals_ggplot <- function(
 #' df <- fits_data(list_fit_models)
 #' fits_ggplot(df, palette = "blue")
 #' }
+#' 
+#' @family visualization functions
+#' @family fits functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_ribbon geom_line geom_errorbar facet_grid 
-#' scale_y_continuous labs geom_point aes
+#' @importFrom ggplot2 aes coord_cartesian facet_grid geom_errorbar geom_line 
+#' geom_point geom_ribbon ggplot labs
 fits_ggplot <- function(
   df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, 
   x_lim = NULL, y_lim = NULL
@@ -194,7 +200,9 @@ fits_ggplot <- function(
 #' observed and predicted values, uncertainty intervals, and model performance 
 #' metrics (MASE).
 #'
-#' @param df_lists A named list as returned by \code{hindcast_data()}.
+#' @param df_lists A named list as returned by \code{hindcast_data()}. It must
+#'   contain the elements \code{data}, \code{data_points}, 
+#'   \code{data_lines} and \code{mase_data}.
 #' @param position A character string specifying the table's position within 
 #'   each plot panel, combining a vertical and a horizontal keyword separated 
 #'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
@@ -230,12 +238,15 @@ fits_ggplot <- function(
 #' df <- hindcast_data(list_hc_models)
 #' hindcast_ggplot(df)
 #' }
+#' 
+#' @family visualization functions
+#' @family hindcasts functions
 #'
 #' @export 
-#' @importFrom ggplot2 .pt annotate annotation_custom ggplot geom_ribbon aes 
-#' geom_line geom_point geom_text ggplotGrob labs facet_wrap scale_fill_manual 
-#' scale_colour_manual scale_y_continuous theme guides guide_legend
-#' @importFrom dplyr filter vars
+#' @importFrom ggplot2 .pt aes coord_cartesian facet_wrap geom_line geom_point 
+#' geom_rect geom_ribbon ggplot guide_legend guides labs scale_colour_manual 
+#' scale_fill_manual theme
+#' @importFrom dplyr filter mutate select vars
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
@@ -280,9 +291,9 @@ hindcast_ggplot <- function(
     decimals = 3
   )
 
-  min_year_hc <- min(df_lists$hindcast_data_2$year) - 1
+  min_year_hc <- min(df_lists$data_lines$year) - 1
 
-  max_year_hc <- max(df_lists$hindcast_data_2$year)
+  max_year_hc <- max(df_lists$data_lines$year)
   
   p1 <- ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
@@ -295,24 +306,23 @@ hindcast_ggplot <- function(
                 fill = "gray30", alpha = 0.5) +
     geom_line(data = filter(df_lists$data, hindcast == FALSE),
               aes(x = year, y = hat, colour = retro), linewidth = 1) +
-    geom_line(data = df_lists$hindcast_data_2,
+    geom_line(data = df_lists$data_lines,
               aes(x = year, y = hat, group = retro.peels),
               linewidth = 1, colour = "white") +
     geom_point(data = filter(df_lists$data, retro.peels == 0, 
                             year < df_lists$min_year_retro),
                aes(x = year, y = obs), pch = 21, size = 4,
                fill = "white") +
-    geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
+    geom_point(data = df_lists$data_points, show.legend = FALSE,
                aes(x = year, y = obs, fill = retro),
                pch = 21, size = 4) +
-    geom_point(data = df_lists$hindcast_data_1, show.legend = FALSE,
+    geom_point(data = df_lists$data_points, show.legend = FALSE,
                aes(x = year, y = hat, fill = retro),
                pch = 21, size = 2) +
     geom_table_npc(data = table,
                   aes(npcx = x, npcy = y, label = tb),
                   size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)
-    ) +
+                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     labs(x = title_x, y = title_y, colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
               drop = FALSE) +
@@ -359,11 +369,11 @@ hindcast_ggplot <- function(
   min_y_zoom_ribbon <- floor(min(zoom_ribbon_all$hat.lci) * 10) / 10
   max_y_zoom_ribbon <- ceiling(max(zoom_ribbon_all$hat.uci) * 10) / 10
 
-  min_y_zoom_points_1 <- floor(min(df_lists$hindcast_data_1$obs) * 10) / 10
-  max_y_zoom_points_1 <- ceiling(max(df_lists$hindcast_data_1$obs) * 10) / 10
+  min_y_zoom_points_1 <- floor(min(df_lists$data_points$obs) * 10) / 10
+  max_y_zoom_points_1 <- ceiling(max(df_lists$data_points$obs) * 10) / 10
 
-  min_y_zoom_points_2 <- floor(min(df_lists$hindcast_data_2$obs) * 10) / 10
-  max_y_zoom_points_2 <- ceiling(max(df_lists$hindcast_data_2$obs) * 10) / 10
+  min_y_zoom_points_2 <- floor(min(df_lists$data_lines$obs) * 10) / 10
+  max_y_zoom_points_2 <- ceiling(max(df_lists$data_lines$obs) * 10) / 10
 
   min_y_zoom <- min(min_y_zoom_ribbon, min_y_zoom_points_1, min_y_zoom_points_2)
   max_y_zoom <- max(max_y_zoom_ribbon, max_y_zoom_points_1, max_y_zoom_points_2)
@@ -400,7 +410,9 @@ hindcast_ggplot <- function(
 #' (B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and 
 #' temporal trajectories.
 #'
-#' @param df_lists A list as returned by \code{kobe_data()}.
+#' @param df_lists A named list as returned by \code{kobe_data()}. It must 
+#'   contain the elements \code{col01}, \code{col02}, \code{col03}, 
+#'   \code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param title_x A character string for the x-axis label. Defaults to "B/Bmsy".
@@ -429,11 +441,14 @@ hindcast_ggplot <- function(
 #' df <- kobe_data(model_results)
 #' kobe_ggplot(df)
 #' }
+#' 
+#' @family visualization functions
+#' @family kobe functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_rect aes geom_hline geom_vline geom_polygon 
-#' geom_path geom_point facet_wrap scale_y_continuous scale_x_continuous 
-#' scale_shape_manual scale_fill_manual labs coord_cartesian theme
+#' @importFrom ggplot2 aes coord_cartesian facet_wrap geom_hline geom_path 
+#' geom_point geom_polygon geom_rect geom_vline ggplot labs scale_fill_manual 
+#' scale_shape_manual scale_x_continuous scale_y_continuous theme
 #' @importFrom grDevices colorRampPalette
 kobe_ggplot <- function(
   df_lists, n_col = 3, title_x = expression(B/B[MSY]), 
@@ -457,7 +472,7 @@ kobe_ggplot <- function(
   if (x_lim[1] < 0) x_lim[1] <- 0
   if (y_lim[1] < 0) y_lim[1] <- 0
 
-  n_levels <- length(unique(df_lists$k.out$q))
+  n_levels <- length(unique(df_lists$ci_data$q))
   ggplot() +
     geom_rect(data = df_lists$col01, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
@@ -473,11 +488,11 @@ kobe_ggplot <- function(
       fill = "green") +
     geom_hline(yintercept = 1, linetype = "longdash") +
     geom_vline(xintercept = 1, linetype = "longdash") +
-    geom_polygon(data = df_lists$k.out,
+    geom_polygon(data = df_lists$ci_data,
                  aes(x = x, y = y, fill = q),
                  colour = "gray30") +
-    geom_path(data = df_lists$tmp11, aes(x = Bratio, y = Fratio)) +
-    geom_point(data = df_lists$tmp11b,
+    geom_path(data = df_lists$data_lines, aes(x = Bratio, y = Fratio)) +
+    geom_point(data = df_lists$highlight_years,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
     facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
@@ -487,8 +502,7 @@ kobe_ggplot <- function(
     scale_fill_manual(
       values = colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
     ) +
-    labs(x = title_x, y = title_y, fill = "",
-         shape = "") +
+    labs(x = title_x, y = title_y, fill = "", shape = "") +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +
     theme(legend.position = "top")
@@ -499,7 +513,9 @@ kobe_ggplot <- function(
 #' Creates a ggplot2-based visualization comparing prior and posterior
 #' distributions for a selected parameter across scenarios.
 #'
-#' @param df_lists A named list as returned by \code{priors_posteriors_data()}.
+#' @param df_lists A named list as returned by \code{priors_posteriors_data()}. 
+#'   It must contain the elements \code{prior}, \code{posterior}, \code{PPVR} 
+#'   and \code{PPMR}.
 #' @param indicator_name A character string specifying the parameter to plot.
 #'   Supported values include "K", "r", and "psi".
 #' @param n_col An integer value that determines the maximum number of columns
@@ -546,12 +562,16 @@ kobe_ggplot <- function(
 #'   df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
 #' )
 #' }
+#' 
+#' @family visualization functions
+#' @family priors vs posteriors functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter select rename pull all_of
-#' @importFrom ggplot2 .pt ggplot geom_area aes facet_wrap geom_text
-#' coord_cartesian labs scale_y_continuous theme element_blank
+#' @importFrom dplyr %>% all_of filter full_join pull rename select
+#' @importFrom ggplot2 .pt aes coord_cartesian element_blank facet_wrap 
+#' geom_area ggplot labs scale_x_continuous scale_y_continuous theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 priors_posteriors_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
   title_y = "Density", use_si_suffix = FALSE, palette = NULL, title_x = NULL, 
@@ -653,7 +673,10 @@ priors_posteriors_ggplot <- function(
   x_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = x_decimals)
+    function(x) {
+      format(1e6, digits = x_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
   
   ggplot() +
@@ -681,7 +704,8 @@ priors_posteriors_ggplot <- function(
 #' retrospective bias (rho) annotations.
 #'
 #' @param df_lists A named list as returned by
-#'   \code{retrospective_analysis_data()}.
+#'   \code{retrospective_analysis_data()}. It must contain the elements 
+#'   \code{data}, \code{surplus_data} and \code{rho_data}.
 #' @param indicator_name A character string specifying the name of the 
 #'   indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
 #'   "procB", and "MSY".
@@ -722,13 +746,17 @@ priors_posteriors_ggplot <- function(
 #' df <- retrospective_analysis_data(list_hc_models)
 #' retrospective_analysis_ggplot(df, indicator_name = "B")
 #' }
+#' 
+#' @family visualization functions
+#' @family retrospective analysis functions
 #'
 #' @export
-#' @importFrom ggplot2 .pt element_text ggplot geom_line aes geom_ribbon geom_text 
-#' guides guide_legend facet_wrap scale_colour_manual scale_y_continuous labs 
-#' theme  
+#' @importFrom ggplot2 .pt aes coord_cartesian element_text facet_wrap 
+#' geom_hline geom_line geom_ribbon ggplot guide_legend guides labs 
+#' scale_colour_manual scale_x_continuous scale_y_continuous theme
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 retrospective_analysis_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
   use_si_suffix = FALSE, title_x = NULL, title_y = NULL, x_lim = NULL, 
@@ -808,7 +836,10 @@ retrospective_analysis_ggplot <- function(
     x_labels <- if (use_si_suffix) {
       function(x) .international_system_prefixes(x)
     } else {
-      function(x) .format_number(x, decimals = x_decimals)
+      function(x) {
+        format(1e6, digits = x_decimals, scientific = FALSE, 
+          big.mark = ".", decimal.mark = ",")
+      }
     }
   }
   table <- .prepare_npc_table_data(
@@ -825,7 +856,10 @@ retrospective_analysis_ggplot <- function(
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = y_decimals)
+    function(x) {
+      format(1e6, digits = y_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
   
   p <- ggplot()
@@ -895,7 +929,8 @@ retrospective_analysis_ggplot <- function(
 #' Creates a ggplot2-based visualization of runs test diagnostics, including 
 #' residuals, credibility limits, and p-values across scenarios and indices.
 #'
-#' @param df_lists A named list as returned by \code{runs_tests_data()}.
+#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
+#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
 #' @param position A character string specifying the table's position within 
 #'   each plot panel, combining a vertical and a horizontal keyword separated 
 #'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
@@ -928,11 +963,15 @@ retrospective_analysis_ggplot <- function(
 #' df <- runs_tests_data(list_fit_models)
 #' runs_tests_ggplot(df)
 #' }
+#' 
+#' @family visualization functions
+#' @family cpue residuals runs tests functions
 #'
 #' @export
-#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment geom_text
-#' geom_point facet_grid scale_fill_manual scale_y_continuous labs theme
+#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment
+#' geom_point facet_grid scale_fill_manual labs theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 runs_tests_ggplot <- function(
   df_lists, position = "top-left", text_size = 6, title_x = "Year", 
   title_y = "Residuals", x_lim = NULL, y_lim = NULL
@@ -1051,9 +1090,11 @@ runs_tests_ggplot <- function(
 #' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 #' }
 #' 
+#' @family visualization functions
+#' 
 #' @export
 #' @importFrom gt gtsave
-#' @importFrom rstudioapi viewer isAvailable
+#' @importFrom rstudioapi isAvailable viewer
 #' @importFrom openxlsx write.xlsx
 #' @importFrom utils browseURL
 summary_table <- function(
@@ -1155,11 +1196,13 @@ summary_table <- function(
 #' df <- trajectories_data(out)
 #' trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 #' }
-#'
+#' 
+#' @family visualization functions
+#' @family trajectories functions
 #'
 #' @export
-#' @importFrom ggplot2 ggplot geom_ribbon aes geom_line facet_wrap 
-#' scale_y_continuous labs theme
+#' @importFrom ggplot2 aes coord_cartesian facet_wrap geom_hline geom_line 
+#' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
   df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
   palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
@@ -1218,7 +1261,10 @@ trajectories_ggplot <- function(
   y_labels <- if (use_si_suffix) {
     function(x) .international_system_prefixes(x)
   } else {
-    function(x) .format_number(x, decimals = y_decimals)
+    function(x) {
+      format(1e6, digits = y_decimals, scientific = FALSE, 
+        big.mark = ".", decimal.mark = ",")
+    }
   }
 
   p <- ggplot() +

@@ -124,6 +124,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_ra_MSY <- reactive({
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_MSY")
     vec <- unlist(reactiveValuesToList(ra_MSY_change))
     
     enable <- any(vec) && !.is_empty(input$ra_MSY_scenarios)
@@ -334,7 +336,6 @@
           type = "scattergl",
           mode = "lines",
           line = list(width = 3),
-          # hoverinfo = "x+y"#,
           hoverinfo = "text",
           text = ~paste0(
             "Biomass (", id,"): ", .international_system_prefixes(SB_i, 2), 
@@ -368,9 +369,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>%
-      flatten()
-    
+    })
 
     results <- subplot(
       plots,
@@ -379,7 +378,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.005
+      margin = 0.02
     ) %>%
       layout(
         annotations = list(

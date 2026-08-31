@@ -15,7 +15,8 @@ runs_tests_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{runs_tests_data()}.}
+\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
+must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
 
 \item{position}{A character string specifying the table's position within
 each plot panel, combining a vertical and a horizontal keyword separated
@@ -61,3 +62,20 @@ runs_tests_ggplot(df)
 }
 
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+
+Other cpue residuals runs tests functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{runs_tests_data}()}
+}
+\concept{cpue residuals runs tests functions}
+\concept{visualization functions}

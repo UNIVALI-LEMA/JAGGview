@@ -29,6 +29,7 @@ Imports:
     grDevices,
     gt,
     htmltools,
+    htmlwidgets,
     JABBA,
     memuse,
     openxlsx,

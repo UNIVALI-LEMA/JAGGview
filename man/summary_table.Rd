@@ -74,3 +74,15 @@ summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
 }
 
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{trajectories_ggplot}()}
+}
+\concept{visualization functions}

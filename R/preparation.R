@@ -1,7 +1,8 @@
 #' Prepare fitted index data and credibility intervals
 #'
-#' Processes model outputs to generate formatted data for fitted indices_factor,
-#' including mean values and credibility intervals (80% and 95%).
+#' Processes model outputs to generate formatted data for fitted 
+#' indices_factor, including mean values and credibility intervals (80% and 
+#' 95%).
 #'
 #' Extracts index and uncertainty information from a list of model results, 
 #' computes upper and lower credibility bounds, and organizes the data for 
@@ -34,6 +35,9 @@
 #' accordingly. The function also ensures consistency across different
 #' model outputs and removes incomplete cases before returning results.
 #' 
+#' @family preparation functions
+#' @family fits functions
+#' 
 #' @examples
 #' \dontrun{
 #' fit.S01 <- fit_jabba()
@@ -42,18 +46,16 @@
 #' result <- fits_data(list_fit_models)
 #' result
 #' }
-#'
+#' 
 #' @export
 #' @importFrom tidyr pivot_longer 
-#' @importFrom dplyr %>% select filter full_join 
+#' @importFrom dplyr %>% full_join mutate select 
 #' @importFrom stats complete.cases
 #' @importFrom forcats fct_relevel
 fits_data <- function(list_fit_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_fits_input_data(list_fit_models)
-  if (.is_fit_jabba(list_fit_models)) {
-    list_fit_models <- list(list_fit_models)
-  }
+  if (.is_fit_jabba(list_fit_models)) list_fit_models <- list(list_fit_models)
 
   ###@> Index...
   tmp01 <- .process_scenarios(list_fit_models, vars = "I")
@@ -145,9 +147,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' \describe{
 #'   \item{data}{A data frame containing full hindcast time series,
 #'   including observed and predicted values.}
-#'   \item{hindcast_data_1}{A data frame with selected hindcast points
+#'   \item{data_points}{A data frame with selected hindcast points
 #'   used for visualization of observed and predicted values.}
-#'   \item{hindcast_data_2}{A data frame containing filtered hindcast
+#'   \item{data_lines}{A data frame containing filtered hindcast
 #'   trajectories for plotting purposes.}
 #'   \item{mase_data}{A data frame containing Mean Absolute Scaled Error
 #'   (MASE) metrics for each index and scenario.}
@@ -166,15 +168,16 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' df <- hindcast_data(list_hc_models)
 #' df
 #' }
+#' 
+#' @family preparation functions
+#' @family hindcasts functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter mutate case_when rename group_by ungroup
+#' @importFrom dplyr %>% filter group_by mutate pull rename ungroup
 hindcast_data <- function(list_hc_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
-  if (.is_hindcast_jabba(list_hc_models)) {
-    list_hc_models <- list(list_hc_models)
-  }
+  if (.is_hindcast_jabba(list_hc_models)) list_hc_models <- list(list_hc_models)
 
   ######@> Plot hindcasting...
   hc <- .process_hindcasts(list_hc_models)
@@ -217,8 +220,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 
   results <- list(
     data = tmp14,
-    hindcast_data_1 = tmp15,
-    hindcast_data_2 = tmp16,
+    data_points = tmp15,
+    data_lines = tmp16,
     mase_data = mase  %>% filter(!Index %in% na_index),
     min_year_retro = min_year
   )
@@ -260,11 +263,11 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #'   overfished and overfishing).}
 #'   \item{col04}{Data frame defining the green quadrant (healthy stock 
 #'   conditions).}
-#'   \item{k.out}{Data frame with kernel density contours (50%, 80%, 95%) 
+#'   \item{ci_data}{Data frame with kernel density contours (50%, 80%, 95%) 
 #'   for the terminal year.}
-#'   \item{tmp11}{Time series of median biomass and fishing mortality 
+#'   \item{data_lines}{Time series of median biomass and fishing mortality 
 #'   ratios by year and scenario.}
-#'   \item{tmp11b}{Subset of selected years (e.g., 1950, 1986, 2023) for 
+#'   \item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023) for 
 #'   highlighting points.}
 #' }
 #'
@@ -275,6 +278,9 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' uncertainty regions commonly displayed in Kobe plots.
 #'
 #' The output is designed to be used directly with \code{kobe_ggplot()}.
+#' 
+#' @family preparation functions
+#' @family kobe functions
 #'
 #' @examples
 #' \dontrun{
@@ -286,9 +292,10 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' }
 #'
 #' @export
-#' @importFrom dplyr %>% summarise arrange filter
+#' @importFrom dplyr %>% summarise arrange filter rename mutate
 #' @importFrom stats median
 #' @importFrom gplots ci2d
+#' @importFrom forcats fct_relevel
 kobe_data <- function(
   list_fit_models, ci_levels = c(0.5, 0.8, 0.95), reserve_mb = 2048, 
   poll_interval = 0.5
@@ -334,7 +341,7 @@ kobe_data <- function(
     mutate(year = as.integer(year))
 
   #####@> Extracting data...
-  tmp11 <- model_results %>%
+  data_lines <- model_results %>%
     summarise(
       Fratio = median(harvest),
       Bratio = median(stock),
@@ -342,8 +349,8 @@ kobe_data <- function(
     ) %>%
     arrange(Scenario, year)
 
-  max_x <- ceiling(max(tmp11$Bratio))
-  max_y <- ceiling(max(tmp11$Fratio))
+  max_x <- ceiling(max(data_lines$Bratio))
+  max_y <- ceiling(max(data_lines$Fratio))
   
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
@@ -367,10 +374,10 @@ kobe_data <- function(
   min_year <- min(model_results$year)
   mid_year <- round(min_year + (max_year - min_year)/2)
 
-  tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
-  tmp11c <- filter(model_results, year == max_year)
+  highlight_years <- filter(data_lines, year %in% c(min_year, mid_year, max_year))
+  data_linesc <- filter(model_results, year == max_year)
 
-  k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
+  ci_data <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
   for(i in unique(model_results$Scenario)) {
     x <- filter(model_results, Scenario == i)
     x <- filter(x, year == max_year)
@@ -394,8 +401,8 @@ kobe_data <- function(
     
     tmp <- do.call(rbind, tmp00)
 
-    k.out <- rbind(
-      k.out, 
+    ci_data <- rbind(
+      ci_data, 
       data.frame(
         x = tmp$x,
         y = tmp$y,
@@ -410,9 +417,9 @@ kobe_data <- function(
     col02 = col02[1, , drop = FALSE],
     col03 = col03[1, , drop = FALSE],
     col04 = col04[1, , drop = FALSE],
-    k.out = k.out,
-    tmp11 = tmp11,
-    tmp11b = tmp11b
+    ci_data = ci_data,
+    data_lines = data_lines,
+    highlight_years = highlight_years
   )
 
   class(results) <- c("JAGGdata", class(results))
@@ -454,6 +461,9 @@ kobe_data <- function(
 #' df <- priors_posteriors_data(list_fit_models)
 #' df
 #' }
+#' 
+#' @family preparation functions
+#' @family priors vs posteriors functions
 #'
 #' @export
 #' @importFrom dplyr %>% filter summarise
@@ -629,15 +639,17 @@ priors_posteriors_data <- function(list_fit_models) {
 #' df <- retrospective_analysis_data(list_hc_models)
 #' df
 #' }
+#' 
+#' @family preparation functions
+#' @family retrospective analysis functions
 #'
 #' @export
-#' @importFrom dplyr %>% filter mutate
+#' @importFrom dplyr %>% filter mutate select
+#' @importFrom forcats fct_relevel
 retrospective_analysis_data <- function(list_hc_models) {
   # ###@> Filtering the expected data...
   # .validate_hcs_input_data(list_hc_models)
-  if (.is_hindcast_jabba(list_hc_models)) {
-    list_hc_models <- list(list_hc_models)
-  }
+  if (.is_hindcast_jabba(list_hc_models)) list_hc_models <- list(list_hc_models)
 
   labels_index <- c(
     "B"      = "Biomass",
@@ -737,18 +749,20 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' df <- runs_tests_data(list_fit_models)
 #' df
 #' }
+#' 
+#' @family preparation functions
+#' @family cpue residuals runs tests functions
 #'
 #' @export
+#' @importFrom tidyr pivot_longer
 #' @importFrom dplyr %>% mutate filter left_join select
 #' @importFrom JABBA jbruns_sig3
-#' @importFrom stats loess predict complete.cases
+#' @importFrom stats complete.cases loess predict
 #' @importFrom forcats fct_relevel
 runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   # ###@> Filtering the expected data...
   # .validate_fits_input_data(list_fit_models)
-  if (.is_fit_jabba(list_fit_models)) {
-    list_fit_models <- list(list_fit_models)
-  }
+  if (.is_fit_jabba(list_fit_models)) list_fit_models <- list(list_fit_models)
 
   tmp05 <- .process_runs(list_fit_models)
 
@@ -815,8 +829,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   tmp05$upper <- pred$fit + 1.96 * pred$se.fit
   tmp05$lower <- pred$fit - 1.96 * pred$se.fit
 
-  RMSE_data <- .process_stats(list_fit_models) %>%
-    filter(Stastistic == "RMSE")
+  RMSE_data <- .process_stats(list_fit_models) %>% filter(Stastistic == "RMSE")
 
   results <- list(
     cpue_residuals = tmp05,
@@ -875,8 +888,11 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' df
 #' }
 #' 
+#' @family preparation functions
+#' @family trajectories functions
+#' 
 #' @export
-#' @importFrom dplyr %>% rename mutate summarise bind_rows ungroup
+#' @importFrom dplyr %>% bind_rows mutate rename summarise ungroup
 #' @importFrom stats median quantile
 trajectories_data <- function(
   list_fit_models, reserve_mb = 2048, poll_interval = 0.5
@@ -937,8 +953,7 @@ trajectories_data <- function(
       )
   })
 
-  results <- bind_rows(result_list) %>%
-    ungroup()
+  results <- bind_rows(result_list) %>% ungroup()
 
   class(results) <- c("JAGGdata", class(results))
 

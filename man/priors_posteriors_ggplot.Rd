@@ -20,7 +20,9 @@ priors_posteriors_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{priors_posteriors_data()}.}
+\item{df_lists}{A named list as returned by \code{priors_posteriors_data()}.
+It must contain the elements \code{prior}, \code{posterior}, \code{PPVR}
+and \code{PPMR}.}
 
 \item{indicator_name}{A character string specifying the parameter to plot.
 Supported values include "K", "r", and "psi".}
@@ -85,3 +87,21 @@ priors_posteriors_ggplot(
 }
 
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+
+Other priors vs posteriors functions: 
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{priors_posteriors_data}()}
+}
+\concept{priors vs posteriors functions}
+\concept{visualization functions}

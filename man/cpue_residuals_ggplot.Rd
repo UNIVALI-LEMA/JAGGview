@@ -17,8 +17,8 @@ cpue_residuals_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list of data frames as returned by
-\code{runs_tests_data()}.}
+\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
+must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
@@ -65,3 +65,20 @@ smoothed trends, and RMSE annotations.
 The plot includes residual segments, observed values, a smoothed trend,
 and RMSE annotations for each scenario.
 }
+\seealso{
+Other visualization functions: 
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+
+Other cpue residuals runs tests functions: 
+\code{\link{runs_tests_data}()},
+\code{\link{runs_tests_ggplot}()}
+}
+\concept{cpue residuals runs tests functions}
+\concept{visualization functions}

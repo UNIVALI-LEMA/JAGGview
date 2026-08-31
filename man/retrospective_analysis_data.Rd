@@ -41,3 +41,18 @@ df
 }
 
 }
+\seealso{
+Other preparation functions: 
+\code{\link{fits_data}()},
+\code{\link{hindcast_data}()},
+\code{\link{kobe_data}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{runs_tests_data}()},
+\code{\link{trajectories_data}()}
+
+Other retrospective analysis functions: 
+\code{\link{get_rho}()},
+\code{\link{retrospective_analysis_ggplot}()}
+}
+\concept{preparation functions}
+\concept{retrospective analysis functions}

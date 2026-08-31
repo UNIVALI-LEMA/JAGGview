@@ -124,6 +124,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_ra_BBmsy <- reactive({
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_BBmsy")
     vec <- unlist(reactiveValuesToList(ra_BBmsy_change))
     
     enable <- any(vec) && !.is_empty(input$ra_BBmsy_scenarios)
@@ -353,15 +355,6 @@
             "mu (", id,"): ", .international_system_prefixes(mu, 2)
           )
         ) %>%
-        # add_text(
-        #   data = rho_var,
-        #   x = pos$x,
-        #   y = pos$y,
-        #   text = ~paste0("\u03c1= ", .international_system_prefixes(rho, 2)),
-        #   textfont = list(size = text_size_ra_BBmsy()),
-        #   textposition = "bottom left",
-        #   hoverinfo = "skip"
-        # ) %>%
         layout(
           showlegend = FALSE,
           xaxis = list(
@@ -388,9 +381,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>% 
-      flatten()
-    
+    })
 
     results <- subplot(
       plots,
@@ -399,7 +390,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.005
+      margin = 0.02
     ) %>%
       layout(
         annotations = list(

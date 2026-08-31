@@ -177,6 +177,7 @@
   })
 
   status_sliders_cpue_res <- reactive({
+    req(input$navmenu == "tab_cpue_residuals")
     vec <- unlist(reactiveValuesToList(cpue_res_change))
 
     empty_condition <- .is_empty(input$cpue_res_scenarios)|| 
@@ -305,7 +306,7 @@
 
     plots <- map(scenarios, function(s) {
       cpue_residuals <- df_lists$cpue_residuals %>%
-          filter(Scenario == s)
+        filter(Scenario == s)
 
       RMSE_data <- df_lists$RMSE_data %>%
         filter(Scenario == s)
@@ -461,7 +462,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>% flatten()
+    })
     
 
     results <- subplot(

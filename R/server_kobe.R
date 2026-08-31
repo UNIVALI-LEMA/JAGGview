@@ -1,5 +1,5 @@
 #' @keywords internal
-.kobe_server <- function(input, output, session, kobe_df) {
+.kobe_server <- function(input, output, session, kobe_df, animation) {
   filtered_kobe <- reactiveVal(kobe_df)
 
   title_x_kobe <- reactiveVal(NULL)
@@ -107,6 +107,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_kobe <- reactive({
+    req(input$navmenu == "tab_kobe")
     vec <- unlist(reactiveValuesToList(kobe_change))
     
     enable <- any(vec) && !.is_empty(input$kobe_scenarios)
@@ -150,15 +151,15 @@
           col02 = kobe_df$col02,
           col03 = kobe_df$col03,
           col04 = kobe_df$col04,
-          k.out = kobe_df$k.out %>%
+          ci_data = kobe_df$ci_data %>%
             filter(
               Scenario %in% input$kobe_scenarios
             ),
-          tmp11 = kobe_df$tmp11 %>%
+          data_lines = kobe_df$data_lines %>%
             filter(
               Scenario %in% input$kobe_scenarios
             ),
-          tmp11b = kobe_df$tmp11b %>%
+          highlight_years = kobe_df$highlight_years %>%
             filter(
               Scenario %in% input$kobe_scenarios
             )
@@ -181,6 +182,11 @@
 
     df_lists <- filtered_kobe()
 
+    min_year <- min(df_lists$data_lines$year, na.rm = TRUE)
+    max_year <- max(df_lists$data_lines$year, na.rm = TRUE)
+    range <- max_year - min_year
+    steps <- round(range / 25)
+
     x_lim_min <- .get_value_or_default(x_lim_min_kobe, 0)
     x_lim_max <- .get_value_or_default(x_lim_max_kobe, df_lists$col02$xmax)
     x_lim <- c(x_lim_min, x_lim_max)
@@ -193,9 +199,9 @@
 
     title_y <- .get_value_or_default(title_y_kobe, "F/Fmsy")
 
-    scenarios <- unique(df_lists$k.out$Scenario)
+    scenarios <- unique(df_lists$ci_data$Scenario)
 
-    n_levels <- length(unique(df_lists$k.out$q))
+    n_levels <- length(unique(df_lists$ci_data$q))
 
     n_scenarios <- length(scenarios)
 
@@ -210,13 +216,18 @@
     palette <- colorRampPalette(c("cornsilk4", "grey", "cornsilk2"))(n_levels)
 
     plots <- map(scenarios, function(s) {
-      line_data <- df_lists$tmp11 %>%
+      line_data <- df_lists$data_lines %>%
         filter(Scenario == s)
 
-      marker_data <- df_lists$tmp11b %>%
+      if (animation) {
+        line_data <- line_data %>% 
+          .accumulate_by(year, step = steps)
+      }
+
+      marker_data <- df_lists$highlight_years %>%
         filter(Scenario == s)
 
-      ci_data <- df_lists$k.out %>%
+      ci_data <- df_lists$ci_data %>%
         filter(Scenario == s)
 
       shapes <- list()
@@ -383,6 +394,7 @@
           type = "scatter",
           mode = "lines",
           line = list(color = "black", width = 1),
+          frame =  if (animation) ~frame else NULL,
           name = "Trajectories",
           hoverinfo = "text",
           text = ~paste0(
@@ -475,8 +487,25 @@
             )
           )
         )
-      )
+      ) 
+    if (animation) {
+      results <- results %>%
+        animation_slider(
+          hide = TRUE
+        ) %>%
+        animation_button(
+          visible = FALSE
+        ) %>%
+        onRender("
+          function(el,x){
+            Plotly.animate(el, null, {
+              frame: {duration: 100, redraw: false},
+              transition: {duration: 100}
+            });
+          }
+        ")
+    }
     # toc()
     results
-    })
+  })
 }

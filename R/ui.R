@@ -2,7 +2,7 @@ plot_height <- "calc(100vh - 57px - 30px)"
 plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
 
 .build_ui <- function(
-  fits_df, pp_df, res_df, kobe_df, traj_df, hind_df, ra_df
+  fits_data, pp_data, res_data, kobe_data, traj_data, hind_data, ra_data
 ) {
   addResourcePath("www", system.file("www", package = "JAGGview"))
 
@@ -282,15 +282,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "fits_scenarios",
               label = "Scenarios: ",
-              choices = unique(fits_df$Scenario),
-              selected = unique(fits_df$Scenario),
+              choices = unique(fits_data$Scenario),
+              selected = unique(fits_data$Scenario),
               multiple = TRUE
             ),
             selectInput(
               inputId = "fits_indices",
               label = "Indices: ",
-              choices = unique(fits_df$Index),
-              selected = unique(fits_df$Index),
+              choices = unique(fits_data$Index),
+              selected = unique(fits_data$Index),
               multiple = TRUE
             ),
             textInput(
@@ -368,15 +368,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "runs_tests_scenarios",
               label = "Scenarios: ",
-              choices = unique(res_df$cpue_residuals$Scenario),
-              selected = unique(res_df$cpue_residuals$Scenario),
+              choices = unique(res_data$cpue_residuals$Scenario),
+              selected = unique(res_data$cpue_residuals$Scenario),
               multiple = TRUE
             ),
             selectInput(
               inputId = "runs_tests_indices",
               label = "Indices: ",
-              choices = unique(res_df$cpue_residuals$Index),
-              selected = unique(res_df$cpue_residuals$Index),
+              choices = unique(res_data$cpue_residuals$Index),
+              selected = unique(res_data$cpue_residuals$Index),
               multiple = TRUE
             ),
             textInput(
@@ -464,15 +464,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "cpue_res_scenarios",
               label = "Scenarios: ",
-              choices = unique(res_df$cpue_residuals$Scenario),
-              selected = unique(res_df$cpue_residuals$Scenario),
+              choices = unique(res_data$cpue_residuals$Scenario),
+              selected = unique(res_data$cpue_residuals$Scenario),
               multiple = TRUE
             ),
             selectInput(
               inputId = "cpue_res_indices",
               label = "Indices: ",
-              choices = unique(res_df$cpue_residuals$Index),
-              selected = unique(res_df$cpue_residuals$Index),
+              choices = unique(res_data$cpue_residuals$Index),
+              selected = unique(res_data$cpue_residuals$Index),
               multiple = TRUE
             ),
             uiOutput("cpue_res_color_inputs"),
@@ -562,8 +562,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "pp_K_scenarios",
               label = "Scenarios: ",
-              choices = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
-              selected = unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario)),
+              choices = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
+              selected = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
               multiple = TRUE
             ),
             textInput(
@@ -636,10 +636,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               inputId = "pp_r_scenarios",
               label = "Scenarios: ",
               choices = unique(
-                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
               ),
               selected = unique(
-                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
               ),
               multiple = TRUE
             ),
@@ -713,10 +713,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               inputId = "pp_psi_scenarios",
               label = "Scenarios: ",
               choices = unique(
-                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
               ),
               selected = unique(
-                c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
               ),
               multiple = TRUE
             ),
@@ -789,8 +789,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_B_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -879,8 +879,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_F_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -969,8 +969,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_BBmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1059,8 +1059,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_FFmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1149,8 +1149,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_procB_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1239,8 +1239,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_MSY_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_df$data$Scenario),
-              selected = unique(ra_df$data$Scenario),
+              choices = unique(ra_data$data$Scenario),
+              selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1328,15 +1328,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "hc_scenarios",
               label = "Scenarios: ",
-              choices = unique(hind_df$data$Scenario),
-              selected = unique(hind_df$data$Scenario),
+              choices = unique(hind_data$data$Scenario),
+              selected = unique(hind_data$data$Scenario),
               multiple = TRUE
             ),
             selectInput(
               inputId = "hc_indices",
               label = "Indices: ",
-              choices = unique(hind_df$data$Index),
-              selected = unique(hind_df$data$Index),
+              choices = unique(hind_data$data$Index),
+              selected = unique(hind_data$data$Index),
               multiple = TRUE
             ),
             textInput(
@@ -1425,8 +1425,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_BB0_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1505,8 +1505,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_BBmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1585,8 +1585,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_FFmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1665,8 +1665,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_Bdev_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1745,8 +1745,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_B_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1825,8 +1825,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_H_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1905,8 +1905,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_Catch_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_df$Scenario),
-              selected = unique(traj_df$Scenario),
+              choices = unique(traj_data$Scenario),
+              selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
             textInput(
@@ -1984,8 +1984,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "kobe_scenarios",
               label = "Scenarios: ",
-              choices = unique(kobe_df$k.out$Scenario),
-              selected = unique(kobe_df$k.out$Scenario),
+              choices = unique(kobe_data$ci_data$Scenario),
+              selected = unique(kobe_data$ci_data$Scenario),
               multiple = TRUE
             ),
             textInput(

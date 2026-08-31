@@ -127,7 +127,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_position, {
-    if (!identical(input$runs_tests_position, runs_tests_values$position_current)) {
+    if (!identical(input$runs_tests_position, 
+      runs_tests_values$position_current)) {
       runs_tests_change$position_changed = TRUE
     }
     else {
@@ -136,6 +137,7 @@
   }, ignoreInit = TRUE)
 
   status_sliders_runs_tests <- reactive({
+    req(input$navmenu == "tab_runs_tests")
     vec <- unlist(reactiveValuesToList(runs_tests_change))
 
     empty_condition <- .is_empty(input$runs_tests_scenarios)|| 

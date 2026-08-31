@@ -19,7 +19,8 @@ retrospective_analysis_ggplot(
 }
 \arguments{
 \item{df_lists}{A named list as returned by
-\code{retrospective_analysis_data()}.}
+\code{retrospective_analysis_data()}. It must contain the elements
+\code{data}, \code{surplus_data} and \code{rho_data}.}
 
 \item{indicator_name}{A character string specifying the name of the
 indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
@@ -77,3 +78,20 @@ retrospective_analysis_ggplot(df, indicator_name = "B")
 }
 
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+
+Other retrospective analysis functions: 
+\code{\link{get_rho}()},
+\code{\link{retrospective_analysis_data}()}
+}
+\concept{retrospective analysis functions}
+\concept{visualization functions}

@@ -126,6 +126,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_pp_psi <- reactive({
+    req(input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_psi")
     vec <- unlist(reactiveValuesToList(pp_psi_change))
 
     empty_condition <- .is_empty(input$pp_psi_scenarios)
@@ -225,9 +227,13 @@
       3
     }
 
-    prior_all <- df_lists$prior %>% select(Scenario, psi01, psi02)
+    prior_all <- df_lists$prior %>% 
+      select(Scenario, psi01, psi02) %>%
+      filter(psi02 > 0.005e-9)
 
-    posterior_all <- df_lists$posterior %>% select(Scenario, psi01, psi02)
+    posterior_all <- df_lists$posterior %>% 
+      select(Scenario, psi01, psi02) %>%
+      filter(psi02 > 0.005e-9)
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_pp_psi, min(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)
@@ -253,12 +259,6 @@
 
     title_y <- .get_value_or_default(title_y_pp_psi, "Density")
 
-    # PPMR <- df_lists$PPMR %>%
-    #   select(Scenario, psi)
-
-    # PPVR <- df_lists$PPVR %>%
-    #   select(Scenario, psi)
-
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = psi) %>%
       full_join(
@@ -274,24 +274,6 @@
       prior <- prior_split[[s]]
       posterior <- posterior_split[[s]]
       df_text <- df_text_split[[s]]
-      # prior <- prior %>%
-      #   filter(Scenario == s)
-
-      # posterior <- posterior %>%
-      #   filter(Scenario == s)
-
-      # PPMR <- PPMR %>%
-      #   filter(Scenario == s)
-
-      # PPVR <- PPVR %>%
-      #   filter(Scenario == s)
-
-      # df_text <- PPMR %>%
-      #   select(Scenario, ppmr_value = all_of("psi")) %>%
-      #   full_join(
-      #     PPVR %>%
-      #       select(Scenario, ppvr_value = all_of("psi")), by = "Scenario"
-      #   )
         
       shapes <- list()
 
@@ -421,8 +403,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>%
-      flatten()
+    })
     
 
     results <- subplot(

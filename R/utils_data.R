@@ -10,6 +10,7 @@
 #'   the index and year.
 #'
 #' @keywords internal
+#' @noRd
 .array_to_dataframe <- function(arr) {
   if (length(dim(arr)) != 3) {
     stop("The input must be a three-dimensional array.")
@@ -25,6 +26,64 @@
   }
   result <- do.call(rbind, df_list)
   return(result)
+}
+
+#' Classify a single loaded object and append it to the right collector
+#' 
+#' Internal helper shared by the \code{.RData}/\code{.rda} and \code{.rds} 
+#' loading branches of \code{create_report()}, so the fit/hindcast/ignored 
+#' classification logic (and its \code{verbose} messaging) is written once.
+#' 
+#' @param obj The R object to classify, as loaded from a \code{.RData}/
+#'   \code{.rds} file.
+#' @param name A character string with \code{obj}'s name. Used in the 
+#'   \code{verbose} message and, if \code{obj} is neither a fit nor a 
+#'   hindcast object, appended to \code{ignored_names}.
+#' @param name_width An integer giving the field width used to left-pad 
+#'   \code{name} (via \code{sprintf("\%-*s", ...)}) when printing the 
+#'   \code{verbose} message, so that object names line up in the console output.
+#' @param fits_list A list of previously identified \pkg{JABBA} fit objects. If 
+#'   \code{obj} is identified as a fit (via \code{.is_fit_jabba()}), it is 
+#'   appended to this list.
+#' @param hc_list A list of previously identified \pkg{JABBA} hindcast objects. 
+#'   If \code{obj} is identified as a hindcast (via 
+#'   \code{.is_hindcast_jabba()}), it is appended to this list.
+#' @param ignored_names A character vector with the names of previously ignored 
+#'   objects (i.e. neither fits nor hindcasts). If \code{obj} is ignored, 
+#'   \code{name} is appended to this vector.
+#' @param verbose A boolean value that if TRUE, prints (via \code{cat()}) a 
+#'   message to console reporting whether \code{obj} was identified as a fit, a 
+#'   hindcast, or ignored.
+#' 
+#' @return 
+#' A list with three elements, \code{fits_list}, \code{hc_list} and 
+#' \code{ignored_names}, corresponding to the input collectors above with 
+#' \code{obj} (or its \code{name}) added to the appropriate one. Since R has 
+#' copy-on-modify semantics, this function does not alter \code{fits_list}, 
+#' \code{hc_list} or \code{ignored_names} in place; the caller must reassign 
+#' them from the returned list.
+#' 
+#' @keywords internal
+#' @noRd
+.classify_object <- function(
+  obj, name, name_width, fits_list, hc_list, ignored_names, verbose
+) {
+  if (.is_fit_jabba(obj)) {
+    fits_list[[length(fits_list) + 1]] <- obj
+    status <- "Identified as fit jabba"
+  }
+  else if (.is_hindcast_jabba(obj)) {
+    hc_list[[length(hc_list) + 1]] <- obj
+    status <- "Identified as hindcast jabba"
+  }
+  else {
+    ignored_names <- c(ignored_names, name)
+    status <- "Ignored file"
+  }
+  if (verbose) {
+    cat(sprintf("\nChecking: %-*s | %s", name_width, name, status))
+  }
+  list(fits_list = fits_list, hc_list = hc_list, ignored_names = ignored_names)
 }
 
 #' Combine trajectory and Kobe plot data for the dashboard
@@ -64,7 +123,8 @@
 #' directly if only one of the two outputs is needed.
 #'
 #' @keywords internal
-#' @importFrom dplyr %>% rename mutate summarise arrange filter bind_rows 
+#' @noRd
+#' @importFrom dplyr %>% arrange bind_rows filter mutate rename summarise 
 #' ungroup
 #' @importFrom stats median quantile
 #' @importFrom gplots ci2d
@@ -132,7 +192,7 @@
   results_traj <- bind_rows(result_list) %>%
     ungroup()
 
-  tmp11 <- model_results %>%
+  data_lines <- model_results %>%
     summarise(
       Fratio = median(harvest),
       Bratio = median(stock),
@@ -140,8 +200,8 @@
     ) %>%
     arrange(Scenario, year)
 
-  max_x <- ceiling(max(tmp11$Bratio))
-  max_y <- ceiling(max(tmp11$Fratio))
+  max_x <- ceiling(max(data_lines$Bratio))
+  max_y <- ceiling(max(data_lines$Fratio))
   
   col01 <- data.frame(
     xmin = c(0, 0), xmax = c(1, 1), ymin = c(0, 0), ymax = c(1, 1), 
@@ -165,10 +225,10 @@
   min_year <- min(model_results$year)
   mid_year <- round(min_year + (max_year - min_year)/2)
 
-  tmp11b <- filter(tmp11, year %in% c(min_year, mid_year, max_year))
-  tmp11c <- filter(model_results, year == max_year)
+  highlight_years <- filter(data_lines, year %in% c(min_year, mid_year, max_year))
+  data_linesc <- filter(model_results, year == max_year)
 
-  k.out <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
+  ci_data <- data.frame(x = NULL, y = NULL, Scenario = NULL, q = NULL)
   for(i in unique(model_results$Scenario)) {
     x <- filter(model_results, Scenario == i)
     x <- filter(x, year == max_year)
@@ -192,8 +252,8 @@
     
     tmp <- do.call(rbind, tmp00)
 
-    k.out <- rbind(
-      k.out, 
+    ci_data <- rbind(
+      ci_data, 
       data.frame(
         x = tmp$x,
         y = tmp$y,
@@ -208,9 +268,9 @@
     col02 = col02[1, , drop = FALSE],
     col03 = col03[1, , drop = FALSE],
     col04 = col04[1, , drop = FALSE],
-    k.out = k.out,
-    tmp11 = tmp11,
-    tmp11b = tmp11b
+    ci_data = ci_data,
+    data_lines = data_lines,
+    highlight_years = highlight_years
   )
 
   results <- list(
@@ -237,6 +297,7 @@
 #' @return A data frame with indices and corresponding rho values.
 #'
 #' @keywords internal
+#' @noRd
 .extract_rhos <- function(rho) {
   vec01 <- as.numeric(rho[nrow(rho),])
   vec02 <- c("B", "F", "BBmsy", "FFmsy", "procB", "MSY")
@@ -259,6 +320,7 @@
 #' @return The input data frame with missing Index values filled.
 #'
 #' @keywords internal
+#' @noRd
 .fill_na_indices <- function(data, index_inputseries) {
   index_data <- unique(data$Index)
   index_inputseries <- index_inputseries[!index_inputseries == "year"]
@@ -281,7 +343,8 @@
 #' @return A filtered data frame containing selected observations.
 #'
 #' @keywords internal
-#' @importFrom dplyr group_by across all_of group_modify filter ungroup
+#' @noRd
+#' @importFrom dplyr across all_of filter group_by group_modify ungroup
 .filter_by_condition <- function(df, group_col, condition_col, year_col) {
   df %>%
     group_by(across(all_of(group_col))) %>%
@@ -309,6 +372,7 @@
 #' @return A logical value indicating whether the object is a valid JABBA fit.
 #'
 #' @keywords internal
+#' @noRd
 .is_fit_jabba <- function(model) {
   cols_fit <- c(
     "assessment", "scenario", "settings", "inputseries", 
@@ -333,10 +397,9 @@
 #' JABBA result
 #' 
 #' @keywords internal
+#' @noRd
 .is_hindcast_jabba <- function(obj) {
-  if(!is.list(obj) || length(obj) == 0) {
-    return(FALSE)
-  }
+  if(!is.list(obj) || length(obj) == 0) return(FALSE)
 
   any(grepl("^-[0-9]{4}$", names(obj)))
 }
@@ -413,6 +476,7 @@
 #' @param run name for single models or joint ensembles
 #' @author Mostly adopted from ss3diags::SSplotEnsemble
 #' @keywords internal
+#' @noRd
 #' @examples
 #' \dontrun{
 #' if (requireNamespace("JABBA", quietly = TRUE)) {
@@ -722,6 +786,7 @@
 #' @param plot if TRUE, produces the plots
 #' @return Mohn's rho statistic for several quantaties
 #' @keywords internal
+#' @noRd
 #' @examples 
 #' \dontrun{
 #' if (requireNamespace("JABBA", quietly = TRUE)) {
@@ -731,6 +796,8 @@
 #'   .jbplot_retro2(bet)
 #' }
 #' }
+#' @importFrom JABBA ss3col
+#' @importFrom grDevices dev.off
 .jbplot_retro2 <- function (hc, type = c("B", "F", "BBmsy", "FFmsy", "procB", "SP"), 
     forecast = FALSE, ylabs = NULL, add = F, output.dir = getwd(), 
     as.png = FALSE, single.plots = add, width = NULL, height = NULL, 
@@ -1031,6 +1098,7 @@
 #' @return A data frame containing combined CPUE data across scenarios.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_cpues <- function(fit_list, vars) {
   temp00 <- lapply(fit_list, function(fit) {
@@ -1047,27 +1115,6 @@
   return(result)
 }
 
-#' Extract MASE data from hindcast results
-#' 
-#' Retrieves the data frame containing MASE (Mean Absolute Scaled Errors) values
-#' for all indices and scenarios, as returned by \code{hindcast_data()}.
-#' 
-#' @param df_lists A named list object returned by \code{hindcast_data()}, which 
-#'   must contain a component named \code{"mase_data"}.
-#' 
-#' @return A data frame containing Mean Absolute Scaled Error (MASE) metrics 
-#' for each index and scenario.
-#' 
-#' @details
-#' The returned data frame is in wide format, with one row per combination of 
-#' Index and Scenario. This function is a convenience acessor for extracting
-#' MASE results for further analysis or visualization.
-#' 
-#' @export
-get_mase <- function(df_lists) {
-  return(df_lists$mase_data)
-}
-
 #' Extract hindcast diagnostics from model outputs
 #'
 #' Internal helper that extracts hindcast diagnostic data from model outputs 
@@ -1078,6 +1125,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing hindcast diagnostics across scenarios.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_hindcasts <- function(fit_list) {
   temp00 <- lapply(
@@ -1110,6 +1158,7 @@ get_mase <- function(df_lists) {
 #' @return A character vector containing unique index names across models.
 #'
 #' @keywords internal
+#' @noRd
 .process_index <- function(fit_list) {
   temp00 <- lapply(fit_list, function(fit) {
     names(fit$inputseries$cpue)
@@ -1128,6 +1177,7 @@ get_mase <- function(df_lists) {
 #' plotting coordinates.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows everything
 #' @importFrom JABBA jbmase
 .process_mase <- function(fit_list) {
@@ -1135,9 +1185,7 @@ get_mase <- function(df_lists) {
     fit_list,
     function(fit) {
       jbmase(fit, verbose = FALSE) %>% 
-        mutate(
-          Scenario = fit[[1]]$scenario
-        )
+        mutate(Scenario = fit[[1]]$scenario)
     }
   )
   result <- bind_rows(temp00) %>% 
@@ -1156,6 +1204,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing surplus production data.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_pfunc <- function(hc_list) {
   temp00 <- lapply(
@@ -1189,6 +1238,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing posterior samples for each scenario.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_posteriors <- function(fit_list) {
   temp00 <- lapply(
@@ -1214,6 +1264,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing prior parameters for each scenario.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_priors <- function(fit_list) {
   temp00 <- lapply(
@@ -1243,6 +1294,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing time series across scenarios and runs.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_retro <- function(hc_list) {
   temp00 <- lapply(
@@ -1275,6 +1327,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing residuals by year and scenario.
 #' 
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_runs <- function(fit_list) {
   temp00 <- lapply(
@@ -1304,6 +1357,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing year, scenario, and extracted variables.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_scenarios <- function(fit_list, vars) {
   temp00 <- lapply(fit_list, function(fit) {
@@ -1335,6 +1389,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing model statistics by scenario.
 #' 
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
 .process_stats <- function(fit_list) {
   temp00 <- lapply(
@@ -1360,6 +1415,7 @@ get_mase <- function(df_lists) {
 #' @return The data frame with renamed columns.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom stats setNames 
 .rename_columns <- function(df, col_names) {
   setNames(df, col_names)
@@ -1376,6 +1432,7 @@ get_mase <- function(df_lists) {
 #' @return A data frame with values replaced by NA where applicable.
 #'
 #' @keywords internal
+#' @noRd
 .replace_na_with_na <- function(df1, df2) {
   df1[] <- lapply(names(df1), function(col) {
     replace(df1[[col]], is.na(df2[[col]]), NA)
@@ -1393,8 +1450,8 @@ get_mase <- function(df_lists) {
 #' @return A data frame containing rho values by index and scenario.
 #'
 #' @keywords internal
+#' @noRd
 #' @importFrom dplyr bind_rows
-#' @importFrom JABBA jbplot_retro
 .rho_retro <- function(hc_list) {
   temp00 <- lapply(
     hc_list,
@@ -1422,6 +1479,7 @@ get_mase <- function(df_lists) {
 #' found in \code{data_indices}.
 #'
 #' @keywords internal
+#' @noRd
 .validate_indices <- function(data_indices, factor_indices) {
   if (!all(factor_indices %in% data_indices)) {
     stop("All indices past in the parameter 'indices' must exist in the data.")

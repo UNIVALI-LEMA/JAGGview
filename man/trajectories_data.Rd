@@ -52,3 +52,17 @@ df
 }
 
 }
+\seealso{
+Other preparation functions: 
+\code{\link{fits_data}()},
+\code{\link{hindcast_data}()},
+\code{\link{kobe_data}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{retrospective_analysis_data}()},
+\code{\link{runs_tests_data}()}
+
+Other trajectories functions: 
+\code{\link{trajectories_ggplot}()}
+}
+\concept{preparation functions}
+\concept{trajectories functions}

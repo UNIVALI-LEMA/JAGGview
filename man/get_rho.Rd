@@ -37,3 +37,27 @@ overestimation, and negative values indicate underestimation.
 This function is a convenience acessor for extracting retrospective analysis
 results for further analysis or visualization.
 }
+\examples{
+\dontrun{
+hc_S01 <- hindcast_jabba()
+hc_S02 <- hindcast_jabba()
+list_hc_models <- list(hc_S01, hc_S02)
+df <- retrospective_analysis_data(list_hc_models)
+get_rho(df)
+}
+
+}
+\seealso{
+Other extraction functions: 
+\code{\link{get_mase}()},
+\code{\link{get_pars}()},
+\code{\link{get_ppmr}()},
+\code{\link{get_ppvr}()},
+\code{\link{get_refpts}()}
+
+Other retrospective analysis functions: 
+\code{\link{retrospective_analysis_data}()},
+\code{\link{retrospective_analysis_ggplot}()}
+}
+\concept{extraction functions}
+\concept{retrospective analysis functions}

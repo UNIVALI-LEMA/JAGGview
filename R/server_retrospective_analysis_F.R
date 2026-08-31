@@ -124,6 +124,8 @@
   }, ignoreInit = TRUE)
 
   status_sliders_ra_F <- reactive({
+    req(input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_F")
     vec <- unlist(reactiveValuesToList(ra_F_change))
     
     enable <- any(vec) && !.is_empty(input$ra_F_scenarios)
@@ -379,9 +381,7 @@
           shapes = shapes,
           annotations = annotations
         )
-    }) %>% 
-      flatten()
-    
+    })
 
     results <- subplot(
       plots,
@@ -390,7 +390,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.005
+      margin = 0.02
     ) %>%
       layout(
         annotations = list(

@@ -78,5 +78,20 @@ df <- trajectories_data(out)
 trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
 }
 
-
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{kobe_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()}
+
+Other trajectories functions: 
+\code{\link{trajectories_data}()}
+}
+\concept{trajectories functions}
+\concept{visualization functions}

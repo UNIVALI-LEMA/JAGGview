@@ -47,3 +47,18 @@ df
 }
 
 }
+\seealso{
+Other preparation functions: 
+\code{\link{fits_data}()},
+\code{\link{hindcast_data}()},
+\code{\link{kobe_data}()},
+\code{\link{priors_posteriors_data}()},
+\code{\link{retrospective_analysis_data}()},
+\code{\link{trajectories_data}()}
+
+Other cpue residuals runs tests functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{runs_tests_ggplot}()}
+}
+\concept{cpue residuals runs tests functions}
+\concept{preparation functions}

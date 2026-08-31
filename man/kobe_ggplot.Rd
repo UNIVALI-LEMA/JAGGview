@@ -14,7 +14,9 @@ kobe_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A list as returned by \code{kobe_data()}.}
+\item{df_lists}{A named list as returned by \code{kobe_data()}. It must
+contain the elements \code{col01}, \code{col02}, \code{col03},
+\code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
@@ -56,3 +58,19 @@ kobe_ggplot(df)
 }
 
 }
+\seealso{
+Other visualization functions: 
+\code{\link{cpue_residuals_ggplot}()},
+\code{\link{fits_ggplot}()},
+\code{\link{hindcast_ggplot}()},
+\code{\link{priors_posteriors_ggplot}()},
+\code{\link{retrospective_analysis_ggplot}()},
+\code{\link{runs_tests_ggplot}()},
+\code{\link{summary_table}()},
+\code{\link{trajectories_ggplot}()}
+
+Other kobe functions: 
+\code{\link{kobe_data}()}
+}
+\concept{kobe functions}
+\concept{visualization functions}
