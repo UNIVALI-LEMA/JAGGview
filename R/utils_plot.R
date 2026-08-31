@@ -298,7 +298,7 @@
     }
     if (any(!is_int)) {
       formatted[!is_int] <- formatC(
-        round(scaled[!is_int], 1), format = "f", digits = 2, big.mark = ","
+        scaled[!is_int], format = "f", digits = 2, big.mark = ","
       )
     }
   } else {

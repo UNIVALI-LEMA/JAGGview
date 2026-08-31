@@ -227,9 +227,13 @@
       3
     }
 
-    prior_all <- df_lists$prior %>% select(Scenario, psi01, psi02)
+    prior_all <- df_lists$prior %>% 
+      select(Scenario, psi01, psi02) %>%
+      filter(K02 > 0.005e-9)
 
-    posterior_all <- df_lists$posterior %>% select(Scenario, psi01, psi02)
+    posterior_all <- df_lists$posterior %>% 
+      select(Scenario, psi01, psi02) %>%
+      filter(K02 > 0.005e-9)
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_pp_psi, min(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)

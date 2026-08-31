@@ -229,10 +229,12 @@
     }
 
     prior_all <- df_lists$prior %>%
-      select(Scenario, K01, K02)
+      select(Scenario, K01, K02) %>%
+      filter(K02 > 0.005e-9)
 
     posterior_all <- df_lists$posterior %>%
-      select(Scenario, K01, K02)
+      select(Scenario, K01, K02) %>%
+      filter(K02 > 0.005e-9)
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_pp_K, min(prior_all$K01, posterior_all$K01, na.rm = TRUE)
@@ -257,9 +259,9 @@
     title_y <- .get_value_or_default(title_y_pp_K, "Density")
 
     df_text_all <- df_lists$PPMR %>%
-      select(Scenario, ppmr_value = r) %>%
+      select(Scenario, ppmr_value = K) %>%
       full_join(
-        df_lists$PPVR %>% select(Scenario, ppvr_value = r),
+        df_lists$PPVR %>% select(Scenario, ppvr_value = K),
         by = "Scenario"
       )
     

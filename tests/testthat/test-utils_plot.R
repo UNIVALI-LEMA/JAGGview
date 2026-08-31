@@ -46,14 +46,20 @@ test_that(
       .default_table(data.frame(name = c("a", "b", "c"), value = c(1, 6)))
     )
     expect_error(.default_table(NULL))
-    expect_error(.default_table(data.frame(name = numeric(0), value = numeric(0))))
+    expect_error(.default_table(
+      data.frame(name = numeric(0), value = numeric(0))
+    ))
   }
 )
 
-test_that(".international_system_prefixes(), returns the number 
-formatted and appended with their corresponding SI unit symbol", {
-  expect_equal(.international_system_prefixes(1000000), "1M")
-})
+test_that(
+  desc = ".international_system_prefixes(), returns the correct number 
+  formatted and appended with their corresponding SI unit symbol", 
+  code = {
+    expect_equal(.international_system_prefixes(1000000), "1M")
+    expect_equal(.international_system_prefixes(0.01e-9), "0.01n")
+    expect_equal(.international_system_prefixes(0.0051e-9), "0.01n")
+  })
 
 test_that(
   ".international_system_prefixes(), error if inital number is a character", 
