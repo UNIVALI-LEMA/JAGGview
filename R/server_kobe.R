@@ -126,15 +126,53 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$kobe_y_min
+    y_max <- input$kobe_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "kobe_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "kobe_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$kobe_x_min
+    x_max <- input$kobe_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "kobe_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "kobe_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_kobe") {
       kobe_values$scenarios_current = input$kobe_scenarios
       kobe_values$title_x_current = input$kobe_title_x
       kobe_values$title_y_current = input$kobe_title_y
       kobe_values$text_size_current = input$kobe_text_size
-      kobe_values$x_min_current = input$kobe_x_min
-      kobe_values$x_max_current = input$kobe_x_max
-      kobe_values$y_min_current = input$kobe_y_min
-      kobe_values$y_max_current = input$kobe_y_max
+      kobe_values$x_min_current = x_min
+      kobe_values$x_max_current = x_max
+      kobe_values$y_min_current = y_min
+      kobe_values$y_max_current = y_max
 
       kobe_change$scenarios_changed = FALSE
       kobe_change$title_x_changed = FALSE
@@ -167,10 +205,10 @@
       )
       title_x_kobe(input$kobe_title_x)
       title_y_kobe(input$kobe_title_y)
-      x_lim_min_kobe(input$kobe_x_min)
-      x_lim_max_kobe(input$kobe_x_max)
-      y_lim_min_kobe(input$kobe_y_min)
-      y_lim_max_kobe(input$kobe_y_max)
+      x_lim_min_kobe(x_min)
+      x_lim_max_kobe(x_max)
+      y_lim_min_kobe(y_min)
+      y_lim_max_kobe(y_max)
     }
   }, ignoreInit = TRUE)
 

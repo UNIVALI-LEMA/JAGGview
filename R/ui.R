@@ -271,6 +271,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
       )
     ),
     controlbar = dashboardControlbar(
+      id = "controlbar",
       controlbarMenu(
         id = "controlbarMenu",
         type = "hidden",

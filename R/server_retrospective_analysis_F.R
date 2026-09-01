@@ -144,6 +144,44 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$ra_F_y_min
+    y_max <- input$ra_F_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "ra_F_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "ra_F_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$ra_F_x_min
+    x_max <- input$ra_F_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "ra_F_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "ra_F_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_retrospective_analysis" && 
       input$retrospective_analysis_tabs == "tab_ra_F") {
       ra_F_values$scenarios_current = input$ra_F_scenarios
@@ -151,10 +189,10 @@
       ra_F_values$title_x_current = input$ra_F_title_x
       ra_F_values$title_y_current = input$ra_F_title_y
       ra_F_values$text_size = input$ra_F_text_size
-      ra_F_values$x_min_current = input$ra_F_x_min
-      ra_F_values$x_max_current = input$ra_F_x_max
-      ra_F_values$y_min_current = input$ra_F_y_min
-      ra_F_values$y_max_current = input$ra_F_y_max
+      ra_F_values$x_min_current = x_min
+      ra_F_values$x_max_current = x_max
+      ra_F_values$y_min_current = y_min
+      ra_F_values$y_max_current = y_max
       ra_F_values$position_current = input$ra_F_position
 
       ra_F_change$scenarios_changed = FALSE
@@ -184,10 +222,10 @@
       title_x_ra_F(input$ra_F_title_x)
       title_y_ra_F(input$ra_F_title_y)
       text_size_ra_F(input$ra_F_text_size)
-      x_lim_min_ra_F(input$ra_F_x_min)
-      x_lim_max_ra_F(input$ra_F_x_max)
-      y_lim_min_ra_F(input$ra_F_y_min)
-      y_lim_max_ra_F(input$ra_F_y_max)
+      x_lim_min_ra_F(x_min)
+      x_lim_max_ra_F(x_max)
+      y_lim_min_ra_F(y_min)
+      y_lim_max_ra_F(y_max)
       position_ra_F(input$ra_F_position)
     }
   }, ignoreInit = TRUE)

@@ -99,7 +99,8 @@
 #' updateControlbar
 #' @importFrom shiny addResourcePath conditionalPanel icon numericInput 
 #' observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
-#' renderUI req selectInput shinyApp tabPanel textInput uiOutput
+#' renderUI req selectInput shinyApp showNotification tabPanel textInput 
+#' uiOutput updateSelectInput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #' add_trace animation_button animation_slider ggplotly layout plot_ly 
 #' plotlyOutput renderPlotly subplot toWebGL
@@ -221,7 +222,9 @@ create_report <- function(
       hind_data <- hindcast_data(hc_list)
       if (verbose) message("Hindcast data was sucessfully obtained")
       ra_data <- retrospective_analysis_data(hc_list)
-      if (verbose) message("Retrospective Analysis data was sucessfully obtained")
+      if (verbose) {
+        message("Retrospective Analysis data was sucessfully obtained")
+      }
     }
     rm(hc_list, hc_NULL)
     gc()

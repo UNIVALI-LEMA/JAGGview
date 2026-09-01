@@ -131,16 +131,54 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$traj_H_y_min
+    y_max <- input$traj_H_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "traj_H_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "traj_H_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$traj_H_x_min
+    x_max <- input$traj_H_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "traj_H_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "traj_H_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_trajectories" && 
       input$trajectories_tabs == "tab_traj_H") {
       traj_H_values$scenarios_current = input$traj_H_scenarios
       traj_H_values$title_x_current = input$traj_H_title_x
       traj_H_values$title_y_current = input$traj_H_title_y
       traj_H_values$color_current = input$traj_H_color
-      traj_H_values$x_min_current = input$traj_H_x_min
-      traj_H_values$x_max_current = input$traj_H_x_max
-      traj_H_values$y_min_current = input$traj_H_y_min
-      traj_H_values$y_max_current = input$traj_H_y_max
+      traj_H_values$x_min_current = x_min
+      traj_H_values$x_max_current = x_max
+      traj_H_values$y_min_current = y_min
+      traj_H_values$y_max_current = y_max
 
       traj_H_change$scenarios_changed = FALSE
       traj_H_change$title_x_changed = FALSE
@@ -159,10 +197,10 @@
       title_x_traj_H(input$traj_H_title_x)
       title_y_traj_H(input$traj_H_title_y)
       palette_traj_H(input$traj_H_color)
-      x_lim_min_traj_H(input$traj_H_x_min)
-      x_lim_max_traj_H(input$traj_H_x_max)
-      y_lim_min_traj_H(input$traj_H_y_min)
-      y_lim_max_traj_H(input$traj_H_y_max)
+      x_lim_min_traj_H(x_min)
+      x_lim_max_traj_H(x_max)
+      y_lim_min_traj_H(y_min)
+      y_lim_max_traj_H(y_max)
     }
   }, ignoreInit = TRUE)
 

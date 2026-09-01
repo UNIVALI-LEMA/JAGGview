@@ -159,16 +159,54 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$runs_tests_y_min
+    y_max <- input$runs_tests_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "runs_tests_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "runs_tests_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$runs_tests_x_min
+    x_max <- input$runs_tests_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "runs_tests_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "runs_tests_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_runs_tests") {
       runs_tests_values$scenarios_current = input$runs_tests_scenarios
       runs_tests_values$indices_current = input$runs_tests_indices
       runs_tests_values$title_x_current = input$runs_tests_title_x
       runs_tests_values$title_y_current = input$runs_tests_title_y
       runs_tests_values$text_size_current = input$runs_tests_text_size
-      runs_tests_values$x_min_current = input$runs_tests_x_min
-      runs_tests_values$x_max_current = input$runs_tests_x_max
-      runs_tests_values$y_min_current = input$runs_tests_y_min
-      runs_tests_values$y_max_current = input$runs_tests_y_max
+      runs_tests_values$x_min_current = x_min
+      runs_tests_values$x_max_current = x_max
+      runs_tests_values$y_min_current = y_min
+      runs_tests_values$y_max_current = y_max
       runs_tests_values$position_current = input$runs_tests_position
 
       runs_tests_change$scenarios_changed = FALSE
@@ -200,10 +238,10 @@
       title_x_runs_tests(input$runs_tests_title_x)
       title_y_runs_tests(input$runs_tests_title_y)
       text_size_runs_tests(input$runs_tests_text_size)
-      x_lim_min_runs_tests(input$runs_tests_x_min)
-      x_lim_max_runs_tests(input$runs_tests_x_max)
-      y_lim_min_runs_tests(input$runs_tests_y_min)
-      y_lim_max_runs_tests(input$runs_tests_y_max)
+      x_lim_min_runs_tests(x_min)
+      x_lim_max_runs_tests(x_max)
+      y_lim_min_runs_tests(y_min)
+      y_lim_max_runs_tests(y_max)
       position_runs_tests(input$runs_tests_position)
     }
   }, ignoreInit = TRUE)

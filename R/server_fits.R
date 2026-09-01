@@ -144,16 +144,54 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$fits_y_min
+    y_max <- input$fits_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "fits_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "fits_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$fits_x_min
+    x_max <- input$fits_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "fits_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "fits_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_fits") {
       fits_values$scenarios_current = input$fits_scenarios
       fits_values$indices_current = input$fits_indices
       fits_values$title_x_current = input$fits_title_x
       fits_values$title_y_current = input$fits_title_y
       fits_values$color_current = input$fits_color
-      fits_values$x_min_current = input$fits_x_min
-      fits_values$x_max_current = input$fits_x_max
-      fits_values$y_min_current = input$fits_y_min
-      fits_values$y_max_current = input$fits_y_max
+      fits_values$x_min_current = x_min
+      fits_values$x_max_current = x_max
+      fits_values$y_min_current = y_min
+      fits_values$y_max_current = y_max
 
       fits_change$scenarios_changed = FALSE
       fits_change$indices_changed = FALSE
@@ -176,10 +214,10 @@
       title_x_fits(input$fits_title_x)
       title_y_fits(input$fits_title_y)
       palette_fits(input$fits_color)
-      x_lim_min_fits(input$fits_x_min)
-      x_lim_max_fits(input$fits_x_max)
-      y_lim_min_fits(input$fits_y_min)
-      y_lim_max_fits(input$fits_y_max)
+      x_lim_min_fits(x_min)
+      x_lim_max_fits(x_max)
+      y_lim_min_fits(y_min)
+      y_lim_max_fits(y_max)
     }
   }, ignoreInit = TRUE)
 
