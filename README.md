@@ -262,7 +262,7 @@ devtools::test()
 
 JAGGview is distributed under the [Creative Commons Attribution–NonCommercial–ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-**Authors:** Thiago Pacheco (creator) and Rodrigo Sant'Ana.
+**Authors:** Thiago Yukio Horita Pacheco (creator) and Rodrigo Sant'Ana.
 
 ---
 
