@@ -674,7 +674,7 @@ priors_posteriors_ggplot <- function(
     function(x) .international_system_prefixes(x)
   } else {
     function(x) {
-      format(1e6, digits = x_decimals, scientific = FALSE, 
+      format(x, nsmall = x_decimals, scientific = FALSE, 
         big.mark = ".", decimal.mark = ",")
     }
   }
@@ -837,7 +837,7 @@ retrospective_analysis_ggplot <- function(
       function(x) .international_system_prefixes(x)
     } else {
       function(x) {
-        format(1e6, digits = x_decimals, scientific = FALSE, 
+        format(x, nsmall = x_decimals, scientific = FALSE, 
           big.mark = ".", decimal.mark = ",")
       }
     }
@@ -857,7 +857,7 @@ retrospective_analysis_ggplot <- function(
     function(x) .international_system_prefixes(x)
   } else {
     function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
+      format(x, nsmall = y_decimals, scientific = FALSE, 
         big.mark = ".", decimal.mark = ",")
     }
   }
@@ -1262,7 +1262,7 @@ trajectories_ggplot <- function(
     function(x) .international_system_prefixes(x)
   } else {
     function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
+      format(x, nsmall = y_decimals, scientific = FALSE, 
         big.mark = ".", decimal.mark = ",")
     }
   }
