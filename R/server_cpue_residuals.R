@@ -199,6 +199,44 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$cpue_res_y_min
+    y_max <- input$cpue_res_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "cpue_res_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "cpue_res_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$cpue_res_x_min
+    x_max <- input$cpue_res_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "cpue_res_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "cpue_res_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_cpue_residuals") {
 
       selected_colors <- current_colors_cpue_res()
@@ -209,10 +247,10 @@
       cpue_res_values$title_y_current = input$cpue_res_title_y
       cpue_res_values$color_current = selected_colors
       cpue_res_values$text_size = input$cpue_res_text_size
-      cpue_res_values$x_min_current = input$cpue_res_x_min
-      cpue_res_values$x_max_current = input$cpue_res_x_max
-      cpue_res_values$y_min_current = input$cpue_res_y_min
-      cpue_res_values$y_max_current = input$cpue_res_y_max
+      cpue_res_values$x_min_current = x_min
+      cpue_res_values$x_max_current = x_max
+      cpue_res_values$y_min_current = y_min
+      cpue_res_values$y_max_current = y_max
       cpue_res_values$position_current = input$cpue_res_position
 
       cpue_res_change$scenarios_changed = FALSE
@@ -246,10 +284,10 @@
       title_y_cpue_res(input$cpue_res_title_y)
       palette_cpue_res(selected_colors)
       text_size_cpue_res(input$cpue_res_text_size)
-      x_lim_min_cpue_res(input$cpue_res_x_min)
-      x_lim_max_cpue_res(input$cpue_res_x_max)
-      y_lim_min_cpue_res(input$cpue_res_y_min)
-      y_lim_max_cpue_res(input$cpue_res_y_max)
+      x_lim_min_cpue_res(x_min)
+      x_lim_max_cpue_res(x_max)
+      y_lim_min_cpue_res(y_min)
+      y_lim_max_cpue_res(y_max)
       position_cpue_res(input$cpue_res_position)
     }
   }, ignoreInit = TRUE)

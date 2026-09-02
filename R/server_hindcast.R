@@ -157,16 +157,54 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
+    y_min <- input$hc_y_min
+    y_max <- input$hc_y_max
+
+    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+      tmp_y <- y_min
+      y_min <- y_max
+      y_max <- tmp_y
+      updateSelectInput(
+        session, inputId = "hc_y_min", selected = y_min
+      )
+      updateSelectInput(
+        session, inputId = "hc_y_max", selected = y_max
+      )
+      showNotification(
+        ui = "First y value shouldn't be higher than the second y value",
+        type = "warning", duration = 10
+      )
+    }
+    
+    x_min <- input$hc_x_min
+    x_max <- input$hc_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "hc_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "hc_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
+
     if (input$navmenu == "tab_hindcast") {
       hc_values$scenarios_current = input$hc_scenarios
       hc_values$indices_current = input$hc_indices
       hc_values$title_x_current = input$hc_title_x
       hc_values$title_y_current = input$hc_title_y
       hc_values$text_size_current = input$hc_text_size
-      hc_values$x_min_current = input$hc_x_min
-      hc_values$x_max_current = input$hc_x_max
-      hc_values$y_min_current = input$hc_y_min
-      hc_values$y_max_current = input$hc_y_max
+      hc_values$x_min_current = x_min
+      hc_values$x_max_current = x_max
+      hc_values$y_min_current = y_min
+      hc_values$y_max_current = y_max
       hc_values$position_current = input$hc_position
 
       hc_change$scenarios_changed = FALSE
@@ -208,10 +246,10 @@
       title_x_hc(input$hc_title_x)
       title_y_hc(input$hc_title_y)
       text_size_hc(input$hc_text_size)
-      x_lim_min_hc(input$hc_x_min)
-      x_lim_max_hc(input$hc_x_max)
-      y_lim_min_hc(input$hc_y_min)
-      y_lim_max_hc(input$hc_y_max)
+      x_lim_min_hc(x_min)
+      x_lim_max_hc(x_max)
+      y_lim_min_hc(y_min)
+      y_lim_max_hc(y_max)
       position_hc(input$hc_position)
     }
   }, ignoreInit = TRUE)
@@ -539,7 +577,6 @@
       })
     }) %>% flatten()
     
-
     results <- subplot(
       plots, 
       nrows = nrow,

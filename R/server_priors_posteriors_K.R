@@ -147,6 +147,25 @@
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
+    
+    x_min <- input$pp_K_x_min
+    x_max <- input$pp_K_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "pp_K_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "pp_K_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
 
     if (input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_K") {
@@ -157,8 +176,8 @@
       pp_K_values$prior_color_current = input$pp_K_prior_color
       pp_K_values$posterior_color_current = input$pp_K_posterior_color
       pp_K_values$text_size = input$pp_K_text_size
-      pp_K_values$x_min_current = input$pp_K_x_min
-      pp_K_values$x_max_current = input$pp_K_x_max
+      pp_K_values$x_min_current = x_min
+      pp_K_values$x_max_current = x_max
       pp_K_values$position_current = input$pp_K_position
 
       pp_K_change$scenarios_changed = FALSE
@@ -197,8 +216,8 @@
       prior_color_pp_K(input$pp_K_prior_color)
       posterior_color_pp_K(input$pp_K_posterior_color)
       text_size_pp_K(input$pp_K_text_size)
-      x_lim_min_pp_K(input$pp_K_x_min)
-      x_lim_max_pp_K(input$pp_K_x_max)
+      x_lim_min_pp_K(x_min)
+      x_lim_max_pp_K(x_max)
       position_pp_K(input$pp_K_position)
     }
   }, ignoreInit = TRUE)

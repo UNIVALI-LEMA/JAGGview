@@ -89,7 +89,10 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   if (any(is.na(tmp00$Index))) .fill_na_indices(tmp00, index_inputseries)
 
   tmp00 <- tmp00[complete.cases(tmp00),] %>% 
-    mutate(Index = fct_relevel(Index, indices_factor)) %>%
+    mutate(
+      Index = fct_relevel(Index, indices_factor),
+      Year = as.integer(Year)
+    ) %>%
     select(-SE)
 
   ####@> Fit (CI 80%)...
@@ -102,7 +105,10 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   if (any(is.na(tmp03$Index))) .fill_na_indices(tmp03, index_inputseries)
 
   tmp03 <- tmp03 %>% 
-    mutate(Index = fct_relevel(Index, indices_factor)) %>% 
+    mutate(
+      Index = fct_relevel(Index, indices_factor),
+      Year = as.integer(Year)
+    ) %>% 
     select(-c(se, obserror))
 
   ####@> Fit (CI 95%)...
@@ -115,7 +121,10 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
   if (any(is.na(tmp04$Index))) .fill_na_indices(tmp04, index_inputseries)
 
   tmp04 <- tmp04 %>% 
-    mutate(Index = fct_relevel(Index, indices_factor)) %>%
+    mutate(
+      Index = fct_relevel(Index, indices_factor),
+      Year = as.integer(Year)
+    ) %>%
     select(-c(se, obserror, mu))
 
   results <- list(
@@ -666,7 +675,8 @@ retrospective_analysis_data <- function(list_hc_models) {
       Index2 = labels_index[Index]
     ) %>%
     mutate(
-      id = fct_relevel(id, sort(unique(id), decreasing = TRUE))
+      id = fct_relevel(id, sort(unique(id), decreasing = TRUE)),
+      Year = as.integer(Year)
     ) %>%
     mutate(
       # This version id_num when id == "Ref" generate NA warning
@@ -817,7 +827,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
     select(Year:Res, lcl, ucl) %>%
     mutate(
       class = ifelse(Res < lcl | Res > ucl, "red", "white"),
-      Index = fct_relevel(Index, indices_factor)
+      Index = fct_relevel(Index, indices_factor),
+      Year = as.integer(Year)
     ) %>%
     droplevels()
   

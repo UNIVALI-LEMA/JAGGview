@@ -147,6 +147,25 @@
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
+    
+    x_min <- input$pp_r_x_min
+    x_max <- input$pp_r_x_max
+
+    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+      tmp_x <- x_min
+      x_min <- x_max
+      x_max <- tmp_x
+      updateSelectInput(
+        session, inputId = "pp_r_x_min", selected = x_min
+      )
+      updateSelectInput(
+        session, inputId = "pp_r_x_max", selected = x_max
+      )
+      showNotification(
+        ui = "First x value shouldn't be higher than the second x value",
+        type = "warning", duration = 10
+      )
+    }
 
     if (input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_r") {
