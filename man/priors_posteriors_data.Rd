@@ -11,7 +11,7 @@ priors_posteriors_data(list_fit_models)
 JABBA function \code{JABBA::fit_jabba()}.}
 }
 \value{
-A named list with the following elements:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{prior}{A data frame containing sampled prior distributions.}
 \item{posterior}{A data frame containing posterior density estimates.}
@@ -29,6 +29,9 @@ Prior distributions are simulated using log-normal and gamma distributions
 based on model settings, while posterior distributions are estimated using
 kernel density methods. Summary metrics (PPVR and PPMR) are computed to
 assess the influence of priors on posterior estimates.
+
+The output is designed to be used directly with
+\code{\link{priors_posteriors_ggplot}()}.
 }
 \examples{
 \dontrun{

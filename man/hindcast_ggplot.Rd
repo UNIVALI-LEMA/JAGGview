@@ -10,7 +10,9 @@ hindcast_ggplot(
   text_size = 6,
   title_x = "Year",
   title_y = "Index",
+  use_si_suffix = FALSE,
   zoom = FALSE,
+  y_decimals = NULL,
   x_lim = NULL,
   y_lim = NULL
 )
@@ -37,9 +39,14 @@ Defaults to 6.}
 
 \item{title_y}{A character string for the y-axis label. Defaults to "Index".}
 
+\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
+used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+
 \item{zoom}{Optional. A boolean value that if \code{TRUE} shows a subplot of
 a zoomed view of the hindcast window. Facets with no data for a given
 Scenario and Index combination are left blank. Defaults to \code{FALSE}.}
+
+\item{y_decimals}{Optional. Number of decimal places y-axis.}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}

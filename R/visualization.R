@@ -22,6 +22,9 @@
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. 
 #'   Defaults to "Residuals"
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param y_decimals Optional. Number of decimal places y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -49,7 +52,8 @@
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 cpue_residuals_ggplot <- function(
   df_lists, n_col = 3, position = "top-left", text_size = 6, title_x = "Year", 
-  title_y = "Residuals", palette = NULL, x_lim = NULL, y_lim = NULL
+  title_y = "Residuals", use_si_suffix = FALSE, y_decimals = NULL, 
+  palette = NULL, x_lim = NULL, y_lim = NULL
 ) {
 
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
@@ -83,6 +87,12 @@ cpue_residuals_ggplot <- function(
     suffix = "%"
   )
   
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
+  
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
     geom_segment(data = df_lists$cpue_residuals,
@@ -98,7 +108,7 @@ cpue_residuals_ggplot <- function(
                   size = text_size,
                   table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
-    scale_y_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     scale_fill_manual(values = palette) +
     scale_colour_manual(values = palette) +
@@ -118,6 +128,9 @@ cpue_residuals_ggplot <- function(
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Abundance index".
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param y_decimals Optional. Number of decimal places y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -147,10 +160,11 @@ cpue_residuals_ggplot <- function(
 #'
 #' @export
 #' @importFrom ggplot2 aes coord_cartesian facet_grid geom_errorbar geom_line 
-#' geom_point geom_ribbon ggplot labs
+#' geom_point geom_ribbon ggplot labs scale_y_continuous
 fits_ggplot <- function(
-  df_lists, title_x = "Year", title_y = "Abundance index", palette = NULL, 
-  x_lim = NULL, y_lim = NULL
+  df_lists, title_x = "Year", title_y = "Abundance index", 
+  use_si_suffix = FALSE, y_decimals = NULL, palette = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -173,6 +187,12 @@ fits_ggplot <- function(
     min_x_val <- min(df_lists$CI_80$Year, na.rm = TRUE)
     x_lim <- c(min_x_val, max_x_val)
   }
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
 
   ggplot() +
     geom_ribbon(data = df_lists$CI_80,
@@ -189,6 +209,7 @@ fits_ggplot <- function(
         aes(x = Year, y = Mean),
         pch = 21, fill = "white", size = 1.5) + 
     facet_grid(Scenario ~ Index, scales = "free") +
+    scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) + 
     labs(x = title_x, y = title_y) +
     .my_theme()
@@ -216,9 +237,12 @@ fits_ggplot <- function(
 #'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to "Index".
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param zoom Optional. A boolean value that if \code{TRUE} shows a subplot of 
 #'   a zoomed view of the hindcast window. Facets with no data for a given
 #'   Scenario and Index combination are left blank. Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places y-axis.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -245,14 +269,15 @@ fits_ggplot <- function(
 #' @export 
 #' @importFrom ggplot2 .pt aes coord_cartesian facet_wrap geom_line geom_point 
 #' geom_rect geom_ribbon ggplot guide_legend guides labs scale_colour_manual 
-#' scale_fill_manual theme
+#' scale_fill_manual scale_y_continuous theme 
 #' @importFrom dplyr filter mutate select vars
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
 hindcast_ggplot <- function(
   df_lists, position = "top-left", text_size = 6, title_x = "Year", 
-  title_y = "Index", zoom = FALSE, x_lim = NULL, y_lim = NULL
+  title_y = "Index", use_si_suffix = FALSE, zoom = FALSE, y_decimals = NULL, 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -295,6 +320,12 @@ hindcast_ggplot <- function(
 
   max_year_hc <- max(df_lists$data_lines$year)
   
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
+  
   p1 <- ggplot() +
     geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
         aes(x = year,
@@ -326,6 +357,7 @@ hindcast_ggplot <- function(
     labs(x = title_x, y = title_y, colour = "") +
     facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
               drop = FALSE) +
+    scale_y_continuous(labels = y_labels) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
@@ -354,7 +386,8 @@ hindcast_ggplot <- function(
     MoreArgs = list(
       df = df_lists,
       min_year = min_year_hc,
-      max_year = max_year_hc
+      max_year = max_year_hc,
+      y_labels = y_labels
     )
   )
 
@@ -495,7 +528,7 @@ kobe_ggplot <- function(
     geom_point(data = df_lists$highlight_years,
                aes(x = Bratio, y = Fratio, shape = factor(year)),
                size = 4, fill = "white") +
-    facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
+    facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
     scale_y_continuous(expand = c(0, 0), breaks = seq(0, y_lim[2], 1)) + 
     scale_x_continuous(expand = c(0, 0), breaks = seq(0, x_lim[2], 1)) + 
     scale_shape_manual(values = c(21, 22, 23)) +
@@ -621,11 +654,7 @@ priors_posteriors_ggplot <- function(
     pos_x_max <- max(posterior$value_1, na.rm = TRUE)
     x_lim <- c(0, ifelse(prior_x_max > pos_x_max, prior_x_max, pos_x_max))
   }
-
-  if (is.null(x_decimals)) {
-    x_decimals <- ifelse(x_lim[2] > 10, 0, 2)
-  }
-
+  
   if (is.null(y_lim)) {
     max_y_pos <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
                                     TRUE, 1.1)
@@ -669,14 +698,11 @@ priors_posteriors_ggplot <- function(
     col_name = c("PPMR", "PPVR"),
     decimals = 3
   )
-
-  x_labels <- if (use_si_suffix) {
-    function(x) .international_system_prefixes(x)
-  } else {
-    function(x) {
-      format(1e6, digits = x_decimals, scientific = FALSE, 
-        big.mark = ".", decimal.mark = ",")
-    }
+  
+  x_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = x_decimals
+    )
   }
   
   ggplot() +
@@ -728,6 +754,8 @@ priors_posteriors_ggplot <- function(
 #'   default label is assigned based on \code{indicator_name}.
 #' @param title_y A character string for the y-axis label. If \code{NULL}, a 
 #'   default label is assigned based on \code{indicator_name}.
+#' @param x_decimals Optional. Number of decimal places for x-axis.
+#' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -759,8 +787,8 @@ priors_posteriors_ggplot <- function(
 #' @importFrom stringr str_split_i
 retrospective_analysis_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
-  use_si_suffix = FALSE, title_x = NULL, title_y = NULL, x_lim = NULL, 
-  y_lim = NULL
+  use_si_suffix = FALSE, title_x = NULL, title_y = NULL, x_decimals = NULL, 
+  y_decimals = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -832,16 +860,20 @@ retrospective_analysis_ggplot <- function(
     }
 
     max_x_val <- .round_to_nearest(max(data_ref$SB_i, na.rm = TRUE), TRUE, 1.1)
-    x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
-    x_labels <- if (use_si_suffix) {
-      function(x) .international_system_prefixes(x)
-    } else {
-      function(x) {
-        format(1e6, digits = x_decimals, scientific = FALSE, 
-          big.mark = ".", decimal.mark = ",")
-      }
-    }
   }
+  
+  x_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = x_decimals
+    )
+  }
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
+  
   table <- .prepare_npc_table_data(
     data = rho_var, 
     pos_x = str_split_i(position, "-", 2), 
@@ -850,17 +882,6 @@ retrospective_analysis_ggplot <- function(
     col_name = "rho", 
     decimals = 3
   )
-
-  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
-
-  y_labels <- if (use_si_suffix) {
-    function(x) .international_system_prefixes(x)
-  } else {
-    function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
-        big.mark = ".", decimal.mark = ",")
-    }
-  }
   
   p <- ggplot()
   
@@ -904,7 +925,6 @@ retrospective_analysis_ggplot <- function(
     ) +
     facet_wrap(~Scenario, ncol = n_col, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
-    scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim)
 
   if (indicator_name == "MSY") {
@@ -913,6 +933,7 @@ retrospective_analysis_ggplot <- function(
   }
   
   p <- p +
+    scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     labs(x = title_x, y = title_y, colour = "") +
     .my_theme() +
     theme(
@@ -945,6 +966,9 @@ retrospective_analysis_ggplot <- function(
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Residuals".
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
 #'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
@@ -974,7 +998,8 @@ retrospective_analysis_ggplot <- function(
 #' @importFrom stringr str_split_i
 runs_tests_ggplot <- function(
   df_lists, position = "top-left", text_size = 6, title_x = "Year", 
-  title_y = "Residuals", x_lim = NULL, y_lim = NULL
+  title_y = "Residuals", use_si_suffix = FALSE, y_decimals = NULL, 
+  x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -1006,6 +1031,12 @@ runs_tests_ggplot <- function(
     col_name = "p-value", 
     decimals = 3
   )
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
 
   ggplot() +
     geom_rect(data = df_lists$SE3,
@@ -1027,6 +1058,7 @@ runs_tests_ggplot <- function(
         pch = 21, size = 2.5) +
       facet_grid(Scenario ~ Index, scales = "free") +
     scale_fill_manual(values = c("green", "red")) +
+    scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = title_y) +
     .my_theme() +
@@ -1158,6 +1190,7 @@ summary_table <- function(
 #'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
 #'   automatically according to the number of index levels.
@@ -1205,7 +1238,7 @@ summary_table <- function(
 #' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
   df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
-  palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
+  y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -1255,16 +1288,11 @@ trajectories_ggplot <- function(
   if (is.null(title_y)) {
     title_y <- labels_y[[indicator_name]]
   }
-
-  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
-
-  y_labels <- if (use_si_suffix) {
-    function(x) .international_system_prefixes(x)
-  } else {
-    function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
-        big.mark = ".", decimal.mark = ",")
-    }
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
   }
 
   p <- ggplot() +
@@ -1289,7 +1317,7 @@ trajectories_ggplot <- function(
   
   p <- p +
     geom_line(data = df, aes(x = year, y = mu), linewidth = 1) +
-    facet_wrap(~ Scenario, scales = "free_x", ncol = n_col) +
+    facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
     scale_y_continuous(
       expand = c(0, 0), 
       labels = y_labels

@@ -14,7 +14,7 @@ JABBA function \code{JABBA::fit_jabba()}.}
 exist in the \code{Index} column.}
 }
 \value{
-A named list with three elements:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{Li_Ui}{A data frame containing mean values and lower (Li) and
 upper (Ui) credibility bounds.}
@@ -44,6 +44,8 @@ using a multiplier of 1.96 applied to the standard error.
 If \code{indices_factor} is provided, the results are filtered and reordered
 accordingly. The function also ensures consistency across different
 model outputs and removes incomplete cases before returning results.
+
+The output is designed to be used directly with \code{\link{fits_ggplot}()}.
 }
 \examples{
 \dontrun{

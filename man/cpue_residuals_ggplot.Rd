@@ -11,6 +11,8 @@ cpue_residuals_ggplot(
   text_size = 6,
   title_x = "Year",
   title_y = "Residuals",
+  use_si_suffix = FALSE,
+  y_decimals = NULL,
   palette = NULL,
   x_lim = NULL,
   y_lim = NULL
@@ -40,6 +42,11 @@ Defaults to 6.}
 
 \item{title_y}{A character string for the y-axis label.
 Defaults to "Residuals"}
+
+\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
+used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+
+\item{y_decimals}{Optional. Number of decimal places y-axis.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
 If \code{NULL} (default), a color-blind-friendly palette is generated

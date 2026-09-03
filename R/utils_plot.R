@@ -268,7 +268,9 @@
 #' 
 #' @keywords internal
 #' @noRd
-.international_system_prefixes <- function(number, decimals = NULL) {
+.international_system_prefixes <- function(
+  number, use_si_suffix = FALSE, decimals = NULL
+) {
   out <- character(length(number))
 
   zero_na <- is.na(number) | number == 0
@@ -285,29 +287,19 @@
   suffixes   <- c("n", "\u00B5", "m", "", "k", "M")
 
   bin    <- findInterval(abs_val, thresholds) + 1L
-  scaled <- val / divisors[bin]
-
-  formatted <- character(length (scaled))
+  scaled <- if(use_si_suffix) val / divisors[bin] else val
 
   if (is.null(decimals)) {
-    is_int <- scaled == round(scaled)
-    if (any(is_int)) {
-      formatted[is_int] <- formatC(
-        round(scaled[is_int]), format = "f", digits = 0, big.mark = ","
-      )
-    }
-    if (any(!is_int)) {
-      formatted[!is_int] <- formatC(
-        scaled[!is_int], format = "f", digits = 2, big.mark = ","
-      )
-    }
+    formatted <- formatC(
+      scaled, format = "f", digits = 2, big.mark = ",", drop0trailing = TRUE
+    )
   } else {
     formatted <- formatC(
-      round(scaled, decimals), format = "f", digits = decimals, big.mark = ","
+      scaled, format = "f", digits = decimals, big.mark = ","
     )
   }
-
-  out[idx] <- paste0(formatted, suffixes[bin])
+  
+  out[idx] <- if(use_si_suffix) paste0(formatted, suffixes[bin]) else formatted
   out
 }
 
@@ -408,6 +400,7 @@
 #'   (x-axis left bound).
 #' @param max_year A numeric value indicating the last year of the zoom window
 #'   (x-axis right bound).
+#' @param y_labels A function that will be used in labels for the y-axis ticks.
 #'
 #' @return A \code{ggplot} object representing the zoomed inset plot, or
 #'   \code{NULL} if no data is available for the given Scenario and Index
@@ -424,9 +417,9 @@
 #' @noRd
 #' @importFrom dplyr filter
 #' @importFrom ggplot2 aes coord_cartesian geom_line geom_point geom_ribbon 
-#' ggplot labs scale_colour_manual scale_fill_manual theme
+#' ggplot labs scale_colour_manual scale_fill_manual scale_y_continuous theme
 #' @importFrom JABBA ss3col
-.make_zoom_plot <- function(df, scen, idx, min_year, max_year) {
+.make_zoom_plot <- function(df, scen, idx, min_year, max_year, y_labels) {
   zoom_data <- df$data %>%
     filter(year >= min_year, Scenario == scen, Index == idx)
 
@@ -459,6 +452,7 @@
     labs(x = "Year", y = "Index", colour = "") +
     scale_fill_manual(values = ss3col(8)) +
     scale_colour_manual(values = c("black", ss3col(8))) +
+    scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = c(min_year, max_year)) +
     .my_theme() +
     theme(legend.position = "none")

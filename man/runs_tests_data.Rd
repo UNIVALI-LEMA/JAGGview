@@ -14,7 +14,7 @@ JABBA function \code{JABBA::fit_jabba()}.}
 in the \code{Index} column.}
 }
 \value{
-A named list with three elements:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{cpue_residuals}{A data frame containing residuals, fitted
 LOESS values, and credibility bands.}
@@ -36,6 +36,9 @@ using LOESS, and credibility intervals are derived from the fitted model.
 If \code{indices_factor} is provided, the results are filtered and reordered
 accordingly. The function also ensures consistency across different model
 outputs and removes incomplete cases before returning results.
+
+The output is designed to be used directly with
+\code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
 }
 \examples{
 \dontrun{

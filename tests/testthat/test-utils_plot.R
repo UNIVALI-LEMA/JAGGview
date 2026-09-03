@@ -56,9 +56,10 @@ test_that(
   desc = ".international_system_prefixes(), returns the correct number 
   formatted and appended with their corresponding SI unit symbol", 
   code = {
-    expect_equal(.international_system_prefixes(1000000), "1M")
-    expect_equal(.international_system_prefixes(0.01e-9), "0.01n")
-    expect_equal(.international_system_prefixes(0.0051e-9), "0.01n")
+    expect_equal(.international_system_prefixes(1000000, TRUE), "1M")
+    expect_equal(.international_system_prefixes(0.01e-9, TRUE), "0.01n")
+    expect_equal(.international_system_prefixes(0.0051e-9, TRUE), "0.01n")
+    expect_equal(.international_system_prefixes(0.001, FALSE), "0")
   })
 
 test_that(

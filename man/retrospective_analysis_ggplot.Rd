@@ -13,6 +13,8 @@ retrospective_analysis_ggplot(
   use_si_suffix = FALSE,
   title_x = NULL,
   title_y = NULL,
+  x_decimals = NULL,
+  y_decimals = NULL,
   x_lim = NULL,
   y_lim = NULL
 )
@@ -50,6 +52,10 @@ default label is assigned based on \code{indicator_name}.}
 
 \item{title_y}{A character string for the y-axis label. If \code{NULL}, a
 default label is assigned based on \code{indicator_name}.}
+
+\item{x_decimals}{Optional. Number of decimal places for x-axis.}
+
+\item{y_decimals}{Optional. Number of decimal places for y-axis.}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
 upper limits of the x-axis c(min, max) used to restrict the plotting range.}

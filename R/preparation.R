@@ -12,8 +12,8 @@
 #'   JABBA function \code{JABBA::fit_jabba()}.
 #' @param indices_factor Optional. A vector of indices_factor to include. Must 
 #'   exist in the \code{Index} column.
-#'
-#' @return A named list with three elements:
+#' 
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{Li_Ui}{A data frame containing mean values and lower (Li) and
 #'   upper (Ui) credibility bounds.}
@@ -34,9 +34,8 @@
 #' If \code{indices_factor} is provided, the results are filtered and reordered
 #' accordingly. The function also ensures consistency across different
 #' model outputs and removes incomplete cases before returning results.
-#' 
-#' @family preparation functions
-#' @family fits functions
+#'
+#' The output is designed to be used directly with \code{\link{fits_ggplot}()}.
 #' 
 #' @examples
 #' \dontrun{
@@ -46,6 +45,9 @@
 #' result <- fits_data(list_fit_models)
 #' result
 #' }
+#' 
+#' @family preparation functions
+#' @family fits functions
 #' 
 #' @export
 #' @importFrom tidyr pivot_longer 
@@ -152,7 +154,7 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' @param indices_factor Optional. A vector of indices_factor to include. Must 
 #'   exist in the \code{Index} column.
 #'
-#' @return A named list with four elements:
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{data}{A data frame containing full hindcast time series,
 #'   including observed and predicted values.}
@@ -169,6 +171,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #' filters relevant years and conditions, and computes MASE statistics
 #' using \code{JABBA::jbmase}. The output is structured for direct use
 #' in visualization functions.
+#'
+#' The output is designed to be used directly with 
+#' \code{\link{hindcast_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -252,8 +257,6 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #'
 #' @param list_fit_models A list containing model outputs as returned by the 
 #'   JABBA function \code{JABBA::fit_jabba()}.
-#' \code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by the JABBA 
-#'   function \code{JABBA::jbplot_ensemble()}.
 #' @param ci_levels A numeric vector containing the CI values between 0 and 1.
 #'   Defaults to 0.5, 0.8, 0.95.
 #' @param reserve_mb A numeric value specifying the minimum amount of free
@@ -262,7 +265,7 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' @param poll_interval A numeric value giving the time interval, in seconds, 
 #'   between memory availability checks. Defaults to 0.5.
 #'
-#' @return A named list containing:
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{col01}{Data frame defining the yellow Kobe quadrant (overfished, 
 #'   not overfishing).}
@@ -276,8 +279,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #'   for the terminal year.}
 #'   \item{data_lines}{Time series of median biomass and fishing mortality 
 #'   ratios by year and scenario.}
-#'   \item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023) for 
-#'   highlighting points.}
+#'   \item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023) 
+#'   for highlighting points.}
 #' }
 #'
 #' @details
@@ -286,10 +289,7 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' terminal year using \code{gplots::ci2d}. These contours represent 
 #' uncertainty regions commonly displayed in Kobe plots.
 #'
-#' The output is designed to be used directly with \code{kobe_ggplot()}.
-#' 
-#' @family preparation functions
-#' @family kobe functions
+#' The output is designed to be used directly with \code{\link{kobe_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -299,6 +299,9 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' df <- kobe_data(list_fit_models)
 #' str(df)
 #' }
+#' 
+#' @family preparation functions
+#' @family kobe functions
 #'
 #' @export
 #' @importFrom dplyr %>% summarise arrange filter rename mutate
@@ -325,7 +328,7 @@ kobe_data <- function(
       poll_interval = poll_interval
     )
   }, memoryLimitExceeded = function(e) {
-    message("Process aborted for security, before crashing the system.")
+    message("Process aborted to prevent the system from running out of memory")
     NULL
   })
 
@@ -444,7 +447,7 @@ kobe_data <- function(
 #' @param list_fit_models A list containing model outputs as returned by the 
 #' JABBA function \code{JABBA::fit_jabba()}.
 #'
-#' @return A named list with the following elements:
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{prior}{A data frame containing sampled prior distributions.}
 #'   \item{posterior}{A data frame containing posterior density estimates.}
@@ -457,6 +460,9 @@ kobe_data <- function(
 #' based on model settings, while posterior distributions are estimated using 
 #' kernel density methods. Summary metrics (PPVR and PPMR) are computed to 
 #' assess the influence of priors on posterior estimates.
+#'
+#' The output is designed to be used directly with 
+#' \code{\link{priors_posteriors_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -621,7 +627,7 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @param list_hc_models A list containing retrospective model outputs as 
 #' returned by the JABBA function \code{JABBA::hindcast_jabba()}.
 #'
-#' @return A named list with three elements:
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{data}{A data frame containing time series for key indices
 #'   (e.g., B, F, B/Bmsy, F/Fmsy, and process error).}
@@ -634,7 +640,11 @@ priors_posteriors_data <- function(list_fit_models) {
 #' @details
 #' The function extracts retrospective runs, filters relevant indices, and 
 #' structures the data for visualization. It also computes logical filters for 
-#' valid retrospective years and includes surplus production and rho diagnostics.
+#' valid retrospective years and includes surplus production and rho 
+#' diagnostics.
+#'
+#' The output is designed to be used directly with 
+#' \code{\link{retrospective_analysis_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -729,7 +739,7 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @param indices_factor Optional. A vector of indices to include. Must exist
 #'   in the \code{Index} column.
 #'
-#' @return A named list with three elements:
+#' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
 #'   \item{cpue_residuals}{A data frame containing residuals, fitted
 #'   LOESS values, and credibility bands.}
@@ -746,6 +756,9 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' If \code{indices_factor} is provided, the results are filtered and reordered
 #' accordingly. The function also ensures consistency across different model 
 #' outputs and removes incomplete cases before returning results.
+#'
+#' The output is designed to be used directly with 
+#' \code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -866,7 +879,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' @param poll_interval A numeric value giving the time interval, in seconds, 
 #'   between memory availability checks. Defaults to 0.5.
 #'
-#' @return A data.frame containing:
+#' @return An object of class \code{JAGGdata} (a data frame) containing:
 #' \itemize{
 #'   \item \code{year}: Year of the observation
 #'   \item \code{Scenario}: Scenario name
@@ -885,6 +898,9 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #'   \item \code{"BBmsy"}: \code{stock}
 #'   \item \code{"FFmsy"}: \code{harvest}
 #' }
+#'
+#' The output is designed to be used directly with 
+#' \code{\link{trajectories_ggplot}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -920,7 +936,7 @@ trajectories_data <- function(
       poll_interval = poll_interval
     )
   }, memoryLimitExceeded = function(e) {
-    message("Process aborted for security, before crashing the system.")
+    message("Process aborted to prevent the system from running out of memory")
     NULL
   })
 

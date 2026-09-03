@@ -10,6 +10,7 @@ trajectories_ggplot(
   n_col = 3,
   title_x = "Year",
   use_si_suffix = FALSE,
+  y_decimals = NULL,
   palette = NULL,
   title_y = NULL,
   x_lim = NULL,
@@ -30,6 +31,8 @@ per line. Defaults to 3.}
 
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+
+\item{y_decimals}{Optional. Number of decimal places for y-axis.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
 If \code{NULL} (default), a color-blind-friendly palette is generated
