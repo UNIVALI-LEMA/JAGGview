@@ -1,5 +1,5 @@
 #' @keywords internal
-.cpue_res_server <- function(input, output, session, res_df) {
+.cpue_res_server <- function(input, output, session, res_df, use_si_suffix) {
   filtered_cpue_res <- reactiveVal(res_df)
 
   title_x_cpue_res <- reactiveVal(NULL)
@@ -20,6 +20,8 @@
 
   position_cpue_res <- reactiveVal("top-left")
 
+  si_suffix_cpue_res <- reactiveVal(use_si_suffix)
+
   cpue_res_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -31,7 +33,8 @@
     x_max_changed = FALSE,
     y_min_changed = FALSE,
     y_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   cpue_res_values <- reactiveValues(
@@ -45,7 +48,8 @@
     x_max_current = NA,
     y_min_current = NA,
     y_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$cpue_res_scenarios, {
@@ -138,7 +142,17 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$cpue_res_si_suffix, {
+    if (!identical(input$cpue_res_si_suffix, cpue_res_values$si_suffix_current)) {
+      cpue_res_change$si_suffix_changed = TRUE
+    }
+    else {
+      cpue_res_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   current_colors_cpue_res <- reactive({
+    req(input$navmenu == "tab_cpue_residuals")
     n <- length(unique(res_df$cpue_residuals$Index))
     req(n > 0)
     var <- c()
@@ -158,12 +172,14 @@
     else {
       cpue_res_change$color_changed = FALSE
     }
-  }, ignoreInit = TRUE, ignoreNULL = FALSE)
+  }, ignoreInit = TRUE)
 
   output$cpue_res_color_inputs <- renderUI({
+    req(input$navmenu == "tab_cpue_residuals")
     n <- length(unique(res_df$cpue_residuals$Index))
 
     default_palette <- .resolve_palette(NULL, n)
+    cpue_res_values$color_current <- default_palette
 
     color_inputs <- lapply(seq_len(n), function(i) {
       colourInput(
@@ -199,45 +215,45 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$cpue_res_y_min
-    y_max <- input$cpue_res_y_max
-
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "cpue_res_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "cpue_res_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$cpue_res_x_min
-    x_max <- input$cpue_res_x_max
-
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "cpue_res_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "cpue_res_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
-
     if (input$navmenu == "tab_cpue_residuals") {
+
+      y_min <- input$cpue_res_y_min
+      y_max <- input$cpue_res_y_max
+
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "cpue_res_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "cpue_res_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$cpue_res_x_min
+      x_max <- input$cpue_res_x_max
+
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "cpue_res_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "cpue_res_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
 
       selected_colors <- current_colors_cpue_res()
 
@@ -252,6 +268,7 @@
       cpue_res_values$y_min_current = y_min
       cpue_res_values$y_max_current = y_max
       cpue_res_values$position_current = input$cpue_res_position
+      cpue_res_values$si_suffix_current = input$cpue_res_si_suffix
 
       cpue_res_change$scenarios_changed = FALSE
       cpue_res_change$indices_changed = FALSE
@@ -264,6 +281,7 @@
       cpue_res_change$y_min_changed = FALSE
       cpue_res_change$y_max_changed = FALSE
       cpue_res_change$position_changed = FALSE
+      cpue_res_change$si_suffix_changed = FALSE
 
       filtered_cpue_res(
         list(
@@ -289,6 +307,7 @@
       y_lim_min_cpue_res(y_min)
       y_lim_max_cpue_res(y_max)
       position_cpue_res(input$cpue_res_position)
+      si_suffix_cpue_res(input$cpue_res_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -438,7 +457,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "Index: ", Index, 
-            "<br>Residuals: ", .international_system_prefixes(Res, 2)
+            "<br>Residuals: ", 
+            .international_system_prefixes(Res, si_suffix_cpue_res())
           )
         ) %>%
         add_lines(
@@ -446,7 +466,7 @@
           line = list(width = 2, color = "black"),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Loess: ", .international_system_prefixes(fit, 2)
+            "Loess: ", .international_system_prefixes(fit, si_suffix_cpue_res())
           )
         ) %>%
         add_ribbons(
@@ -457,8 +477,9 @@
           line = list(width = 0),
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(95): (", .international_system_prefixes(lower, 2), ") - (", 
-            .international_system_prefixes(upper, 2), ")"
+            "CI(95): (", 
+            .international_system_prefixes(lower, si_suffix_cpue_res()), ") - (", 
+            .international_system_prefixes(upper, si_suffix_cpue_res()), ")"
           ) 
         ) %>%
           add_segments(

@@ -1,5 +1,7 @@
 #' @keywords internal
-.retrospective_analysis_F_server <- function(input, output, session, ra_df) {
+.retrospective_analysis_F_server <- function(
+  input, output, session, ra_df, use_si_suffix
+) {
   filtered_ra_F <- reactiveVal(ra_df)
 
   title_x_ra_F <- reactiveVal(NULL)
@@ -18,6 +20,8 @@
 
   position_ra_F <- reactiveVal("top-left")
 
+  si_suffix_ra_F <- reactiveVal(use_si_suffix)
+
   ra_F_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -27,7 +31,8 @@
     x_max_changed = FALSE,
     y_min_changed = FALSE,
     y_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   ra_F_values <- reactiveValues(
@@ -39,7 +44,8 @@
     x_max_current = NA,
     y_min_current = NA,
     y_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$ra_F_scenarios, {
@@ -123,6 +129,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$ra_F_si_suffix, {
+    if (!identical(input$ra_F_si_suffix, ra_F_values$si_suffix_current)) {
+      ra_F_change$si_suffix_changed = TRUE
+    }
+    else {
+      ra_F_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_ra_F <- reactive({
     req(input$navmenu == "tab_retrospective_analysis" && 
       input$retrospective_analysis_tabs == "tab_ra_F")
@@ -144,46 +159,48 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$ra_F_y_min
-    y_max <- input$ra_F_y_max
+    if (
+      input$navmenu == "tab_retrospective_analysis" && 
+      input$retrospective_analysis_tabs == "tab_ra_F"
+    ) {
+      y_min <- input$ra_F_y_min
+      y_max <- input$ra_F_y_max
 
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "ra_F_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "ra_F_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$ra_F_x_min
-    x_max <- input$ra_F_x_max
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "ra_F_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "ra_F_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$ra_F_x_min
+      x_max <- input$ra_F_x_max
 
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "ra_F_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "ra_F_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "ra_F_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "ra_F_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
 
-    if (input$navmenu == "tab_retrospective_analysis" && 
-      input$retrospective_analysis_tabs == "tab_ra_F") {
       ra_F_values$scenarios_current = input$ra_F_scenarios
       ra_F_values$indices_current = input$ra_F_indices
       ra_F_values$title_x_current = input$ra_F_title_x
@@ -194,6 +211,7 @@
       ra_F_values$y_min_current = y_min
       ra_F_values$y_max_current = y_max
       ra_F_values$position_current = input$ra_F_position
+      ra_F_values$si_suffix_current = input$ra_F_si_suffix
 
       ra_F_change$scenarios_changed = FALSE
       ra_F_change$indices_changed = FALSE
@@ -205,6 +223,7 @@
       ra_F_change$y_min_changed = FALSE
       ra_F_change$y_max_changed = FALSE
       ra_F_change$position_changed = FALSE
+      ra_F_change$si_suffix_changed = FALSE
 
       filtered_ra_F(
         list(
@@ -227,6 +246,7 @@
       y_lim_min_ra_F(y_min)
       y_lim_max_ra_F(y_max)
       position_ra_F(input$ra_F_position)
+      si_suffix_ra_F(input$ra_F_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -376,8 +396,8 @@
           line = list(width = 0),
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(95): (", .international_system_prefixes(lci, 2), 
-            ") - (", .international_system_prefixes(uci, 2), ")"
+            "CI(95): (", .international_system_prefixes(lci, si_suffix_ra_F()), 
+            ") - (", .international_system_prefixes(uci, si_suffix_ra_F()), ")"
           )
         ) %>%
         add_lines(
@@ -390,7 +410,8 @@
           line = list(width = 3),
           hoverinfo = "text+x",
           text = ~paste0(
-            "mu (", id,"): ", .international_system_prefixes(mu, 2)
+            "mu (", id,"): ", 
+            .international_system_prefixes(mu, si_suffix_ra_F())
           )
         ) %>%
         layout(

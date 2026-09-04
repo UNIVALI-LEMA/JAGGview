@@ -1,5 +1,5 @@
 #' @keywords internal
-.runs_tests_server <- function(input, output, session, res_df) {
+.runs_tests_server <- function(input, output, session, res_df, use_si_suffix) {
   filtered_runs_tests <- reactiveVal(res_df)
 
   title_x_runs_tests <- reactiveVal(NULL)
@@ -18,6 +18,8 @@
 
   position_runs_tests <- reactiveVal("top-left")
 
+  si_suffix_runs_tests <- reactiveVal(use_si_suffix)
+
   runs_tests_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -28,7 +30,8 @@
     x_max_changed = FALSE,
     y_min_changed = FALSE,
     y_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   runs_tests_values <- reactiveValues(
@@ -41,7 +44,8 @@
     x_max_current = NA,
     y_min_current = NA,
     y_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$runs_tests_scenarios, {
@@ -82,7 +86,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_text_size, {
-    if (!identical(input$runs_tests_text_size, runs_tests_values$text_size_current)) {
+    if (
+      !identical(
+        input$runs_tests_text_size, runs_tests_values$text_size_current
+      )
+    ) {
       runs_tests_change$text_size_changed = TRUE
     }
     else {
@@ -136,6 +144,19 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$runs_tests_si_suffix, {
+    if (
+      !identical(
+        input$runs_tests_si_suffix, runs_tests_values$si_suffix_current
+      )
+    ) {
+      runs_tests_change$si_suffix_changed = TRUE
+    }
+    else {
+      runs_tests_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_runs_tests <- reactive({
     req(input$navmenu == "tab_runs_tests")
     vec <- unlist(reactiveValuesToList(runs_tests_change))
@@ -154,50 +175,50 @@
     } else {
       disable("confirm_button")
     }
-  }, ignoreInit = TRUE)
+  }, ignoreInit = FALSE)
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$runs_tests_y_min
-    y_max <- input$runs_tests_y_max
-
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "runs_tests_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "runs_tests_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$runs_tests_x_min
-    x_max <- input$runs_tests_x_max
-
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "runs_tests_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "runs_tests_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
-
     if (input$navmenu == "tab_runs_tests") {
+      y_min <- input$runs_tests_y_min
+      y_max <- input$runs_tests_y_max
+
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "runs_tests_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "runs_tests_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$runs_tests_x_min
+      x_max <- input$runs_tests_x_max
+
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "runs_tests_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "runs_tests_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
+
       runs_tests_values$scenarios_current = input$runs_tests_scenarios
       runs_tests_values$indices_current = input$runs_tests_indices
       runs_tests_values$title_x_current = input$runs_tests_title_x
@@ -208,6 +229,7 @@
       runs_tests_values$y_min_current = y_min
       runs_tests_values$y_max_current = y_max
       runs_tests_values$position_current = input$runs_tests_position
+      runs_tests_values$si_suffix_current = input$runs_tests_si_suffix
 
       runs_tests_change$scenarios_changed = FALSE
       runs_tests_change$indices_changed = FALSE
@@ -219,6 +241,7 @@
       runs_tests_change$y_min_changed = FALSE
       runs_tests_change$y_max_changed = FALSE
       runs_tests_change$position_changed = FALSE
+      runs_tests_change$si_suffix_changed = FALSE
 
       filtered_runs_tests(
         list(
@@ -243,6 +266,7 @@
       y_lim_min_runs_tests(y_min)
       y_lim_max_runs_tests(y_max)
       position_runs_tests(input$runs_tests_position)
+      si_suffix_runs_tests(input$runs_tests_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -419,8 +443,9 @@
             line = list(color = "black"),
             hoverinfo = "text+x",
             text = ~paste0(
-              "CI(95): ", .international_system_prefixes(lcl, 2), " - ",
-              .international_system_prefixes(ucl, 2)  
+              "CI(95): ", 
+              .international_system_prefixes(lcl, si_suffix_runs_tests()), " - ",
+              .international_system_prefixes(ucl, si_suffix_runs_tests())  
             ) 
           ) %>%
           add_markers(
@@ -436,7 +461,9 @@
               )
             ),
             hoverinfo = "text+x",
-            text = ~paste0("Residue: ", .international_system_prefixes(Res, 2))
+            text = ~paste0(
+              "Residue: ", .international_system_prefixes(Res, si_suffix_runs_tests())
+            )
           ) %>%
           add_markers(
             data = cpue_residuals %>% filter(class == "red"),
@@ -451,7 +478,9 @@
               )
             ),
             hoverinfo = "text+x",
-            text = ~paste0("Residue: ", .international_system_prefixes(Res, 2))
+            text = ~paste0(
+              "Residue: ", .international_system_prefixes(Res, si_suffix_runs_tests())
+            )
           )
         
         if (nrow(SE3) != 0) {

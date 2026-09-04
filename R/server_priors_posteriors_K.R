@@ -1,5 +1,7 @@
 #' @keywords internal
-.priors_posteriors_K_server <- function(input, output, session, pp_df) {
+.priors_posteriors_K_server <- function(
+  input, output, session, pp_df, use_si_suffix
+) {
   filtered_pp_K <- reactiveVal(pp_df)
 
   title_x_pp_K <- reactiveVal(NULL)
@@ -18,6 +20,8 @@
 
   position_pp_K <- reactiveVal("top-left")
 
+  si_suffix_pp_K <- reactiveVal(use_si_suffix)
+
   pp_K_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -27,7 +31,8 @@
     text_size_changed = FALSE,
     x_min_changed = FALSE,
     x_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   pp_K_values <- reactiveValues(
@@ -40,7 +45,8 @@
     text_size_current = 16,
     x_min_current = NA,
     x_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$pp_K_scenarios, {
@@ -125,6 +131,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$pp_K_si_suffix, {
+    if (!identical(input$pp_K_si_suffix, pp_K_values$si_suffix_current)) {
+      pp_K_change$si_suffix_changed = TRUE
+    }
+    else {
+      pp_K_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_pp_K <- reactive({
     req(input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_K")
@@ -147,28 +162,30 @@
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
-    
-    x_min <- input$pp_K_x_min
-    x_max <- input$pp_K_x_max
 
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "pp_K_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "pp_K_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
+    if (
+      input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_K"
+    ) {      
+      x_min <- input$pp_K_x_min
+      x_max <- input$pp_K_x_max
 
-    if (input$navmenu == "tab_priors_posteriors" && 
-      input$priors_posteriors_tabs == "tab_pp_K") {
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "pp_K_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "pp_K_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
+
       pp_K_values$scenarios_current = input$pp_K_scenarios
       pp_K_values$indices_current = input$pp_K_indices
       pp_K_values$title_x_current = input$pp_K_title_x
@@ -179,6 +196,7 @@
       pp_K_values$x_min_current = x_min
       pp_K_values$x_max_current = x_max
       pp_K_values$position_current = input$pp_K_position
+      pp_K_values$si_suffix_current = input$pp_K_si_suffix
 
       pp_K_change$scenarios_changed = FALSE
       pp_K_change$indices_changed = FALSE
@@ -189,6 +207,7 @@
       pp_K_change$x_min_changed = FALSE
       pp_K_change$x_max_changed = FALSE
       pp_K_change$position_changed = FALSE
+      pp_K_change$si_suffix_changed = FALSE
 
       filtered_pp_K(
         list(
@@ -219,6 +238,7 @@
       x_lim_min_pp_K(x_min)
       x_lim_max_pp_K(x_max)
       position_pp_K(input$pp_K_position)
+      si_suffix_pp_K(input$pp_K_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -375,7 +395,8 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Prior<br>K: ", .international_system_prefixes(K01)
+            "Prior<br>K: ", 
+            .international_system_prefixes(K01, si_suffix_pp_K())
           )
         ) %>%
         add_trace(
@@ -392,7 +413,8 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Posterior<br>K: ", .international_system_prefixes(K01)
+            "Posterior<br>K: ", 
+            .international_system_prefixes(K01, si_suffix_pp_K())
           )
         ) %>%
         layout(

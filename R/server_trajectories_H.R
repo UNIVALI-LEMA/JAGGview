@@ -1,5 +1,7 @@
 #' @keywords internal
-.traj_H_server <- function(input, output, session, traj_df, animation) { 
+.traj_H_server <- function(
+  input, output, session, traj_df, animation, use_si_suffix
+) { 
   filtered_traj_H <- reactiveVal(traj_df)
 
   title_x_traj_H <- reactiveVal(NULL)
@@ -16,6 +18,8 @@
 
   y_lim_max_traj_H <- reactiveVal(NULL)
 
+  si_suffix_traj_H <- reactiveVal(use_si_suffix)
+
   traj_H_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -24,7 +28,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   traj_H_values <- reactiveValues(
@@ -35,7 +40,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$traj_H_scenarios, {
@@ -110,6 +116,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$traj_H_si_suffix, {
+    if (!identical(input$traj_H_si_suffix, traj_H_values$si_suffix_current)) {
+      traj_H_change$si_suffix_changed = TRUE
+    }
+    else {
+      traj_H_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_traj_H <- reactive({
     req(input$navmenu == "tab_trajectories" && 
       input$trajectories_tabs == "tab_traj_H")
@@ -131,46 +146,48 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$traj_H_y_min
-    y_max <- input$traj_H_y_max
+    if (
+      input$navmenu == "tab_trajectories" && 
+      input$trajectories_tabs == "tab_traj_H"
+    ) {
+      y_min <- input$traj_H_y_min
+      y_max <- input$traj_H_y_max
 
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "traj_H_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "traj_H_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$traj_H_x_min
-    x_max <- input$traj_H_x_max
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "traj_H_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "traj_H_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$traj_H_x_min
+      x_max <- input$traj_H_x_max
 
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "traj_H_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "traj_H_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "traj_H_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "traj_H_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
 
-    if (input$navmenu == "tab_trajectories" && 
-      input$trajectories_tabs == "tab_traj_H") {
       traj_H_values$scenarios_current = input$traj_H_scenarios
       traj_H_values$title_x_current = input$traj_H_title_x
       traj_H_values$title_y_current = input$traj_H_title_y
@@ -179,6 +196,7 @@
       traj_H_values$x_max_current = x_max
       traj_H_values$y_min_current = y_min
       traj_H_values$y_max_current = y_max
+      traj_H_values$si_suffix_current = input$traj_H_si_suffix
 
       traj_H_change$scenarios_changed = FALSE
       traj_H_change$title_x_changed = FALSE
@@ -188,6 +206,7 @@
       traj_H_change$x_max_changed = FALSE
       traj_H_change$y_min_changed = FALSE
       traj_H_change$y_max_changed = FALSE
+      traj_H_change$si_suffix_changed = FALSE
 
       filtered_traj_H(
         traj_df %>%
@@ -201,6 +220,7 @@
       x_lim_max_traj_H(x_max)
       y_lim_min_traj_H(y_min)
       y_lim_max_traj_H(y_max)
+      si_suffix_traj_H(input$traj_H_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -327,8 +347,9 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(90): (", .international_system_prefixes(lcl2, 2), 
-            ") - (", .international_system_prefixes(ucl2, 2), ")"
+            "CI(90): (", 
+            .international_system_prefixes(lcl2, si_suffix_traj_H()), ") - (", 
+            .international_system_prefixes(ucl2, si_suffix_traj_H()), ")"
           )
         ) %>%
         add_ribbons(
@@ -342,8 +363,9 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(97,5): (", .international_system_prefixes(lcl, 2), 
-            ") - (", .international_system_prefixes(ucl, 2), ")"
+            "CI(97,5): (", 
+            .international_system_prefixes(lcl, si_suffix_traj_H()), ") - (", 
+            .international_system_prefixes(ucl, si_suffix_traj_H()), ")"
           )
         ) %>%
         add_lines(
@@ -355,7 +377,9 @@
           line = list(width = 3, color = "black"),
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
-          text = ~paste0("Value: ", .international_system_prefixes(mu, 2))
+          text = ~paste0(
+            "Value: ", .international_system_prefixes(mu, si_suffix_traj_H())
+          )
         ) %>%
         layout(
           showlegend = FALSE,

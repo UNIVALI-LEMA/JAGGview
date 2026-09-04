@@ -15,6 +15,7 @@ create_report(
   filename = NULL,
   dir = getwd(),
   animation = TRUE,
+  use_si_suffix = FALSE,
   verbose = FALSE
 )
 }
@@ -52,6 +53,9 @@ located. Defaults to the currente working directory (\code{getwd()}).}
 
 \item{animation}{A boolean value that if TRUE, shows animations in some
 plots. Defaults to TRUE.}
+
+\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
+used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{verbose}{A boolean value that if TRUE, shows progress through messages
 in console. Defaults to FALSE.}

@@ -1,5 +1,7 @@
 #' @keywords internal
-.kobe_server <- function(input, output, session, kobe_df, animation) {
+.kobe_server <- function(
+  input, output, session, kobe_df, animation, use_si_suffix
+) {
   filtered_kobe <- reactiveVal(kobe_df)
 
   title_x_kobe <- reactiveVal(NULL)
@@ -14,6 +16,8 @@
 
   y_lim_max_kobe <- reactiveVal(NULL)
 
+  si_suffix_kobe <- reactiveVal(use_si_suffix)
+
   kobe_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -21,7 +25,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   kobe_values <- reactiveValues(
@@ -31,7 +36,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$kobe_scenarios, {
@@ -106,6 +112,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$kobe_si_suffix, {
+    if (!identical(input$kobe_si_suffix, kobe_values$si_suffix_current)) {
+      kobe_change$si_suffix_changed = TRUE
+    }
+    else {
+      kobe_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_kobe <- reactive({
     req(input$navmenu == "tab_kobe")
     vec <- unlist(reactiveValuesToList(kobe_change))
@@ -126,45 +141,45 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$kobe_y_min
-    y_max <- input$kobe_y_max
-
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "kobe_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "kobe_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$kobe_x_min
-    x_max <- input$kobe_x_max
-
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "kobe_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "kobe_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
-
     if (input$navmenu == "tab_kobe") {
+      y_min <- input$kobe_y_min
+      y_max <- input$kobe_y_max
+
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "kobe_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "kobe_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$kobe_x_min
+      x_max <- input$kobe_x_max
+
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "kobe_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "kobe_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
+
       kobe_values$scenarios_current = input$kobe_scenarios
       kobe_values$title_x_current = input$kobe_title_x
       kobe_values$title_y_current = input$kobe_title_y
@@ -173,6 +188,7 @@
       kobe_values$x_max_current = x_max
       kobe_values$y_min_current = y_min
       kobe_values$y_max_current = y_max
+      kobe_values$si_suffix_current = input$kobe_si_suffix
 
       kobe_change$scenarios_changed = FALSE
       kobe_change$title_x_changed = FALSE
@@ -182,6 +198,7 @@
       kobe_change$x_max_changed = FALSE
       kobe_change$y_min_changed = FALSE
       kobe_change$y_max_changed = FALSE
+      kobe_change$si_suffix_changed = FALSE
 
       filtered_kobe(
         list(
@@ -209,6 +226,7 @@
       x_lim_max_kobe(x_max)
       y_lim_min_kobe(y_min)
       y_lim_max_kobe(y_max)
+      si_suffix_kobe(input$kobe_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -437,8 +455,9 @@
           hoverinfo = "text",
           text = ~paste0(
             "Year: ", year, "<br>B/B<sub>MSY</sub>: ", 
-            .international_system_prefixes(Bratio), "<br>F/F<sub>MSY</sub>: ", 
-            .international_system_prefixes(Fratio)
+            .international_system_prefixes(Bratio, si_suffix_kobe()), 
+            "<br>F/F<sub>MSY</sub>: ", 
+            .international_system_prefixes(Fratio, si_suffix_kobe())
           )
         ) %>%
         add_markers(

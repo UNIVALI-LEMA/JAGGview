@@ -1,5 +1,5 @@
 #' @keywords internal
-.hindcast_server <- function(input, output, session, hind_df) { 
+.hindcast_server <- function(input, output, session, hind_df, use_si_suffix) { 
   filtered_hc <- reactiveVal(hind_df)
 
   title_x_hc <- reactiveVal(NULL)
@@ -18,6 +18,8 @@
 
   position_hc <- reactiveVal("top-left")
 
+  si_suffix_hc <- reactiveVal(use_si_suffix)
+
   hc_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -28,7 +30,8 @@
     x_max_changed = FALSE,
     y_min_changed = FALSE,
     y_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   hc_values <- reactiveValues(
@@ -41,7 +44,8 @@
     x_max_current = NA,
     y_min_current = NA,
     y_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$hc_scenarios, {
@@ -134,6 +138,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$hc_si_suffix, {
+    if (!identical(input$hc_si_suffix, hc_values$si_suffix_current)) {
+      hc_change$si_suffix_changed = TRUE
+    }
+    else {
+      hc_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_hc <- reactive({
     req(input$navmenu == "tab_hindcast")
     vec <- unlist(reactiveValuesToList(hc_change))
@@ -157,45 +170,45 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$hc_y_min
-    y_max <- input$hc_y_max
-
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "hc_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "hc_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$hc_x_min
-    x_max <- input$hc_x_max
-
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "hc_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "hc_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
-
     if (input$navmenu == "tab_hindcast") {
+      y_min <- input$hc_y_min
+      y_max <- input$hc_y_max
+
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "hc_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "hc_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$hc_x_min
+      x_max <- input$hc_x_max
+
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "hc_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "hc_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
+
       hc_values$scenarios_current = input$hc_scenarios
       hc_values$indices_current = input$hc_indices
       hc_values$title_x_current = input$hc_title_x
@@ -206,6 +219,7 @@
       hc_values$y_min_current = y_min
       hc_values$y_max_current = y_max
       hc_values$position_current = input$hc_position
+      hc_values$si_suffix_current = input$hc_si_suffix
 
       hc_change$scenarios_changed = FALSE
       hc_change$indices_changed = FALSE
@@ -217,6 +231,7 @@
       hc_change$y_min_changed = FALSE
       hc_change$y_max_changed = FALSE
       hc_change$position_changed = FALSE
+      hc_change$si_suffix_changed = FALSE
 
       filtered_hc(
         list(
@@ -251,6 +266,7 @@
       y_lim_min_hc(y_min)
       y_lim_max_hc(y_max)
       position_hc(input$hc_position)
+      si_suffix_hc(input$hc_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -446,8 +462,9 @@
             line = list(width = 0),
             hoverinfo = "text+x",
             text = ~paste0(
-              "hat CI(95): (", .international_system_prefixes(hat.lci, 2), 
-              ") - (", .international_system_prefixes(hat.uci, 2), ")"
+              "hat CI(95): (", 
+              .international_system_prefixes(hat.lci, si_suffix_hc()), ") - (", 
+              .international_system_prefixes(hat.uci, si_suffix_hc()), ")"
             )
           ) %>%
           add_ribbons(
@@ -460,8 +477,9 @@
             line = list(width = 0),
             hoverinfo = "text+x",
             text = ~paste0(
-              "hat CI(95): (", .international_system_prefixes(hat.lci, 2), 
-              ") - (", .international_system_prefixes(hat.uci, 2), ")"
+              "hat CI(95): (", 
+              .international_system_prefixes(hat.lci, si_suffix_hc()), ") - (", 
+              .international_system_prefixes(hat.uci, si_suffix_hc()), ")"
             )
           ) %>%
           add_lines(
@@ -474,7 +492,8 @@
             line = list(width = 2),
             hoverinfo = "text+x",
             text = ~paste0(
-              "hat (", retro,"): ", .international_system_prefixes(hat, 2)
+              "hat (", retro,"): ", 
+              .international_system_prefixes(hat, si_suffix_hc())
             ),
             inherit = FALSE
           ) %>%
@@ -488,7 +507,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hat - hindcast(", retro,"): ", 
-              .international_system_prefixes(hat, 2)
+              .international_system_prefixes(hat, si_suffix_hc())
             )
           ) %>%
           add_markers(
@@ -506,7 +525,7 @@
             ),
             hoverinfo = "text+x",
             text = ~paste0(
-              "obs: ", .international_system_prefixes(obs, 2)
+              "obs: ", .international_system_prefixes(obs, si_suffix_hc())
             )
           ) %>%
           add_markers(
@@ -525,7 +544,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hindcast obs (", retro,"): ",
-              .international_system_prefixes(obs, 2)
+              .international_system_prefixes(obs, si_suffix_hc())
             )
           ) %>%
           add_markers(
@@ -544,7 +563,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hindcast hat (", retro,"): ", 
-              .international_system_prefixes(hat, 2)
+              .international_system_prefixes(hat, si_suffix_hc())
             )
           ) %>%
           layout(

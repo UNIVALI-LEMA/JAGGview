@@ -1,5 +1,5 @@
 #' @keywords internal
-.fits_server <- function(input, output, session, fits_df) { 
+.fits_server <- function(input, output, session, fits_df, use_si_suffix) { 
   filtered_fits <- reactiveVal(fits_df)
 
   title_x_fits <- reactiveVal(NULL)
@@ -16,6 +16,8 @@
 
   y_lim_max_fits <- reactiveVal(NULL)
 
+  si_suffix_fits <- reactiveVal(use_si_suffix)
+
   fits_change <- reactiveValues(
     scenarios_changed = FALSE,
     indices_changed = FALSE,
@@ -25,7 +27,8 @@
     x_min_changed = FALSE,
     x_max_changed = FALSE,
     y_min_changed = FALSE,
-    y_max_changed = FALSE
+    y_max_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   fits_values <- reactiveValues(
@@ -37,7 +40,8 @@
     x_min_current = NA,
     x_max_current = NA,
     y_min_current = NA,
-    y_max_current = NA
+    y_max_current = NA,
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$fits_scenarios, {
@@ -121,6 +125,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$fits_si_suffix, {
+    if (!identical(input$fits_si_suffix, fits_values$si_suffix_current)) {
+      fits_change$si_suffix_changed = TRUE
+    }
+    else {
+      fits_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_fits <- reactive({
     req(input$navmenu == "tab_fits")
     vec <- unlist(reactiveValuesToList(fits_change))
@@ -144,45 +157,45 @@
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
 
-    y_min <- input$fits_y_min
-    y_max <- input$fits_y_max
-
-    if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-      tmp_y <- y_min
-      y_min <- y_max
-      y_max <- tmp_y
-      updateSelectInput(
-        session, inputId = "fits_y_min", selected = y_min
-      )
-      updateSelectInput(
-        session, inputId = "fits_y_max", selected = y_max
-      )
-      showNotification(
-        ui = "First y value shouldn't be higher than the second y value",
-        type = "warning", duration = 10
-      )
-    }
-    
-    x_min <- input$fits_x_min
-    x_max <- input$fits_x_max
-
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "fits_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "fits_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
-
     if (input$navmenu == "tab_fits") {
+      y_min <- input$fits_y_min
+      y_max <- input$fits_y_max
+
+      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
+        tmp_y <- y_min
+        y_min <- y_max
+        y_max <- tmp_y
+        updateSelectInput(
+          session, inputId = "fits_y_min", selected = y_min
+        )
+        updateSelectInput(
+          session, inputId = "fits_y_max", selected = y_max
+        )
+        showNotification(
+          ui = "First y value shouldn't be higher than the second y value",
+          type = "warning", duration = 10
+        )
+      }
+      
+      x_min <- input$fits_x_min
+      x_max <- input$fits_x_max
+
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "fits_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "fits_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
+
       fits_values$scenarios_current = input$fits_scenarios
       fits_values$indices_current = input$fits_indices
       fits_values$title_x_current = input$fits_title_x
@@ -192,6 +205,7 @@
       fits_values$x_max_current = x_max
       fits_values$y_min_current = y_min
       fits_values$y_max_current = y_max
+      fits_values$si_suffix_current = input$fits_si_suffix
 
       fits_change$scenarios_changed = FALSE
       fits_change$indices_changed = FALSE
@@ -202,6 +216,7 @@
       fits_change$x_max_changed = FALSE
       fits_change$y_min_changed = FALSE
       fits_change$y_max_changed = FALSE
+      fits_change$si_suffix_changed = FALSE
 
       filtered_fits(
         fits_df %>%
@@ -218,6 +233,7 @@
       x_lim_max_fits(x_max)
       y_lim_min_fits(y_min)
       y_lim_max_fits(y_max)
+      si_suffix_fits(input$fits_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -382,8 +398,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(95%): ", 
-            .international_system_prefixes(lci_95, 2), "-", 
-            .international_system_prefixes(uci_95, 2)
+            .international_system_prefixes(lci_95, si_suffix_fits()), "-", 
+            .international_system_prefixes(uci_95, si_suffix_fits())
           )
         ) %>%
         add_ribbons(
@@ -397,8 +413,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(80%): ", 
-            .international_system_prefixes(lci_80, 2), "-", 
-            .international_system_prefixes(uci_80, 2)  
+            .international_system_prefixes(lci_80, si_suffix_fits()), "-", 
+            .international_system_prefixes(uci_80, si_suffix_fits())  
           )
         ) %>%
         add_lines(
@@ -410,7 +426,7 @@
           line = list(width = 2, color = "black"),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Mean: ", .international_system_prefixes(mu_80, 2)
+            "Mean: ", .international_system_prefixes(mu_80, si_suffix_fits())
           )
         ) %>%
         add_markers(
@@ -431,9 +447,10 @@
           ),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Point: ", .international_system_prefixes(Mean, 2), 
-            "<br>Interval: ", .international_system_prefixes(Li, 2), "-", 
-            .international_system_prefixes(Ui, 2)
+            "Point: ", .international_system_prefixes(Mean, si_suffix_fits()), 
+            "<br>Interval: ", 
+            .international_system_prefixes(Li, si_suffix_fits()), "-", 
+            .international_system_prefixes(Ui, si_suffix_fits())
           )
         ) %>%
         layout(

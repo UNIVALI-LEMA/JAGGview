@@ -1,5 +1,7 @@
 #' @keywords internal
-.priors_posteriors_psi_server <- function(input, output, session, pp_df) {
+.priors_posteriors_psi_server <- function(
+  input, output, session, pp_df, use_si_suffix
+) {
   filtered_pp_psi <- reactiveVal(pp_df)
 
   title_x_pp_psi <- reactiveVal(NULL)
@@ -18,6 +20,8 @@
 
   position_pp_psi <- reactiveVal("top-left")
 
+  si_suffix_pp_psi <- reactiveVal(use_si_suffix)
+
   pp_psi_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -27,7 +31,9 @@
     text_size_changed = FALSE,
     x_min_changed = FALSE,
     x_max_changed = FALSE,
-    position_changed = FALSE
+    position_changed = FALSE,
+    si_suffix_changed = FALSE,
+    si_suffix_changed = FALSE
   )
 
   pp_psi_values <- reactiveValues(
@@ -40,7 +46,8 @@
     text_size_current = 16,
     x_min_current = NA,
     x_max_current = NA,
-    position_current = "top-left"
+    position_current = "top-left",
+    si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$pp_psi_scenarios, {
@@ -125,6 +132,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$pp_psi_si_suffix, {
+    if (!identical(input$pp_psi_si_suffix, pp_psi_values$si_suffix_current)) {
+      pp_psi_change$si_suffix_changed = TRUE
+    }
+    else {
+      pp_psi_change$si_suffix_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_pp_psi <- reactive({
     req(input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_psi")
@@ -147,28 +163,30 @@
 
   observeEvent(input$confirm_button, {
     updateControlbar(id = "controlbar", session = session)
-    
-    x_min <- input$pp_psi_x_min
-    x_max <- input$pp_psi_x_max
+   
+    if (
+      input$navmenu == "tab_priors_posteriors" && 
+      input$priors_posteriors_tabs == "tab_pp_psi"
+    ) {   
+      x_min <- input$pp_psi_x_min
+      x_max <- input$pp_psi_x_max
 
-    if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-      tmp_x <- x_min
-      x_min <- x_max
-      x_max <- tmp_x
-      updateSelectInput(
-        session, inputId = "pp_psi_x_min", selected = x_min
-      )
-      updateSelectInput(
-        session, inputId = "pp_psi_x_max", selected = x_max
-      )
-      showNotification(
-        ui = "First x value shouldn't be higher than the second x value",
-        type = "warning", duration = 10
-      )
-    }
+      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
+        tmp_x <- x_min
+        x_min <- x_max
+        x_max <- tmp_x
+        updateSelectInput(
+          session, inputId = "pp_psi_x_min", selected = x_min
+        )
+        updateSelectInput(
+          session, inputId = "pp_psi_x_max", selected = x_max
+        )
+        showNotification(
+          ui = "First x value shouldn't be higher than the second x value",
+          type = "warning", duration = 10
+        )
+      }
 
-    if (input$navmenu == "tab_priors_posteriors" && 
-      input$priors_posteriors_tabs == "tab_pp_psi") {
       pp_psi_values$scenarios_current = input$pp_psi_scenarios
       pp_psi_values$indices_current = input$pp_psi_indices
       pp_psi_values$title_x_current = input$pp_psi_title_x
@@ -179,6 +197,7 @@
       pp_psi_values$x_min_current = input$pp_psi_x_min
       pp_psi_values$x_max_current = input$pp_psi_x_max
       pp_psi_values$position_current = input$pp_psi_position
+      pp_psi_values$si_suffix_current = input$pp_psi_si_suffix
 
       pp_psi_change$scenarios_changed = FALSE
       pp_psi_change$indices_changed = FALSE
@@ -189,6 +208,7 @@
       pp_psi_change$x_min_changed = FALSE
       pp_psi_change$x_max_changed = FALSE
       pp_psi_change$position_changed = FALSE
+      pp_psi_change$si_suffix_changed = FALSE
 
       filtered_pp_psi(
         list(
@@ -219,6 +239,7 @@
       x_lim_min_pp_psi(input$pp_psi_x_min)
       x_lim_max_pp_psi(input$pp_psi_x_max)
       position_pp_psi(input$pp_psi_position)
+      si_suffix_pp_psi(input$pp_psi_si_suffix)
     }
   }, ignoreInit = TRUE)
 
@@ -376,7 +397,8 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Prior<br>psi: ", .international_system_prefixes(psi01)
+            "Prior<br>psi: ", 
+            .international_system_prefixes(psi01, si_suffix_pp_psi())
           )
         ) %>%
         add_trace(
@@ -393,7 +415,8 @@
           ),
           hoverinfo = "text",
           text = ~paste0(
-            "Posterior<br>psi: ", .international_system_prefixes(psi01)
+            "Posterior<br>psi: ", 
+            .international_system_prefixes(psi01, si_suffix_pp_psi())
           )
         ) %>%
         layout(

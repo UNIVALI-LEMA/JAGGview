@@ -1,6 +1,7 @@
 #' @keywords internal
 .build_server <- function(
-  fits_data, hind_data, pp_data, res_data, kobe_data, traj_data, ra_data, animation
+  fits_data, hind_data, pp_data, res_data, kobe_data, traj_data, ra_data, 
+  animation, use_si_suffix
 ) {
   function(input, output, session) {
 
@@ -79,27 +80,54 @@
     #     # tic("tab_kobe")
     #   }
     # })
+    session$onFlushed(function() {
+      disable("confirm_button")
+    }, once = TRUE)
 
-    .cpue_res_server(input, output, session, res_data)
-    .fits_server(input, output, session, fits_data)
-    .hindcast_server(input, output, session, hind_data)
-    .kobe_server(input, output, session, kobe_data, animation)
-    .priors_posteriors_K_server(input, output, session, pp_data)
-    .priors_posteriors_r_server(input, output, session, pp_data)
-    .priors_posteriors_psi_server(input, output, session, pp_data)
-    .retrospective_analysis_B_server(input, output, session, ra_data)
-    .retrospective_analysis_F_server(input, output, session, ra_data)
-    .retrospective_analysis_BBmsy_server(input, output, session, ra_data)
-    .retrospective_analysis_FFmsy_server(input, output, session, ra_data)
-    .retrospective_analysis_procB_server(input, output, session, ra_data)
-    .retrospective_analysis_MSY_server(input, output, session, ra_data)
-    .runs_tests_server(input, output, session, res_data)
-    .traj_BB0_server(input, output, session, traj_data, animation)
-    .traj_BBmsy_server(input, output, session, traj_data, animation)
-    .traj_FFmsy_server(input, output, session, traj_data, animation)
-    .traj_Bdev_server(input, output, session, traj_data, animation)
-    .traj_B_server(input, output, session, traj_data, animation)
-    .traj_H_server(input, output, session, traj_data, animation)
-    .traj_Catch_server(input, output, session, traj_data, animation)
-    }
+    .cpue_res_server(input, output, session, res_data, use_si_suffix)
+    .fits_server(input, output, session, fits_data, use_si_suffix)
+    .hindcast_server(input, output, session, hind_data, use_si_suffix)
+    .kobe_server(input, output, session, kobe_data, animation, use_si_suffix)
+    .priors_posteriors_K_server(input, output, session, pp_data, use_si_suffix)
+    .priors_posteriors_r_server(input, output, session, pp_data, use_si_suffix)
+    .priors_posteriors_psi_server(
+      input, output, session, pp_data, use_si_suffix
+    )
+    .retrospective_analysis_B_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .retrospective_analysis_F_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .retrospective_analysis_BBmsy_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .retrospective_analysis_FFmsy_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .retrospective_analysis_procB_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .retrospective_analysis_MSY_server(
+      input, output, session, ra_data, use_si_suffix
+    )
+    .runs_tests_server(input, output, session, res_data, use_si_suffix)
+    .traj_BB0_server(
+      input, output, session, traj_data, animation, use_si_suffix
+    )
+    .traj_BBmsy_server(
+      input, output, session, traj_data, animation, use_si_suffix
+    )
+    .traj_FFmsy_server(
+      input, output, session, traj_data, animation, use_si_suffix
+    )
+    .traj_Bdev_server(
+      input, output, session, traj_data, animation, use_si_suffix
+    )
+    .traj_B_server(input, output, session, traj_data, animation, use_si_suffix)
+    .traj_H_server(input, output, session, traj_data, animation, use_si_suffix)
+    .traj_Catch_server(
+      input, output, session, traj_data, animation, use_si_suffix
+    )
+  }
 }
