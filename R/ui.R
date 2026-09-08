@@ -2,7 +2,8 @@ plot_height <- "calc(100vh - 57px - 30px)"
 plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
 
 .build_ui <- function(
-  fits_data, pp_data, res_data, kobe_data, traj_data, hind_data, ra_data
+  fits_data, pp_data, res_data, kobe_data, traj_data, hind_data, ra_data, 
+  use_si_suffix
 ) {
   addResourcePath("www", system.file("www", package = "JAGGview"))
 
@@ -297,12 +298,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "fits_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = NA
             ),
             textInput(
               inputId = "fits_title_y",
               label = "Title Y:",
-              placeholder = "Abundance index"
+              placeholder = "Abundance index",
+              value = NA
             ),
             colourInput(
               inputId = "fits_color",
@@ -321,7 +324,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = NA,
                   width = "100%"
                 ), 
                 tags$span(
@@ -331,7 +334,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = NA,
                   width = "100%"
                 )
               )
@@ -348,7 +351,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = NA,
                   width = "100%"
                 ), 
                 tags$span(
@@ -358,10 +361,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = NA,
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "fits_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -458,6 +466,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "runs_tests_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -555,6 +568,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "cpue_res_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -628,6 +646,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "pp_K_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -705,6 +728,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "pp_r_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -782,6 +810,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "pp_psi_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -872,6 +905,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_B_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -962,6 +1000,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_F_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1052,6 +1095,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_BBmsy_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1142,6 +1190,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_FFmsy_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1232,6 +1285,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_procB_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1322,6 +1380,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "ra_MSY_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1418,6 +1481,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = "top-left",
               multiple = FALSE,
               width = "100%"
+            ),
+            checkboxInput(
+              inputId = "hc_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1498,6 +1566,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_BB0_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1578,6 +1651,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_BBmsy_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1658,6 +1736,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_FFmsy_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1738,6 +1821,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_Bdev_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1818,6 +1906,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_B_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1898,6 +1991,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_H_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -1978,6 +2076,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "traj_Catch_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           conditionalPanel(
@@ -2052,6 +2155,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   width = "100%"
                 )
               )
+            ),
+            checkboxInput(
+              inputId = "kobe_si_suffix", 
+              label = "Use SI suffixes", 
+              value = use_si_suffix
             )
           ),
           div(

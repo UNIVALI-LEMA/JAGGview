@@ -13,9 +13,7 @@ kobe_data(
 }
 \arguments{
 \item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.
-\code{harvest} (F/Fmsy), and \code{stock} (B/Bmsy), returned by the JABBA
-function \code{JABBA::jbplot_ensemble()}.}
+JABBA function \code{JABBA::fit_jabba()}.}
 
 \item{ci_levels}{A numeric vector containing the CI values between 0 and 1.
 Defaults to 0.5, 0.8, 0.95.}
@@ -28,7 +26,7 @@ to 2048.}
 between memory availability checks. Defaults to 0.5.}
 }
 \value{
-A named list containing:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{col01}{Data frame defining the yellow Kobe quadrant (overfished,
 not overfishing).}
@@ -42,8 +40,8 @@ conditions).}
 for the terminal year.}
 \item{data_lines}{Time series of median biomass and fishing mortality
 ratios by year and scenario.}
-\item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023) for
-highlighting points.}
+\item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023)
+for highlighting points.}
 }
 }
 \description{
@@ -57,7 +55,7 @@ ratios by year and scenario, and estimates kernel density contours for the
 terminal year using \code{gplots::ci2d}. These contours represent
 uncertainty regions commonly displayed in Kobe plots.
 
-The output is designed to be used directly with \code{kobe_ggplot()}.
+The output is designed to be used directly with \code{\link{kobe_ggplot}()}.
 }
 \examples{
 \dontrun{

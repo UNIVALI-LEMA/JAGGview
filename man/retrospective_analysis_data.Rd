@@ -11,7 +11,7 @@ retrospective_analysis_data(list_hc_models)
 returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
 }
 \value{
-A named list with three elements:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{data}{A data frame containing time series for key indices
 (e.g., B, F, B/Bmsy, F/Fmsy, and process error).}
@@ -29,7 +29,11 @@ scenarios and indices.
 \details{
 The function extracts retrospective runs, filters relevant indices, and
 structures the data for visualization. It also computes logical filters for
-valid retrospective years and includes surplus production and rho diagnostics.
+valid retrospective years and includes surplus production and rho
+diagnostics.
+
+The output is designed to be used directly with
+\code{\link{retrospective_analysis_ggplot}()}.
 }
 \examples{
 \dontrun{

@@ -18,7 +18,7 @@ to 2048.}
 between memory availability checks. Defaults to 0.5.}
 }
 \value{
-A data.frame containing:
+An object of class \code{JAGGdata} (a data frame) containing:
 \itemize{
 \item \code{year}: Year of the observation
 \item \code{Scenario}: Scenario name
@@ -41,6 +41,9 @@ The function maps user-friendly indicator_name names to:
 \item \code{"BBmsy"}: \code{stock}
 \item \code{"FFmsy"}: \code{harvest}
 }
+
+The output is designed to be used directly with
+\code{\link{trajectories_ggplot}()}.
 }
 \examples{
 \dontrun{

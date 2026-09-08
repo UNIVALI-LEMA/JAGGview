@@ -14,7 +14,7 @@ returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
 exist in the \code{Index} column.}
 }
 \value{
-A named list with four elements:
+An object of class \code{JAGGdata} (a named list) containing:
 \describe{
 \item{data}{A data frame containing full hindcast time series,
 including observed and predicted values.}
@@ -36,6 +36,9 @@ The function extracts hindcast runs, formats retrospective labels,
 filters relevant years and conditions, and computes MASE statistics
 using \code{JABBA::jbmase}. The output is structured for direct use
 in visualization functions.
+
+The output is designed to be used directly with
+\code{\link{hindcast_ggplot}()}.
 }
 \examples{
 \dontrun{

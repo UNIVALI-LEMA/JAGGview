@@ -36,6 +36,8 @@
 #'   located. Defaults to the currente working directory (\code{getwd()}).
 #' @param animation A boolean value that if TRUE, shows animations in some 
 #'   plots. Defaults to TRUE.
+#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
+#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
 #' @param verbose A boolean value that if TRUE, shows progress through messages 
 #'   in console. Defaults to FALSE.
 #' 
@@ -97,10 +99,10 @@
 #' dashboardBrand dashboardControlbar dashboardHeader dashboardPage 
 #' dashboardSidebar navbarMenu navbarTab tabItem tabItems tabsetPanel 
 #' updateControlbar
-#' @importFrom shiny addResourcePath conditionalPanel icon numericInput 
-#' observeEvent reactive reactiveVal reactiveValues reactiveValuesToList 
-#' renderUI req selectInput shinyApp showNotification tabPanel textInput 
-#' uiOutput updateSelectInput
+#' @importFrom shiny addResourcePath checkboxInput conditionalPanel icon 
+#' numericInput observeEvent reactive reactiveVal reactiveValues 
+#' reactiveValuesToList renderUI req selectInput shinyApp showNotification 
+#' tabPanel textInput uiOutput updateSelectInput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #' add_trace animation_button animation_slider ggplotly layout plot_ly 
 #' plotlyOutput renderPlotly subplot toWebGL
@@ -118,7 +120,7 @@ create_report <- function(
   fits_data = data.frame(), hind_data = list(), kobe_data = list(), 
   pp_data = list(), ra_data = list(), res_data = list(), 
   traj_data = data.frame(), filename = NULL,  dir = getwd(), animation = TRUE, 
-  verbose = FALSE
+  use_si_suffix = FALSE, verbose = FALSE
 ) {
 
   if (!is.null(filename)) {
@@ -254,7 +256,8 @@ create_report <- function(
     traj_data = traj_data,
     hind_data = hind_data,
     ra_data = ra_data,
-    animation = animation
+    animation = animation,
+    use_si_suffix = use_si_suffix
   )
   
   ui <- .build_ui(
@@ -264,7 +267,8 @@ create_report <- function(
     kobe_data = kobe_data,
     traj_data = traj_data,
     hind_data = hind_data,
-    ra_data = ra_data
+    ra_data = ra_data,
+    use_si_suffix = use_si_suffix
   )
   if (verbose) message("Initializing Interactive Data Visualization")
   shinyApp(ui, server)
