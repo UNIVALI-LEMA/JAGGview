@@ -698,7 +698,7 @@ priors_posteriors_ggplot <- function(
     col_name = c("PPMR", "PPVR"),
     decimals = 3
   )
-  
+
   x_labels <- function(x) {
     .international_system_prefixes(
       number = x, use_si_suffix = use_si_suffix, decimals = x_decimals
