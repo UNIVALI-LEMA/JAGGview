@@ -144,12 +144,12 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (
       input$navmenu == "tab_trajectories" && 
       input$trajectories_tabs == "tab_traj_B"
     ) {
+      updateControlbar(id = "controlbar", session = session)
+      
       y_min <- input$traj_B_y_min
       y_max <- input$traj_B_y_max
 

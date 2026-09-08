@@ -178,9 +178,9 @@
   }, ignoreInit = FALSE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (input$navmenu == "tab_runs_tests") {
+      updateControlbar(id = "controlbar", session = session)
+      
       y_min <- input$runs_tests_y_min
       y_max <- input$runs_tests_y_max
 

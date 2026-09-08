@@ -213,9 +213,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (input$navmenu == "tab_cpue_residuals") {
+      updateControlbar(id = "controlbar", session = session)
 
       y_min <- input$cpue_res_y_min
       y_max <- input$cpue_res_y_max

@@ -157,12 +157,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (
       input$navmenu == "tab_retrospective_analysis" && 
       input$retrospective_analysis_tabs == "tab_ra_BBmsy"
     ) {
+      updateControlbar(id = "controlbar", session = session)
 
       y_min <- input$ra_BBmsy_y_min
       y_max <- input$ra_BBmsy_y_max

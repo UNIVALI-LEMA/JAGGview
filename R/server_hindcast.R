@@ -168,9 +168,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (input$navmenu == "tab_hindcast") {
+      updateControlbar(id = "controlbar", session = session)
+      
       y_min <- input$hc_y_min
       y_max <- input$hc_y_max
 

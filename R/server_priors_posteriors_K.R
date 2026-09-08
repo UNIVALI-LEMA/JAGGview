@@ -161,12 +161,12 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$confirm_button, {
-    updateControlbar(id = "controlbar", session = session)
-
     if (
       input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_K"
-    ) {      
+    ) {
+      updateControlbar(id = "controlbar", session = session)
+      
       x_min <- input$pp_K_x_min
       x_max <- input$pp_K_x_max
 
