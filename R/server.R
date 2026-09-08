@@ -1,6 +1,6 @@
 #' @keywords internal
 .build_server <- function(
-  fits_data, hind_data, pp_data, res_data, kobe_data, traj_data, ra_data, 
+  fits_data, hind_data, kobe_data, pp_data, ra_data, res_data, traj_data, 
   animation, use_si_suffix
 ) {
   function(input, output, session) {

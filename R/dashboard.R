@@ -105,7 +105,7 @@
 #' tabPanel textInput uiOutput updateSelectInput
 #' @importFrom plotly add_lines add_markers add_ribbons add_segments add_text 
 #' add_trace animation_button animation_slider ggplotly layout plot_ly 
-#' plotlyOutput renderPlotly subplot toWebGL
+#' plotlyOutput renderPlotly subplot
 #' @importFrom colourpicker colourInput
 #' @importFrom htmltools div strong tagList tags
 #' @importFrom htmlwidgets onRender
@@ -212,9 +212,9 @@ create_report <- function(
       res_data <- runs_tests_data(fits_list)
       if (verbose) message("Residuals data was sucessfully obtained")
       ensemble_data <- .ensemble_data(fits_list)
-      kobe_data <- ensemble_data$kobe_datas
+      kobe_data <- ensemble_data$kobe_dfs
       if (verbose) message("Kobe data was sucessfully obtained")
-      traj_data <- ensemble_data$trajectories_data
+      traj_data <- ensemble_data$trajectories_df
       if (verbose) message("Trajectories data was sucessfully obtained")
       rm(ensemble_data)
     }
@@ -250,24 +250,24 @@ create_report <- function(
   
   server <- .build_server(
     fits_data = fits_data,
-    pp_data = pp_data,
-    res_data = res_data,
-    kobe_data = kobe_data,
-    traj_data = traj_data,
     hind_data = hind_data,
+    kobe_data = kobe_data,
+    pp_data = pp_data,
     ra_data = ra_data,
+    res_data = res_data,
+    traj_data = traj_data,
     animation = animation,
     use_si_suffix = use_si_suffix
   )
   
   ui <- .build_ui(
     fits_data = fits_data,
-    pp_data = pp_data,
-    res_data = res_data,
-    kobe_data = kobe_data,
-    traj_data = traj_data,
     hind_data = hind_data,
+    kobe_data = kobe_data,
+    pp_data = pp_data,
     ra_data = ra_data,
+    res_data = res_data,
+    traj_data = traj_data,
     use_si_suffix = use_si_suffix
   )
   if (verbose) message("Initializing Interactive Data Visualization")

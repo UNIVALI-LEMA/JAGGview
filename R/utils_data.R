@@ -273,12 +273,13 @@
     highlight_years = highlight_years
   )
 
+  class(results_traj) <- c("JAGGdata", class(results_traj))
+  class(results_kobe) <- c("JAGGdata", class(results_kobe))
+
   results <- list(
     trajectories_df = results_traj,
     kobe_dfs = results_kobe
   )
-
-  class(results) <- c("JAGGdata", class(results))
 
   if (all(is.na(results))) {
     stop("Data frame only have NA data.")

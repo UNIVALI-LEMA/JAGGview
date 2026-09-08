@@ -471,8 +471,7 @@
             )
           )
         )
-      ) %>%
-      toWebGL()
+      )
     # toc()
     results
   })

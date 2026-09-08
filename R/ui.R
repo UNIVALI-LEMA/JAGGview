@@ -2,7 +2,7 @@ plot_height <- "calc(100vh - 57px - 30px)"
 plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
 
 .build_ui <- function(
-  fits_data, pp_data, res_data, kobe_data, traj_data, hind_data, ra_data, 
+  fits_data, hind_data, kobe_data, pp_data, ra_data, res_data, traj_data, 
   use_si_suffix
 ) {
   addResourcePath("www", system.file("www", package = "JAGGview"))
