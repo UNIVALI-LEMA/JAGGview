@@ -332,10 +332,6 @@ kobe_data <- function(
     NULL
   })
 
-  if(is.null(model_results)) {
-    stop("Process terminated: insufficient RAM to execute the function.")
-  }
-
   if (!inherits(ci_levels, "numeric")) {
     stop("Parameter 'ci_levels' was expecting a numeric vector")
   }
@@ -943,10 +939,6 @@ trajectories_data <- function(
     message("Process aborted to prevent the system from running out of memory")
     NULL
   })
-
-  if(is.null(model_results)) {
-    stop("Process terminated: insufficient RAM to execute the function.")
-  }
 
   columns <- list(
     BB0   = "BB0",

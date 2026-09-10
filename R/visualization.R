@@ -860,16 +860,20 @@ retrospective_analysis_ggplot <- function(
     }
 
     max_x_val <- .round_to_nearest(max(data_ref$SB_i, na.rm = TRUE), TRUE, 1.1)
-    x_decimals <- ifelse(x_lim[2] > 10, 0, 1)
-    x_labels <- if (use_si_suffix) {
-      function(x) .international_system_prefixes(x)
-    } else {
-      function(x) {
-        format(1e6, digits = x_decimals, scientific = FALSE, 
-          big.mark = ".", decimal.mark = ",")
-      }
-    }
   }
+  
+  x_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = x_decimals
+    )
+  }
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
+  }
+  
   table <- .prepare_npc_table_data(
     data = rho_var, 
     pos_x = str_split_i(position, "-", 2), 
@@ -878,17 +882,6 @@ retrospective_analysis_ggplot <- function(
     col_name = "rho", 
     decimals = 3
   )
-
-  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
-
-  y_labels <- if (use_si_suffix) {
-    function(x) .international_system_prefixes(x)
-  } else {
-    function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
-        big.mark = ".", decimal.mark = ",")
-    }
-  }
   
   p <- ggplot()
   
@@ -1295,16 +1288,11 @@ trajectories_ggplot <- function(
   if (is.null(title_y)) {
     title_y <- labels_y[[indicator_name]]
   }
-
-  y_decimals <- ifelse(y_lim[2] > 10, 0, 1)
-
-  y_labels <- if (use_si_suffix) {
-    function(x) .international_system_prefixes(x)
-  } else {
-    function(x) {
-      format(1e6, digits = y_decimals, scientific = FALSE, 
-        big.mark = ".", decimal.mark = ",")
-    }
+  
+  y_labels <- function(x) {
+    .international_system_prefixes(
+      number = x, use_si_suffix = use_si_suffix, decimals = y_decimals
+    )
   }
 
   p <- ggplot() +
