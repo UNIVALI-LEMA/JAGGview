@@ -35,7 +35,7 @@ used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
 \item{blim}{Optional. A numeric value indicating the limit reference point
 to be displayed as a horizontal dashed red line on the plot. Only used
-when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}}
+when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}.}
 
 \item{y_decimals}{Optional. Number of decimal places for y-axis.}
 
@@ -71,7 +71,8 @@ trajectory line (\code{mu}).
 
 Reference lines are added depending on the selected indicator_name:
 \itemize{
-\item \code{"BBmsy"}: horizontal lines at 1 and 0.4
+\item \code{"BBmsy"}: horizontal lines at 1 and \code{blim} (0.4 by
+default)
 \item \code{"FFmsy"}: horizontal line at 1
 \item \code{"Bdev"}: horizontal line at 0
 }
