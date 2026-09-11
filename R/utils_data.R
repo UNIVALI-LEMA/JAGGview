@@ -356,7 +356,7 @@
     "timeseries", "refpts", 
     "pfunc", "diags", "residuals", "std.residuals", 
     "stats", "pars_posterior", "refpts_posterior", "kobe", 
-    "flqs", "bppd", "kbtrj", "posteriors"#, "model"
+    "flqs", "bppd", "kbtrj"#, "posteriors"#, "model"
   )
   is.list(model) && all(cols_fit %in% names(model))
 }

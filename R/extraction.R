@@ -255,3 +255,133 @@ get_refpts <- function(list_fit_models) {
 get_rho <- function(df_lists) {
   return(df_lists$rho_data)
 }
+
+#' @export
+get_estimates <- function(list_fit_models) {
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
+
+  temp00 <- lapply(
+    list_fit_models,
+    function(fit) {
+      df <- as.data.frame(fit$estimates)
+      df$indicator <- rownames(df)
+      df$scenario <- fit$scenario
+
+      rownames(df) <- NULL
+      df[, c("scenario", "indicator", setdiff(names(df), 
+      c("scenario", "indicator")))]
+    }
+  )
+  temp00 <- bind_rows(temp00)
+
+  return(temp00)
+}
+
+#' @export
+get_stats <- function(list_fit_models) {
+  if (.is_fit_jabba(list_fit_models)) {
+    list_fit_models <- list(list_fit_models)
+  }
+
+  temp00 <- lapply(
+    list_fit_models,
+    function(fit) {
+      df <- as.data.frame(fit$stats)
+      df$indicator <- rownames(df)
+      df$scenario <- fit$scenario
+
+      rownames(df) <- NULL
+      df[, c("scenario", "indicator", setdiff(names(df), 
+      c("scenario", "indicator")))]
+    }
+  )
+  temp00 <- bind_rows(temp00)
+
+  return(temp00)
+}
+
+#' @export
+#' @importFrom dplyr bind_rows relocate
+get_hc_pars <- function(list_hc_models) {
+  if (.is_hindcast_jabba(list_hc_models)) {
+    list_hc_models <- list(list_hc_models)
+  }
+
+  temp00 <- lapply(
+    list_hc_models,
+    function(hc) {
+      temp01 <- lapply(
+        names(hc),
+        function(nm) {
+          df <- data.frame(
+            Scenario = hc[[nm]]$scenario,
+            Peel = nm,
+            hc[[nm]]$pars
+          )
+          df$Indicator <- rownames(df)
+          rownames(df) <- NULL
+          df %>%
+            relocate(Scenario, Peel, Indicator)
+        }
+      )
+      bind_rows(temp01)
+    }
+  )
+  return(bind_rows(temp00))
+}
+
+#' @export
+get_hc_stats <- function(list_hc_models) {
+  if (.is_hindcast_jabba(list_hc_models)) {
+    list_hc_models <- list(list_hc_models)
+  }
+
+  temp00 <- lapply(
+    list_hc_models,
+    function(hc) {
+      temp01 <- lapply(
+        names(hc),
+        function(nm) {
+          data.frame(
+            Scenario = hc[[nm]]$scenario,
+            Peel = nm,
+            hc[[nm]]$stats
+          )
+        }
+      )
+      bind_rows(temp01)
+    }
+  )
+  return(bind_rows(temp00))
+}
+
+#' @export
+get_hc_estimates <- function(list_hc_models) {
+  if (.is_hindcast_jabba(list_hc_models)) {
+    list_hc_models <- list(list_hc_models)
+  }
+
+  temp00 <- lapply(
+    list_hc_models,
+    function(hc) {
+      temp01 <- lapply(
+        names(hc),
+        function(nm) {
+          df <- data.frame(
+            Scenario = hc[[nm]]$scenario,
+            Peel = nm,
+            hc[[nm]]$estimates
+          )
+          df$Indicator <- rownames(df)
+          rownames(df) <- NULL
+          df %>%
+            relocate(Scenario, Peel, Indicator)
+        }
+      )
+      bind_rows(temp01)
+    }
+  )
+  return(bind_rows(temp00))
+}
