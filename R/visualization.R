@@ -312,7 +312,6 @@ hindcast_ggplot <- function(
     pos_y = str_split_i(position, "-", 1), 
     col = MASE, 
     col_name = "MASE", 
-    suffix = "%", 
     decimals = 3
   )
 
