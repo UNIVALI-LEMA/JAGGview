@@ -933,7 +933,7 @@
 #' @noRd
 .build_metric_table <- function(
   data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
-  heigth_mult = 1.2, width_mult = 4, left_pad_mult = 0.25, 
+  heigth_mult = 1.5, width_mult = 4, left_pad_mult = 0.25, 
   colors = c("#CCCCCC", "#F2F2F2")
 ) {
 

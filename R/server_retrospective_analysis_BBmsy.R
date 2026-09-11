@@ -304,7 +304,7 @@
 
     title_x <- .get_value_or_default(title_x_ra_BBmsy, "Year")
 
-    title_y <- .get_value_or_default(title_y_ra_BBmsy, "B/Bmsy")
+    title_y <- .get_value_or_default(title_y_ra_BBmsy, "B/B<sub>MSY</sub>")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
@@ -395,8 +395,9 @@
           line = list(width = 0),
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(95): (", .international_system_prefixes(lci, si_suffix_ra_BBmsy()), 
-            ") - (", .international_system_prefixes(uci, si_suffix_ra_BBmsy()), ")"
+            "CI(95): (", 
+            .international_system_prefixes(lci, si_suffix_ra_BBmsy()), ") - (", 
+            .international_system_prefixes(uci, si_suffix_ra_BBmsy()), ")"
           )
         ) %>%
         add_lines(

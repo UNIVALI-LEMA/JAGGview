@@ -268,7 +268,7 @@
 
     title_x <- .get_value_or_default(title_x_traj_BB0, "Year")
 
-    title_y <- .get_value_or_default(title_y_traj_BB0, "B/B0")
+    title_y <- .get_value_or_default(title_y_traj_BB0, "B/B<sub>0</sub>")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)

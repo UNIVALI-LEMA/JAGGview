@@ -312,7 +312,6 @@ hindcast_ggplot <- function(
     pos_y = str_split_i(position, "-", 1), 
     col = MASE, 
     col_name = "MASE", 
-    suffix = "%", 
     decimals = 3
   )
 
@@ -879,7 +878,7 @@ retrospective_analysis_ggplot <- function(
     pos_x = str_split_i(position, "-", 2), 
     pos_y = str_split_i(position, "-", 1), 
     col = rho, 
-    col_name = "rho", 
+    col_name = "\u03c1", 
     decimals = 3
   )
   
@@ -1190,6 +1189,7 @@ summary_table <- function(
 #'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param blim Optional. A numeric value for 
 #' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
@@ -1238,7 +1238,8 @@ summary_table <- function(
 #' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
   df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
-  y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
+  blim = NULL, y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -1272,7 +1273,6 @@ trajectories_ggplot <- function(
     x_lim <- c(min_x_val, max_x_val)
   }
 
-
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
@@ -1280,9 +1280,7 @@ trajectories_ggplot <- function(
     Bdev = "Process Error on log(Biomass)",
     B = "Biomass (t)",
     H = "Harvest rate",
-    Catch = "Catch",
-    BBfrac = expression(B/B[frac]),
-    Bref = expression(B[REF])
+    Catch = "Catch"
   )
 
   if (is.null(title_y)) {
@@ -1295,18 +1293,22 @@ trajectories_ggplot <- function(
     )
   }
 
+  if (is.null(blim) && indicator_name == "BBmsy") {
+    blim <- 0.4
+  }
+
   p <- ggplot() +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl, ymax = ucl)) +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl2, ymax = ucl2))
   
-  if (indicator_name == "BBmsy") {
+  if (!is.null(blim) && indicator_name == "BBmsy") {
     p <- p +
-      geom_hline(yintercept = 1, linetype = "longdash") +
-      geom_hline(yintercept = 0.4, linetype = "longdash", colour = "red")
+      geom_hline(yintercept = blim, linetype = "longdash", colour = "red")
   }
-  else if (indicator_name == "FFmsy") {
+
+  if (indicator_name %in% c("BBmsy", "FFmsy")) {
     p <- p +
       geom_hline(yintercept = 1, linetype = "longdash")
   }
