@@ -649,36 +649,24 @@ priors_posteriors_ggplot <- function(
     )
   
   if (is.null(x_lim)) {
-    prior_x_max <- max(prior$value_1, na.rm = TRUE)
-    pos_x_max <- max(posterior$value_1, na.rm = TRUE)
-    x_lim <- c(0, ifelse(prior_x_max > pos_x_max, prior_x_max, pos_x_max))
+    x_min <- min(prior$value_1, posterior$value_1, na.rm = TRUE)
+    x_max <- ifelse(
+      indicator_name != "K", 
+      max(prior$value_1, posterior$value_1, na.rm = TRUE),
+      quantile(c(prior$value_1, posterior$value_1), 0.95, na.rm = TRUE)
+    )
+    x_lim <- c(ifelse(indicator_name != "K", x_min, x_min - 1), x_max)
   }
   
   if (is.null(y_lim)) {
-    max_y_pos <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
-                                    TRUE, 1.1)
-    min_y_pos <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), 
-                                    FALSE, 1.1)
+    max_y <- .round_to_nearest(
+      max(prior$value_2, posterior$value_2, na.rm = TRUE), TRUE, 1.1
+    )
+    min_y <- .round_to_nearest(
+      min(prior$value_2, posterior$value_2, na.rm = TRUE), FALSE, 1.1
+    )
 
-    max_prior <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
-                                  TRUE, 1.1)
-    min_prior <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
-                                  FALSE, 1.1)
-
-    max_y_val <- if (max_y_pos > max_prior) {
-      max_y_pos
-    }
-    else {
-      max_prior
-    }
-
-    min_y_val <- if (min_y_pos < min_prior) {
-      min_y_pos
-    }
-    else {
-      min_prior
-    }
-    y_lim <- c(min_y_val, max_y_val)
+    y_lim <- c(min_y, max_y)
   }
   
   df_text <- df_lists$PPMR %>%
