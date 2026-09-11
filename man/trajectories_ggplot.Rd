@@ -33,7 +33,9 @@ per line. Defaults to 3.}
 \item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
 used, or if FALSE then shows the absolute number, Defaults to FALSE.}
 
-\item{blim}{Optional.}
+\item{blim}{Optional. A numeric value indicating the limit reference point
+to be displayed as a horizontal dashed red line on the plot. Only used
+when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}}
 
 \item{y_decimals}{Optional. Number of decimal places for y-axis.}
 

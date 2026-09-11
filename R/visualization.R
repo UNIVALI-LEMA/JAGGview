@@ -1189,7 +1189,9 @@ summary_table <- function(
 #'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param blim Optional. A numeric value for 
+#' @param blim Optional. A numeric value indicating the limit reference point 
+#'   to be displayed as a horizontal dashed red line on the plot. Only used 
+#'   when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}
 #' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
