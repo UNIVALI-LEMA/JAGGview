@@ -19,6 +19,8 @@
   y_lim_max_traj_BBmsy <- reactiveVal(NULL)
 
   si_suffix_traj_BBmsy <- reactiveVal(use_si_suffix)
+  
+  blim_traj_BBmsy <- reactiveVal(NULL)
 
   traj_BBmsy_change <- reactiveValues(
     scenarios_changed = FALSE,
@@ -29,7 +31,8 @@
     x_max_changed = FALSE,
     y_min_changed = FALSE,
     y_max_changed = FALSE,
-    si_suffix_changed = FALSE
+    si_suffix_changed = FALSE,
+    blim_changed = FALSE
   )
 
   traj_BBmsy_values <- reactiveValues(
@@ -41,7 +44,8 @@
     x_max_current = NA,
     y_min_current = NA,
     y_max_current = NA,
-    si_suffix_current = use_si_suffix
+    si_suffix_current = use_si_suffix,
+    blim_current = NA
   )
 
   observeEvent(input$traj_BBmsy_scenarios, {
@@ -130,6 +134,15 @@
     }
   }, ignoreInit = TRUE)
 
+  observeEvent(input$traj_BBmsy_blim, {
+    if (!identical(input$traj_BBmsy_blim, traj_BBmsy_values$blim_current)) {
+      traj_BBmsy_change$blim_changed = TRUE
+    }
+    else {
+      traj_BBmsy_change$blim_changed = FALSE
+    }
+  }, ignoreInit = TRUE)
+
   status_sliders_traj_BBmsy <- reactive({
     req(input$navmenu == "tab_trajectories" && 
       input$trajectories_tabs == "tab_traj_BBmsy")
@@ -202,6 +215,7 @@
       traj_BBmsy_values$y_min_current = y_min
       traj_BBmsy_values$y_max_current = y_max
       traj_BBmsy_values$si_suffix_current = input$traj_BBmsy_si_suffix
+      traj_BBmsy_values$blim_current = input$traj_BBmsy_blim
 
       traj_BBmsy_change$scenarios_changed = FALSE
       traj_BBmsy_change$title_x_changed = FALSE
@@ -212,6 +226,7 @@
       traj_BBmsy_change$y_min_changed = FALSE
       traj_BBmsy_change$y_max_changed = FALSE
       traj_BBmsy_change$si_suffix_changed = FALSE
+      traj_BBmsy_change$blim_changed = FALSE
 
       filtered_traj_BBmsy(
         traj_df %>%
@@ -226,6 +241,7 @@
       y_lim_min_traj_BBmsy(y_min)
       y_lim_max_traj_BBmsy(y_max)
       si_suffix_traj_BBmsy(input$traj_BBmsy_si_suffix)
+      blim_traj_BBmsy(input$traj_BBmsy_blim)
     }
   }, ignoreInit = TRUE)
 
@@ -273,10 +289,12 @@
 
     title_x <- .get_value_or_default(title_x_traj_BBmsy, "Year")
 
-    title_y <- .get_value_or_default(title_y_traj_BBmsy, "B/Bmsy")
+    title_y <- .get_value_or_default(title_y_traj_BBmsy, "B/B<sub>MSY</sub>")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)
+
+    blim <- .get_value_or_default(blim_traj_BBmsy, 0.4)
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -405,8 +423,8 @@
         add_segments(
           x = x_lim[1],
           xend = x_lim[2],
-          y = 0.4, 
-          yend = 0.4,
+          y = blim, 
+          yend = blim,
           line = list(
             color = "red",
             width = 2,

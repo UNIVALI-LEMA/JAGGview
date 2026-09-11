@@ -305,7 +305,7 @@
 
     title_x <- .get_value_or_default(title_x_ra_FFmsy, "Year")
 
-    title_y <- .get_value_or_default(title_y_ra_FFmsy, "F/Fmsy")
+    title_y <- .get_value_or_default(title_y_ra_FFmsy, "F/F<sub>MSY</sub>")
 
     y_lim <- .expand_range(y_lim)
     x_lim <- .expand_range(x_lim)

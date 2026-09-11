@@ -139,7 +139,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             ),
             tabPanel(
-              title = "B/Bmsy",
+              title = tags$span(
+                "B/B", tags$sub("MSY", style = "margin-left: -3px;")
+              ),
               value = "tab_ra_BBmsy",
               div(
                 style = paste("height:", plot_height_tab),
@@ -150,7 +152,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             ),
             tabPanel(
-              title = "F/Fmsy",
+              title = tags$span(
+                "F/F", tags$sub("MSY", style = "margin-left: -3px;")
+              ),
               value = "tab_ra_FFmsy",
               div(
                 style = paste("height:", plot_height_tab),
@@ -195,7 +199,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
           tabsetPanel(
             id = "trajectories_tabs",
             tabPanel(
-              title = "BB0",
+              title = tags$span(
+                "B/B", tags$sub("0", style = "margin-left: -3px;")
+              ),
               value = "tab_traj_BB0",
               div(
                 style = paste("height:", plot_height_tab),
@@ -205,7 +211,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             ),
             tabPanel(
-              title = "BBmsy",
+              title = tags$span(
+                "B/B", tags$sub("MSY", style = "margin-left: -3px;")
+              ),
               value = "tab_traj_BBmsy",
               div(
                 style = paste("height:", plot_height_tab),
@@ -215,7 +223,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             ),
             tabPanel(
-              title = "FFmsy",
+              title = tags$span(
+                "F/F", tags$sub("MSY", style = "margin-left: -3px;")
+              ),
               value = "tab_traj_FFmsy",
               div(
                 style = paste("height:", plot_height_tab),
@@ -225,7 +235,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               )
             ),
             tabPanel(
-              title = "Bdev",
+              title = "Process error",
               value = "tab_traj_Bdev",
               div(
                 style = paste("height:", plot_height_tab),
@@ -1656,6 +1666,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               inputId = "traj_BBmsy_si_suffix", 
               label = "Use SI suffixes", 
               value = use_si_suffix
+            ),
+            numericInput(
+              inputId = "traj_BBmsy_blim",
+              label = "Blim:",
+              value = NULL,
+              width = "100%"
             )
           ),
           conditionalPanel(

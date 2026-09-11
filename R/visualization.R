@@ -649,36 +649,24 @@ priors_posteriors_ggplot <- function(
     )
   
   if (is.null(x_lim)) {
-    prior_x_max <- max(prior$value_1, na.rm = TRUE)
-    pos_x_max <- max(posterior$value_1, na.rm = TRUE)
-    x_lim <- c(0, ifelse(prior_x_max > pos_x_max, prior_x_max, pos_x_max))
+    x_min <- min(prior$value_1, posterior$value_1, na.rm = TRUE)
+    x_max <- ifelse(
+      indicator_name != "K", 
+      max(prior$value_1, posterior$value_1, na.rm = TRUE),
+      quantile(c(prior$value_1, posterior$value_1), 0.95, na.rm = TRUE)
+    )
+    x_lim <- c(ifelse(indicator_name != "K", x_min, x_min - 1), x_max)
   }
   
   if (is.null(y_lim)) {
-    max_y_pos <- .round_to_nearest(max(posterior$value_2, na.rm = TRUE), 
-                                    TRUE, 1.1)
-    min_y_pos <- .round_to_nearest(min(posterior$value_2, na.rm = TRUE), 
-                                    FALSE, 1.1)
+    max_y <- .round_to_nearest(
+      max(prior$value_2, posterior$value_2, na.rm = TRUE), TRUE, 1.1
+    )
+    min_y <- .round_to_nearest(
+      min(prior$value_2, posterior$value_2, na.rm = TRUE), FALSE, 1.1
+    )
 
-    max_prior <- .round_to_nearest(max(prior$value_2, na.rm = TRUE), 
-                                  TRUE, 1.1)
-    min_prior <- .round_to_nearest(min(prior$value_2, na.rm = TRUE), 
-                                  FALSE, 1.1)
-
-    max_y_val <- if (max_y_pos > max_prior) {
-      max_y_pos
-    }
-    else {
-      max_prior
-    }
-
-    min_y_val <- if (min_y_pos < min_prior) {
-      min_y_pos
-    }
-    else {
-      min_prior
-    }
-    y_lim <- c(min_y_val, max_y_val)
+    y_lim <- c(min_y, max_y)
   }
   
   df_text <- df_lists$PPMR %>%
@@ -878,7 +866,7 @@ retrospective_analysis_ggplot <- function(
     pos_x = str_split_i(position, "-", 2), 
     pos_y = str_split_i(position, "-", 1), 
     col = rho, 
-    col_name = "rho", 
+    col_name = "\u03c1", 
     decimals = 3
   )
   
@@ -1189,6 +1177,9 @@ summary_table <- function(
 #'   per line. Defaults to 3.
 #' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
 #'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#' @param blim Optional. A numeric value indicating the limit reference point 
+#'   to be displayed as a horizontal dashed red line on the plot. Only used 
+#'   when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}.
 #' @param y_decimals Optional. Number of decimal places for y-axis.
 #' @param palette Optional. A character vector of colors used for plotting. 
 #'   If \code{NULL} (default), a color-blind-friendly palette is generated
@@ -1214,7 +1205,8 @@ summary_table <- function(
 #'
 #' Reference lines are added depending on the selected indicator_name:
 #' \itemize{
-#'   \item \code{"BBmsy"}: horizontal lines at 1 and 0.4
+#'   \item \code{"BBmsy"}: horizontal lines at 1 and \code{blim} (0.4 by 
+#'     default)
 #'   \item \code{"FFmsy"}: horizontal line at 1
 #'   \item \code{"Bdev"}: horizontal line at 0
 #' }
@@ -1237,7 +1229,8 @@ summary_table <- function(
 #' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
   df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
-  y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, y_lim = NULL
+  blim = NULL, y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, 
+  y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
@@ -1271,7 +1264,6 @@ trajectories_ggplot <- function(
     x_lim <- c(min_x_val, max_x_val)
   }
 
-
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
@@ -1279,9 +1271,7 @@ trajectories_ggplot <- function(
     Bdev = "Process Error on log(Biomass)",
     B = "Biomass (t)",
     H = "Harvest rate",
-    Catch = "Catch",
-    BBfrac = expression(B/B[frac]),
-    Bref = expression(B[REF])
+    Catch = "Catch"
   )
 
   if (is.null(title_y)) {
@@ -1294,18 +1284,22 @@ trajectories_ggplot <- function(
     )
   }
 
+  if (is.null(blim) && indicator_name == "BBmsy") {
+    blim <- 0.4
+  }
+
   p <- ggplot() +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl, ymax = ucl)) +
     geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
                 aes(x = year, ymin = lcl2, ymax = ucl2))
   
-  if (indicator_name == "BBmsy") {
+  if (!is.null(blim) && indicator_name == "BBmsy") {
     p <- p +
-      geom_hline(yintercept = 1, linetype = "longdash") +
-      geom_hline(yintercept = 0.4, linetype = "longdash", colour = "red")
+      geom_hline(yintercept = blim, linetype = "longdash", colour = "red")
   }
-  else if (indicator_name == "FFmsy") {
+
+  if (indicator_name %in% c("BBmsy", "FFmsy")) {
     p <- p +
       geom_hline(yintercept = 1, linetype = "longdash")
   }

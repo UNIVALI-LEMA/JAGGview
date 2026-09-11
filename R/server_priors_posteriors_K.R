@@ -279,10 +279,9 @@
       x_lim_min_pp_K, min(prior_all$K01, posterior_all$K01, na.rm = TRUE)
     )
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_pp_K, max(prior_all$K01, posterior_all$K01, na.rm = TRUE)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
+    Q3 <- quantile(c(prior_all$K01, posterior_all$K01), 0.95, na.rm = TRUE)
+    
+    x_lim <- c(x_lim_min-1, Q3)
 
     y_lim_min <- .round_to_nearest(
       min(prior_all$K02, posterior_all$K02, na.rm = TRUE), 
