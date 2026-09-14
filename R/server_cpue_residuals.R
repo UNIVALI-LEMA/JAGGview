@@ -514,7 +514,7 @@
           margin = list(
             b = 50,
             t = 60,
-            l = 60,
+            l = 70,
             r = 50
           ),
           shapes = shapes,
@@ -554,7 +554,7 @@
             textangle = -90,
             xanchor = "right",
             yanchor = "middle",
-            xshift = -30,
+            xshift = -35,
             xref = "paper",
             yref = "paper",
             text = title_y,
