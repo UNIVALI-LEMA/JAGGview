@@ -90,29 +90,95 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom gt cell_fill cell_text cells_body cells_column_labels cols_label 
-#' fmt_number gt html tab_style
-#' @importFrom dplyr where
+#' fmt_number gt html tab_style fmt
+#' @importFrom dplyr %>% where
 .default_table <- function(data, digits = 2) {
   if (is.null(data) || nrow(data) == 0) {
     stop("Argument 'data' cannot be NULL or empty.")
   }
 
   label_map <- list(
-    bmsy = html("B<sub>MSY</sub>"),
-    fmsy = html("F<sub>MSY</sub>"),
-    msy  = "MSY",
-    bb0 = html("b/b<sub>0</sub>"),
-    k = "K"
+    bmsy     = html("B<sub>MSY</sub>"),
+    fmsy     = html("F<sub>MSY</sub>"),
+    msy      = "MSY",
+    bb0      = html("b/b<sub>0</sub>"),
+    k        = "K",
+    FFmsy    = html("F/F<sub>MSY</sub>"),
+    BBmsy    = html("B/B<sub>MSY</sub>"),
+    psi      = "psi (\u03a8)",
+    mu       = "Mean (\u03bc)",
+    LCI      = "2.5% Cred. Interval",
+    UCI      = "97.5% Cred. Interval",
+    Geweke.p = "Geweke (p)",
+    Heidel.p = "Heidel (p)",
+    MASE.adj = html("MASE<sub>adj</sub>"),
+    MAE.PR   = html("MAE<sub>PR</sub>"),
+    MAE.base = html("MAE<sub>base</sub>"),
+    n.eval   = html("n<sub>eval</sub>")
   )
 
   labels <- label_map[names(label_map) %in% names(data)]
+
+  value_map <- c(
+    "q.1" = "q<sub>1</sub>",
+    "q.2" = "q<sub>2</sub>",
+    "psi" = "psi (\u03a8)",
+    "sigma2" = "sigma<sup>2</sup> (\u03c3<sup>2</sup>)",
+    "tau2.1" = "tau<sub>1</sub><sup>2</sup> (\u03c4<sub>1</sub><sup>2</sup>)",
+    "tau2.2" = "tau<sub>2</sub><sup>2</sup> (\u03c4<sub>2</sub><sup>2</sup>)",
+    "sigma.proc" = "sigma<sub>proc</sub> (\u03c3<sub>proc</sub>)",
+    "Hmsy" = "H<sub>MSY</sub>",
+    "SBmsy" = "SB<sub>MSY</sub>",
+    "bmsyk" = "B<sub>MSY</sub>/K"
+  )
   
   table <- gt(data = data) %>%
     fmt_number(
       columns = where(is.numeric),
       decimals = digits
     ) %>%
-    cols_label(.list = labels) %>%
+    cols_label(.list = labels) 
+  
+  if ("Indicator" %in% names(data)) {
+    yr <- lapply(
+      data$Indicator,
+      function(val) {
+        if (grepl("^P[0-9]{4}$", val)) {
+          yr_aux <- as.integer(substring(val, 2))
+        }
+      }
+    )
+    yr <- unlist(yr)
+    if (!is.null(yr)) {
+      cur_yr <- max(unlist(yr), na.rm = TRUE)
+      value_map <- c(
+        value_map, 
+        "B_Bmsy.cur" = paste0("B<sub>", cur_yr, "</sub>/B<sub>MSY</sub>"),
+        "H_Hmsy.cur" = paste0("H<sub>", cur_yr, "</sub>/H<sub>MSY</sub>")
+      )
+    }
+
+    table <- table %>%
+      fmt(
+        columns = Indicator,
+        fns = function(x) {
+          sapply(x, function(val) {
+            if (val %in% names(value_map)) {
+              html(value_map[[val]])
+            } 
+            else if (grepl("^P[0-9]{4}$", val)) {
+              yr <- substring(val, 2)
+              html(paste0("P<sub>", yr, "</sub>"))
+            } 
+            else {
+              val
+            }
+          })
+        }
+      ) 
+  }
+
+  table <- table %>%
     tab_style(
       style = cell_text(weight = "bold"),
       locations = cells_column_labels()
@@ -124,6 +190,32 @@
       )
     )
   return(table)
+}
+
+#' @keywords internal
+#' @noRd
+#' @importFrom gt opt_interactive tab_options
+#' @importFrom dplyr %>%
+.dynamic_table <- function(data) {
+  .default_table(data) %>%
+    opt_interactive(
+      use_pagination = TRUE,
+      use_pagination_info = TRUE,
+      use_page_size_select = TRUE,
+      page_size_default = 20,
+      page_size_values = c(5, 10, 20, 50, 100),
+      use_sorting = TRUE,
+      use_search = FALSE,
+      use_filters = TRUE,
+      use_resizers = FALSE,
+      use_highlight = TRUE,
+      use_compact_mode = FALSE,
+      use_text_wrapping = FALSE,
+      pagination_type = "numbers"
+    ) %>%
+      tab_options(
+        column_labels.font.weight = "bold"
+      )
 }
 
 #' Create an empty placeholder plotly widget
@@ -147,6 +239,7 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom plotly layout plotly_empty
+#' @importFrom dplyr %>%
 .empty_plotly <- function(title){
   plotly_empty(type = "scatter", mode = "markers") %>%
     layout(
@@ -415,7 +508,7 @@
 #' 
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr filter
+#' @importFrom dplyr %>% filter
 #' @importFrom ggplot2 aes coord_cartesian geom_line geom_point geom_ribbon 
 #' ggplot labs scale_colour_manual scale_fill_manual scale_y_continuous theme
 #' @importFrom JABBA ss3col
@@ -557,7 +650,7 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom purrr pmap
-#' @importFrom dplyr case_when mutate select
+#' @importFrom dplyr %>% case_when mutate select
 .prepare_npc_table_data <- function(
   data, pos_x, pos_y, col, col_name, suffix = "", decimals = 2
 ) {
@@ -931,6 +1024,7 @@
 #'
 #' @keywords internal
 #' @noRd
+#' @importFrom dplyr %>% select
 .build_metric_table <- function(
   data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
   heigth_mult = 1.5, width_mult = 4, left_pad_mult = 0.25, 

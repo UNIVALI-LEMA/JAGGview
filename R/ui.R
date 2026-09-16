@@ -50,6 +50,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
         navbarTab(
           tabName = "tab_kobe",
           text = "Kobe"
+        ),
+        navbarTab(
+          tabName = "tab_summary_table",
+          text = "Summary Table"
         )
       )
     ),
@@ -277,6 +281,100 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
           div(
             style = paste("height:", plot_height),
             plotlyOutput("kobe", width = "100%", height = "100%")
+          )
+        ),
+        tabItem(
+          tabName = "tab_summary_table",
+          tabsetPanel(
+            id = "summary_tables_tabs",
+            tabPanel(
+              title = "Estimates",
+              value = "tab_sumtbl_estimates",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_estimates")
+              )
+            ),
+            tabPanel(
+              title = "Parameters",
+              value = "tab_sumtbl_pars",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_pars")
+              )
+            ),
+            tabPanel(
+              title = "Stats",
+              value = "tab_sumtbl_stats",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_stats")
+              )
+            ),
+            tabPanel(
+              title = "Hindcast Estimates",
+              value = "tab_sumtbl_hc_estimates",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_hc_estimates")
+              )
+            ),
+            tabPanel(
+              title = "Hindcast Parameters",
+              value = "tab_sumtbl_hc_pars",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_hc_pars")
+              )
+            ),
+            tabPanel(
+              title = "Hindcast Stats",
+              value = "tab_sumtbl_hc_stats",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_hc_stats")
+              )
+            ),
+            tabPanel(
+              title = "MASE",
+              value = "tab_sumtbl_mase",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_mase")
+              )
+            ),
+            tabPanel(
+              title = "PPMR",
+              value = "tab_sumtbl_ppmr",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_ppmr")
+              )
+            ),
+            tabPanel(
+              title = "PPVR",
+              value = "tab_sumtbl_ppvr",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_ppvr")
+              )
+            ),
+            tabPanel(
+              title = "Reference Points",
+              value = "tab_sumtbl_refpts",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_refpts")
+              )
+            ),
+            tabPanel(
+              title = "Retrospective Bias Metrics",
+              value = "tab_sumtbl_rho",
+              div(
+                style = paste("height:", plot_height_tab),
+                gt_output("summary_table_rho")
+              )
+            )
           )
         )
       )

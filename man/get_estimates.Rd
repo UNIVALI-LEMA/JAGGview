@@ -22,7 +22,7 @@ one or more fitted JABBA models returned by \code{fit_jabba()}.
 If a single fitted model is provided, it is automatically wrapped into a
 list to ensure consistent processing. For each model, the \code{estimates}
 component is converted to a data frame, with row names extracted as an
-\code{indicator} column and the model \code{scenario} appended as an
+\code{Indicator} column and the model \code{Scenario} appended as an
 additional column.
 
 The resulting data frames are combined by rows into a single data frame,

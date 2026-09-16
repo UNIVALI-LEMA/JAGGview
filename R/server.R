@@ -1,7 +1,7 @@
 #' @keywords internal
 .build_server <- function(
   fits_data, hind_data, kobe_data, pp_data, ra_data, res_data, traj_data, 
-  animation, use_si_suffix
+  list_fit_models, list_hc_models, animation, use_si_suffix
 ) {
   function(input, output, session) {
 
@@ -128,6 +128,10 @@
     .traj_H_server(input, output, session, traj_data, animation, use_si_suffix)
     .traj_Catch_server(
       input, output, session, traj_data, animation, use_si_suffix
+    )
+    .summary_table_server(
+      input, output, session, list_fit_models, list_hc_models, hind_data, 
+      pp_data, ra_data
     )
   }
 }

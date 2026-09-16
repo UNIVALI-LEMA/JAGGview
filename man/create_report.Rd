@@ -12,6 +12,8 @@ create_report(
   ra_data = list(),
   res_data = list(),
   traj_data = data.frame(),
+  list_fit_models = list(),
+  list_hc_models = list(),
   filename = NULL,
   dir = getwd(),
   animation = TRUE,
@@ -44,6 +46,12 @@ and \code{PPMR}.}
 must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
 
 \item{traj_data}{A data frame as returned by \code{trajectories_data()}.}
+
+\item{list_fit_models}{A list of fitted model objects returned by
+\code{fit_jabba()}, or a single fitted model object.}
+
+\item{list_hc_models}{A list of hindcast model objects returned by
+\code{hindcast_jabba()}, or a single hindcast model object.}
 
 \item{filename}{A character string with the name of the \code{.RData} file
 containing the model objects to be loaded (e.g. results from \pkg{JABBA}).}

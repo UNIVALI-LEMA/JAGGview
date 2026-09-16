@@ -1153,7 +1153,7 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr bind_rows everything
+#' @importFrom dplyr bind_rows everything select
 #' @importFrom JABBA jbmase
 .process_mase <- function(fit_list) {
   temp00 <- lapply(
@@ -1460,3 +1460,17 @@
     stop("All indices past in the parameter 'indices' must exist in the data.")
   }
 }
+
+#' @keywords internal
+#' @noRd
+.get_scenarios <- function(data) {
+  temp00 <- sapply(
+    data,
+    function(fit) {
+      fit$scenario
+    }
+  )
+  
+  return(temp00)
+}
+

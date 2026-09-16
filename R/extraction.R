@@ -189,7 +189,7 @@ get_ppvr <- function(df_lists) {
 #' @family extraction functions
 #' 
 #' @export
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr across bind_rows mutate rename
 get_refpts <- function(list_fit_models) {
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
@@ -204,7 +204,7 @@ get_refpts <- function(list_fit_models) {
         ~ifelse(quant == "logse", exp(.x), .x)
       )
     ) %>%
-    rename(Scenario = level)
+    rename(Scenario = level, Factor = factor, Quant = quant)
 
   return(temp00)
 }
@@ -252,8 +252,16 @@ get_refpts <- function(list_fit_models) {
 #' @family retrospective analysis functions
 #' 
 #' @export
+#' @importFrom dplyr select
+#' @importFrom tidyr pivot_wider
 get_rho <- function(df_lists) {
-  return(df_lists$rho_data)
+  temp00 <- df_lists$rho_data %>% select(Scenario, Index, rho)
+
+  temp01 <- pivot_wider(
+    temp00, names_from = "Index", values_from = "rho"
+  )
+  
+  return(temp01)
 }
 
 #' Extract fitted estimates from fitted models
@@ -271,7 +279,7 @@ get_rho <- function(df_lists) {
 #' If a single fitted model is provided, it is automatically wrapped into a 
 #' list to ensure consistent processing. For each model, the \code{estimates}
 #' component is converted to a data frame, with row names extracted as an
-#' \code{indicator} column and the model \code{scenario} appended as an
+#' \code{Indicator} column and the model \code{Scenario} appended as an
 #' additional column.
 #' 
 #' The resulting data frames are combined by rows into a single data frame,
@@ -288,7 +296,7 @@ get_rho <- function(df_lists) {
 #' @family extraction functions
 #' 
 #' @export
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr bind_rows rename
 get_estimates <- function(list_fit_models) {
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
@@ -298,15 +306,16 @@ get_estimates <- function(list_fit_models) {
     list_fit_models,
     function(fit) {
       df <- as.data.frame(fit$estimates)
-      df$indicator <- rownames(df)
-      df$scenario <- fit$scenario
+      df$Indicator <- rownames(df)
+      df$Scenario <- fit$scenario
 
       rownames(df) <- NULL
-      df[, c("scenario", "indicator", setdiff(names(df), 
-      c("scenario", "indicator")))]
+      df[, c("Scenario", "Indicator", setdiff(names(df), 
+      c("Scenario", "Indicator")))]
     }
   )
-  temp02 <- bind_rows(temp00)
+  temp02 <- bind_rows(temp00) %>%
+    rename(LCI = lci, UCI = uci)
 
   return(temp02)
 }
@@ -356,10 +365,10 @@ get_stats <- function(list_fit_models) {
     list_fit_models,
     function(fit) {
       df <- as.data.frame(fit$stats)
-      df$scenario <- fit$scenario
+      df$Scenario <- fit$scenario
 
       rownames(df) <- NULL
-      df[, c("scenario", setdiff(names(df), "scenario"))]
+      df[, c("Scenario", setdiff(names(df), "Scenario"))]
     }
   )
   temp02 <- bind_rows(temp00)
@@ -544,7 +553,7 @@ get_hc_stats <- function(list_hc_models) {
 #' @family retrospective analysis functions
 #' 
 #' @export
-#' @importFrom dplyr bind_rows relocate
+#' @importFrom dplyr bind_rows relocate rename
 get_hc_estimates <- function(list_hc_models) {
   if (.is_hindcast_jabba(list_hc_models)) {
     list_hc_models <- list(list_hc_models)
@@ -557,21 +566,22 @@ get_hc_estimates <- function(list_hc_models) {
         names(hc),
         function(nm) {
           df <- data.frame(
-            scenario = hc[[nm]]$scenario,
-            peel = nm,
+            Scenario = hc[[nm]]$scenario,
+            Peel = nm,
             hc[[nm]]$estimates
           )
-          df$indicator <- rownames(df)
+          df$Indicator <- rownames(df)
           rownames(df) <- NULL
           df %>%
-            relocate(scenario, peel, indicator)
+            relocate(Scenario, Peel, Indicator)
         }
       )
       bind_rows(temp01)
     }
   )
 
-  temp02 <- bind_rows(temp00)
+  temp02 <- bind_rows(temp00) %>%
+    rename(LCI = lci, UCI = uci)
 
   return(temp02)
 }
