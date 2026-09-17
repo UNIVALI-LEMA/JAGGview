@@ -142,9 +142,7 @@
     Bdev  = "Bdev",
     B = "B",
     H = "H",
-    Catch = "Catch",
-    BBfrac = "BBfrac",
-    Bref = "Bref"
+    Catch = "Catch"
   )
 
   result_list <- lapply(names(columns), function(var_name) {

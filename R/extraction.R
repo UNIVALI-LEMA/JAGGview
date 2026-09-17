@@ -64,6 +64,10 @@ get_mase <- function(df_lists) {
 #' @export
 #' @importFrom dplyr bind_rows
 get_pars <- function(list_fit_models) {
+  if (is.null(list_fit_models) || identical(list_fit_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
   }
@@ -191,6 +195,10 @@ get_ppvr <- function(df_lists) {
 #' @export
 #' @importFrom dplyr across bind_rows mutate rename
 get_refpts <- function(list_fit_models) {
+  if (is.null(list_fit_models) || identical(list_fit_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
   }
@@ -255,13 +263,17 @@ get_refpts <- function(list_fit_models) {
 #' @importFrom dplyr select
 #' @importFrom tidyr pivot_wider
 get_rho <- function(df_lists) {
-  temp00 <- df_lists$rho_data %>% select(Scenario, Index, rho)
+  temp00 <- df_lists$rho_data 
+  if (is.null(temp00)) return(NULL)
 
-  temp01 <- pivot_wider(
-    temp00, names_from = "Index", values_from = "rho"
+  temp01 <- temp00 %>%
+    select(Scenario, Index, rho)
+
+  temp02 <- pivot_wider(
+    temp01, names_from = "Index", values_from = "rho"
   )
   
-  return(temp01)
+  return(temp02)
 }
 
 #' Extract fitted estimates from fitted models
@@ -298,6 +310,10 @@ get_rho <- function(df_lists) {
 #' @export
 #' @importFrom dplyr bind_rows rename
 get_estimates <- function(list_fit_models) {
+  if (is.null(list_fit_models) || identical(list_fit_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
   }
@@ -357,6 +373,10 @@ get_estimates <- function(list_fit_models) {
 #' @importFrom dplyr bind_rows
 #' @importFrom tidyr pivot_wider
 get_stats <- function(list_fit_models) {
+  if (is.null(list_fit_models) || identical(list_fit_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_fit_jabba(list_fit_models)) {
     list_fit_models <- list(list_fit_models)
   }
@@ -418,6 +438,10 @@ get_stats <- function(list_fit_models) {
 #' @export
 #' @importFrom dplyr bind_rows relocate
 get_hc_pars <- function(list_hc_models) {
+  if (is.null(list_hc_models) || identical(list_hc_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_hindcast_jabba(list_hc_models)) {
     list_hc_models <- list(list_hc_models)
   }
@@ -487,6 +511,10 @@ get_hc_pars <- function(list_hc_models) {
 #' @importFrom dplyr bind_rows
 #' @importFrom tidyr pivot_wider
 get_hc_stats <- function(list_hc_models) {
+  if (is.null(list_hc_models) || identical(list_hc_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_hindcast_jabba(list_hc_models)) {
     list_hc_models <- list(list_hc_models)
   }
@@ -555,6 +583,10 @@ get_hc_stats <- function(list_hc_models) {
 #' @export
 #' @importFrom dplyr bind_rows relocate rename
 get_hc_estimates <- function(list_hc_models) {
+  if (is.null(list_hc_models) || identical(list_hc_models, list())) {
+    return(NULL)
+  }
+  
   if (.is_hindcast_jabba(list_hc_models)) {
     list_hc_models <- list(list_hc_models)
   }

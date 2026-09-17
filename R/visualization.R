@@ -1120,6 +1120,7 @@ summary_table <- function(
   data, show = "html", save = NULL, filename = "summary_table", digits = 4
 ) {
   table <- .default_table(data, digits = digits)
+  if (is.null(table)) stop("Argument 'data' cannot be NULL or empty.")
   
   if (!is.null(show)) {
     ext <- switch(
