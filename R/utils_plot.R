@@ -384,8 +384,6 @@
     "q.2" = "q<sub>2</sub>",
     "psi" = "psi (\u03a8)",
     "sigma2" = "sigma<sup>2</sup> (\u03c3<sup>2</sup>)",
-    "tau2.1" = "tau<sub>1</sub><sup>2</sup> (\u03c4<sub>1</sub><sup>2</sup>)",
-    "tau2.2" = "tau<sub>2</sub><sup>2</sup> (\u03c4<sub>2</sub><sup>2</sup>)",
     "sigma.proc" = "sigma<sub>proc</sub> (\u03c3<sub>proc</sub>)",
     "Hmsy" = "H<sub>MSY</sub>",
     "SBmsy" = "SB<sub>MSY</sub>",
@@ -430,6 +428,16 @@
               yr <- substring(val, 2)
               html(paste0("P<sub>", yr, "</sub>"))
             } 
+            else if (grepl("tau2.[0-9]{1}$", val)) {
+              num <- substr(val, 6, 7)
+              html(
+                paste0(
+                  "tau<sub>", num,
+                  "</sub><sup>2</sup> (\u03c4<sub>", num, 
+                  "</sub><sup>2</sup>)"
+                )
+              )
+            }
             else {
               val
             }
