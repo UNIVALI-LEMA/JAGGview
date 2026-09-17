@@ -30,6 +30,10 @@
 #' @param res_data A named list as returned by \code{runs_tests_data()}. It 
 #'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
 #' @param traj_data A data frame as returned by \code{trajectories_data()}.
+#' @param list_fit_models A list of fitted model objects returned by 
+#'   \code{fit_jabba()}, or a single fitted model object.
+#' @param list_hc_models A list of hindcast model objects returned by 
+#'   \code{hindcast_jabba()}, or a single hindcast model object.
 #' @param filename A character string with the name of the \code{.RData} file 
 #'   containing the model objects to be loaded (e.g. results from \pkg{JABBA}). 
 #' @param dir A character string with the directory where \code{filename} is 
@@ -116,11 +120,13 @@
 #' @importFrom grDevices colorRampPalette
 #' @importFrom JABBA ss3col
 #' @importFrom tools file_ext file_path_sans_ext
+#' @importFrom gt render_gt gt_output
 create_report <- function(
   fits_data = data.frame(), hind_data = list(), kobe_data = list(), 
   pp_data = list(), ra_data = list(), res_data = list(), 
-  traj_data = data.frame(), filename = NULL,  dir = getwd(), animation = TRUE, 
-  use_si_suffix = FALSE, verbose = FALSE
+  traj_data = data.frame(), list_fit_models = list(), list_hc_models = list(), 
+  filename = NULL,  dir = getwd(), animation = TRUE, use_si_suffix = FALSE, 
+  verbose = FALSE
 ) {
 
   if (!is.null(filename)) {
@@ -217,6 +223,9 @@ create_report <- function(
       traj_data <- ensemble_data$trajectories_df
       if (verbose) message("Trajectories data was sucessfully obtained")
       rm(ensemble_data)
+      if (identical(list_fit_models, list())) {
+        list_fit_models <- fits_list
+      }
     }
     rm(fits_list, fits_NULL)
     gc()
@@ -226,6 +235,9 @@ create_report <- function(
       ra_data <- retrospective_analysis_data(hc_list)
       if (verbose) {
         message("Retrospective Analysis data was sucessfully obtained")
+      }
+      if (identical(list_hc_models, list())) {
+        list_hc_models <- hc_list
       }
     }
     rm(hc_list, hc_NULL)
@@ -256,6 +268,8 @@ create_report <- function(
     ra_data = ra_data,
     res_data = res_data,
     traj_data = traj_data,
+    list_fit_models = list_fit_models,
+    list_hc_models = list_hc_models,
     animation = animation,
     use_si_suffix = use_si_suffix
   )

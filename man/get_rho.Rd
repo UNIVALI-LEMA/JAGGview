@@ -49,13 +49,21 @@ get_rho(df)
 }
 \seealso{
 Other extraction functions: 
+\code{\link{get_estimates}()},
+\code{\link{get_hc_estimates}()},
+\code{\link{get_hc_pars}()},
+\code{\link{get_hc_stats}()},
 \code{\link{get_mase}()},
 \code{\link{get_pars}()},
 \code{\link{get_ppmr}()},
 \code{\link{get_ppvr}()},
-\code{\link{get_refpts}()}
+\code{\link{get_refpts}()},
+\code{\link{get_stats}()}
 
 Other retrospective analysis functions: 
+\code{\link{get_hc_estimates}()},
+\code{\link{get_hc_pars}()},
+\code{\link{get_hc_stats}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{retrospective_analysis_ggplot}()}
 }

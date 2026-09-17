@@ -34,6 +34,7 @@ test_that(
     expect_equal(ncol(table$`_data`), ncol(df))
     expect_equal(table$`_data`$name, df$name)
     expect_equal(table$`_data`$value, df$value)
+    expect_equal(.default_table(NULL), NULL)
     expect_type(table$`_data`$name, type_name)
     expect_type(table$`_data`$value, "double")
   }
@@ -45,10 +46,6 @@ test_that(
     expect_error(
       .default_table(data.frame(name = c("a", "b", "c"), value = c(1, 6)))
     )
-    expect_error(.default_table(NULL))
-    expect_error(.default_table(
-      data.frame(name = numeric(0), value = numeric(0))
-    ))
   }
 )
 

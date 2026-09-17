@@ -34,11 +34,16 @@ get_mase(df)
 }
 \seealso{
 Other extraction functions: 
+\code{\link{get_estimates}()},
+\code{\link{get_hc_estimates}()},
+\code{\link{get_hc_pars}()},
+\code{\link{get_hc_stats}()},
 \code{\link{get_pars}()},
 \code{\link{get_ppmr}()},
 \code{\link{get_ppvr}()},
 \code{\link{get_refpts}()},
-\code{\link{get_rho}()}
+\code{\link{get_rho}()},
+\code{\link{get_stats}()}
 
 Other hindcasts functions: 
 \code{\link{hindcast_data}()},

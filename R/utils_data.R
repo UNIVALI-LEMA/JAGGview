@@ -142,9 +142,7 @@
     Bdev  = "Bdev",
     B = "B",
     H = "H",
-    Catch = "Catch",
-    BBfrac = "BBfrac",
-    Bref = "Bref"
+    Catch = "Catch"
   )
 
   result_list <- lapply(names(columns), function(var_name) {
@@ -356,7 +354,7 @@
     "timeseries", "refpts", 
     "pfunc", "diags", "residuals", "std.residuals", 
     "stats", "pars_posterior", "refpts_posterior", "kobe", 
-    "flqs", "bppd", "kbtrj", "posteriors"#, "model"
+    "flqs", "bppd", "kbtrj"#, "posteriors"#, "model"
   )
   is.list(model) && all(cols_fit %in% names(model))
 }
@@ -1153,7 +1151,7 @@
 #'
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr bind_rows everything
+#' @importFrom dplyr bind_rows everything select
 #' @importFrom JABBA jbmase
 .process_mase <- function(fit_list) {
   temp00 <- lapply(
@@ -1460,3 +1458,17 @@
     stop("All indices past in the parameter 'indices' must exist in the data.")
   }
 }
+
+#' @keywords internal
+#' @noRd
+.get_scenarios <- function(data) {
+  temp00 <- sapply(
+    data,
+    function(fit) {
+      fit$scenario
+    }
+  )
+  
+  return(temp00)
+}
+

@@ -70,6 +70,266 @@
   }
 }
 
+#' Build a compact metric table using plotly shapes and annotations
+#' 
+#' Internal helper that builds pixel-sized \pkg{plotly} shapes (cell borders) 
+#' and annotations (header and value text) for a small metric table, anchored 
+#' to the top-left corner of the panel, with dimensions based on the given font 
+#' size rather than the panel's dimensions. This allows the table to be used as 
+#' a substitute for \code{add_text()} when a fixed-size, panel-size independent 
+#' tabular annotation is desired, with one row per metric selected in 
+#' \code{col}.
+#' 
+#' @param data A data frame containing the column(s) to be summarised in the 
+#'   table.
+#' @param text_size A numeric value giving the font size, in the pixels, used 
+#'   for the table's text. Also used as the basis for computing row height, 
+#'   column width, and left padding (see \code{heigth_mult}, \code{width_mult}, 
+#'   and \code{left_pad_mult}).
+#' @param pos_x A character string giving the horizontal NPC position. One of 
+#'   \code{"left"}, \code{"center"}, or \code{"right"}. Any other value 
+#'   defaults to \code{0} (left).
+#' @param pos_y A character string giving the vertical NPC position. One of 
+#'   \code{"top"}, \code{"middle"}, or \code{"bottom"}. Any other value 
+#'   defaults to \code{1} (top).
+#' @param col One or more (unquoted) columns in \code{data} whose values will 
+#'   populate the table, selected with tidyselect syntax (e.g., \code{Value}, 
+#'   or \code{c(ppmr_value, ppvr_value)} for multiple rows).
+#' @param col_name A character vector giving the row label to be used in the 
+#'   resulting table for each column selected in \code{col}, in the same order 
+#'   (e.g., \code{c("PPMR", "PPVR")}). Must have the same length as the number 
+#'   of columns selected in \code{col}.
+#' @param suffix A character string appended to each formatted value (e.g., 
+#'   \code{"\%"}). Defaults to \code{""}.
+#' @param decimals A numeric value giving the number of decimal places used to 
+#'   round the values. Defaults to 2.
+#' @param heigth_mult A numeric value giving the row height as a multiple of 
+#'   \code{text_size}, in pixels. Defaults to 1.2.
+#' @param width_mult A numeric value giving each column's width as a multiple 
+#'   of \code{text_size}, in pixels. Defaults to 4.
+#' @param left_pad_mult A numeric value giving the left padding applied to each 
+#'   column's text, as a multiple of \code{text_size}, in pixels. Defaults to 
+#'   0.25.
+#' 
+#' @return A named list with two elements:
+#'   \itemize{
+#'     \item \code{shapes}: a list of \pkg{plotly} shape specifications 
+#'       (\code{type = "rect"}) drawing the table's cell borders, one 
+#'       header row plus one row per metric.
+#'     \item \code{annotations}: a list of \pkg{plotly} annotation 
+#'       specifications with the header text (\code{"Metric"}, \code{"Value"}) 
+#'       and the formatted values for each metric.
+#'   }
+#'   Both elements are ready to be appended to a subplot's \code{shapes} and 
+#'   \code{annotations} lists, respectively, in a \code{layout()} call.
+#'
+#' @details
+#' All shapes and annotations are positioned in pixel units 
+#' (\code{xsizemode/ysizemode = "pixel"}), anchored to the top-left corner of 
+#' the panel (\code{xref = "paper"}, \code{yref = "paper"}, \code{xanchor = 0}, 
+#' \code{yanchor = 1}). This keeps the table's size fixed relative to 
+#' \code{text_size}, independent of the panel's actual pixel dimensions, so 
+#' the table does not stretch or shrink disproportionately when the plotting 
+#' area is resized.
+#'
+#' @keywords internal
+#' @noRd
+#' @importFrom dplyr %>% select
+.build_metric_table <- function(
+  data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
+  heigth_mult = 1.5, width_mult = 4, left_pad_mult = 0.25, 
+  colors = c("#CCCCCC", "#F2F2F2")
+) {
+
+  cols_data <- data %>% select({{col}})
+
+  if (ncol(cols_data) != length(col_name)) {
+    stop(paste0("Expected parameter 'col_name' to have the same length",
+    "as the number of columns selected in 'col'."))
+  }
+
+  shapes <- list()
+  annotations <- list() 
+
+  n_rows <- ncol(cols_data)
+
+  heigth_line <- -heigth_mult*text_size
+  width_line <- width_mult*text_size
+  left_padding <- left_pad_mult*text_size
+  if (pos_x == "left") {
+    mult_x <- 1
+    xanchor <- 0
+    x0_2 <- mult_x*width_line
+    x1_2 <- mult_x*width_line*2
+    x_shift_1 <- left_padding
+    x_shift_2 <- width_line*2 - left_padding
+    x_shift_fix_1 <- width_line/2
+    x_shift_fix_2 <- width_line + width_line/2
+  } else if (pos_x == "right") {
+    mult_x <- -1
+    xanchor <- 1
+    x0_2 <- mult_x*width_line
+    x1_2 <- mult_x*width_line*2
+    x_shift_1 <- left_padding - width_line*2
+    x_shift_2 <- -left_padding
+    x_shift_fix_1 <- mult_x*(width_line + width_line/2)
+    x_shift_fix_2 <- mult_x*width_line/2
+  }
+  else if (pos_x == "center") {
+    mult_x <- 1
+    xanchor <- 0.5
+    x0_2 <- 0
+    x1_2 <- -1*width_line
+    x_shift_1 <- left_padding - width_line
+    x_shift_2 <- width_line - left_padding
+    x_shift_fix_1 <- -1*width_line/2
+    x_shift_fix_2 <- width_line/2
+  }
+
+  if (pos_y == "top") {
+    yanchor <- 1
+    mult_y <- 1
+    y_shift_1 <- 0
+  } else if (pos_y == "bottom") {
+    yanchor <- 0
+    mult_y <- -1
+    y_shift_1 <- -heigth_line*(n_rows+1)
+  }
+
+  for (r in 0:n_rows) {
+    y0 <- mult_y*r*heigth_line
+    y1 <- mult_y*(r+1)*heigth_line
+
+    color <- colors[(r %% 2)+1]
+
+    shapes <- append(
+      shapes,
+      list(
+        list(
+          type = "rect",
+          xref = "paper",
+          yref = "paper",
+          xsizemode = "pixel",
+          xanchor = xanchor,
+          x0 = 0,
+          x1 = mult_x*width_line,
+          yanchor = yanchor,
+          y0 = y0, 
+          y1 = y1,
+          ysizemode = "pixel",
+          line = list(width = 1),
+          fillcolor = color
+        ),
+        list(
+          type = "rect",
+          xref = "paper",
+          yref = "paper",
+          xsizemode = "pixel",
+          xanchor = xanchor,
+          x0 = x0_2,
+          x1 = x1_2,
+          yanchor = yanchor,
+          y0 = y0, 
+          y1 = y1,
+          ysizemode = "pixel",
+          line = list(width = 1),
+          fillcolor = color
+        )
+      )
+    )
+  }
+
+  annotations <- append(
+    annotations,
+    list(
+      list(
+        x = xanchor,
+        y = yanchor,
+        xanchor = "center",
+        xshift = x_shift_fix_1,
+        yanchor = "top",
+        yshift = y_shift_1,
+        xref = "paper",
+        yref = "paper",
+        text = "<b>Metric</b>",
+        showarrow = FALSE,
+        font = list(
+          size = text_size,
+          color = "black"
+        )
+      ),
+      list(
+        x = xanchor,
+        y = yanchor,
+        xshift = x_shift_fix_2,
+        xanchor = "center",
+        yanchor = "top",
+        yshift = y_shift_1,
+        xref = "paper",
+        yref = "paper",
+        text = "<b>Value</b>",
+        showarrow = FALSE,
+        font = list(
+          size = text_size,
+          color = "black"
+        )
+      )
+    )
+  )
+
+  for (r in seq_len(n_rows)) {
+    var <- if (pos_y == "bottom") {
+      n_rows + 1 - r
+    } else{
+      r
+    }
+    row_shift <- mult_y*var*heigth_line
+    val <- cols_data[[r]]
+    annotations <- append(
+      annotations,
+      list(
+        list(
+          x = xanchor,
+          y = yanchor,
+          xanchor = "left",
+          xshift = x_shift_1,
+          yanchor = "top",
+          yshift = row_shift,
+          xref = "paper",
+          yref = "paper",
+          text = col_name[r],
+          showarrow = FALSE,
+          font = list(
+            size = text_size,
+            color = "black"
+          )
+        ),
+        list(
+          x = xanchor,
+          y = yanchor,
+          xshift = x_shift_2,
+          xanchor = "right",
+          yanchor = "top",
+          yshift = row_shift,
+          xref = "paper",
+          yref = "paper",
+          text = paste0(round(val, decimals), suffix),
+          showarrow = FALSE,
+          font = list(
+            size = text_size,
+            color = "black"
+          )
+        )
+      )
+    )
+  }
+
+  list(
+    shapes = shapes,
+    annotations = annotations
+  )
+}
+
 #' Create a default formatted gt table
 #' 
 #' Internal helper function used to generate consistently formatted \pkg{gt} 
@@ -90,29 +350,103 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom gt cell_fill cell_text cells_body cells_column_labels cols_label 
-#' fmt_number gt html tab_style
-#' @importFrom dplyr where
+#' fmt_number gt html tab_style fmt
+#' @importFrom dplyr %>% where
 .default_table <- function(data, digits = 2) {
   if (is.null(data) || nrow(data) == 0) {
-    stop("Argument 'data' cannot be NULL or empty.")
+    return(NULL)
   }
 
   label_map <- list(
-    bmsy = html("B<sub>MSY</sub>"),
-    fmsy = html("F<sub>MSY</sub>"),
-    msy  = "MSY",
-    bb0 = html("b/b<sub>0</sub>"),
-    k = "K"
+    bmsy     = html("B<sub>MSY</sub>"),
+    fmsy     = html("F<sub>MSY</sub>"),
+    msy      = "MSY",
+    bb0      = html("b/b<sub>0</sub>"),
+    k        = "K",
+    FFmsy    = html("F/F<sub>MSY</sub>"),
+    BBmsy    = html("B/B<sub>MSY</sub>"),
+    psi      = "psi (\u03a8)",
+    mu       = "Mean (\u03bc)",
+    LCI      = "2.5% Cred. Interval",
+    UCI      = "97.5% Cred. Interval",
+    Geweke.p = "Geweke (p)",
+    Heidel.p = "Heidel (p)",
+    MASE.adj = html("MASE<sub>adj</sub>"),
+    MAE.PR   = html("MAE<sub>PR</sub>"),
+    MAE.base = html("MAE<sub>base</sub>"),
+    n.eval   = html("n<sub>eval</sub>")
   )
 
   labels <- label_map[names(label_map) %in% names(data)]
+
+  value_map <- c(
+    "q.1" = "q<sub>1</sub>",
+    "q.2" = "q<sub>2</sub>",
+    "psi" = "psi (\u03a8)",
+    "sigma2" = "sigma<sup>2</sup> (\u03c3<sup>2</sup>)",
+    "sigma.proc" = "sigma<sub>proc</sub> (\u03c3<sub>proc</sub>)",
+    "Hmsy" = "H<sub>MSY</sub>",
+    "SBmsy" = "SB<sub>MSY</sub>",
+    "bmsyk" = "B<sub>MSY</sub>/K"
+  )
   
   table <- gt(data = data) %>%
     fmt_number(
       columns = where(is.numeric),
       decimals = digits
     ) %>%
-    cols_label(.list = labels) %>%
+    cols_label(.list = labels) 
+  
+  if ("Indicator" %in% names(data)) {
+    yr <- lapply(
+      data$Indicator,
+      function(val) {
+        if (grepl("^P[0-9]{4}$", val)) {
+          yr_aux <- as.integer(substring(val, 2))
+        }
+      }
+    )
+    yr <- unlist(yr)
+    if (!is.null(yr)) {
+      cur_yr <- max(unlist(yr), na.rm = TRUE)
+      value_map <- c(
+        value_map, 
+        "B_Bmsy.cur" = paste0("B<sub>", cur_yr, "</sub>/B<sub>MSY</sub>"),
+        "H_Hmsy.cur" = paste0("H<sub>", cur_yr, "</sub>/H<sub>MSY</sub>")
+      )
+    }
+
+    table <- table %>%
+      fmt(
+        columns = Indicator,
+        fns = function(x) {
+          sapply(x, function(val) {
+            if (val %in% names(value_map)) {
+              html(value_map[[val]])
+            } 
+            else if (grepl("^P[0-9]{4}$", val)) {
+              yr <- substring(val, 2)
+              html(paste0("P<sub>", yr, "</sub>"))
+            } 
+            else if (grepl("tau2.[0-9]{1}$", val)) {
+              num <- substr(val, 6, 7)
+              html(
+                paste0(
+                  "tau<sub>", num,
+                  "</sub><sup>2</sup> (\u03c4<sub>", num, 
+                  "</sub><sup>2</sup>)"
+                )
+              )
+            }
+            else {
+              val
+            }
+          })
+        }
+      ) 
+  }
+
+  table <- table %>%
     tab_style(
       style = cell_text(weight = "bold"),
       locations = cells_column_labels()
@@ -124,6 +458,53 @@
       )
     )
   return(table)
+}
+
+#' Build an interactive gt table
+#' 
+#' Creates an interactive \code{gt} table from the provided data, with
+#' pagination, sorting, filtering, and highlighting enabled.
+#' 
+#' @param data A data frame to be rendered as an interactive table.
+#' 
+#' @return A \code{gt} table object with interactive features enabled. If
+#'   \code{data} is \code{NULL} or has no rows, a placeholder table is returned 
+#'   instead, as produced by \code{.table_no_data()}.
+#' 
+#' @details
+#' This is an internal helper function that builds on \code{.default_table()}
+#' to add interactivity to the rendered table, including pagination controls,
+#' column sorting, filters, and row highlighting. Column labels are rendered
+#' in bold.
+#' 
+#' @keywords internal
+#' @noRd
+#' @importFrom gt opt_interactive tab_options
+#' @importFrom dplyr %>%
+.dynamic_table <- function(data) {
+  if (is.null(data) || nrow(data) == 0) {
+    return(.table_no_data())
+  }
+
+  .default_table(data) %>%
+    opt_interactive(
+      use_pagination = TRUE,
+      use_pagination_info = TRUE,
+      use_page_size_select = TRUE,
+      page_size_default = 20,
+      page_size_values = c(5, 10, 20, 50, 100),
+      use_sorting = TRUE,
+      use_search = FALSE,
+      use_filters = TRUE,
+      use_resizers = FALSE,
+      use_highlight = TRUE,
+      use_compact_mode = FALSE,
+      use_text_wrapping = FALSE,
+      pagination_type = "numbers"
+    ) %>%
+      tab_options(
+        column_labels.font.weight = "bold"
+      )
 }
 
 #' Create an empty placeholder plotly widget
@@ -147,6 +528,7 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom plotly layout plotly_empty
+#' @importFrom dplyr %>%
 .empty_plotly <- function(title){
   plotly_empty(type = "scatter", mode = "markers") %>%
     layout(
@@ -415,7 +797,7 @@
 #' 
 #' @keywords internal
 #' @noRd
-#' @importFrom dplyr filter
+#' @importFrom dplyr %>% filter
 #' @importFrom ggplot2 aes coord_cartesian geom_line geom_point geom_ribbon 
 #' ggplot labs scale_colour_manual scale_fill_manual scale_y_continuous theme
 #' @importFrom JABBA ss3col
@@ -557,7 +939,7 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom purrr pmap
-#' @importFrom dplyr case_when mutate select
+#' @importFrom dplyr %>% case_when mutate select
 .prepare_npc_table_data <- function(
   data, pos_x, pos_y, col, col_name, suffix = "", decimals = 2
 ) {
@@ -867,261 +1249,29 @@
     stop("Unsupported operating system: ", os)
   }
 }
-#' Build a compact metric table using plotly shapes and annotations
+
+#' Build an empty placeholder table
 #' 
-#' Internal helper that builds pixel-sized \pkg{plotly} shapes (cell borders) 
-#' and annotations (header and value text) for a small metric table, anchored 
-#' to the top-left corner of the panel, with dimensions based on the given font 
-#' size rather than the panel's dimensions. This allows the table to be used as 
-#' a substitute for \code{add_text()} when a fixed-size, panel-size independent 
-#' tabular annotation is desired, with one row per metric selected in 
-#' \code{col}.
+#' Creates a \code{gt} table displaying a warning message, used as a placeholder
+#' whenever there is no data available to render.
 #' 
-#' @param data A data frame containing the column(s) to be summarised in the 
-#'   table.
-#' @param text_size A numeric value giving the font size, in the pixels, used 
-#'   for the table's text. Also used as the basis for computing row height, 
-#'   column width, and left padding (see \code{heigth_mult}, \code{width_mult}, 
-#'   and \code{left_pad_mult}).
-#' @param pos_x A character string giving the horizontal NPC position. One of 
-#'   \code{"left"}, \code{"center"}, or \code{"right"}. Any other value 
-#'   defaults to \code{0} (left).
-#' @param pos_y A character string giving the vertical NPC position. One of 
-#'   \code{"top"}, \code{"middle"}, or \code{"bottom"}. Any other value 
-#'   defaults to \code{1} (top).
-#' @param col One or more (unquoted) columns in \code{data} whose values will 
-#'   populate the table, selected with tidyselect syntax (e.g., \code{Value}, 
-#'   or \code{c(ppmr_value, ppvr_value)} for multiple rows).
-#' @param col_name A character vector giving the row label to be used in the 
-#'   resulting table for each column selected in \code{col}, in the same order 
-#'   (e.g., \code{c("PPMR", "PPVR")}). Must have the same length as the number 
-#'   of columns selected in \code{col}.
-#' @param suffix A character string appended to each formatted value (e.g., 
-#'   \code{"\%"}). Defaults to \code{""}.
-#' @param decimals A numeric value giving the number of decimal places used to 
-#'   round the values. Defaults to 2.
-#' @param heigth_mult A numeric value giving the row height as a multiple of 
-#'   \code{text_size}, in pixels. Defaults to 1.2.
-#' @param width_mult A numeric value giving each column's width as a multiple 
-#'   of \code{text_size}, in pixels. Defaults to 4.
-#' @param left_pad_mult A numeric value giving the left padding applied to each 
-#'   column's text, as a multiple of \code{text_size}, in pixels. Defaults to 
-#'   0.25.
+#' @return A \code{gt} table object with hidden column labels and a single 
+#'   centered message indicating the absence of data.
 #' 
-#' @return A named list with two elements:
-#'   \itemize{
-#'     \item \code{shapes}: a list of \pkg{plotly} shape specifications 
-#'       (\code{type = "rect"}) drawing the table's cell borders, one 
-#'       header row plus one row per metric.
-#'     \item \code{annotations}: a list of \pkg{plotly} annotation 
-#'       specifications with the header text (\code{"Metric"}, \code{"Value"}) 
-#'       and the formatted values for each metric.
-#'   }
-#'   Both elements are ready to be appended to a subplot's \code{shapes} and 
-#'   \code{annotations} lists, respectively, in a \code{layout()} call.
-#'
 #' @details
-#' All shapes and annotations are positioned in pixel units 
-#' (\code{xsizemode/ysizemode = "pixel"}), anchored to the top-left corner of 
-#' the panel (\code{xref = "paper"}, \code{yref = "paper"}, \code{xanchor = 0}, 
-#' \code{yanchor = 1}). This keeps the table's size fixed relative to 
-#' \code{text_size}, independent of the panel's actual pixel dimensions, so 
-#' the table does not stretch or shrink disproportionately when the plotting 
-#' area is resized.
-#'
+#' This is an internal helper function used by table-rendering functions to 
+#' avoid errors when the input data is empty or unavailable.
+#' 
 #' @keywords internal
 #' @noRd
-.build_metric_table <- function(
-  data, text_size, pos_x, pos_y, col, col_name, suffix = "", decimals = 2, 
-  heigth_mult = 1.5, width_mult = 4, left_pad_mult = 0.25, 
-  colors = c("#CCCCCC", "#F2F2F2")
-) {
-
-  cols_data <- data %>% select({{col}})
-
-  if (ncol(cols_data) != length(col_name)) {
-    stop(paste0("Expected parameter 'col_name' to have the same length",
-    "as the number of columns selected in 'col'."))
-  }
-
-  shapes <- list()
-  annotations <- list() 
-
-  n_rows <- ncol(cols_data)
-
-  heigth_line <- -heigth_mult*text_size
-  width_line <- width_mult*text_size
-  left_padding <- left_pad_mult*text_size
-  if (pos_x == "left") {
-    mult_x <- 1
-    xanchor <- 0
-    x0_2 <- mult_x*width_line
-    x1_2 <- mult_x*width_line*2
-    x_shift_1 <- left_padding
-    x_shift_2 <- width_line*2 - left_padding
-    x_shift_fix_1 <- width_line/2
-    x_shift_fix_2 <- width_line + width_line/2
-  } else if (pos_x == "right") {
-    mult_x <- -1
-    xanchor <- 1
-    x0_2 <- mult_x*width_line
-    x1_2 <- mult_x*width_line*2
-    x_shift_1 <- left_padding - width_line*2
-    x_shift_2 <- -left_padding
-    x_shift_fix_1 <- mult_x*(width_line + width_line/2)
-    x_shift_fix_2 <- mult_x*width_line/2
-  }
-  else if (pos_x == "center") {
-    mult_x <- 1
-    xanchor <- 0.5
-    x0_2 <- 0
-    x1_2 <- -1*width_line
-    x_shift_1 <- left_padding - width_line
-    x_shift_2 <- width_line - left_padding
-    x_shift_fix_1 <- -1*width_line/2
-    x_shift_fix_2 <- width_line/2
-  }
-
-  if (pos_y == "top") {
-    yanchor <- 1
-    mult_y <- 1
-    y_shift_1 <- 0
-  } else if (pos_y == "bottom") {
-    yanchor <- 0
-    mult_y <- -1
-    y_shift_1 <- -heigth_line*(n_rows+1)
-  }
-
-  for (r in 0:n_rows) {
-    y0 <- mult_y*r*heigth_line
-    y1 <- mult_y*(r+1)*heigth_line
-
-    color <- colors[(r %% 2)+1]
-
-    shapes <- append(
-      shapes,
-      list(
-        list(
-          type = "rect",
-          xref = "paper",
-          yref = "paper",
-          xsizemode = "pixel",
-          xanchor = xanchor,
-          x0 = 0,
-          x1 = mult_x*width_line,
-          yanchor = yanchor,
-          y0 = y0, 
-          y1 = y1,
-          ysizemode = "pixel",
-          line = list(width = 1),
-          fillcolor = color
-        ),
-        list(
-          type = "rect",
-          xref = "paper",
-          yref = "paper",
-          xsizemode = "pixel",
-          xanchor = xanchor,
-          x0 = x0_2,
-          x1 = x1_2,
-          yanchor = yanchor,
-          y0 = y0, 
-          y1 = y1,
-          ysizemode = "pixel",
-          line = list(width = 1),
-          fillcolor = color
-        )
-      )
-    )
-  }
-
-  annotations <- append(
-    annotations,
-    list(
-      list(
-        x = xanchor,
-        y = yanchor,
-        xanchor = "center",
-        xshift = x_shift_fix_1,
-        yanchor = "top",
-        yshift = y_shift_1,
-        xref = "paper",
-        yref = "paper",
-        text = "<b>Metric</b>",
-        showarrow = FALSE,
-        font = list(
-          size = text_size,
-          color = "black"
-        )
-      ),
-      list(
-        x = xanchor,
-        y = yanchor,
-        xshift = x_shift_fix_2,
-        xanchor = "center",
-        yanchor = "top",
-        yshift = y_shift_1,
-        xref = "paper",
-        yref = "paper",
-        text = "<b>Value</b>",
-        showarrow = FALSE,
-        font = list(
-          size = text_size,
-          color = "black"
-        )
-      )
-    )
-  )
-
-  for (r in seq_len(n_rows)) {
-    var <- if (pos_y == "bottom") {
-      n_rows + 1 - r
-    } else{
-      r
-    }
-    row_shift <- mult_y*var*heigth_line
-    val <- cols_data[[r]]
-    annotations <- append(
-      annotations,
-      list(
-        list(
-          x = xanchor,
-          y = yanchor,
-          xanchor = "left",
-          xshift = x_shift_1,
-          yanchor = "top",
-          yshift = row_shift,
-          xref = "paper",
-          yref = "paper",
-          text = col_name[r],
-          showarrow = FALSE,
-          font = list(
-            size = text_size,
-            color = "black"
-          )
-        ),
-        list(
-          x = xanchor,
-          y = yanchor,
-          xshift = x_shift_2,
-          xanchor = "right",
-          yanchor = "top",
-          yshift = row_shift,
-          xref = "paper",
-          yref = "paper",
-          text = paste0(round(val, decimals), suffix),
-          showarrow = FALSE,
-          font = list(
-            size = text_size,
-            color = "black"
-          )
-        )
-      )
-    )
-  }
-
-  list(
-    shapes = shapes,
-    annotations = annotations
+#' @importFrom gt cols_align gt tab_options
+#' @importFrom dplyr everything
+.table_no_data <- function() {
+  return(
+    gt(
+      data.frame(warning = "There is no data for this table")
+    ) %>%
+      tab_options(column_labels.hidden = TRUE) %>%
+      cols_align(align = "center", columns = everything())
   )
 }

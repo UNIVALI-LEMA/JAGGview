@@ -268,18 +268,19 @@
     }
 
     prior_all <- df_lists$prior %>%
-      select(Scenario, K01, K02) %>%
-      filter(K02 > 0.005e-9)
+      select(Scenario, K01, K02)
 
     posterior_all <- df_lists$posterior %>%
-      select(Scenario, K01, K02) %>%
-      filter(K02 > 0.005e-9)
+      select(Scenario, K01, K02)
 
     x_lim_min <- .get_value_or_default(
       x_lim_min_pp_K, min(prior_all$K01, posterior_all$K01, na.rm = TRUE)
     )
 
-    Q3 <- quantile(c(prior_all$K01, posterior_all$K01), 0.95, na.rm = TRUE)
+    Q3 <- .get_value_or_default(
+      x_lim_max_pp_K,
+      quantile(c(prior_all$K01, posterior_all$K01), 0.95, na.rm = TRUE)
+    )
     
     x_lim <- c(x_lim_min-1, Q3)
 
@@ -436,7 +437,7 @@
           margin = list(
             b = 50,
             t = 60,
-            l = 60,
+            l = 70,
             r = 50
           ),
           shapes = shapes,
@@ -476,7 +477,7 @@
             textangle = -90,
             xanchor = "right",
             yanchor = "middle",
-            xshift = -10,
+            xshift = -35,
             xref = "paper",
             yref = "paper",
             text = title_y,
