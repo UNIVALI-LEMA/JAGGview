@@ -478,7 +478,8 @@
           ),
           shapes = shapes,
           annotations = annotations
-        ) 
+        ) %>%
+          .plotly_config("fits_plot")
       })
     }) %>% flatten()
 

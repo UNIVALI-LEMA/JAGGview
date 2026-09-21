@@ -1275,3 +1275,36 @@
       cols_align(align = "center", columns = everything())
   )
 }
+
+#' @keywords internal
+#' @noRd
+#' @importFrom plotly config
+.plotly_config <- function(
+  p, filename = "plot", locale = "en-US", width = 1920, height = 1080
+) {
+  config(
+    p = p,
+    displayModeBar         = TRUE,
+    displaylogo            = FALSE,
+    locale                 = locale,
+    toImageButtonOptions   = list(
+      format   = "png",
+      filename = filename,
+      width    = width,
+      height   = height
+    ),
+    modeBarButtonsToRemove = c(
+      "zoom2d", 
+      "pan2d",
+      "select2d",
+      "lasso2d",
+      "zoomIn2d", 
+      "zoomOut2d", 
+      "autoScale2d", 
+      "resetScale2d", 
+      "hoverClosestCartesian", 
+      "hoverCompareCartesian",
+      "hoverClosestPie"
+    )
+  )
+}

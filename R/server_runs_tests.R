@@ -537,7 +537,8 @@
             ),
             shapes = shapes,
             annotations = annotations
-          )
+          ) %>%
+        .plotly_config("runs_tests_plot")
         p
         
       })

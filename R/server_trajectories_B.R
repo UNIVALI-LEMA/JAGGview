@@ -405,7 +405,8 @@
           ),
           shapes = shapes,
           annotations = annotations
-        )
+        ) %>%
+        .plotly_config("traj_B_plot")
     })
     
 
@@ -416,7 +417,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.02
+      margin = c(0.005, 0.005, 0.035, 0.035)
     ) %>%
       layout(
         annotations = list(

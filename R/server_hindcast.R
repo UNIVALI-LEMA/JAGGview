@@ -591,7 +591,8 @@
             ),
             shapes = shapes,
             annotations = annotations
-          )
+          ) %>%
+          .plotly_config("hindcast_plot")
         p
       })
     }) %>% flatten()
