@@ -503,12 +503,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "runs_tests_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "runs_tests_title_y",
               label = "Title Y:",
-              placeholder = "Residuals"
+              placeholder = "Residuals",
+              value = "Residuals"
             ),
             numericInput(
               inputId = "runs_tests_text_size",
@@ -528,7 +530,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(res_data$SE3$ymin),
                   width = "100%"
                 ), 
                 tags$span(
@@ -538,7 +540,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(res_data$SE3$ymax),
                   width = "100%"
                 )
               )
@@ -555,7 +557,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(res_data$SE3$lcl, na.rm = TRUE), FALSE, 2.5
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -565,7 +569,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(res_data$SE3$ucl, na.rm = TRUE), TRUE, 2.5
+                  ),
                   width = "100%"
                 )
               )
@@ -605,12 +611,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "cpue_res_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "cpue_res_title_y",
               label = "Title Y:",
-              placeholder = "Residuals"
+              placeholder = "Residuals",
+              value = "Residuals"
             ),
             numericInput(
               inputId = "cpue_res_text_size",
@@ -630,7 +638,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(res_data$cpue_residuals$Year, na.rm = TRUE),
                   width = "100%"
                 ), 
                 tags$span(
@@ -640,7 +648,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(res_data$cpue_residuals$Year, na.rm = TRUE),
                   width = "100%"
                 )
               )
@@ -657,7 +665,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(res_data$cpue_residuals$Res, na.rm = TRUE), FALSE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -667,7 +677,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(res_data$cpue_residuals$Res, na.rm = TRUE), TRUE
+                  ),
                   width = "100%"
                 )
               )

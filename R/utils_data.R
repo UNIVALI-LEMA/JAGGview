@@ -1472,3 +1472,15 @@
   return(temp00)
 }
 
+
+#' @keywords internal
+#' @noRd
+.validate_year <- function(year, inputId, session) {
+  if (!is.integer(year)) {
+    year <- as.integer(year)
+    updateSelectInput(
+      session, inputId = inputId, selected = year
+    )
+  }
+  return(year)
+}

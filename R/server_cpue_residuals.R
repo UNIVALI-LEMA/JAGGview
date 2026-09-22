@@ -2,21 +2,31 @@
 .cpue_res_server <- function(input, output, session, res_df, use_si_suffix) {
   filtered_cpue_res <- reactiveVal(res_df)
 
-  title_x_cpue_res <- reactiveVal(NULL)
+  title_x_cpue_res <- reactiveVal("Year")
 
-  title_y_cpue_res <- reactiveVal(NULL)
+  title_y_cpue_res <- reactiveVal("Residuals")
 
-  palette_cpue_res <- reactiveVal(NULL)
+  palette_cpue_res <- reactiveVal(
+    .resolve_palette(NULL, length(unique(res_df$cpue_residuals$Index)))
+  )
 
   text_size_cpue_res <- reactiveVal(16)
 
-  x_lim_min_cpue_res <- reactiveVal(NULL)
+  x_lim_min_cpue_res <- reactiveVal(
+    min(res_df$cpue_residuals$Year, na.rm = TRUE)
+  )
 
-  x_lim_max_cpue_res <- reactiveVal(NULL)
+  x_lim_max_cpue_res <- reactiveVal(
+    max(res_df$cpue_residuals$Year, na.rm = TRUE)
+  )
 
-  y_lim_min_cpue_res <- reactiveVal(NULL)
+  y_lim_min_cpue_res <- reactiveVal(
+    .round_to_nearest(min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE)
+  )
 
-  y_lim_max_cpue_res <- reactiveVal(NULL)
+  y_lim_max_cpue_res <- reactiveVal(
+    .round_to_nearest(max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE)
+  )
 
   position_cpue_res <- reactiveVal("top-left")
 
@@ -40,14 +50,20 @@
   cpue_res_values <- reactiveValues(
     scenarios_current = unique(res_df$cpue_residuals$Scenario),
     indices_current = unique(res_df$cpue_residuals$Index),
-    title_x_current = NA,
-    title_y_current = NA,
-    color_current = NULL,
+    title_x_current = "Year",
+    title_y_current = "Residuals",
+    color_current = .resolve_palette(
+      NULL, length(unique(res_df$cpue_residuals$Index))
+    ),
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min(res_df$cpue_residuals$Year, na.rm = TRUE),
+    x_max_current = max(res_df$cpue_residuals$Year, na.rm = TRUE),
+    y_min_current = .round_to_nearest(
+      min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE
+    ),
+    y_max_current = .round_to_nearest(
+      max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -98,7 +114,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_x_min, {
-    if (!identical(input$cpue_res_x_min, cpue_res_values$x_min_current)) {
+    if (input$cpue_res_x_min != cpue_res_values$x_min_current) {
       cpue_res_change$x_min_changed = TRUE
     }
     else {
@@ -107,7 +123,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_x_max, {
-    if (!identical(input$cpue_res_x_max, cpue_res_values$x_max_current)) {
+    if (input$cpue_res_x_max != cpue_res_values$x_max_current) {
       cpue_res_change$x_max_changed = TRUE
     }
     else {
@@ -116,7 +132,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_y_min, {
-    if (!identical(input$cpue_res_y_min, cpue_res_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$cpue_res_y_min, cpue_res_values$y_min_current)
+      )
+    ) {
       cpue_res_change$y_min_changed = TRUE
     }
     else {
@@ -125,7 +145,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_y_max, {
-    if (!identical(input$cpue_res_y_max, cpue_res_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$cpue_res_y_max, cpue_res_values$y_max_current)
+      )
+    ) {
       cpue_res_change$y_max_changed = TRUE
     }
     else {
@@ -235,8 +259,8 @@
         )
       }
       
-      x_min <- input$cpue_res_x_min
-      x_max <- input$cpue_res_x_max
+      x_min <- .validate_year(input$cpue_res_x_min, "cpue_res_x_min", session)
+      x_max <- .validate_year(input$cpue_res_x_max, "cpue_res_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -318,38 +342,14 @@
 
     df_lists <- filtered_cpue_res()
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_cpue_res, min(df_lists$cpue_residuals$Year, na.rm = TRUE)
-    )
-
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_cpue_res, max(df_lists$cpue_residuals$Year, na.rm = TRUE)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_cpue_res, 
-      .round_to_nearest(min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_cpue_res, 
-      .round_to_nearest(max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    x_lim <- .expand_range(c(x_lim_min_cpue_res(), x_lim_max_cpue_res()))
+    y_lim <- .expand_range(c(y_lim_min_cpue_res(), y_lim_max_cpue_res()))
 
     scenarios <- unique(df_lists$cpue_residuals$Scenario)
-
     n_indices <- length(unique(df_lists$cpue_residuals$Index))
-
     n_scenarios <- length(scenarios)
     
-    title_x <- .get_value_or_default(title_x_cpue_res, "Year")
-
-    title_y <- .get_value_or_default(title_y_cpue_res, "Residuals")
+    si_suffix <- si_suffix_cpue_res()
 
     nrow <- if (n_scenarios < 3) {
       1
@@ -457,7 +457,7 @@
           text = ~paste0(
             "Index: ", Index, 
             "<br>Residuals: ", 
-            .international_system_prefixes(Res, si_suffix_cpue_res())
+            .international_system_prefixes(Res, si_suffix)
           )
         ) %>%
         add_lines(
@@ -465,7 +465,7 @@
           line = list(width = 2, color = "black"),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Loess: ", .international_system_prefixes(fit, si_suffix_cpue_res())
+            "Loess: ", .international_system_prefixes(fit, si_suffix)
           )
         ) %>%
         add_ribbons(
@@ -477,8 +477,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(95): (", 
-            .international_system_prefixes(lower, si_suffix_cpue_res()), ") - (", 
-            .international_system_prefixes(upper, si_suffix_cpue_res()), ")"
+            .international_system_prefixes(lower, si_suffix), ") - (", 
+            .international_system_prefixes(upper, si_suffix), ")"
           ) 
         ) %>%
           add_segments(
@@ -543,7 +543,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_cpue_res(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -558,7 +558,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_cpue_res(),
             showarrow = FALSE,
             font = list(
               size = 20

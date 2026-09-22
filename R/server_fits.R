@@ -144,7 +144,7 @@
 
     empty_condition <- .is_empty(input$fits_scenarios) ||
       .is_empty(input$fits_indices)
-    
+
     enable <- any(vec) && !empty_condition
 
     return(enable)
@@ -180,9 +180,9 @@
           type = "warning", duration = 10
         )
       }
-      
-      x_min <- input$fits_x_min
-      x_max <- input$fits_x_max
+
+      x_min <- .validate_year(input$fits_x_min, "fits_x_min", session)
+      x_max <- .validate_year(input$fits_x_max, "fits_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -260,8 +260,6 @@
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
-    title_x <- title_x_fits()
-    title_y <- title_y_fits()
     si_suffix <- si_suffix_fits()
 
     plots <- map(scenarios, function(s) {
@@ -488,7 +486,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_fits(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -503,7 +501,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_fits(),
             showarrow = FALSE,
             font = list(
               size = 20

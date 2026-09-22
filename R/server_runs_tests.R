@@ -2,19 +2,23 @@
 .runs_tests_server <- function(input, output, session, res_df, use_si_suffix) {
   filtered_runs_tests <- reactiveVal(res_df)
 
-  title_x_runs_tests <- reactiveVal(NULL)
+  title_x_runs_tests <- reactiveVal("Year")
 
-  title_y_runs_tests <- reactiveVal(NULL)
+  title_y_runs_tests <- reactiveVal("Residuals")
 
   text_size_runs_tests <- reactiveVal(16)
 
-  x_lim_min_runs_tests <- reactiveVal(NULL)
+  x_lim_min_runs_tests <- reactiveVal(min(res_df$SE3$ymin))
 
-  x_lim_max_runs_tests <- reactiveVal(NULL)
+  x_lim_max_runs_tests <- reactiveVal(max(res_df$SE3$ymax))
 
-  y_lim_min_runs_tests <- reactiveVal(NULL)
+  y_lim_min_runs_tests <- reactiveVal(
+    .round_to_nearest(min(res_df$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
+  )
 
-  y_lim_max_runs_tests <- reactiveVal(NULL)
+  y_lim_max_runs_tests <- reactiveVal(
+    .round_to_nearest(max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+  )
 
   position_runs_tests <- reactiveVal("top-left")
 
@@ -37,13 +41,17 @@
   runs_tests_values <- reactiveValues(
     scenarios_current = unique(res_df$cpue_residuals$Scenario),
     indices_current = unique(res_df$cpue_residuals$Index),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Year",
+    title_y_current = "Residuals",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min(res_df$SE3$ymin),
+    x_max_current = max(res_df$SE3$ymax),
+    y_min_current = .round_to_nearest(
+      min(res_df$SE3$lcl, na.rm = TRUE), FALSE, 2.5
+    ),
+    y_max_current = .round_to_nearest(
+      max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -86,11 +94,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_text_size, {
-    if (
-      !identical(
-        input$runs_tests_text_size, runs_tests_values$text_size_current
-      )
-    ) {
+    if (input$runs_tests_text_size != runs_tests_values$text_size_current) {
       runs_tests_change$text_size_changed = TRUE
     }
     else {
@@ -99,7 +103,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_x_min, {
-    if (!identical(input$runs_tests_x_min, runs_tests_values$x_min_current)) {
+    if (input$runs_tests_x_min != runs_tests_values$x_min_current) {
       runs_tests_change$x_min_changed = TRUE
     }
     else {
@@ -108,7 +112,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_x_max, {
-    if (!identical(input$runs_tests_x_max, runs_tests_values$x_max_current)) {
+    if (input$runs_tests_x_max != runs_tests_values$x_max_current) {
       runs_tests_change$x_max_changed = TRUE
     }
     else {
@@ -117,7 +121,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_y_min, {
-    if (!identical(input$runs_tests_y_min, runs_tests_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$runs_tests_y_min, runs_tests_values$y_min_current)
+      )
+    ) {
       runs_tests_change$y_min_changed = TRUE
     }
     else {
@@ -126,7 +134,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_y_max, {
-    if (!identical(input$runs_tests_y_max, runs_tests_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$runs_tests_y_max, runs_tests_values$y_max_current)
+      )
+    ) {
       runs_tests_change$y_max_changed = TRUE
     }
     else {
@@ -199,9 +211,13 @@
           type = "warning", duration = 10
         )
       }
-      
-      x_min <- input$runs_tests_x_min
-      x_max <- input$runs_tests_x_max
+
+      x_min <- .validate_year(
+        input$runs_tests_x_min, "runs_tests_x_min", session
+      )
+      x_max <- .validate_year(
+        input$runs_tests_x_max, "runs_tests_x_max", session
+      )
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -277,39 +293,17 @@
     }
 
     df_lists <- filtered_runs_tests()
-    
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_runs_tests, min(df_lists$SE3$ymin)
-    )
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_runs_tests, max(df_lists$SE3$ymax)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_runs_tests, 
-      .round_to_nearest(min(df_lists$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_runs_tests, 
-      .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    x_lim <- .expand_range(c(x_lim_min_runs_tests(), x_lim_max_runs_tests()))
+    y_lim <- .expand_range(c(y_lim_min_runs_tests(), y_lim_max_runs_tests()))
 
     scenarios <- unique(df_lists$cpue_residuals$Scenario)
     indices <- levels(df_lists$cpue_residuals$Index)
 
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
-
-    title_x <- .get_value_or_default(title_x_runs_tests, "Year")
-
-    title_y <- .get_value_or_default(title_y_runs_tests, "Residuals")
+    
+    si_suffix <- si_suffix_runs_tests()
 
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -444,8 +438,8 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "CI(95): ", 
-              .international_system_prefixes(lcl, si_suffix_runs_tests()), " - ",
-              .international_system_prefixes(ucl, si_suffix_runs_tests())  
+              .international_system_prefixes(lcl, si_suffix), " - ",
+              .international_system_prefixes(ucl, si_suffix)  
             ) 
           ) %>%
           add_markers(
@@ -462,7 +456,7 @@
             ),
             hoverinfo = "text+x",
             text = ~paste0(
-              "Residue: ", .international_system_prefixes(Res, si_suffix_runs_tests())
+              "Residue: ", .international_system_prefixes(Res, si_suffix)
             )
           ) %>%
           add_markers(
@@ -479,7 +473,7 @@
             ),
             hoverinfo = "text+x",
             text = ~paste0(
-              "Residue: ", .international_system_prefixes(Res, si_suffix_runs_tests())
+              "Residue: ", .international_system_prefixes(Res, si_suffix)
             )
           )
         
@@ -564,7 +558,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_runs_tests(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -579,7 +573,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_runs_tests(),
             showarrow = FALSE,
             font = list(
               size = 20
