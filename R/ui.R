@@ -407,13 +407,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               inputId = "fits_title_x",
               label = "Title X:",
               placeholder = "Year",
-              value = NA
+              value = "Year"
             ),
             textInput(
               inputId = "fits_title_y",
               label = "Title Y:",
               placeholder = "Abundance index",
-              value = NA
+              value = "Abundance index"
             ),
             colourInput(
               inputId = "fits_color",
@@ -432,7 +432,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_min",
                   label = NULL,
-                  value = NA,
+                  value = min(fits_data$Year, na.rm = TRUE),
                   width = "100%"
                 ), 
                 tags$span(
@@ -442,7 +442,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_max",
                   label = NULL,
-                  value = NA,
+                  value = max(fits_data$Year, na.rm = TRUE),
                   width = "100%"
                 )
               )
@@ -459,7 +459,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_min",
                   label = NULL,
-                  value = NA,
+                  value = .round_to_nearest(
+                    min(fits_data$lci_95, na.rm = TRUE), FALSE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -469,7 +471,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_max",
                   label = NULL,
-                  value = NA,
+                  value = .round_to_nearest(
+                    max(fits_data$uci_95, na.rm = TRUE), TRUE
+                  ),
                   width = "100%"
                 )
               )
