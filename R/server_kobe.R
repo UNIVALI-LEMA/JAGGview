@@ -4,17 +4,17 @@
 ) {
   filtered_kobe <- reactiveVal(kobe_df)
 
-  title_x_kobe <- reactiveVal(NULL)
+  title_x_kobe <- reactiveVal("B/Bmsy")
 
-  title_y_kobe <- reactiveVal(NULL)
+  title_y_kobe <- reactiveVal("F/Fmsy")
 
-  x_lim_min_kobe <- reactiveVal(NULL)
+  x_lim_min_kobe <- reactiveVal(0)
 
-  x_lim_max_kobe <- reactiveVal(NULL)
+  x_lim_max_kobe <- reactiveVal(kobe_df$col02$xmax)
 
-  y_lim_min_kobe <- reactiveVal(NULL)
+  y_lim_min_kobe <- reactiveVal(0)
 
-  y_lim_max_kobe <- reactiveVal(NULL)
+  y_lim_max_kobe <- reactiveVal(kobe_df$col02$ymax)
 
   si_suffix_kobe <- reactiveVal(use_si_suffix)
 
@@ -31,12 +31,12 @@
 
   kobe_values <- reactiveValues(
     scenarios_current = unique(kobe_df$cpue_residuals$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    title_x_current = "B/Bmsy",
+    title_y_current = "F/Fmsy",
+    x_min_current = 0,
+    x_max_current = kobe_df$col02$xmax,
+    y_min_current = 0,
+    y_max_current = kobe_df$col02$ymax,
     si_suffix_current = use_si_suffix
   )
 
@@ -68,7 +68,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_text_size, {
-    if (!identical(input$kobe_text_size, kobe_values$text_size_current)) {
+    if (input$kobe_text_size != kobe_values$text_size_current) {
       kobe_change$text_size_changed = TRUE
     }
     else {
@@ -77,7 +77,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_min, {
-    if (!identical(input$kobe_x_min, kobe_values$x_min_current)) {
+    if (!isTRUE(all.equal(input$kobe_x_min, kobe_values$x_min_current))) {
       kobe_change$x_min_changed = TRUE
     }
     else {
@@ -86,7 +86,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_max, {
-    if (!identical(input$kobe_x_max, kobe_values$x_max_current)) {
+    if (!isTRUE(all.equal(input$kobe_x_max, kobe_values$x_max_current))) {
       kobe_change$x_max_changed = TRUE
     }
     else {
@@ -95,7 +95,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_min, {
-    if (!identical(input$kobe_y_min, kobe_values$y_min_current)) {
+    if (!isTRUE(all.equal(input$kobe_y_min, kobe_values$y_min_current))) {
       kobe_change$y_min_changed = TRUE
     }
     else {
@@ -104,7 +104,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_max, {
-    if (!identical(input$kobe_y_max, kobe_values$y_max_current)) {
+    if (!isTRUE(all.equal(input$kobe_y_max, kobe_values$y_max_current))) {
       kobe_change$y_max_changed = TRUE
     }
     else {
@@ -241,19 +241,11 @@
     min_year <- min(df_lists$data_lines$year, na.rm = TRUE)
     max_year <- max(df_lists$data_lines$year, na.rm = TRUE)
     range <- max_year - min_year
-    steps <- round(range / 25)
 
-    x_lim_min <- .get_value_or_default(x_lim_min_kobe, 0)
-    x_lim_max <- .get_value_or_default(x_lim_max_kobe, df_lists$col02$xmax)
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(y_lim_min_kobe, 0)
-    y_lim_max <- .get_value_or_default(y_lim_max_kobe, df_lists$col02$ymax)
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_kobe, "B/Bmsy")
-
-    title_y <- .get_value_or_default(title_y_kobe, "F/Fmsy")
+    x_lim <- c(x_lim_min_kobe(), x_lim_max_kobe())
+    y_lim <- c(y_lim_min_kobe(), y_lim_max_kobe())
+    
+    si_suffix <- si_suffix_kobe()
 
     scenarios <- unique(df_lists$ci_data$Scenario)
 
@@ -277,7 +269,7 @@
 
       if (animation) {
         line_data <- line_data %>% 
-          .accumulate_by(year, step = steps)
+          .accumulate_by(year, step = round(range / 25))
       }
 
       marker_data <- df_lists$highlight_years %>%
@@ -455,9 +447,9 @@
           hoverinfo = "text",
           text = ~paste0(
             "Year: ", year, "<br>B/B<sub>MSY</sub>: ", 
-            .international_system_prefixes(Bratio, si_suffix_kobe()), 
+            .international_system_prefixes(Bratio, si_suffix), 
             "<br>F/F<sub>MSY</sub>: ", 
-            .international_system_prefixes(Fratio, si_suffix_kobe())
+            .international_system_prefixes(Fratio, si_suffix)
           )
         ) %>%
         add_markers(
@@ -523,7 +515,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = .format_title(title_x_kobe()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -538,7 +530,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = .format_title(title_y_kobe()),
             showarrow = FALSE,
             font = list(
               size = 20

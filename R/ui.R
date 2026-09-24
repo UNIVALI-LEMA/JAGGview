@@ -705,19 +705,25 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "pp_K_scenarios",
               label = "Scenarios: ",
-              choices = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
-              selected = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
+              choices = unique(
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              ),
+              selected = unique(
+                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              ),
               multiple = TRUE
             ),
             textInput(
               inputId = "pp_K_title_x",
               label = "Title X:",
-              placeholder = "Carrying capacity (K)"
+              placeholder = "Carrying capacity (K)",
+              value = "Carrying capacity (K)"
             ),
             textInput(
               inputId = "pp_K_title_y",
               label = "Title Y:",
-              placeholder = "Density"
+              placeholder = "Density",
+              value = "Density"
             ),
             colourInput(
               inputId = "pp_K_prior_color",
@@ -747,7 +753,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_K_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = floor(
+                    min(
+                      pp_data$prior$K01, pp_data$posterior$K01, na.rm = TRUE
+                    ) - 1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -757,7 +767,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_K_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = ceiling(
+                    quantile(
+                      c(pp_data$prior$K01, pp_data$posterior$K01), 
+                      0.95, na.rm = TRUE
+                    )
+                  ),
                   width = "100%"
                 )
               )
@@ -794,12 +809,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "pp_r_title_x",
               label = "Title X:",
-              placeholder = "Intrinsic growth rate (r)"
+              placeholder = "Intrinsic growth rate (r)",
+              value = "Intrinsic growth rate (r)"
             ),
             textInput(
               inputId = "pp_r_title_y",
               label = "Title Y:",
-              placeholder = "Density"
+              placeholder = "Density",
+              value = "Density"
             ),
             colourInput(
               inputId = "pp_r_prior_color",
@@ -829,7 +846,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_r_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = round(
+                    min(pp_data$prior$r01, pp_data$posterior$r01, na.rm = TRUE),
+                    3
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -839,7 +859,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_r_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = round(
+                    max(pp_data$prior$r01, pp_data$posterior$r01, na.rm = TRUE),
+                    3
+                  ),
                   width = "100%"
                 )
               )
@@ -876,12 +899,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "pp_psi_title_x",
               label = "Title X:",
-              placeholder = "Initial biomass depletion ratio (psi)"
+              placeholder = "Initial biomass depletion ratio (psi)",
+              value = "Initial biomass depletion ratio (psi)"
             ),
             textInput(
               inputId = "pp_psi_title_y",
               label = "Title Y:",
-              placeholder = "Density"
+              placeholder = "Density",
+              value = "Density"
             ),
             colourInput(
               inputId = "pp_psi_prior_color",
@@ -911,7 +936,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_psi_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = round(
+                    min(
+                      pp_data$prior$psi01, pp_data$posterior$psi01, na.rm = TRUE
+                    ), 3
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -921,7 +950,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_psi_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = round(
+                    max(
+                      pp_data$prior$psi01, pp_data$posterior$psi01, na.rm = TRUE
+                    ), 3
+                  ),
                   width = "100%"
                 )
               )
@@ -954,12 +987,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_B_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "ra_B_title_y",
               label = "Title Y:",
-              placeholder = "Biomass (t)"
+              placeholder = "Biomass (t)",
+              value = "Biomass (t)"
             ),
             numericInput(
               inputId = "ra_B_text_size",
@@ -979,7 +1014,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min((ra_data$data %>% filter(Index == "B"))$Year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -989,7 +1024,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max((ra_data$data %>% filter(Index == "B"))$Year),
                   width = "100%"
                 )
               )
@@ -1006,7 +1041,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "B"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1016,7 +1056,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "B"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1049,12 +1094,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_F_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "ra_F_title_y",
               label = "Title Y:",
-              placeholder = "Fishing Mortality (F)"
+              placeholder = "Fishing Mortality (F)",
+              value = "Fishing Mortality (F)"
             ),
             numericInput(
               inputId = "ra_F_text_size",
@@ -1074,7 +1121,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min((ra_data$data %>% filter(Index == "F"))$Year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1084,7 +1131,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max((ra_data$data %>% filter(Index == "F"))$Year),
                   width = "100%"
                 )
               )
@@ -1101,7 +1148,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "F"))$lci, na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1111,7 +1162,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "F"))$uci, na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1144,12 +1199,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_BBmsy_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "ra_BBmsy_title_y",
               label = "Title Y:",
-              placeholder = "B/Bmsy"
+              placeholder = "B/Bmsy",
+              value = "B/Bmsy"
             ),
             numericInput(
               inputId = "ra_BBmsy_text_size",
@@ -1169,7 +1226,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min((ra_data$data %>% filter(Index == "BBmsy"))$Year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1179,7 +1236,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max((ra_data$data %>% filter(Index == "BBmsy"))$Year),
                   width = "100%"
                 )
               )
@@ -1196,7 +1253,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "BBmsy"))$lci,
+                       na.rm = TRUE
+                      ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1206,7 +1268,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "BBmsy"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1239,12 +1306,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_FFmsy_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "ra_FFmsy_title_y",
               label = "Title Y:",
-              placeholder = "F/Fmsy"
+              placeholder = "F/Fmsy",
+              value = "F/Fmsy"
             ),
             numericInput(
               inputId = "ra_FFmsy_text_size",
@@ -1264,7 +1333,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min((ra_data$data %>% filter(Index == "FFmsy"))$Year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1274,7 +1343,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max((ra_data$data %>% filter(Index == "FFmsy"))$Year),
                   width = "100%"
                 )
               )
@@ -1291,7 +1360,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "FFmsy"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1301,7 +1375,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "FFmsy"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1334,12 +1413,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_procB_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "ra_procB_title_y",
               label = "Title Y:",
-              placeholder = "Process error on log(Biomass)"
+              placeholder = "Process error on log(Biomass)",
+              value = "Process error on log(Biomass)"
             ),
             numericInput(
               inputId = "ra_procB_text_size",
@@ -1359,7 +1440,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min((ra_data$data %>% filter(Index == "procB"))$Year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1369,7 +1450,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max((ra_data$data %>% filter(Index == "procB"))$Year),
                   width = "100%"
                 )
               )
@@ -1386,7 +1467,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "procB"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1396,7 +1482,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "procB"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1429,12 +1520,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "ra_MSY_title_x",
               label = "Title X:",
-              placeholder = "Biomass (t)"
+              placeholder = "Biomass (t)",
+              value = "Biomass (t)"
             ),
             textInput(
               inputId = "ra_MSY_title_y",
               label = "Title Y:",
-              placeholder = "Surplus Production (t)"
+              placeholder = "Surplus Production (t)",
+              value = "Surplus Production (t)"
             ),
             numericInput(
               inputId = "ra_MSY_text_size",
@@ -1454,7 +1547,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (ra_data$surplus_data %>% filter(Index == "MSY"))$SB_i
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1464,7 +1559,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (ra_data$surplus_data %>% filter(Index == "MSY"))$SB_i
+                  ),
                   width = "100%"
                 )
               )
@@ -1481,7 +1578,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (ra_data$surplus_data %>% filter(Index == "MSY"))$SP, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1491,7 +1593,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (ra_data$surplus_data %>% filter(Index == "MSY"))$SP, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1530,12 +1637,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "hc_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "hc_title_y",
               label = "Title Y:",
-              placeholder = "Index"
+              placeholder = "Index",
+              value = "Index"
             ),
             numericInput(
               inputId = "hc_text_size",
@@ -1555,7 +1664,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(hind_data$data$year),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1565,7 +1674,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(hind_data$data$year),
                   width = "100%"
                 )
               )
@@ -1582,7 +1691,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(hind_data$data$hat.lci, na.rm = TRUE), FALSE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1592,7 +1703,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(hind_data$data$hat.uci, na.rm = TRUE), TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -1625,12 +1738,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_BB0_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_BB0_title_y",
               label = "Title Y:",
-              placeholder = "B/B0"
+              placeholder = "B/B0",
+              value = "B/B0"
             ),
             colourInput(
               inputId = "traj_BB0_color",
@@ -1649,7 +1764,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "BB0"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1659,7 +1777,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "BB0"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -1676,7 +1797,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "BB0"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1686,7 +1812,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "BB0"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1710,12 +1841,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_BBmsy_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_BBmsy_title_y",
               label = "Title Y:",
-              placeholder = "B/Bmsy"
+              placeholder = "B/Bmsy",
+              value = "B/Bmsy"
             ),
             colourInput(
               inputId = "traj_BBmsy_color",
@@ -1734,7 +1867,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "BBmsy"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1744,7 +1880,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "BBmsy"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -1761,7 +1900,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "BBmsy"))$lcl, 
+                      na.rm = TRUE
+                    ), 
+                    FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1771,7 +1916,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "BBmsy"))$ucl, 
+                      na.rm = TRUE
+                    ), 
+                    TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1784,7 +1935,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "traj_BBmsy_blim",
               label = "Blim:",
-              value = NULL,
+              value = 0.4,
+              step = 0.1,
               width = "100%"
             )
           ),
@@ -1801,12 +1953,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_FFmsy_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_FFmsy_title_y",
               label = "Title Y:",
-              placeholder = "F/Fmsy"
+              placeholder = "F/Fmsy",
+              value = "F/Fmsy"
             ),
             colourInput(
               inputId = "traj_FFmsy_color",
@@ -1825,7 +1979,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "FFmsy"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1835,7 +1992,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "FFmsy"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -1852,7 +2012,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "FFmsy"))$lcl, 
+                      na.rm = TRUE), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1862,7 +2026,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "FFmsy"))$ucl, 
+                      na.rm = TRUE), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1886,12 +2054,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_Bdev_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_Bdev_title_y",
               label = "Title Y:",
-              placeholder = "Process Error on log(Biomass)"
+              placeholder = "Process Error on log(Biomass)",
+              value = "Process Error on log(Biomass)"
             ),
             colourInput(
               inputId = "traj_Bdev_color",
@@ -1910,7 +2080,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "Bdev"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1920,7 +2093,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "Bdev"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -1937,7 +2113,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "Bdev"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1947,7 +2128,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "Bdev"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -1971,12 +2157,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_B_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_B_title_y",
               label = "Title Y:",
-              placeholder = "Biomass (t)"
+              placeholder = "Biomass (t)",
+              value = "Biomass (t)"
             ),
             colourInput(
               inputId = "traj_B_color",
@@ -1995,7 +2183,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "B"))$year, na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2005,7 +2195,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "B"))$year, na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -2022,7 +2214,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "B"))$lcl, na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2032,7 +2228,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "B"))$ucl, na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -2056,12 +2256,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_H_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_H_title_y",
               label = "Title Y:",
-              placeholder = "Harvest rate"
+              placeholder = "Harvest rate",
+              value = "Harvest rate"
             ),
             colourInput(
               inputId = "traj_H_color",
@@ -2080,7 +2282,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "H"))$year, na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2090,7 +2294,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "H"))$year, na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -2107,7 +2313,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "H"))$lcl, na.rm = TRUE
+                    ), 
+                    FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2117,7 +2328,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "H"))$ucl, na.rm = TRUE
+                    ), 
+                    TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -2141,12 +2357,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "traj_Catch_title_x",
               label = "Title X:",
-              placeholder = "Year"
+              placeholder = "Year",
+              value = "Year"
             ),
             textInput(
               inputId = "traj_Catch_title_y",
               label = "Title Y:",
-              placeholder = "Catch"
+              placeholder = "Catch",
+              value = "Catch"
             ),
             colourInput(
               inputId = "traj_Catch_color",
@@ -2165,7 +2383,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = min(
+                    (traj_data %>% filter(indicator == "Catch"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2175,7 +2396,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = max(
+                    (traj_data %>% filter(indicator == "Catch"))$year, 
+                    na.rm = TRUE
+                  ),
                   width = "100%"
                 )
               )
@@ -2192,7 +2416,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "Catch"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2202,7 +2431,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "Catch"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ),
                   width = "100%"
                 )
               )
@@ -2225,12 +2459,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             textInput(
               inputId = "kobe_title_x",
               label = "Title X:",
-              placeholder = "B/Bmsy"
+              placeholder = "B/Bmsy",
+              value = "B/Bmsy"
             ),
             textInput(
               inputId = "kobe_title_y",
               label = "Title Y:",
-              placeholder = "F/Fmsy"
+              placeholder = "F/Fmsy",
+              value = "F/Fmsy"
             ),
             div(
               div(
@@ -2244,7 +2480,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = 0,
                   width = "100%"
                 ), 
                 tags$span(
@@ -2254,7 +2490,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = kobe_data$col02$xmax,
                   width = "100%"
                 )
               )
@@ -2271,7 +2507,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = 0,
                   width = "100%"
                 ), 
                 tags$span(
@@ -2281,7 +2517,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = kobe_data$col02$ymax,
                   width = "100%"
                 )
               )

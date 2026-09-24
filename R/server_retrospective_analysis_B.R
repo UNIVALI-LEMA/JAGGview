@@ -4,19 +4,31 @@
 ) {
   filtered_ra_B <- reactiveVal(ra_df)
 
-  title_x_ra_B <- reactiveVal(NULL)
+  title_x_ra_B <- reactiveVal("Year")
 
-  title_y_ra_B <- reactiveVal(NULL)
+  title_y_ra_B <- reactiveVal("Biomass (t)")
 
   text_size_ra_B <- reactiveVal(16)
 
-  x_lim_min_ra_B <- reactiveVal(NULL)
+  x_lim_min_ra_B <- reactiveVal(
+    min((ra_df$data %>% filter(Index == "B"))$Year)
+  )
 
-  x_lim_max_ra_B <- reactiveVal(NULL)
+  x_lim_max_ra_B <- reactiveVal(
+    max((ra_df$data %>% filter(Index == "B"))$Year)
+  )
 
-  y_lim_min_ra_B <- reactiveVal(NULL)
+  y_lim_min_ra_B <- reactiveVal(
+    .round_to_nearest(
+      min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
+    )
+  )
 
-  y_lim_max_ra_B <- reactiveVal(NULL)
+  y_lim_max_ra_B <- reactiveVal(
+    .round_to_nearest(
+      max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
+    )
+  )
 
   position_ra_B <- reactiveVal("top-left")
 
@@ -37,13 +49,17 @@
 
   ra_B_values <- reactiveValues(
     scenarios_current = unique(ra_df$data$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Year",
+    title_y_current = "Biomass (t)",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min((ra_df$data %>% filter(Index == "B"))$Year),
+    x_max_current = max((ra_df$data %>% filter(Index == "B"))$Year),
+    y_min_current = .round_to_nearest(
+      min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
+    ),
+    y_max_current = .round_to_nearest(
+      max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -76,7 +92,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_text_size, {
-    if (!identical(input$ra_B_text_size, ra_B_values$text_size_current)) {
+    if (input$ra_B_text_size != ra_B_values$text_size_current) {
       ra_B_change$text_size_changed = TRUE
     }
     else {
@@ -85,7 +101,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_x_min, {
-    if (!identical(input$ra_B_x_min, ra_B_values$x_min_current)) {
+    if (input$ra_B_x_min != ra_B_values$x_min_current) {
       ra_B_change$x_min_changed = TRUE
     }
     else {
@@ -94,7 +110,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_x_max, {
-    if (!identical(input$ra_B_x_max, ra_B_values$x_max_current)) {
+    if (input$ra_B_x_max != ra_B_values$x_max_current) {
       ra_B_change$x_max_changed = TRUE
     }
     else {
@@ -103,7 +119,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_y_min, {
-    if (!identical(input$ra_B_y_min, ra_B_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$ra_B_y_min, ra_B_values$y_min_current)
+      )
+    ) {
       ra_B_change$y_min_changed = TRUE
     }
     else {
@@ -112,7 +132,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_y_max, {
-    if (!identical(input$ra_B_y_max, ra_B_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$ra_B_y_max, ra_B_values$y_max_current)
+      )
+    ) {
       ra_B_change$y_max_changed = TRUE
     }
     else {
@@ -182,8 +206,8 @@
         )
       }
       
-      x_min <- input$ra_B_x_min
-      x_max <- input$ra_B_x_max
+      x_min <- .validate_year(input$ra_B_x_min, "ra_B_x_min", session)
+      x_max <- .validate_year(input$ra_B_x_max, "ra_B_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -283,32 +307,12 @@
     rho_var <- rho_data %>%
       filter(Index == "B")
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_ra_B, min(data_ref$Year, data_var$Year)
-    )
+    x_lim <- .expand_range(c(x_lim_min_ra_B(), x_lim_max_ra_B()))
+    y_lim <- .expand_range(c(y_lim_min_ra_B(), y_lim_max_ra_B()))
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_ra_B, max(data_ref$Year, data_var$Year)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_ra_B, 
-      .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_ra_B, 
-      .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_ra_B, "Year")
-
-    title_y <- .get_value_or_default(title_y_ra_B, "Biomass (t)")
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_ra_B()
+    text_size <- text_size_ra_B()
+    position <- position_ra_B()
 
     plots <- map(scenarios, function(s) {
       data_ref <- data_ref %>%
@@ -373,10 +377,9 @@
           )
         )
       )
-      position <- position_ra_B()
 
       table <- .build_metric_table(
-        rho_var, text_size_ra_B(), 
+        rho_var, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         "rho", "\u03c1", decimals = 3
@@ -396,8 +399,8 @@
           line = list(width = 0),
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(95): (", .international_system_prefixes(lci, si_suffix_ra_B()), 
-            ") - (", .international_system_prefixes(uci, si_suffix_ra_B()), ")"
+            "CI(95): (", .international_system_prefixes(lci, si_suffix), 
+            ") - (", .international_system_prefixes(uci, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -411,7 +414,7 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "mu (", id,"): ", 
-            .international_system_prefixes(mu, si_suffix_ra_B())
+            .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         layout(
@@ -463,7 +466,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_ra_B(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -478,7 +481,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_ra_B(),
             showarrow = FALSE,
             font = list(
               size = 20

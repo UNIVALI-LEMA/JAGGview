@@ -105,7 +105,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_text_size, {
-    if(!identical(input$cpue_res_text_size, cpue_res_values$text_size_current)){
+    if (input$cpue_res_text_size != cpue_res_values$text_size_current) {
       cpue_res_change$text_size_changed = TRUE
     }
     else {
@@ -350,6 +350,8 @@
     n_scenarios <- length(scenarios)
     
     si_suffix <- si_suffix_cpue_res()
+    text_size <- text_size_cpue_res()
+    position <- position_cpue_res()
 
     nrow <- if (n_scenarios < 3) {
       1
@@ -420,10 +422,9 @@
           )
         )
       )
-      position <- position_cpue_res()
 
       table <- .build_metric_table(
-        RMSE_data, text_size_cpue_res(), 
+        RMSE_data, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         "Value", "RMSE", "%"

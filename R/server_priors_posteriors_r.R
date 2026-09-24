@@ -4,19 +4,23 @@
 ) {
   filtered_pp_r <- reactiveVal(pp_df)
 
-  title_x_pp_r <- reactiveVal(NULL)
+  title_x_pp_r <- reactiveVal("Intrinsic growth rate (r)")
 
-  title_y_pp_r <- reactiveVal(NULL)
+  title_y_pp_r <- reactiveVal("Density")
 
-  prior_color_pp_r <- reactiveVal(NULL)
+  prior_color_pp_r <- reactiveVal("#1B4F8A")
   
-  posterior_color_pp_r <- reactiveVal(NULL)
+  posterior_color_pp_r <- reactiveVal("#2A9D5C")
 
   text_size_pp_r <- reactiveVal(16)
 
-  x_lim_min_pp_r <- reactiveVal(NULL)
+  x_lim_min_pp_r <- reactiveVal(
+    round(min(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3)
+  )
 
-  x_lim_max_pp_r <- reactiveVal(NULL)
+  x_lim_max_pp_r <- reactiveVal(
+    round(max(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3)
+  )
 
   position_pp_r <- reactiveVal("top-left")
 
@@ -36,15 +40,20 @@
   )
 
   pp_r_values <- reactiveValues(
-    scenarios_current = unique(c(pp_df$prior$Scenario, 
-      pp_df$posterior$Scenario)),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = unique(
+      c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+    ),
+    title_x_current = "Intrinsic growth rate (r)",
+    title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
+    x_min_current = round(
+      min(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3
+    ),
+    x_max_current = round(
+      max(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -96,7 +105,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_text_size, {
-    if (!identical(input$pp_r_text_size, pp_r_values$text_size_current)) {
+    # if (!identical(input$pp_r_text_size, pp_r_values$text_size_current)) {
+    if (input$pp_r_text_size != pp_r_values$text_size_current) {
       pp_r_change$text_size_changed = TRUE
     }
     else {
@@ -105,7 +115,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_min, {
-    if (!identical(input$pp_r_x_min, pp_r_values$x_min_current)) {
+    # if (!identical(input$pp_r_x_min, pp_r_values$x_min_current)) {
+    if (input$pp_r_x_min != pp_r_values$x_min_current) {
       pp_r_change$x_min_changed = TRUE
     }
     else {
@@ -114,7 +125,8 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_max, {
-    if (!identical(input$pp_r_x_max, pp_r_values$x_max_current)) {
+    # if (!identical(input$pp_r_x_max, pp_r_values$x_max_current)) {
+    if (input$pp_r_x_max != pp_r_values$x_max_current) {
       pp_r_change$x_max_changed = TRUE
     }
     else {
@@ -268,34 +280,25 @@
     }
 
     prior_all <- df_lists$prior %>%
-      select(Scenario, r01, r02) %>%
-      filter(r02 > 0.005e-9)
+      select(Scenario, r01, r02)
 
     posterior_all <- df_lists$posterior %>%
-      select(Scenario, r01, r02) %>%
-      filter(r02 > 0.005e-9)
+      select(Scenario, r01, r02)
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_pp_r, min(prior_all$r01, posterior_all$r01, na.rm = TRUE)
+    x_lim <- c(x_lim_min_pp_r(), x_lim_max_pp_r())
+
+    y_lim <- c(
+      .round_to_nearest(
+        min(prior_all$r02, posterior_all$r02, na.rm = TRUE), FALSE, 1.1
+      ), 
+      .round_to_nearest(
+        max(prior_all$r02, posterior_all$r02, na.rm = TRUE), TRUE, 1.1
+      )
     )
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_pp_r, max(prior_all$r01, posterior_all$r01, na.rm = TRUE)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .round_to_nearest(
-      min(prior_all$r02, posterior_all$r02, na.rm = TRUE), FALSE, 1.1
-    )
-
-    y_lim_max <- .round_to_nearest(
-      max(prior_all$r02, posterior_all$r02, na.rm = TRUE), TRUE, 1.1
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_pp_r, "Intrinsic growth rate (r)")
-
-    title_y <- .get_value_or_default(title_y_pp_r, "Density")
+    si_suffix <- si_suffix_pp_r()
+    text_size <- text_size_pp_r()
+    position <- position_pp_r()
 
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = r) %>%
@@ -366,10 +369,9 @@
           )
         )
       )
-      position <- position_pp_r()
 
       table <- .build_metric_table(
-        df_text, text_size_pp_r(), 
+        df_text, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         c("ppmr_value", "ppvr_value"), 
@@ -396,7 +398,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Prior<br>r: ", 
-            .international_system_prefixes(r01, si_suffix_pp_r())
+            .international_system_prefixes(r01, si_suffix)
           )
         ) %>%
         add_trace(
@@ -414,7 +416,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Posterior<br>r: ", 
-            .international_system_prefixes(r01, si_suffix_pp_r())
+            .international_system_prefixes(r01, si_suffix)
           )
         ) %>%
         layout(
@@ -466,7 +468,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_pp_r(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -481,7 +483,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_pp_r(),
             showarrow = FALSE,
             font = list(
               size = 20

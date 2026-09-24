@@ -4,19 +4,33 @@
 ) {
   filtered_ra_MSY <- reactiveVal(ra_df)
 
-  title_x_ra_MSY <- reactiveVal(NULL)
+  title_x_ra_MSY <- reactiveVal("Biomass (t)")
 
-  title_y_ra_MSY <- reactiveVal(NULL)
+  title_y_ra_MSY <- reactiveVal("Surplus Production (t)")
 
   text_size_ra_MSY <- reactiveVal(16)
 
-  x_lim_min_ra_MSY <- reactiveVal(NULL)
+  x_lim_min_ra_MSY <- reactiveVal(
+    min((ra_df$surplus_data %>% filter(Index == "MSY"))$SB_i)
+  )
 
-  x_lim_max_ra_MSY <- reactiveVal(NULL)
+  x_lim_max_ra_MSY <- reactiveVal(
+    max((ra_df$surplus_data %>% filter(Index == "MSY"))$SB_i)
+  )
 
-  y_lim_min_ra_MSY <- reactiveVal(NULL)
+  y_lim_min_ra_MSY <- reactiveVal(
+    .round_to_nearest(
+      min((ra_df$surplus_data %>% filter(Index == "MSY"))$SP, na.rm = TRUE), 
+      FALSE, 1.1
+    )
+  )
 
-  y_lim_max_ra_MSY <- reactiveVal(NULL)
+  y_lim_max_ra_MSY <- reactiveVal(
+    .round_to_nearest(
+      max((ra_df$surplus_data %>% filter(Index == "MSY"))$SP, na.rm = TRUE), 
+      TRUE, 1.1
+    )
+  )
 
   position_ra_MSY <- reactiveVal("top-left")
 
@@ -37,13 +51,19 @@
 
   ra_MSY_values <- reactiveValues(
     scenarios_current = unique(ra_df$data$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Biomass (t)",
+    title_y_current = "Surplus Production (t)",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min((ra_df$surplus_data %>% filter(Index == "MSY"))$SB_i),
+    x_max_current = max((ra_df$surplus_data %>% filter(Index == "MSY"))$SB_i),
+    y_min_current = .round_to_nearest(
+      min((ra_df$surplus_data %>% filter(Index == "MSY"))$SP, na.rm = TRUE), 
+      FALSE, 1.1
+    ),
+    y_max_current = .round_to_nearest(
+      max((ra_df$surplus_data %>% filter(Index == "MSY"))$SP, na.rm = TRUE), 
+      TRUE, 1.1
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -76,7 +96,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_text_size, {
-    if (!identical(input$ra_MSY_text_size, ra_MSY_values$text_size_current)) {
+    if (input$ra_MSY_text_size != ra_MSY_values$text_size_current) {
       ra_MSY_change$text_size_changed = TRUE
     }
     else {
@@ -85,7 +105,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_x_min, {
-    if (!identical(input$ra_MSY_x_min, ra_MSY_values$x_min_current)) {
+    if (input$ra_MSY_x_min != ra_MSY_values$x_min_current) {
       ra_MSY_change$x_min_changed = TRUE
     }
     else {
@@ -94,7 +114,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_x_max, {
-    if (!identical(input$ra_MSY_x_max, ra_MSY_values$x_max_current)) {
+    if (input$ra_MSY_x_max != ra_MSY_values$x_max_current) {
       ra_MSY_change$x_max_changed = TRUE
     }
     else {
@@ -103,7 +123,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_y_min, {
-    if (!identical(input$ra_MSY_y_min, ra_MSY_values$y_min_current)) {
+    if (!isTRUE(all.equal(input$ra_MSY_y_min, ra_MSY_values$y_min_current))) {
       ra_MSY_change$y_min_changed = TRUE
     }
     else {
@@ -112,7 +132,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_y_max, {
-    if (!identical(input$ra_MSY_y_max, ra_MSY_values$y_max_current)) {
+    if (!isTRUE(all.equal(input$ra_MSY_y_max, ra_MSY_values$y_max_current))) {
       ra_MSY_change$y_max_changed = TRUE
     }
     else {
@@ -182,8 +202,8 @@
         )
       }
       
-      x_min <- input$ra_MSY_x_min
-      x_max <- input$ra_MSY_x_max
+      x_min <- .validate_year(input$ra_MSY_x_min, "ra_MSY_x_min", session)
+      x_max <- .validate_year(input$ra_MSY_x_max, "ra_MSY_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -283,31 +303,12 @@
     rho_var <- rho_data %>% 
       filter(Index == "MSY")
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_ra_MSY, min(data_ref$SB_i, data_var$SB_i)
-    )
+    x_lim <- .expand_range(c(x_lim_min_ra_MSY(), x_lim_max_ra_MSY()))
+    y_lim <- c(y_lim_min_ra_MSY(), y_lim_max_ra_MSY())
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_ra_MSY, max(data_ref$SB_i, data_var$SB_i)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_ra_MSY, 
-      .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_ra_MSY, 
-      .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_ra_MSY, "Biomass (t)")
-
-    title_y <- .get_value_or_default(title_y_ra_MSY, "Surplus Production (t)")
-
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_ra_MSY()
+    text_size <- text_size_ra_MSY()
+    position <- position_ra_MSY()
 
     data_lines_split <- split(data_lines, data_lines$Scenario)
     rho_var_split <- split(rho_var, rho_var$Scenario)
@@ -369,10 +370,9 @@
           )
         )
       )
-      position <- position_ra_MSY()
 
       table <- .build_metric_table(
-        rho_var, text_size_ra_MSY(), 
+        rho_var, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         "rho", "\u03c1", decimals = 3
@@ -397,9 +397,9 @@
           hoverinfo = "text",
           text = ~paste0(
             "Biomass (", id,"): ", 
-            .international_system_prefixes(SB_i, si_suffix_ra_MSY()), 
+            .international_system_prefixes(SB_i, si_suffix), 
             "t<br>Surplus Production (", id,"): ", 
-            .international_system_prefixes(SP, si_suffix_ra_MSY()), "t" 
+            .international_system_prefixes(SP, si_suffix), "t" 
           )
         ) %>%
         layout(
@@ -450,7 +450,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_ra_MSY(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -465,7 +465,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_ra_MSY(),
             showarrow = FALSE,
             font = list(
               size = 20

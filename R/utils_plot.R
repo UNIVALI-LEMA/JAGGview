@@ -584,36 +584,6 @@
   sort(unique(x))
 }
 
-#' Get a reactive value or fall back to a default
-#' 
-#' Internal helper that evaluates a reactive value and returns it, unless it is 
-#' \code{NULL}, an empty string, or \code{NA}, in which case a default value is 
-#' returned instead
-#' 
-#' @param reactive_val A reactive expression (e.g., a Shiny \code{reactive()} 
-#'   or \code{input}) to be evaluated.
-#' @param default A value to be returned when \code{reactive_val} evaluates to 
-#'   \code{NULL}, \code{""}, or \code{NA}.
-#' 
-#' @return The evaluated value of \code{reactive_val}, or \code{default} if it 
-#'   is missing.
-#' 
-#' @details
-#' This function is typically used to provide fallback values for Shiny inputs 
-#' that have not yet been set or have been cleared by the user.
-#' 
-#' @keywords internal
-#' @noRd
-.get_value_or_default <- function(reactive_val, default) {
-  val <- reactive_val()
-  if (is.null(val) || val == "" || is.na(val)) {
-    default
-  }
-  else {
-    val
-  }
-}
-
 #' Format numbers with International System (SI) of prefixes
 #' 
 #' Scales a numeric vector and appends the appropriate SI unit prefix (e.g., 
@@ -1307,4 +1277,15 @@
       "hoverClosestPie"
     )
   )
+}
+
+#' @keywords internal
+#' @noRd
+.format_title <- function(title) {
+  if (grepl("^[A-Z]{1}/[A-Z]{1}", title) && !grepl(".<sub>.", title)) {
+    up <- substring(title, 1, 3)
+    sub <- substring(title, 4)
+    title <- paste0(up, "<sub>", toupper(sub), "</sub>")
+  }
+  return(title)
 }

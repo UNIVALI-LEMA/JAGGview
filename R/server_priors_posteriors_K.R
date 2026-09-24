@@ -4,19 +4,25 @@
 ) {
   filtered_pp_K <- reactiveVal(pp_df)
 
-  title_x_pp_K <- reactiveVal(NULL)
+  title_x_pp_K <- reactiveVal("Carrying capacity (K)")
 
-  title_y_pp_K <- reactiveVal(NULL)
+  title_y_pp_K <- reactiveVal("Density")
 
-  prior_color_pp_K <- reactiveVal(NULL)
+  prior_color_pp_K <- reactiveVal("#1B4F8A")
   
-  posterior_color_pp_K <- reactiveVal(NULL)
+  posterior_color_pp_K <- reactiveVal("#2A9D5C")
 
   text_size_pp_K <- reactiveVal(16)
 
-  x_lim_min_pp_K <- reactiveVal(NULL)
+  x_lim_min_pp_K <- reactiveVal(
+    floor(min(pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE) - 1)
+  )
 
-  x_lim_max_pp_K <- reactiveVal(NULL)
+  x_lim_max_pp_K <- reactiveVal(
+    ceiling(
+      quantile(c(pp_df$prior$K01, pp_df$posterior$K01), 0.95, na.rm = TRUE)
+    )
+  )
 
   position_pp_K <- reactiveVal("top-left")
 
@@ -36,15 +42,24 @@
   )
 
   pp_K_values <- reactiveValues(
-    scenarios_current = unique(c(pp_df$prior$Scenario, 
-      pp_df$posterior$Scenario)),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = unique(
+      c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+    ),
+    title_x_current = "Carrying capacity (K)",
+    title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
+    x_min_current = floor(
+      min(
+        pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE
+      ) - 1),
+    x_max_current = ceiling(
+      quantile(
+        c(pp_df$prior$K01, pp_df$posterior$K01), 
+        0.95, na.rm = TRUE
+      )
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -96,7 +111,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_text_size, {
-    if (!identical(input$pp_K_text_size, pp_K_values$text_size_current)) {
+    if (input$pp_K_text_size != pp_K_values$text_size_current) {
       pp_K_change$text_size_changed = TRUE
     }
     else {
@@ -105,7 +120,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_min, {
-    if (!identical(input$pp_K_x_min, pp_K_values$x_min_current)) {
+    if (input$pp_K_x_min != pp_K_values$x_min_current) {
       pp_K_change$x_min_changed = TRUE
     }
     else {
@@ -114,7 +129,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_max, {
-    if (!identical(input$pp_K_x_max, pp_K_values$x_max_current)) {
+    if (input$pp_K_x_max != pp_K_values$x_max_current) {
       pp_K_change$x_max_changed = TRUE
     }
     else {
@@ -251,12 +266,10 @@
     df_lists <- filtered_pp_K()
 
     palette <- .resolve_palette(
-      c(prior_color_pp_K(), posterior_color_pp_K()), 
-      2
+      c(prior_color_pp_K(), posterior_color_pp_K()), 2
     )
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
-
     n_scenarios <- length(scenarios)
 
     nrow <- if (n_scenarios < 3) {
@@ -273,29 +286,20 @@
     posterior_all <- df_lists$posterior %>%
       select(Scenario, K01, K02)
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_pp_K, min(prior_all$K01, posterior_all$K01, na.rm = TRUE)
+    x_lim <- c(x_lim_min_pp_K(), x_lim_max_pp_K())
+
+    y_lim <- c(
+      .round_to_nearest(
+        min(prior_all$K02, posterior_all$K02, na.rm = TRUE), FALSE, 1.1
+      ), 
+      .round_to_nearest(
+        max(prior_all$K02, posterior_all$K02, na.rm = TRUE), TRUE, 1.1
+      )
     )
 
-    Q3 <- .get_value_or_default(
-      x_lim_max_pp_K,
-      quantile(c(prior_all$K01, posterior_all$K01), 0.95, na.rm = TRUE)
-    )
-    
-    x_lim <- c(x_lim_min-1, Q3)
-
-    y_lim_min <- .round_to_nearest(
-      min(prior_all$K02, posterior_all$K02, na.rm = TRUE), 
-      FALSE, 1.1)
-
-    y_lim_max <- .round_to_nearest(
-      max(prior_all$K02, posterior_all$K02, na.rm = TRUE), 
-      TRUE, 1.1)
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_pp_K, "Carrying capacity (K)")
-
-    title_y <- .get_value_or_default(title_y_pp_K, "Density")
+    si_suffix <- si_suffix_pp_K()
+    text_size <- text_size_pp_K()
+    position <- position_pp_K()
 
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = K) %>%
@@ -366,10 +370,9 @@
           )
         )
       )
-      position <- position_pp_K()
 
       table <- .build_metric_table(
-        df_text, text_size_pp_K(), 
+        df_text, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         c("ppmr_value", "ppvr_value"), 
@@ -396,7 +399,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Prior<br>K: ", 
-            .international_system_prefixes(K01, si_suffix_pp_K())
+            .international_system_prefixes(K01, si_suffix)
           )
         ) %>%
         add_trace(
@@ -414,7 +417,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Posterior<br>K: ", 
-            .international_system_prefixes(K01, si_suffix_pp_K())
+            .international_system_prefixes(K01, si_suffix)
           )
         ) %>%
         layout(
@@ -466,7 +469,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_pp_K(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -481,7 +484,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_pp_K(),
             showarrow = FALSE,
             font = list(
               size = 20

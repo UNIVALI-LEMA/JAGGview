@@ -2,19 +2,23 @@
 .hindcast_server <- function(input, output, session, hind_df, use_si_suffix) { 
   filtered_hc <- reactiveVal(hind_df)
 
-  title_x_hc <- reactiveVal(NULL)
+  title_x_hc <- reactiveVal("Year")
 
-  title_y_hc <- reactiveVal(NULL)
+  title_y_hc <- reactiveVal("Index")
 
   text_size_hc <- reactiveVal(16)
 
-  x_lim_min_hc <- reactiveVal(NULL)
+  x_lim_min_hc <- reactiveVal(min(hind_df$data$year))
 
-  x_lim_max_hc <- reactiveVal(NULL)
+  x_lim_max_hc <- reactiveVal(max(hind_df$data$year))
 
-  y_lim_min_hc <- reactiveVal(NULL)
+  y_lim_min_hc <- reactiveVal(
+    .round_to_nearest(min(hind_df$data$hat.lci, na.rm = TRUE), FALSE)
+  )
 
-  y_lim_max_hc <- reactiveVal(NULL)
+  y_lim_max_hc <- reactiveVal(
+    .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE)
+  )
 
   position_hc <- reactiveVal("top-left")
 
@@ -37,13 +41,17 @@
   hc_values <- reactiveValues(
     scenarios_current = unique(hind_df$data$Scenario),
     indices_current = unique(hind_df$data$Index),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Year",
+    title_y_current = "Index",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min(hind_df$data$year),
+    x_max_current = max(hind_df$data$year),
+    y_min_current = .round_to_nearest(
+      min(hind_df$data$hat.lci, na.rm = TRUE), FALSE
+    ),
+    y_max_current = .round_to_nearest(
+      max(hind_df$data$hat.uci, na.rm = TRUE), TRUE
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -85,7 +93,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$hc_text_size, {
-    if (!identical(input$hc_text_size, hc_values$text_size_current)) {
+    if (input$hc_text_size != hc_values$text_size_current) {
       hc_change$text_size_changed = TRUE
     }
     else {
@@ -94,7 +102,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$hc_x_min, {
-    if (!identical(input$hc_x_min, hc_values$x_min_current)) {
+    if (input$hc_x_min != hc_values$x_min_current) {
       hc_change$x_min_changed = TRUE
     }
     else {
@@ -103,7 +111,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$hc_x_max, {
-    if (!identical(input$hc_x_max, hc_values$x_max_current)) {
+    if (input$hc_x_max != hc_values$x_max_current) {
       hc_change$x_max_changed = TRUE
     }
     else {
@@ -112,7 +120,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$hc_y_min, {
-    if (!identical(input$hc_y_min, hc_values$y_min_current)) {
+    if (!isTRUE(all.equal(input$hc_y_min, hc_values$y_min_current))) {
       hc_change$y_min_changed = TRUE
     }
     else {
@@ -121,7 +129,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$hc_y_max, {
-    if (!identical(input$hc_y_max, hc_values$y_max_current)) {
+    if (!isTRUE(all.equal(input$hc_y_max, hc_values$y_max_current))) {
       hc_change$y_max_changed = TRUE
     }
     else {
@@ -190,8 +198,8 @@
         )
       }
       
-      x_min <- input$hc_x_min
-      x_max <- input$hc_x_max
+      x_min <- .validate_year(input$hc_x_min, "hc_x_min", session)
+      x_max <- .validate_year(input$hc_x_max, "hc_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -290,37 +298,13 @@
       n_scenarios < 8         ~ 2,
       TRUE                    ~ 3
     )
-    
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_hc, min(df_lists$data$year)
-    )
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_hc, max(df_lists$data$year)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
+    x_lim <- .expand_range(c(x_lim_min_hc(), x_lim_max_hc()))
+    y_lim <- .expand_range(c(y_lim_min_hc(), y_lim_max_hc()))
 
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_hc, 
-      .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), FALSE)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_hc, 
-      .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), TRUE)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
-
-    title_x <- .get_value_or_default(title_x_hc, "Year")
-
-    title_y <- .get_value_or_default(title_y_hc, "Index")
-
-    min_year_hc <- min(df_lists$data_lines$year) - 1
-
-    max_year_hc <- max(df_lists$data_lines$year)
+    si_suffix <- si_suffix_hc()
+    text_size <- text_size_hc()
+    position <- position_hc()
   
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -438,10 +422,8 @@
           )
         }
         if (nrow(mase_data)) {
-          position <- position_hc()
-
           table <- .build_metric_table(
-            mase_data, text_size_hc(), 
+            mase_data, text_size, 
             str_split_i(position, "-", 2),
             str_split_i(position, "-", 1), 
             "MASE", "MASE", decimals = 3
@@ -463,8 +445,8 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hat CI(95): (", 
-              .international_system_prefixes(hat.lci, si_suffix_hc()), ") - (", 
-              .international_system_prefixes(hat.uci, si_suffix_hc()), ")"
+              .international_system_prefixes(hat.lci, si_suffix), ") - (", 
+              .international_system_prefixes(hat.uci, si_suffix), ")"
             )
           ) %>%
           add_ribbons(
@@ -478,8 +460,8 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hat CI(95): (", 
-              .international_system_prefixes(hat.lci, si_suffix_hc()), ") - (", 
-              .international_system_prefixes(hat.uci, si_suffix_hc()), ")"
+              .international_system_prefixes(hat.lci, si_suffix), ") - (", 
+              .international_system_prefixes(hat.uci, si_suffix), ")"
             )
           ) %>%
           add_lines(
@@ -493,7 +475,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hat (", retro,"): ", 
-              .international_system_prefixes(hat, si_suffix_hc())
+              .international_system_prefixes(hat, si_suffix)
             ),
             inherit = FALSE
           ) %>%
@@ -507,7 +489,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hat - hindcast(", retro,"): ", 
-              .international_system_prefixes(hat, si_suffix_hc())
+              .international_system_prefixes(hat, si_suffix)
             )
           ) %>%
           add_markers(
@@ -525,7 +507,7 @@
             ),
             hoverinfo = "text+x",
             text = ~paste0(
-              "obs: ", .international_system_prefixes(obs, si_suffix_hc())
+              "obs: ", .international_system_prefixes(obs, si_suffix)
             )
           ) %>%
           add_markers(
@@ -544,7 +526,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hindcast obs (", retro,"): ",
-              .international_system_prefixes(obs, si_suffix_hc())
+              .international_system_prefixes(obs, si_suffix)
             )
           ) %>%
           add_markers(
@@ -563,7 +545,7 @@
             hoverinfo = "text+x",
             text = ~paste0(
               "hindcast hat (", retro,"): ", 
-              .international_system_prefixes(hat, si_suffix_hc())
+              .international_system_prefixes(hat, si_suffix)
             )
           ) %>%
           layout(
@@ -616,7 +598,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_hc(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -631,7 +613,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_hc(),
             showarrow = FALSE,
             font = list(
               size = 20

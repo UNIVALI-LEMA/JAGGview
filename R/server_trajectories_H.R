@@ -4,19 +4,33 @@
 ) { 
   filtered_traj_H <- reactiveVal(traj_df)
 
-  title_x_traj_H <- reactiveVal(NULL)
+  title_x_traj_H <- reactiveVal("Year")
 
-  title_y_traj_H <- reactiveVal(NULL)
+  title_y_traj_H <- reactiveVal("Harvest rate")
 
-  palette_traj_H <- reactiveVal(NULL)
+  palette_traj_H <- reactiveVal("#1B4F8A")
 
-  x_lim_min_traj_H <- reactiveVal(NULL)
+  x_lim_min_traj_H <- reactiveVal(
+    min((traj_df %>% filter(indicator == "H"))$year, na.rm = TRUE)
+  )
 
-  x_lim_max_traj_H <- reactiveVal(NULL)
+  x_lim_max_traj_H <- reactiveVal(
+    max((traj_df %>% filter(indicator == "H"))$year, na.rm = TRUE)
+  )
 
-  y_lim_min_traj_H <- reactiveVal(NULL)
+  y_lim_min_traj_H <- reactiveVal(
+    .round_to_nearest(
+      min((traj_df %>% filter(indicator == "H"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    )
+  )
 
-  y_lim_max_traj_H <- reactiveVal(NULL)
+  y_lim_max_traj_H <- reactiveVal(
+    .round_to_nearest(
+      max((traj_df %>% filter(indicator == "H"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    )
+  )
 
   si_suffix_traj_H <- reactiveVal(use_si_suffix)
 
@@ -34,13 +48,23 @@
 
   traj_H_values <- reactiveValues(
     scenarios_current = unique(traj_df$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Year",
+    title_y_current = "B/B0",
     color_current = "#1B4F8A",
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min(
+      (traj_df %>% filter(indicator == "H"))$year, na.rm = TRUE
+    ),
+    x_max_current = max(
+      (traj_df %>% filter(indicator == "H"))$year, na.rm = TRUE
+    ),
+    y_min_current = .round_to_nearest(
+      min((traj_df %>% filter(indicator == "H"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ),
+    y_max_current = .round_to_nearest(
+      max((traj_df %>% filter(indicator == "H"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ),
     si_suffix_current = use_si_suffix
   )
 
@@ -81,7 +105,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_H_x_min, {
-    if (!identical(input$traj_H_x_min, traj_H_values$x_min_current)) {
+    if (input$traj_H_x_min != traj_H_values$x_min_current) {
       traj_H_change$x_min_changed = TRUE
     }
     else {
@@ -90,7 +114,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_H_x_max, {
-    if (!identical(input$traj_H_x_max, traj_H_values$x_max_current)) {
+    if (input$traj_H_x_max != traj_H_values$x_max_current) {
       traj_H_change$x_max_changed = TRUE
     }
     else {
@@ -99,7 +123,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_H_y_min, {
-    if (!identical(input$traj_H_y_min, traj_H_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_H_y_min, traj_H_values$y_min_current)
+      )
+    ) {
       traj_H_change$y_min_changed = TRUE
     }
     else {
@@ -108,7 +136,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_H_y_max, {
-    if (!identical(input$traj_H_y_max, traj_H_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_H_y_max, traj_H_values$y_max_current)
+      )
+    ) {
       traj_H_change$y_max_changed = TRUE
     }
     else {
@@ -169,8 +201,8 @@
         )
       }
       
-      x_min <- input$traj_H_x_min
-      x_max <- input$traj_H_x_max
+      x_min <- .validate_year(input$traj_H_x_min, "traj_H_x_min", session)
+      x_max <- .validate_year(input$traj_H_x_max, "traj_H_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -247,31 +279,14 @@
 
     palette <- .resolve_palette(palette_traj_H(), 1)
 
-    min_x <- min(df$year, na.rm = TRUE)
-    max_x <- max(df$year, na.rm = TRUE)
+    min_x <- x_lim_min_traj_H()
+    max_x <- x_lim_max_traj_H()
     range <- max_x - min_x
 
-    x_lim_min <- .get_value_or_default(x_lim_min_traj_H, min_x)
-    x_lim_max <- .get_value_or_default(x_lim_max_traj_H, max_x)
-    x_lim <- c(x_lim_min, x_lim_max)
+    x_lim <- .expand_range(c(min_x, max_x))
+    y_lim <- .expand_range(c(y_lim_min_traj_H(), y_lim_max_traj_H()))
 
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_traj_H, 
-      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_traj_H, 
-      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_traj_H, "Year")
-
-    title_y <- .get_value_or_default(title_y_traj_H, "Harvest rate")
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_traj_H()
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -348,8 +363,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(90): (", 
-            .international_system_prefixes(lcl2, si_suffix_traj_H()), ") - (", 
-            .international_system_prefixes(ucl2, si_suffix_traj_H()), ")"
+            .international_system_prefixes(lcl2, si_suffix), ") - (", 
+            .international_system_prefixes(ucl2, si_suffix), ")"
           )
         ) %>%
         add_ribbons(
@@ -364,8 +379,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(97,5): (", 
-            .international_system_prefixes(lcl, si_suffix_traj_H()), ") - (", 
-            .international_system_prefixes(ucl, si_suffix_traj_H()), ")"
+            .international_system_prefixes(lcl, si_suffix), ") - (", 
+            .international_system_prefixes(ucl, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -378,7 +393,7 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "Value: ", .international_system_prefixes(mu, si_suffix_traj_H())
+            "Value: ", .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         layout(
@@ -429,7 +444,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_traj_H(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -444,7 +459,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_traj_H(),
             showarrow = FALSE,
             font = list(
               size = 20

@@ -304,6 +304,8 @@
     n_indices <- length(indices)
     
     si_suffix <- si_suffix_runs_tests()
+    text_size <- text_size_runs_tests()
+    position <- position_runs_tests()
 
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -492,10 +494,9 @@
               showlegend = FALSE,
               hoverinfo = "none"
             )
-          position <- position_runs_tests()
           
           table <- .build_metric_table(
-            SE3, text_size_runs_tests(), 
+            SE3, text_size, 
             str_split_i(position, "-", 2),
             str_split_i(position, "-", 1), 
             "pvalue", "p-value", decimals = 3

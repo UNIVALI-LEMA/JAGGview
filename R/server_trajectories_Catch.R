@@ -4,19 +4,33 @@
 ) { 
   filtered_traj_Catch <- reactiveVal(traj_df)
 
-  title_x_traj_Catch <- reactiveVal(NULL)
+  title_x_traj_Catch <- reactiveVal("Year")
 
-  title_y_traj_Catch <- reactiveVal(NULL)
+  title_y_traj_Catch <- reactiveVal("Catch")
 
-  palette_traj_Catch <- reactiveVal(NULL)
+  palette_traj_Catch <- reactiveVal("#1B4F8A")
 
-  x_lim_min_traj_Catch <- reactiveVal(NULL)
+  x_lim_min_traj_Catch <- reactiveVal(
+    min((traj_df %>% filter(indicator == "Catch"))$year, na.rm = TRUE)
+  )
 
-  x_lim_max_traj_Catch <- reactiveVal(NULL)
+  x_lim_max_traj_Catch <- reactiveVal(
+    max((traj_df %>% filter(indicator == "Catch"))$year, na.rm = TRUE)
+  )
 
-  y_lim_min_traj_Catch <- reactiveVal(NULL)
+  y_lim_min_traj_Catch <- reactiveVal(
+    .round_to_nearest(
+      min((traj_df %>% filter(indicator == "Catch"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    )
+  )
 
-  y_lim_max_traj_Catch <- reactiveVal(NULL)
+  y_lim_max_traj_Catch <- reactiveVal(
+    .round_to_nearest(
+      max((traj_df %>% filter(indicator == "Catch"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    )
+  )
 
   si_suffix_traj_Catch <- reactiveVal(use_si_suffix)
 
@@ -34,13 +48,23 @@
 
   traj_Catch_values <- reactiveValues(
     scenarios_current = unique(traj_df$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    title_x_current = "Year",
+    title_y_current = "B/B0",
     color_current = "#1B4F8A",
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = min(
+      (traj_df %>% filter(indicator == "Catch"))$year, na.rm = TRUE
+    ),
+    x_max_current = max(
+      (traj_df %>% filter(indicator == "Catch"))$year, na.rm = TRUE
+    ),
+    y_min_current = .round_to_nearest(
+      min((traj_df %>% filter(indicator == "Catch"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ),
+    y_max_current = .round_to_nearest(
+      max((traj_df %>% filter(indicator == "Catch"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ),
     si_suffix_current = use_si_suffix
   )
 
@@ -82,7 +106,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_x_min, {
-    if (!identical(input$traj_Catch_x_min, traj_Catch_values$x_min_current)) {
+    if (input$traj_Catch_x_min != traj_Catch_values$x_min_current) {
       traj_Catch_change$x_min_changed = TRUE
     }
     else {
@@ -91,7 +115,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_x_max, {
-    if (!identical(input$traj_Catch_x_max, traj_Catch_values$x_max_current)) {
+    if (input$traj_Catch_x_max != traj_Catch_values$x_max_current) {
       traj_Catch_change$x_max_changed = TRUE
     }
     else {
@@ -100,7 +124,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_y_min, {
-    if (!identical(input$traj_Catch_y_min, traj_Catch_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_Catch_y_min, traj_Catch_values$y_min_current)
+      )
+    ) {
       traj_Catch_change$y_min_changed = TRUE
     }
     else {
@@ -109,7 +137,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_y_max, {
-    if (!identical(input$traj_Catch_y_max, traj_Catch_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_Catch_y_max, traj_Catch_values$y_max_current)
+      )
+    ) {
       traj_Catch_change$y_max_changed = TRUE
     }
     else {
@@ -174,8 +206,8 @@
         )
       }
       
-      x_min <- input$traj_Catch_x_min
-      x_max <- input$traj_Catch_x_max
+      x_min <- .validate_year(input$traj_Catch_x_min, "traj_Catch_x_min", session)
+      x_max <- .validate_year(input$traj_Catch_x_max, "traj_Catch_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -252,36 +284,14 @@
 
     palette <- .resolve_palette(palette_traj_Catch(), 1)
 
-    min_x <- min(df$year, na.rm = TRUE)
-    max_x <- max(df$year, na.rm = TRUE)
+    min_x <- x_lim_min_traj_Catch()
+    max_x <- x_lim_max_traj_Catch()
     range <- max_x - min_x
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_traj_Catch, min_x
-    )
+    x_lim <- .expand_range(c(min_x, max_x))
+    y_lim <- .expand_range(c(y_lim_min_traj_Catch(), y_lim_max_traj_Catch()))
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_traj_Catch, max_x
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_traj_Catch, 
-      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_traj_Catch, 
-      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_traj_Catch, "Year")
-
-    title_y <- .get_value_or_default(title_y_traj_Catch, "Catch")
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_traj_Catch()
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -358,9 +368,9 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(90): (", 
-            .international_system_prefixes(lcl2, si_suffix_traj_Catch()), 
+            .international_system_prefixes(lcl2, si_suffix), 
             ") - (", 
-            .international_system_prefixes(ucl2, si_suffix_traj_Catch()), ")"
+            .international_system_prefixes(ucl2, si_suffix), ")"
           )
         ) %>%
         add_ribbons(
@@ -375,9 +385,9 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(97,5): (", 
-            .international_system_prefixes(lcl, si_suffix_traj_Catch()), 
+            .international_system_prefixes(lcl, si_suffix), 
             ") - (", 
-            .international_system_prefixes(ucl, si_suffix_traj_Catch()), ")"
+            .international_system_prefixes(ucl, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -391,7 +401,7 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "Value: ", 
-            .international_system_prefixes(mu, si_suffix_traj_Catch())
+            .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         layout(
@@ -442,7 +452,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = title_x_traj_Catch(),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -457,7 +467,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = title_y_traj_Catch(),
             showarrow = FALSE,
             font = list(
               size = 20
