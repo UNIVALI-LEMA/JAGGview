@@ -544,7 +544,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_cpue_res(),
+            text = .format_title(title_x_cpue_res()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -559,7 +559,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y_cpue_res(),
+            text = .format_title(title_y_cpue_res()),
             showarrow = FALSE,
             font = list(
               size = 20

@@ -468,7 +468,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_pp_r(),
+            text = .format_title(title_x_pp_r()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -483,7 +483,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y_pp_r(),
+            text = .format_title(title_y_pp_r()),
             showarrow = FALSE,
             font = list(
               size = 20

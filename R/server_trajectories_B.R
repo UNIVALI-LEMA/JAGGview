@@ -436,7 +436,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x_traj_B(),
+            text = .format_title(title_x_traj_B()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -451,7 +451,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y_traj_B(),
+            text = .format_title(title_y_traj_B()),
             showarrow = FALSE,
             font = list(
               size = 20

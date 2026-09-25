@@ -59,6 +59,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
     ),
     sidebar = dashboardSidebar(disable = TRUE),
     body = dashboardBody(
+      tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style.css"),
+      ),
       useShinyjs(),
       tabItems(
         tabItem(
@@ -403,17 +406,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(fits_data$Index),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "fits_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "fits_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "fits_title_y",
-              label = "Title Y:",
-              placeholder = "Abundance index",
-              value = "Abundance index"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "fits_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Abundance index",
+                value = "Abundance index"
+              )
             ),
             colourInput(
               inputId = "fits_color",
@@ -478,10 +519,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "fits_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "fits_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -500,17 +557,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(res_data$cpue_residuals$Index),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "runs_tests_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "runs_tests_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "runs_tests_title_y",
-              label = "Title Y:",
-              placeholder = "Residuals",
-              value = "Residuals"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "runs_tests_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Residuals",
+                value = "Residuals"
+              )
             ),
             numericInput(
               inputId = "runs_tests_text_size",
@@ -585,10 +680,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "runs_tests_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "runs_tests_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -608,17 +719,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = TRUE
             ),
             uiOutput("cpue_res_color_inputs"),
-            textInput(
-              inputId = "cpue_res_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "cpue_res_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "cpue_res_title_y",
-              label = "Title Y:",
-              placeholder = "Residuals",
-              value = "Residuals"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "cpue_res_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Residuals",
+                value = "Residuals"
+              )
             ),
             numericInput(
               inputId = "cpue_res_text_size",
@@ -693,10 +842,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "cpue_res_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "cpue_res_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -713,17 +878,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_K_title_x",
-              label = "Title X:",
-              placeholder = "Carrying capacity (K)",
-              value = "Carrying capacity (K)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_K_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Carrying capacity (K)",
+                value = "Carrying capacity (K)"
+              )
             ),
-            textInput(
-              inputId = "pp_K_title_y",
-              label = "Title Y:",
-              placeholder = "Density",
-              value = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_K_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_K_prior_color",
@@ -786,10 +989,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_K_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_K_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -806,17 +1025,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_r_title_x",
-              label = "Title X:",
-              placeholder = "Intrinsic growth rate (r)",
-              value = "Intrinsic growth rate (r)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_r_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Intrinsic growth rate (r)",
+                value = "Intrinsic growth rate (r)"
+              )
             ),
-            textInput(
-              inputId = "pp_r_title_y",
-              label = "Title Y:",
-              placeholder = "Density",
-              value = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_r_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_r_prior_color",
@@ -876,10 +1133,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_r_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_r_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -896,17 +1169,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_psi_title_x",
-              label = "Title X:",
-              placeholder = "Initial biomass depletion ratio (psi)",
-              value = "Initial biomass depletion ratio (psi)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_psi_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Initial biomass depletion ratio (psi)",
+                value = "Initial biomass depletion ratio (psi)"
+              )
             ),
-            textInput(
-              inputId = "pp_psi_title_y",
-              label = "Title Y:",
-              placeholder = "Density",
-              value = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_psi_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_psi_prior_color",
@@ -968,10 +1279,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_psi_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_psi_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -984,17 +1311,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_B_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_B_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_B_title_y",
-              label = "Title Y:",
-              placeholder = "Biomass (t)",
-              value = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_B_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
             numericInput(
               inputId = "ra_B_text_size",
@@ -1075,10 +1440,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_B_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_B_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1091,17 +1472,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_F_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_F_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_F_title_y",
-              label = "Title Y:",
-              placeholder = "Fishing Mortality (F)",
-              value = "Fishing Mortality (F)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_F_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Fishing Mortality (F)",
+                value = "Fishing Mortality (F)"
+              )
             ),
             numericInput(
               inputId = "ra_F_text_size",
@@ -1180,10 +1599,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_F_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_F_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1196,17 +1631,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_BBmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_BBmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_BBmsy_title_y",
-              label = "Title Y:",
-              placeholder = "B/Bmsy",
-              value = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_BBmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
             numericInput(
               inputId = "ra_BBmsy_text_size",
@@ -1287,10 +1760,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_BBmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_BBmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1303,17 +1792,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_FFmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_FFmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_FFmsy_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy",
-              value = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_FFmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             numericInput(
               inputId = "ra_FFmsy_text_size",
@@ -1394,10 +1921,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_FFmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_FFmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1410,17 +1953,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_procB_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_procB_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_procB_title_y",
-              label = "Title Y:",
-              placeholder = "Process error on log(Biomass)",
-              value = "Process error on log(Biomass)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_procB_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Process error on log(Biomass)",
+                value = "Process error on log(Biomass)"
+              )
             ),
             numericInput(
               inputId = "ra_procB_text_size",
@@ -1501,10 +2082,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_procB_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_procB_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1517,17 +2114,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(ra_data$data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_MSY_title_x",
-              label = "Title X:",
-              placeholder = "Biomass (t)",
-              value = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_MSY_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
-            textInput(
-              inputId = "ra_MSY_title_y",
-              label = "Title Y:",
-              placeholder = "Surplus Production (t)",
-              value = "Surplus Production (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_MSY_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Surplus Production (t)",
+                value = "Surplus Production (t)"
+              )
             ),
             numericInput(
               inputId = "ra_MSY_text_size",
@@ -1612,10 +2247,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_MSY_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_MSY_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1634,17 +2285,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(hind_data$data$Index),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "hc_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "hc_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "hc_title_y",
-              label = "Title Y:",
-              placeholder = "Index",
-              value = "Index"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "hc_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Index",
+                value = "Index"
+              )
             ),
             numericInput(
               inputId = "hc_text_size",
@@ -1719,10 +2408,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "hc_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "hc_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1735,17 +2440,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_BB0_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BB0_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_BB0_title_y",
-              label = "Title Y:",
-              placeholder = "B/B0",
-              value = "B/B0"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BB0_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/B0",
+                value = "B/B0"
+              )
             ),
             colourInput(
               inputId = "traj_BB0_color",
@@ -1822,10 +2565,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_BB0_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_BB0_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1838,17 +2597,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_BBmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BBmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_BBmsy_title_y",
-              label = "Title Y:",
-              placeholder = "B/Bmsy",
-              value = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BBmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
             colourInput(
               inputId = "traj_BBmsy_color",
@@ -1927,10 +2724,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_BBmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_BBmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             ),
             numericInput(
               inputId = "traj_BBmsy_blim",
@@ -1950,17 +2763,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_FFmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_FFmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_FFmsy_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy",
-              value = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_FFmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             colourInput(
               inputId = "traj_FFmsy_color",
@@ -2035,10 +2886,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_FFmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_FFmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2051,17 +2918,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_Bdev_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Bdev_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_Bdev_title_y",
-              label = "Title Y:",
-              placeholder = "Process Error on log(Biomass)",
-              value = "Process Error on log(Biomass)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Bdev_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Process Error on log(Biomass)",
+                value = "Process Error on log(Biomass)"
+              )
             ),
             colourInput(
               inputId = "traj_Bdev_color",
@@ -2138,10 +3043,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_Bdev_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_Bdev_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2154,17 +3075,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_B_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_B_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_B_title_y",
-              label = "Title Y:",
-              placeholder = "Biomass (t)",
-              value = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_B_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
             colourInput(
               inputId = "traj_B_color",
@@ -2237,10 +3196,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_B_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_B_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2253,17 +3228,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_H_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_H_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_H_title_y",
-              label = "Title Y:",
-              placeholder = "Harvest rate",
-              value = "Harvest rate"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_H_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Harvest rate",
+                value = "Harvest rate"
+              )
             ),
             colourInput(
               inputId = "traj_H_color",
@@ -2338,10 +3351,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_H_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_H_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2354,17 +3383,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(traj_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_Catch_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Catch_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_Catch_title_y",
-              label = "Title Y:",
-              placeholder = "Catch",
-              value = "Catch"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Catch_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Catch",
+                value = "Catch"
+              )
             ),
             colourInput(
               inputId = "traj_Catch_color",
@@ -2441,10 +3508,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_Catch_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_Catch_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2456,17 +3539,55 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               selected = unique(kobe_data$ci_data$Scenario),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "kobe_title_x",
-              label = "Title X:",
-              placeholder = "B/Bmsy",
-              value = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "kobe_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
-            textInput(
-              inputId = "kobe_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy",
-              value = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "kobe_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             div(
               div(
@@ -2522,10 +3643,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "kobe_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "kobe_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           div(
