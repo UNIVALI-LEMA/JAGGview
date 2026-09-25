@@ -565,6 +565,34 @@
   lim + c(-1, 1) * d * mult
 }
 
+#' Format plot title
+#'
+#' Internal helper that formats titles containing a one-letter uppercase
+#' prefix followed by a slash by converting the remaining text to an HTML
+#' subscript.
+#'
+#' @param title A character string containing the title to be formatted.
+#'
+#' @details
+#' Titles matching the pattern \code{"A/B"}, where \code{A} and \code{B}
+#' represent uppercase letters, are transformed by wrapping the text after
+#' the slash in an HTML \code{<sub>} tag. Titles that already contain an
+#' HTML \code{<sub>} tag are not modified.
+#'
+#' @return
+#' A character string containing the formatted title.
+#'
+#' @keywords internal
+#' @noRd
+.format_title <- function(title) {
+  if (grepl("^[A-Z]{1}/[A-Z]{1}", title) && !grepl(".<sub>.", title)) {
+    up <- substring(title, 1, 3)
+    sub <- substring(title, 4)
+    title <- paste0(up, "<sub>", toupper(sub), "</sub>")
+  }
+  return(title)
+}
+
 #' Get sorted unique levels of a vector
 #'
 #' Helper used by .accumulate_by() to determine the ordered set of
@@ -867,6 +895,65 @@
     )
 }
 
+#' Configure Plotly output options
+#'
+#' Internal helper that configures the appearance and behavior of a Plotly
+#' widget, including the mode bar, localization, and image export options.
+#'
+#' @param p A Plotly object to be configured.
+#' @param filename A character string specifying the default filename used when
+#' exporting the plot as an image. Defaults to \code{"plot"}.
+#' @param locale A character string specifying the locale used by Plotly for
+#' interface elements and formatting. Defaults to \code{"en-US"}.
+#' @param width A numeric value specifying the width, in pixels, of exported
+#' images. Defaults to 1920.
+#' @param height A numeric value specifying the height, in pixels, of exported
+#' images. Defaults to 1080.
+#'
+#' @details
+#' The function enables the Plotly mode bar and disables the Plotly logo.
+#' Several interactive controls related to zooming, panning, selection, and
+#' hover behavior are removed from the mode bar.
+#'
+#' The image export button is configured to export plots as PNG files using
+#' the specified \code{filename}, \code{width}, and \code{height}.
+#'
+#' @return
+#' A Plotly object with the specified configuration applied.
+#'
+#' @keywords internal
+#' @noRd
+#' @importFrom plotly config
+.plotly_config <- function(
+  p, filename = "plot", locale = "en-US", width = 1920, height = 1080
+) {
+  config(
+    p = p,
+    displayModeBar         = TRUE,
+    displaylogo            = FALSE,
+    locale                 = locale,
+    toImageButtonOptions   = list(
+      format   = "png",
+      filename = filename,
+      width    = width,
+      height   = height
+    ),
+    modeBarButtonsToRemove = c(
+      "zoom2d", 
+      "pan2d",
+      "select2d",
+      "lasso2d",
+      "zoomIn2d", 
+      "zoomOut2d", 
+      "autoScale2d", 
+      "resetScale2d", 
+      "hoverClosestCartesian", 
+      "hoverCompareCartesian",
+      "hoverClosestPie"
+    )
+  )
+}
+
 #' Prepare data for an NPC-positioned table annotation
 #' 
 #' Internal helper thta adds NPC (normalized parent coordinates) columns and a 
@@ -920,32 +1007,32 @@
     stop(paste0("Expected parameter 'col_name' to have the same length",
     "as the number of columns selected in 'col'."))
   }
-    data %>%
-      mutate(
-        x = case_when(
-          pos_x == "left" ~ 0,
-          pos_x == "right" ~ 1,
-          pos_x == "center" ~ 0.5,
-          TRUE ~ 0
-        ),
-        y = case_when(
-          pos_y == "top" ~ 1,
-          pos_y == "bottom" ~ 0,
-          pos_y == "middle" ~ 0.5,
-          TRUE ~ 1
-        ),
-        tb = pmap(
-          cols_data, 
-          function(...) {
-            vals <- c(...)
-            data.frame(
-              Metric = col_name,
-              Value = paste0(round(vals, decimals), suffix)
-            )
-          }
-        )
+  data %>%
+    mutate(
+      x = case_when(
+        pos_x == "left" ~ 0,
+        pos_x == "right" ~ 1,
+        pos_x == "center" ~ 0.5,
+        TRUE ~ 0
+      ),
+      y = case_when(
+        pos_y == "top" ~ 1,
+        pos_y == "bottom" ~ 0,
+        pos_y == "middle" ~ 0.5,
+        TRUE ~ 1
+      ),
+      tb = pmap(
+        cols_data, 
+        function(...) {
+          vals <- c(...)
+          data.frame(
+            Metric = col_name,
+            Value = paste0(round(vals, decimals), suffix)
+          )
+        }
       )
-  }
+    )
+}
 
 #' Resolve plotting palette
 #' 
@@ -1244,48 +1331,4 @@
       tab_options(column_labels.hidden = TRUE) %>%
       cols_align(align = "center", columns = everything())
   )
-}
-
-#' @keywords internal
-#' @noRd
-#' @importFrom plotly config
-.plotly_config <- function(
-  p, filename = "plot", locale = "en-US", width = 1920, height = 1080
-) {
-  config(
-    p = p,
-    displayModeBar         = TRUE,
-    displaylogo            = FALSE,
-    locale                 = locale,
-    toImageButtonOptions   = list(
-      format   = "png",
-      filename = filename,
-      width    = width,
-      height   = height
-    ),
-    modeBarButtonsToRemove = c(
-      "zoom2d", 
-      "pan2d",
-      "select2d",
-      "lasso2d",
-      "zoomIn2d", 
-      "zoomOut2d", 
-      "autoScale2d", 
-      "resetScale2d", 
-      "hoverClosestCartesian", 
-      "hoverCompareCartesian",
-      "hoverClosestPie"
-    )
-  )
-}
-
-#' @keywords internal
-#' @noRd
-.format_title <- function(title) {
-  if (grepl("^[A-Z]{1}/[A-Z]{1}", title) && !grepl(".<sub>.", title)) {
-    up <- substring(title, 1, 3)
-    sub <- substring(title, 4)
-    title <- paste0(up, "<sub>", toupper(sub), "</sub>")
-  }
-  return(title)
 }

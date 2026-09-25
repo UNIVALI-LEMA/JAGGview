@@ -335,6 +335,34 @@
     ungroup()
 }
 
+#' Extract scenario identifiers
+#'
+#' Internal helper that extracts the scenario identifier from each model fit
+#' in a collection of JABBA model fits.
+#'
+#' @param data A collection of JABBA model fits containing a \code{scenario}
+#' element in each fit.
+#'
+#' @details
+#' The function iterates over the supplied collection and extracts the value
+#' of the \code{scenario} element from each model fit.
+#'
+#' @return
+#' A vector containing the scenario identifier associated with each model fit.
+#'
+#' @keywords internal
+#' @noRd
+.get_scenarios <- function(data) {
+  temp00 <- sapply(
+    data,
+    function(fit) {
+      fit$scenario
+    }
+  )
+  
+  return(temp00)
+}
+
 #' Check if object is a valid JABBA model fit
 #'
 #' Internal helper that verifies whether an object is a list containing all 
@@ -1459,20 +1487,24 @@
   }
 }
 
-#' @keywords internal
-#' @noRd
-.get_scenarios <- function(data) {
-  temp00 <- sapply(
-    data,
-    function(fit) {
-      fit$scenario
-    }
-  )
-  
-  return(temp00)
-}
-
-
+#' Validate and update year input
+#'
+#' Internal helper that ensures a year value is stored as an integer and
+#' updates the corresponding Shiny select input when conversion is required.
+#'
+#' @param year A numeric or integer value representing a year.
+#' @param inputId A character string specifying the ID of the Shiny input to
+#' update.
+#' @param session A Shiny session object used to update the input value.
+#'
+#' @details
+#' If \code{year} is not already an integer, it is converted using
+#' \code{as.integer()} and the corresponding Shiny \code{selectInput} is
+#' updated to reflect the converted value.
+#'
+#' @return
+#' An integer representation of \code{year}.
+#'
 #' @keywords internal
 #' @noRd
 .validate_year <- function(year, inputId, session) {
