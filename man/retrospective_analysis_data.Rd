@@ -7,41 +7,54 @@
 retrospective_analysis_data(list_hc_models)
 }
 \arguments{
-\item{list_hc_models}{A list containing retrospective model outputs as
-returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
+\item{list_hc_models}{Either a single hindcast returned by
+\code{JABBA::hindcast_jabba()}, or a list of such hindcasts (one per
+scenario). A single hindcast is automatically wrapped into a list.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{data}{A data frame containing time series for key indices
-(e.g., B, F, B/Bmsy, F/Fmsy, and process error).}
-\item{surplus_data}{A data frame containing surplus production
-(MSY-related) data.}
-\item{rho_data}{A data frame containing retrospective bias estimates (rho)
-for each index and scenario.}
+\item{data}{Time series B, F, B/Bmsy, F/Fmsy, and process error, by
+scenario and retrospective run, with the labels in \code{Index2} and the
+logical filter \code{keep}.}
+\item{surplus_data}{Surplus production (MSY-related) curves, by scenario
+and retrospective run.}
+\item{rho_data}{retrospective bias estimates (rho) by index and scenario.}
 }
 }
 \description{
-Processes retrospective model outputs to generate time series data, surplus
-production curves, and retrospective bias metrics (rho) for multiple
-scenarios and indices.
+Extracts time series from one or more JABBA hindcast runs, together with
+surplus production curves and retrospective bias metrics (Mohn's rho), for
+each scenario. The result is ready for
+\code{\link{retrospective_analysis_ggplot}()}.
 }
 \details{
-The function extracts retrospective runs, filters relevant indices, and
-structures the data for visualization. It also computes logical filters for
-valid retrospective years and includes surplus production and rho
-diagnostics.
+Only the quantities B, F, B/Bmsy, F/Fmsy and the process error on
+log(biomass) are kept in \code{data}. Each retrospective run (peel) is
+identified by the \code{id} column (\code{"Ref"} for the reference run,
+\code{"-1"}, \code{"-2"}, ... for the peels).
 
-The output is designed to be used directly with
-\code{\link{retrospective_analysis_ggplot}()}.
+The logical column \code{keep} flags the years to be drawn in the
+retrospective lines: it is \code{TRUE} for all years of the reference run
+and, for each peel, only years earlier than the peel's terminal year
+(\code{Year < id_num}).
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-list_hc_models <- list(hc_S01, hc_S02)
-df <- retrospective_analysis_data(list_hc_models)
-df
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# A single hindcast
+res1 <- retrospective_analysis_data(hc_S01)
+
+# A list of hindcasts (one per scenario)
+res2 <- retrospective_analysis_data(list(hc_S01, hc_S02))
 }
 
 }

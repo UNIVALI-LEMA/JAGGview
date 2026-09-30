@@ -12,15 +12,14 @@ kobe_data(
 )
 }
 \arguments{
-\item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 
-\item{ci_levels}{A numeric vector containing the CI values between 0 and 1.
-Defaults to 0.5, 0.8, 0.95.}
+\item{ci_levels}{A numeric vector with the credibility levels of the
+contours, strictly between 0 and 1. Defaults to \code{c(0.5, 0.8, 0.95)}.}
 
-\item{reserve_mb}{A numeric value specifying the minimum amount of free
-system memory, in megabytes, to reserve for the operating system. Defaults
-to 2048.}
+\item{reserve_mb}{A numeric value for the minimum free system memory, in
+megabytes, to keep available. Defaults to 2048.}
 
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
 between memory availability checks. Defaults to 0.5.}
@@ -28,42 +27,50 @@ between memory availability checks. Defaults to 0.5.}
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{col01}{Data frame defining the yellow Kobe quadrant (overfished,
+\item{col01}{Yellow Kobe quadrant (B/Bmsy < 1 and F/Fmsy < 1: overfished,
 not overfishing).}
-\item{col02}{Data frame defining the orange quadrant (overfished and
+\item{col02}{Orange quadrant (B/Bmsy > 1 an F/Fmsy > 1: not overfished and
 overfishing).}
-\item{col03}{Data frame defining the red quadrant (severely
-overfished and overfishing).}
-\item{col04}{Data frame defining the green quadrant (healthy stock
-conditions).}
-\item{ci_data}{Data frame with kernel density contours (50\%, 80\%, 95\%)
-for the terminal year.}
-\item{data_lines}{Time series of median biomass and fishing mortality
-ratios by year and scenario.}
-\item{highlight_years}{Subset of selected years (e.g., 1950, 1986, 2023)
-for highlighting points.}
+\item{col03}{Red quadrant (B/Bmsy < 1 and F/Fmsy > 1: overfished and
+overfishing).}
+\item{col04}{Green quadrant (B/Bmsy > 1 and F/Fmsy < 1, not overfished and
+not overfishing).}
+\item{ci_data}{Contour coordinates for the terminal year, by scenario and
+credibility level (\code{q}).}
+\item{data_lines}{Median B/Bmsy (\code{Bratio}) and F/Fmsy
+(\code{Fratio}) by year and scenario.}
+\item{highlight_years}{Subset of \code{data_lines} for the first, middle
+and last year of the series.}
 }
+Returns \code{NULL} if the process is aborted due to low memory.
 }
 \description{
-Computes biomass and fishing mortality ratios and prepares all required
-components to build a Kobe plot, including credibility contours and
-reference quadrants.
+Computes median B/Bmsy and F/Fmsy ratios by year and scenario, and builds
+the components of a Kobe plot: reference quadrants and credibility contours
+for the terminal year. The result is ready for \code{\link{kobe_ggplot}()}.
 }
 \details{
-The function computes median biomass (B/Bmsy) and fishing mortality (F/Fmsy)
-ratios by year and scenario, and estimates kernel density contours for the
-terminal year using \code{gplots::ci2d}. These contours represent
-uncertainty regions commonly displayed in Kobe plots.
+Contours are estimated with kernel density (\code{gplots::ci2d()}) using
+the posterior samples of the terminal year, one set per scenario.
 
-The output is designed to be used directly with \code{\link{kobe_ggplot}()}.
+Memory use is monitored while the posterior samples are extracted. If the
+free memory falls below \code{reserve_mb}, the process is aborted with a
+message and \code{NULL} is returned.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-df <- kobe_data(list_fit_models)
-str(df)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+res1 <- kobe_data(fit.S01)
+
+# A list of fits (one per scenario), with custom credibility levels
+res2 <- kobe_data(list(fit.S01, fit.S02), ci_levels = c(0.5, 0.95))
 }
 
 }

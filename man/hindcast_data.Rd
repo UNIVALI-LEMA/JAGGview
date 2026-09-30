@@ -7,45 +7,53 @@
 hindcast_data(list_hc_models, indices_factor = NULL)
 }
 \arguments{
-\item{list_hc_models}{A list containing retrospective model outputs as
-returned by the JABBA function \code{JABBA::hindcast_jabba()}.}
+\item{list_hc_models}{Either a single fit returned by
+\code{JABBA::hindcast_jabba()}, or a list of such hindcasts (one per
+scenario). A single hindcast is automatically wrapped into a list.}
 
-\item{indices_factor}{Optional. A vector of indices_factor to include. Must
-exist in the \code{Index} column.}
+\item{indices_factor}{Optional. A character vector with the index names to
+use and their order. All values must exist in the \code{Index} column.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{data}{A data frame containing full hindcast time series,
-including observed and predicted values.}
-\item{data_points}{A data frame with selected hindcast points
-used for visualization of observed and predicted values.}
-\item{data_lines}{A data frame containing filtered hindcast
-trajectories for plotting purposes.}
-\item{mase_data}{A data frame containing Mean Absolute Scaled Error
-(MASE) metrics for each index and scenario.}
+\item{data}{Full hindcast time series, with observed and predicted values.}
+\item{data_points}{Selected hindcast points (first hindcast year of each
+retrospective run) used to plot observed and predicted values.}
+\item{data_lines}{Filtered hindcast trajectories used for plotting lines.}
+\item{mase_data}{Mean Absolute Scaled Error (MASE) metrics for each index
+and scenario.}
 }
 }
 \description{
-Processes model outputs to generate data structures for hindcast
-diagnostics, including observed and predicted values, filtered
-hindcast points, and accuracy metrics (MASE).
+Extracts observed and predicted values from one or more JABBA hindcast runs
+and computes the Mean Absolute Scaled Error (MASE) for each index. The
+result is ready for \code{\link{hindcast_ggplot}()}.
 }
 \details{
-The function extracts hindcast runs, formats retrospective labels,
-filters relevant years and conditions, and computes MASE statistics
-using \code{JABBA::jbmase}. The output is structured for direct use
-in visualization functions.
+Hindcast runs are extracted and the retrospective labels are formatted. MASE
+is computed with \code{JABBA::jbmase()}. Indices whose MASE is \code{NA} are
+removed from all returned data frames.
 
-The output is designed to be used directly with
-\code{\link{hindcast_ggplot}()}.
+If \code{indices_factor} is supplied, the \code{Index} column is reordered
+following that vector.
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-df <- hindcast_data(list_hc_models)
-df
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- hindcast_jabba(jb.S02, fit.S01, ...)
+
+# A single hindcast
+res1 <- hindcast_data(hc_S01)
+
+# A list of hindcasts (one per scenario)
+res2 <- hindcast_data(list(hc_S01, hc_S02))
 }
 
 }

@@ -299,6 +299,7 @@
   index_inputseries <- index_inputseries[!index_inputseries == "year"]
   NA_index <- setdiff(index_inputseries, index_data)
   data$Index[is.na(data$Index)] <- NA_index
+  return(data)
 }
 
 #' Filter data based on conditional transitions
