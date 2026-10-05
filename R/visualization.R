@@ -1,11 +1,19 @@
 #' Plot CPUE residuals diagnostics
 #' 
-#' Creates a ggplot2- based visualization of CPUE residuals across
-#' years and scenarios, including reference lines, residual segments,
-#' smoothed trends, and RMSE annotations.
+#' Creates a ggplot2-based visualization of the CPUE residuals by year, index 
+#' and scenarios, with a smoothed trend and the RMSE of each scenario. The 
+#' input is the output of \code{\link{runs_tests_data}()}.
 #' 
-#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
-#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
+#' @details 
+#' Each panel shows one scenario. Residuals are drawn as points joined by
+#' segments to the \code{Ref} value, with a horizontal line at zero. The
+#' smoothed trend (black line and band) is computed by
+#' \code{ggplot2::geom_smooth()} on the residuals of the panel, and the RMSE
+#' table is placed at the position given by \code{position}.
+#' 
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{runs_tests_data}()}, with the elements
+#'   \code{cpue_residuals} and \code{RMSE_data}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param position A character string specifying the table's position within 
@@ -20,64 +28,86 @@
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
-#' @param title_y A character string for the y-axis label. 
-#'   Defaults to "Residuals"
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param y_decimals Optional. Number of decimal places y-axis.
+#' @param title_y A character string for the y-axis label. Defaults to 
+#'   "Residuals".
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places y-axis labels. 
+#'   If \code{NULL}, up to two decimals places are shown and trailling zeros 
+#'   are dropped. Defaults to NULL.
 #' @param palette Optional. A character vector of colors used for plotting. 
-#'   If \code{NULL} (default), a color-blind-friendly palette is generated
-#'   automatically according to the number of index levels.
-#'   If the number of suplied colors is smaller than the number specified, 
-#'   than the code returns an error.
+#'   If \code{NULL}, a color-blind-friendly palette is generated automatically 
+#'   according to the number of index levels. If the number of supplied colors 
+#'   is smaller then the number specified, then the code returns an error. 
+#'   Defaults to NULL.
 #' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
+#'   upper limits of the x-axis c(min, max). If \code{NULL}, the limits will be 
+#'   calculated based on the data. Defaults to NULL. 
 #' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#'   upper limits of the y-axis c(min, max). If \code{NULL}, the limits will be 
+#'   calculated based on the data. Defaults to NULL. 
 #' 
-#' @return A ggplot object displaying CPUE residual diagnostics.
+#' @return A \code{ggplot} object.
 #' 
-#' @details 
-#' The plot includes residual segments, observed values, a smoothed trend,
-#' and RMSE annotations for each scenario.
+#' @examples
+#' \dontrun{
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- runs_tests_data(list(fit.S01, fit.S02))
+#' cpue_residuals_ggplot(data)
+#'
+#' # Table at the bottom right, in two columns
+#' cpue_residuals_ggplot(data, n_col = 2, position = "bottom-right")
+#' }
 #' 
 #' @family visualization functions
 #' @family cpue residuals runs tests functions
 #' 
 #' @export
-#' @importFrom ggplot2 .pt aes facet_wrap geom_hline geom_point geom_segment 
-#' geom_smooth ggplot labs scale_colour_manual scale_fill_manual 
+#' @importFrom ggplot2 .pt aes coord_cartesian facet_wrap geom_hline geom_point 
+#' geom_segment geom_smooth ggplot labs scale_colour_manual scale_fill_manual 
 #' scale_y_continuous theme
 #' @importFrom grDevices colorRampPalette
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
+#' @importFrom stringr str_split_i
 cpue_residuals_ggplot <- function(
   df_lists, n_col = 3, position = "top-left", text_size = 6, title_x = "Year", 
   title_y = "Residuals", use_si_suffix = FALSE, y_decimals = NULL, 
   palette = NULL, x_lim = NULL, y_lim = NULL
 ) {
-
+  if (!inherits(df_lists, "JAGGdata")) {
+    stop("Input data was expected to have 'JAGGdata' class.")
+  }
+  
+  # One color per index
   n_levels <- length(unique(df_lists$cpue_residuals$Index))
-
   palette <- .resolve_palette(palette, n_levels)
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(
-      df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE)
-    min_y_val <- .round_to_nearest(min(
-      df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE)
+    max_y_val <- .round_to_nearest(
+      max(df_lists$cpue_residuals$Res, na.rm = TRUE), TRUE
+    )
+    min_y_val <- .round_to_nearest(
+      min(df_lists$cpue_residuals$Res, na.rm = TRUE), FALSE
+    )
     y_lim <- c(min_y_val, max_y_val)
   }
   
-  if (is.null(x_lim)) {
-    max_x_val <- max(df_lists$cpue_residuals$Year, na.rm = TRUE)
-    min_x_val <- min(df_lists$cpue_residuals$Year, na.rm = TRUE)
-    x_lim <- c(min_x_val, max_x_val)
-  }
+  if (is.null(x_lim)) x_lim <- range(df_lists$cpue_residuals$Year, na.rm = TRUE)
   
+  # RMSE table placed in each panel
   table <- .prepare_npc_table_data(
     data = df_lists$RMSE_data, 
     pos_x = str_split_i(position, "-", 2), 
@@ -95,18 +125,26 @@ cpue_residuals_ggplot <- function(
   
   ggplot() +
     geom_hline(yintercept = 0, linetype = "longdash") +
-    geom_segment(data = df_lists$cpue_residuals,
-                 aes(x = Year, xend = Year, y = Ref, yend = Res,
-                     colour = Index)) +
-    geom_point(data = df_lists$cpue_residuals, 
+    geom_segment(
+      data = df_lists$cpue_residuals, 
+      aes(x = Year, xend = Year, y = Ref, yend = Res, colour = Index)
+    ) +
+    geom_point(
+      data = df_lists$cpue_residuals, 
       aes(x = Year, y = Res, fill = Index, colour = Index),
-               pch = 21, size = 2) +
-    geom_smooth(data = df_lists$cpue_residuals, 
-      aes(x = Year, y = Res), se = TRUE, colour = "black") +
-    geom_table_npc(data = table,
-                  aes(npcx = x, npcy = y, label = tb), 
-                  size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
+      pch = 21, size = 2
+    ) +
+    geom_smooth(
+      data = df_lists$cpue_residuals, 
+      aes(x = Year, y = Res), 
+      se = TRUE, colour = "black"
+    ) +
+    geom_table_npc(
+      data = table,
+      aes(npcx = x, npcy = y, label = tb), 
+      size = text_size, 
+      table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    ) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
     scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
@@ -118,41 +156,62 @@ cpue_residuals_ggplot <- function(
 }
 
 #' Plot fitted indices with credibility intervals
+#' 
+#' Creates a ggplot2-based visualization of the observed abundance indices 
+#' together with the fitted values and their 80% and 95% credibility 
+#' intervals, by scenario and index. The input is the output of 
+#' \code{\link{fits_data}()}.
+#' 
+#' @details
+#' Each panel shows one scenario (rows) and one index (columns). The ribbons
+#' are the 80% and 95% credibility intervals of the fit, the line is the
+#' fitted value, and the points with error bars are the observed values with
+#' their bounds (\code{Li} and \code{Ui}).
 #'
-#' Creates a ggplot2-based visualization of fitted abundance indices,
-#' including mean values and credibility intervals (80% and 95%).
+#' The axis limits (\code{x_lim} and \code{y_lim}) are applied with
+#' \code{ggplot2::coord_cartesian()}, so they are the same in all panels.
 #'
-#' @param df_lists A named list of data frames as returned by
-#'   \code{fits_data()}. It must contain the elements \code{Li_Ui},
-#'   \code{CI_80}, and \code{CI_95}.
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{fits_data}()}, with the elements \code{Li_Ui}, \code{CI_80}
+#'   and \code{CI_95}.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Abundance index".
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param y_decimals Optional. Number of decimal places y-axis.
-#' @param palette Optional. A character vector of colors used for plotting. 
-#'   If \code{NULL} (default), a color-blind-friendly palette is generated
-#'   automatically according to the number of index levels.
-#'   If the number of suplied colors is smaller than the number specified, 
-#'   than the code returns an error.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places in the y-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param palette Optional. A character vector of colors used for plotting.
+#'   Only the first color is used (the fill of the credibility intervals).
+#'   If \code{NULL}, a default color-blind-friendly color is used. An error
+#'   is returned if the supplied vector is invalid. Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits are calculated from the years in the data. Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits are calculated from the 95% credibility intervals, rounded.
+#'   Defaults to \code{NULL}.
 #'
-#' @return A ggplot object displaying fitted indices with uncertainty ribbons, 
-#'   error bars, and observed values, faceted by scenario and index.
-#'
-#' @details
-#' The plot includes ribbons representing 80% and 95% credibility intervals, a 
-#' fitted line, observed points with error bars, and faceting by scenario and 
-#' index.
+#' @return A \code{ggplot} object.
 #'
 #' @examples
 #' \dontrun{
-#' df <- fits_data(list_fit_models)
-#' fits_ggplot(df, palette = "blue")
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- fits_data(list(fit.S01, fit.S02))
+#' fits_ggplot(data)
+#'
+#' # Custom color and y-axis limits
+#' fits_ggplot(data, palette = "#1B4F8A", y_lim = c(0, 5))
 #' }
 #' 
 #' @family visualization functions
@@ -170,23 +229,21 @@ fits_ggplot <- function(
     stop("Input data was expected to have 'JAGGdata' class.")
   }
 
+  # A single color is needed
   palette <- .resolve_palette(palette, 1)
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
     max_y_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
     min_y_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
     y_lim <- c(min_y_val, max_y_val)
   }
 
-  if (is.null(x_lim)) {
-    max_x_val <- max(df_lists$CI_80$Year, na.rm = TRUE)
-    min_x_val <- min(df_lists$CI_80$Year, na.rm = TRUE)
-    x_lim <- c(min_x_val, max_x_val)
-  }
+  if (is.null(x_lim)) x_lim <- range(df_lists$CI_80$Year, na.rm = TRUE) 
   
   y_labels <- function(x) {
     .international_system_prefixes(
@@ -195,19 +252,27 @@ fits_ggplot <- function(
   }
 
   ggplot() +
-    geom_ribbon(data = df_lists$CI_80,
-        aes(x = Year, ymin = lci, ymax = uci),
-        alpha = 0.3, fill = palette[1]) +
-    geom_ribbon(data = df_lists$CI_95,
-        aes(x = Year, ymin = lci, ymax = uci),
-        alpha = 0.3, fill = palette[1]) +
+    geom_ribbon(
+      data = df_lists$CI_80,
+      aes(x = Year, ymin = lci, ymax = uci),
+      alpha = 0.3, fill = palette[1]
+    ) +
+    geom_ribbon(
+      data = df_lists$CI_95,
+      aes(x = Year, ymin = lci, ymax = uci),
+      alpha = 0.3, fill = palette[1]
+    ) +
     geom_line(data = df_lists$CI_80, aes(x = Year, y = mu)) +
-    geom_errorbar(data = df_lists$Li_Ui, 
-                  aes(x = Year, ymin = Li, ymax = Ui
-                  ), width = 1.5) +
-    geom_point(data = df_lists$Li_Ui,
-        aes(x = Year, y = Mean),
-        pch = 21, fill = "white", size = 1.5) + 
+    geom_errorbar(
+      data = df_lists$Li_Ui,
+      aes(x = Year, ymin = Li, ymax = Ui), 
+      width = 1.5
+    ) +
+    geom_point(
+      data = df_lists$Li_Ui,
+      aes(x = Year, y = Mean),
+      pch = 21, fill = "white", size = 1.5
+    ) + 
     facet_grid(Scenario ~ Index, scales = "free") +
     scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) + 
@@ -217,13 +282,31 @@ fits_ggplot <- function(
 
 #' Plot hindcast diagnostics
 #'
-#' Creates a ggplot2-based visualization of hindcast diagnostics, including 
-#' observed and predicted values, uncertainty intervals, and model performance 
-#' metrics (MASE).
+#' Creates a ggplot2-based visualization of the hindcast (retrospective
+#' forecast) diagnostics, showing the observed and predicted values, the
+#' credibility intervals of the reference run and the MASE of each index, by
+#' scenario and index. The input is the output of \code{\link{hindcast_data}()}.
+#' 
+#' @details
+#' Each panel shows one scenario (rows) and one index (columns). The gray
+#' ribbon is the credibility interval of the reference run, the colored lines
+#' are the retrospective runs, and the white lines are the hindcast
+#' trajectories. Points show the observed values (large) and the predicted
+#' values (small) at the first hindcast year of each run. The MASE of each 
+#' panel is shown in a table.
+#' 
+#' The colors of the retrospective runs come from \code{JABBA::ss3col()},
+#' which supports up to 8 runs.
+#' 
+#' If \code{zoom = TRUE}, a zoomed view of the hindcast window is inserted in
+#' the upper right corner of each panel, and the window is marked by a dashed
+#' rectangle. Panels with no data for a Scenario and Index combination are left 
+#' blank.
 #'
-#' @param df_lists A named list as returned by \code{hindcast_data()}. It must
-#'   contain the elements \code{data}, \code{data_points}, 
-#'   \code{data_lines} and \code{mase_data}.
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{hindcast_data}()}, with the elements \code{data}, 
+#'   \code{data_points}, \code{data_lines}, \code{mase_data} and
+#'   \code{min_year_retro}.
 #' @param position A character string specifying the table's position within 
 #'   each plot panel, combining a vertical and a horizontal keyword separated 
 #'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
@@ -237,20 +320,24 @@ fits_ggplot <- function(
 #'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to "Index".
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param zoom Optional. A boolean value that if \code{TRUE} shows a subplot of 
-#'   a zoomed view of the hindcast window. Facets with no data for a given
-#'   Scenario and Index combination are left blank. Defaults to \code{FALSE}.
-#' @param y_decimals Optional. Number of decimal places y-axis.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param zoom A boolean value that if \code{TRUE} adds a zoomed view of the 
+#'   hindcast window to each panel. Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places in the y-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the years in the data. Defaults to
+#'   \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the credibility intervals of the
+#'   fitted values, rounded. Defaults to \code{NULL}.
 #'
-#' @return A ggplot object displaying hindcast trajectories, observed data 
-#'   points, uncertainty ribbons, and MASE annotations, faceted by scenario and 
-#'   index.
+#' @return A \code{ggplot} object.
 #'
 #' @details
 #' The plot includes credibility ribbons for reference runs, hindcast
@@ -259,18 +346,31 @@ fits_ggplot <- function(
 #'
 #' @examples
 #' \dontrun{
-#' df <- hindcast_data(list_hc_models)
-#' hindcast_ggplot(df)
+#' # Build the JABBA input, fit the model and run the hindcast per scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#' hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#' hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- hindcast_data(list(hc_S01, hc_S02))
+#' hindcast_ggplot(data)
+#'
+#' # With the zoomed view and the MASE table at the bottom right
+#' hindcast_ggplot(data, zoom = TRUE, position = "bottom-right")
 #' }
 #' 
 #' @family visualization functions
 #' @family hindcasts functions
 #'
 #' @export 
-#' @importFrom ggplot2 .pt aes coord_cartesian facet_wrap geom_line geom_point 
+#' @importFrom ggplot2 .pt aes coord_cartesian facet_grid geom_line geom_point 
 #' geom_rect geom_ribbon ggplot guide_legend guides labs scale_colour_manual 
 #' scale_fill_manual scale_y_continuous theme 
-#' @importFrom dplyr filter mutate select vars
+#' @importFrom dplyr %>% filter mutate select vars
 #' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
@@ -283,29 +383,25 @@ hindcast_ggplot <- function(
     stop("Input data was expected to have 'JAGGdata' class.")
   }
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$data$hat.uci, na.rm = TRUE), 
-    TRUE)
+    max_y_val <- .round_to_nearest(
+      max(df_lists$data$hat.uci, na.rm = TRUE), TRUE
+    )
     min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), 
     FALSE)
     y_lim <- c(min_y_val, max_y_val)
   }
 
   if (is.null(x_lim)) {
-    max_x_val <- max(df_lists$data$year)
-    min_x_val <- min(df_lists$data$year)
-    x_lim <- c(min_x_val, max_x_val)
+    x_lim <- range(df_lists$data$year)
   }
-
-  x_min_zoom <- x_lim[2] - (x_lim[2] - x_lim[1]) * 0.5
-  y_min_zoom <- y_lim[2] - (y_lim[2] - y_lim[1]) * 0.5
-
-  zoom_x_lim <- if(!zoom) x_lim else c(x_lim[1], x_min_zoom)
   
+  # MASE table placed in each panel
   table <- .prepare_npc_table_data(
     data = df_lists$mase_data, 
     pos_x = str_split_i(position, "-", 2), 
@@ -315,8 +411,8 @@ hindcast_ggplot <- function(
     decimals = 3
   )
 
+  # Hindcast window
   min_year_hc <- min(df_lists$data_lines$year) - 1
-
   max_year_hc <- max(df_lists$data_lines$year)
   
   y_labels <- function(x) {
@@ -326,36 +422,52 @@ hindcast_ggplot <- function(
   }
   
   p1 <- ggplot() +
-    geom_ribbon(data = filter(df_lists$data, retro.peels == 0),
-        aes(x = year,
-            ymin = hat.lci, ymax = hat.uci),
-        fill = "gray80") +
-    geom_ribbon(data = filter(df_lists$data, retro.peels == 0, 
-                              year < df_lists$min_year_retro),
-                aes(x = year, ymin = hat.lci, ymax = hat.uci),
-                fill = "gray30", alpha = 0.5) +
-    geom_line(data = filter(df_lists$data, hindcast == FALSE),
-              aes(x = year, y = hat, colour = retro), linewidth = 1) +
-    geom_line(data = df_lists$data_lines,
-              aes(x = year, y = hat, group = retro.peels),
-              linewidth = 1, colour = "white") +
-    geom_point(data = filter(df_lists$data, retro.peels == 0, 
-                            year < df_lists$min_year_retro),
-               aes(x = year, y = obs), pch = 21, size = 4,
-               fill = "white") +
-    geom_point(data = df_lists$data_points, show.legend = FALSE,
-               aes(x = year, y = obs, fill = retro),
-               pch = 21, size = 4) +
-    geom_point(data = df_lists$data_points, show.legend = FALSE,
-               aes(x = year, y = hat, fill = retro),
-               pch = 21, size = 2) +
-    geom_table_npc(data = table,
-                  aes(npcx = x, npcy = y, label = tb),
-                  size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
+    geom_ribbon(
+      data = filter(df_lists$data, retro.peels == 0),
+      aes(x = year, ymin = hat.lci, ymax = hat.uci),
+      fill = "gray80"
+    ) +
+    geom_ribbon(
+      data = filter(
+        df_lists$data, retro.peels == 0, year < df_lists$min_year_retro
+      ),
+      aes(x = year, ymin = hat.lci, ymax = hat.uci),
+      fill = "gray30", alpha = 0.5
+    ) +
+    geom_line(
+      data = filter(df_lists$data, hindcast == FALSE),
+      aes(x = year, y = hat, colour = retro), 
+      linewidth = 1
+    ) +
+    geom_line(
+      data = df_lists$data_lines,
+      aes(x = year, y = hat, group = retro.peels),
+      linewidth = 1, colour = "white"
+    ) +
+    geom_point(
+      data = filter(
+        df_lists$data, retro.peels == 0, year < df_lists$min_year_retro
+      ),
+      aes(x = year, y = obs), 
+      pch = 21, size = 4, fill = "white"
+    ) +
+    geom_point(
+      data = df_lists$data_points, 
+      aes(x = year, y = obs, fill = retro),
+      show.legend = FALSE, pch = 21, size = 4
+    ) +
+    geom_point(
+      data = df_lists$data_points,
+      aes(x = year, y = hat, fill = retro),
+      show.legend = FALSE,pch = 21, size = 2
+    ) +
+    geom_table_npc(
+      data = table,
+      aes(npcx = x, npcy = y, label = tb),
+      size = text_size,
+      table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    ) +
     labs(x = title_x, y = title_y, colour = "") +
-    facet_wrap(Scenario ~ Index, ncol = length(unique(df_lists$data$Index)), 
-              drop = FALSE) +
     scale_y_continuous(labels = y_labels) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
     scale_fill_manual(values = ss3col(8)) +
@@ -369,12 +481,10 @@ hindcast_ggplot <- function(
     return(p1)
   } 
 
-  scenarios <- unique(df_lists$data$Scenario)
-  indices <- unique(df_lists$data$Index)
-
+  # Zoomed view of the hindcast window, one per Scenario and Index
   combos <- expand.grid(
-    Scenario = scenarios,
-    Index = indices,
+    Scenario = unique(df_lists$data$Scenario),
+    Index = unique(df_lists$data$Index),
     stringsAsFactors = FALSE
   )
 
@@ -390,26 +500,27 @@ hindcast_ggplot <- function(
     )
   )
 
+  # Keep only the panels that have data
   combos_valid <- combos %>% filter(!sapply(plot, is.null))
-
   combos_valid$x <- x_lim[2]
   combos_valid$y <- y_lim[2]
 
+  # y range of the zoom window
   zoom_ribbon_all <- df_lists$data %>%
     filter(year >= min_year_hc, retro.peels == 0)
 
-  min_y_zoom_ribbon <- floor(min(zoom_ribbon_all$hat.lci) * 10) / 10
-  max_y_zoom_ribbon <- ceiling(max(zoom_ribbon_all$hat.uci) * 10) / 10
+  min_y_zoom <- min(
+    floor(min(zoom_ribbon_all$hat.lci) * 10) / 10,
+    floor(min(df_lists$data_points$obs) * 10) / 10,
+    floor(min(df_lists$data_lines$obs) * 10) / 10
+  )
+  max_y_zoom <- max(
+    ceiling(max(zoom_ribbon_all$hat.uci) * 10) / 10,
+    ceiling(max(df_lists$data_points$obs) * 10) / 10,
+    ceiling(max(df_lists$data_lines$obs) * 10) / 10
+  )
 
-  min_y_zoom_points_1 <- floor(min(df_lists$data_points$obs) * 10) / 10
-  max_y_zoom_points_1 <- ceiling(max(df_lists$data_points$obs) * 10) / 10
-
-  min_y_zoom_points_2 <- floor(min(df_lists$data_lines$obs) * 10) / 10
-  max_y_zoom_points_2 <- ceiling(max(df_lists$data_lines$obs) * 10) / 10
-
-  min_y_zoom <- min(min_y_zoom_ribbon, min_y_zoom_points_1, min_y_zoom_points_2)
-  max_y_zoom <- max(max_y_zoom_ribbon, max_y_zoom_points_1, max_y_zoom_points_2)
-
+  # Dashed rectangle marking the zoom window
   rect_data <- combos_valid %>%
     select(Scenario, Index) %>%
     mutate(
@@ -417,7 +528,7 @@ hindcast_ggplot <- function(
       ymin = min_y_zoom,  ymax = max_y_zoom
     )
 
-  p3 <- p1 +
+  p1 +
     geom_rect(
       data = rect_data,
       mapping = aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
@@ -432,46 +543,72 @@ hindcast_ggplot <- function(
       hjust = 1,
       vjust = 1
     )
-
-  p3
 }
 
 #' Plot Kobe diagram
-#'
-#' Creates a Kobe plot showing the status of fish stocks in terms of biomass 
-#' (B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and 
-#' temporal trajectories.
-#'
-#' @param df_lists A named list as returned by \code{kobe_data()}. It must 
-#'   contain the elements \code{col01}, \code{col02}, \code{col03}, 
-#'   \code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.
-#' @param n_col An integer value that determines the maximum number of columns
-#'   per line. Defaults to 3.
-#' @param title_x A character string for the x-axis label. Defaults to "B/Bmsy".
-#' @param title_y A character string for the y-axis label. Defaults to "F/Fmsy".
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
-#'
-#' @return A ggplot object representing the Kobe plot, faceted by scenario.
+#' 
+#' Creates a ggplot2-based visualization of the stock status in a Kobe plot,
+#' with biomass (B/Bmsy) on the x-axis and fishing mortality (F/Fmsy) on the
+#' y-axis, showing the credibility contours of the terminal year and the
+#' trajectory of each scenario. The input is the output of
+#' \code{\link{kobe_data}()}.
 #'
 #' @details
-#' The plot includes:
+#' Each panel shows one scenario. The background is divided into four
+#' quadrants by the reference lines at B/Bmsy = 1 and F/Fmsy = 1:
 #' \itemize{
-#'   \item Colored quadrants representing stock status regions.
-#'   \item Kernel density contours (50%, 80%, 95%) for uncertainty.
-#'   \item Time series trajectory of stock status.
-#'   \item Highlighted reference years.
-#'   \item Reference lines at B/Bmsy = 1 and F/Fmsy = 1.
+#'   \item green: B/Bmsy > 1 and F/Fmsy < 1;
+#'   \item yellow: B/Bmsy < 1 and F/Fmsy < 1;
+#'   \item orange: B/Bmsy > 1 and F/Fmsy > 1;
+#'   \item red: B/Bmsy < 1 and F/Fmsy > 1.
 #' }
 #'
-#' Faceting is applied by scenario, allowing comparison across model runs.
+#' The gray polygons are the kernel density contours of the terminal year,
+#' one for each credibility level chosen in \code{kobe_data()} (argument
+#' \code{ci_levels}). The line is the trajectory of the median B/Bmsy and
+#' F/Fmsy, and the points mark the first, middle and last years of the series
+#' (circle, square and diamond, respectively).
+#'
+#' The quadrants extend up to the maximum ratio found in the data, so axis
+#' limits larger than that show blank areas. The lower limits cannot be
+#' negative, and the axis breaks are placed at every 1 unit.
+#'
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{kobe_data}()}, with the elements \code{col01}, \code{col02},
+#'   \code{col03}, \code{col04}, \code{ci_data}, \code{data_lines} and
+#'   \code{highlight_years}.
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
+#' @param title_x A character string or an expression for the x-axis label. 
+#'   Defaults to \code{expression(B/B[MSY])}.
+#' @param title_y A character string or an expression for the y-axis label.
+#'   Defaults to \code{expression(F/F[MSY])}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from 0 to the maximum
+#'   B/Bmsy. Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from 0 to the maximum
+#'   F/Fmsy. Defaults to \code{NULL}.
+#'
+#' @return A \code{ggplot} object.
 #'
 #' @examples
 #' \dontrun{
-#' df <- kobe_data(model_results)
-#' kobe_ggplot(df)
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- kobe_data(list(fit.S01, fit.S02))
+#' kobe_ggplot(data)
+#'
+#' # In two columns, with custom axis limits
+#' kobe_ggplot(data, n_col = 2, x_lim = c(0, 3), y_lim = c(0, 2))
 #' }
 #' 
 #' @family visualization functions
@@ -489,10 +626,12 @@ kobe_ggplot <- function(
   if (!inherits(df_lists, "JAGGdata")) {
     stop("Input data was expected to have 'JAGGdata' class.")
   }
-  .axis_limit(y_lim)
 
+  # Validate the axis limits
+  .axis_limit(y_lim)
   .axis_limit(x_lim)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
     max_y <- df_lists$col02$ymax
     y_lim <- c(0, max_y)
@@ -501,10 +640,10 @@ kobe_ggplot <- function(
     max_x <- df_lists$col02$xmax
     x_lim <- c(0, max_x)
   }
-  if (x_lim[1] < 0) x_lim[1] <- 0
-  if (y_lim[1] < 0) y_lim[1] <- 0
 
+  # One color per index
   n_levels <- length(unique(df_lists$ci_data$q))
+
   ggplot() +
     geom_rect(data = df_lists$col01, 
       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
@@ -542,14 +681,26 @@ kobe_ggplot <- function(
 
 #' Plot prior and posterior distributions
 #'
-#' Creates a ggplot2-based visualization comparing prior and posterior
-#' distributions for a selected parameter across scenarios.
+#' Creates a ggplot2-based visualization comparing the prior and posterior
+#' densities of a selected parameter (K, r or psi), by scenario, annotated with
+#' the prior-posterior mean and variance ratios. The input is the output of
+#' \code{\link{priors_posteriors_data}()}.
 #'
-#' @param df_lists A named list as returned by \code{priors_posteriors_data()}. 
-#'   It must contain the elements \code{prior}, \code{posterior}, \code{PPVR} 
-#'   and \code{PPMR}.
+#' @details
+#' Each panel shows one scenario. The prior density is drawn with the first
+#' color of \code{palette} and the posterior density with the second one. The
+#' table in each panel shows the prior-posterior mean ratio (PPMR) and the
+#' prior-posterior variance ratio (PPVR) of the selected parameter.
+#'
+#' The y-axis labels and ticks are hidden, since densities are only compared
+#' in shape. The axis limits are applied with
+#' \code{ggplot2::coord_cartesian()}, so they are the same in all panels.
+#'
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{priors_posteriors_data}()}, with the elements \code{prior},
+#'   \code{posterior}, \code{PPVR} and \code{PPMR}.
 #' @param indicator_name A character string specifying the parameter to plot.
-#'   Supported values include "K", "r", and "psi".
+#'   Must be one of \code{"K"}, \code{"r"} or \code{"psi"}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param position A character string specifying the table's position within 
@@ -560,38 +711,58 @@ kobe_ggplot <- function(
 #'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
 #'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
 #'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
-#'   \code{"bottom-center"}, and \code{"bottom-right"}.
+#'   \code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+#'   \code{"top-left"}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 6.
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Density".
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param palette Optional. A character vector of colors used for plotting. 
-#'   If \code{NULL} (default), a color-blind-friendly palette is generated
-#'   automatically according to the number of index levels.
-#'   If the number of suplied colors is smaller than the number specified, 
-#'   than the code returns an error.
-#' @param title_x A character string for the x-axis label. If \code{NULL}, a 
-#'   default label is assigned based on \code{indicator_name}.
-#' @param x_decimals Optional. Number of decimal places.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param palette Optional. A character vector of colors used for plotting,
+#'   with at least two colors (prior and posterior). If \code{NULL}, a
+#'   color-blind-friendly palette with two colors is generated automatically.
+#'   If more than two colors are supplied, only the first two are used. If the
+#'   number of supplied colors is smaller than two, then the code returns an
+#'   error. Defaults to \code{NULL}.
+#' @param title_x Optional. A character string for the x-axis label. If
+#'   \code{NULL}, a default label is assigned based on \code{indicator_name}
+#'   ("Carrying capacity (K)", "Intrinsic growth rate (r)" or "Initial biomass
+#'   depletion ratio (psi)"). Defaults to \code{NULL}.
+#' @param x_decimals Optional. Number of decimal places in the x-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from the minimum to the
+#'   maximum value of the prior and posterior. For \code{"K"}, the upper
+#'   limit is the 95% quantile of these values, to avoid the long tail.
+#'   Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from the minimum to the
+#'   maximum density of the prior and posterior, rounded. Defaults to
+#'   \code{NULL}.
 #'
-#' @return A ggplot object displaying prior and posterior densities, annotated 
-#'   with prior-posterior metrics (PPMR and PPVR).
-#'
-#' @details
-#' The plot overlays prior and posterior density curves, includes annotations 
-#' for prior-posterior mean and variance ratios, and faceted views by scenario.
+#' @return A \code{ggplot} object.
 #'
 #' @examples
 #' \dontrun{
-#' df <- priors_posteriors_data(list_fit_models)
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- priors_posteriors_data(list(fit.S01, fit.S02))
+#' priors_posteriors_ggplot(data, "K")
+#'
+#' # Custom colors and SI suffixes on the x-axis
 #' priors_posteriors_ggplot(
-#'   df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
+#'   data, "K", use_si_suffix = TRUE, palette = c("#4285f4", "#34a853")
 #' )
 #' }
 #' 
@@ -599,11 +770,12 @@ kobe_ggplot <- function(
 #' @family priors vs posteriors functions
 #'
 #' @export
-#' @importFrom dplyr %>% all_of filter full_join pull rename select
+#' @importFrom dplyr %>% all_of full_join pull rename select
 #' @importFrom ggplot2 .pt aes coord_cartesian element_blank facet_wrap 
 #' geom_area ggplot labs scale_x_continuous scale_y_continuous theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
+#' @importFrom stats quantile
 priors_posteriors_ggplot <- function(
   df_lists, indicator_name, n_col = 3, position = "top-left", text_size = 6, 
   title_y = "Density", use_si_suffix = FALSE, palette = NULL, title_x = NULL, 
@@ -616,38 +788,34 @@ priors_posteriors_ggplot <- function(
     stop("Parameter 'indicator_name' was expecting 'K', 'r' or 'psi'.")
   }
 
+  # Colors for prior and poseterior
   palette <- .resolve_palette(palette, 2)
 
+  # Validate the axis index
   .axis_limit(x_lim)
-
   .axis_limit(y_lim)
 
+  # Select the prior data from the indicator
   indicator1 <- paste0(indicator_name, "01")
   indicator2 <- paste0(indicator_name, "02")
   prior <- df_lists$prior %>%
     select(c(Scenario, all_of(c(indicator1, indicator2)))) %>%
-    rename(
-      value_1 = all_of(indicator1),
-      value_2 = all_of(indicator2)
-    )
+    rename(value_1 = all_of(indicator1), value_2 = all_of(indicator2))
   
+  # Title set to receive label based on indicator
   labels_x <- list(
     K = "Carrying capacity (K)",
     r = "Intrinsic growth rate (r)",
     psi = "Initial biomass depletion ratio (psi)"
   )
-
-  if (is.null(title_x)) {
-    title_x <- labels_x[[indicator_name]]
-  }
+  if (is.null(title_x)) title_x <- labels_x[[indicator_name]]
   
+  # Select the posterior data from the indicator
   posterior <- df_lists$posterior %>%
     select(c(Scenario, all_of(c(indicator1, indicator2)))) %>%
-    rename(
-      value_1 = all_of(indicator1),
-      value_2 = all_of(indicator2)
-    )
-  
+    rename(value_1 = all_of(indicator1), value_2 = all_of(indicator2))
+
+  # Default limits from the data
   if (is.null(x_lim)) {
     x_min <- min(prior$value_1, posterior$value_1, na.rm = TRUE)
     x_max <- ifelse(
@@ -657,7 +825,6 @@ priors_posteriors_ggplot <- function(
     )
     x_lim <- c(ifelse(indicator_name != "K", x_min, x_min - 1), x_max)
   }
-  
   if (is.null(y_lim)) {
     max_y <- .round_to_nearest(
       max(prior$value_2, posterior$value_2, na.rm = TRUE), TRUE, 1.1
@@ -665,18 +832,17 @@ priors_posteriors_ggplot <- function(
     min_y <- .round_to_nearest(
       min(prior$value_2, posterior$value_2, na.rm = TRUE), FALSE, 1.1
     )
-
     y_lim <- c(min_y, max_y)
   }
   
   df_text <- df_lists$PPMR %>%
   select(Scenario, ppmr_value = all_of(indicator_name)) %>%
   full_join(
-    df_lists$PPVR %>%
-      select(Scenario, ppvr_value = all_of(indicator_name)),
+    df_lists$PPVR %>% select(Scenario, ppvr_value = all_of(indicator_name)),
     by = "Scenario"
   ) 
 
+  # PPMR and PPVR table placed in each panel
   table <- .prepare_npc_table_data(
     data = df_text,
     pos_x = str_split_i(position, "-", 2), 
@@ -693,14 +859,22 @@ priors_posteriors_ggplot <- function(
   }
   
   ggplot() +
-    geom_area(data = prior, aes(x = value_1, y = value_2),
-              fill = palette[1], alpha = 0.5, colour = "black") +
-    geom_area(data = posterior, aes(x = value_1, y = value_2),
-              fill = palette[2], alpha = 0.5, colour = "black") +
-    geom_table_npc(data = table,
-                  aes(npcx = x, npcy = y, label = tb),
-                  size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
+    geom_area(
+      data = prior, 
+      aes(x = value_1, y = value_2),
+      fill = palette[1], alpha = 0.5, colour = "black"
+    ) +
+    geom_area(
+      data = posterior, 
+      aes(x = value_1, y = value_2),
+      fill = palette[2], alpha = 0.5, colour = "black"
+    ) +
+    geom_table_npc(
+      data = table,
+      aes(npcx = x, npcy = y, label = tb),
+      size = text_size, 
+      table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    ) +
     facet_wrap(~Scenario, ncol = n_col) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = title_y) +
@@ -712,16 +886,34 @@ priors_posteriors_ggplot <- function(
 
 #' Plot retrospective analysis results
 #'
-#' Creates a ggplot2-based visualization of retrospective analyses, including 
-#' time series of key indices and surplus production curves, along with 
-#' retrospective bias (rho) annotations.
+#' Creates a ggplot2-based visualization of the retrospective analysis of a
+#' selected indicator (B, F, B/Bmsy, F/Fmsy, process error or surplus 
+#' production), by scenario, annotated with the retrospective bias (rho). The
+#' input is the output of \code{\link{retrospective_analysis_data}()}.
 #'
-#' @param df_lists A named list as returned by
-#'   \code{retrospective_analysis_data()}. It must contain the elements 
+#' @details
+#' Each panel shows one scenario. For the time series indicators (\code{"B"},
+#' \code{"F"}, \code{"BBmsy"}, \code{"FFmsy"} and \code{"procB"}), the gray
+#' ribbon is the credibility interval of the reference run, and the lines are
+#' the reference run (black) and the retrospective runs (colored), drawn only
+#' for the years flagged by the \code{keep} column. A dashed line marks 1 for
+#' \code{"BBmsy"} and \code{"FFmsy"}, and 0 for \code{"procB"}.
+#'
+#' For \code{"MSY"}, the plot shows the surplus production curves as a function 
+#' of biomass, one for each run.
+#'
+#' The table in each panel shows the retrospective bias (rho) of the selected
+#' indicator. The colors of the retrospective runs come from
+#' \code{JABBA::ss3col()}, which supports up to 8 runs. The axis limits are
+#' applied with \code{ggplot2::coord_cartesian()}, so they are the same in all
+#' panels.
+#'
+#' @param df_lists A \code{JAGGdata} list as returned by
+#'   \code{\link{retrospective_analysis_data}()}, with the elements
 #'   \code{data}, \code{surplus_data} and \code{rho_data}.
-#' @param indicator_name A character string specifying the name of the 
-#'   indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
-#'   "procB", and "MSY".
+#' @param indicator_name A character string specifying the indicator to plot.
+#'   Must be one of \code{"B"}, \code{"F"}, \code{"BBmsy"}, \code{"FFmsy"},
+#'   \code{"procB"} or \code{"MSY"}.
 #' @param n_col An integer value that determines the maximum number of columns
 #'   per line. Defaults to 3.
 #' @param position A character string specifying the table's position within 
@@ -732,34 +924,56 @@ priors_posteriors_ggplot <- function(
 #'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
 #'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
 #'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
-#'   \code{"bottom-center"}, and \code{"bottom-right"}.
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
+#'   \code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+#'   \code{"top-left"}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 6.
-#' @param title_x A character string for the x-axis label. If \code{NULL}, a 
-#'   default label is assigned based on \code{indicator_name}.
-#' @param title_y A character string for the y-axis label. If \code{NULL}, a 
-#'   default label is assigned based on \code{indicator_name}.
-#' @param x_decimals Optional. Number of decimal places for x-axis.
-#' @param y_decimals Optional. Number of decimal places for y-axis.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param title_x Optional. A character string for the x-axis label. If
+#'   \code{NULL}, a default label is assigned based on \code{indicator_name}
+#'   ("Biomass (t)" for \code{"MSY"} and "Year" for the others). Defaults to
+#'   \code{NULL}.
+#' @param title_y Optional. A character string or an expression for the
+#'   y-axis label. If \code{NULL}, a default label is assigned based on
+#'   \code{indicator_name} (for example, "Biomass (t)" for \code{"B"} and
+#'   "Surplus Production (t)" for \code{"MSY"}). Defaults to \code{NULL}.
+#' @param x_decimals Optional. Number of decimal places in the x-axis labels,
+#'   used only when \code{indicator_name} is \code{"MSY"}. If \code{NULL}, up
+#'   to two decimal places are shown and trailing zeros are dropped. Defaults
+#'   to \code{NULL}.
+#' @param y_decimals Optional. Number of decimal places in the y-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data. Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data (the credibility interval of
+#'   the reference run, or its surplus production for \code{"MSY"}), rounded.
+#'   Defaults to \code{NULL}.
 #'
-#' @return A ggplot object displaying retrospective trajectories, credibility 
-#' intervals (when applicable), and rho annotations.
-#'
-#' @details
-#' For standard indices, the plot shows time series with credibility ribbons 
-#' and retrospective trajectories. For "MSY", the plot displays surplus 
-#' production curves as a function of biomass. Results are faceted by scenario.
+#' @return A \code{ggplot} object.
 #'
 #' @examples
 #' \dontrun{
-#' df <- retrospective_analysis_data(list_hc_models)
-#' retrospective_analysis_ggplot(df, indicator_name = "B")
+#' # Build the JABBA input, fit the model and run the hindcast per scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#' hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#' hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+#'
+#' # Prepare the data and plot
+#' data <- retrospective_analysis_data(list(hc_S01, hc_S02))
+#' retrospective_analysis_ggplot(data, indicator_name = "B")
+#'
+#' # Surplus production curves, in two columns
+#' retrospective_analysis_ggplot(data, "MSY", n_col = 2)
 #' }
 #' 
 #' @family visualization functions
@@ -787,8 +1001,8 @@ retrospective_analysis_ggplot <- function(
     ))
   }
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
   if (indicator_name != "MSY") {
@@ -799,6 +1013,7 @@ retrospective_analysis_ggplot <- function(
     if (is.null(title_x)) title_x <- "Biomass (t)"
   }
 
+  # Title set to receive label based on indicator
   labels_y <- list(
     B = "Biomass (t)",
     F = "Fishing Mortality (F)",
@@ -807,45 +1022,36 @@ retrospective_analysis_ggplot <- function(
     procB = "Process error on log(Biomass)",
     MSY = "Surplus Production (t)"
   )
-
   if (is.null(title_y)) {
     title_y <- labels_y[[indicator_name]]
   }
   
+  # Filtering the data base on the indicator
   rho_data <- df_lists$rho_data
-  data_var <- data[data$Index == indicator_name, ]
-  
-  data_ref   <- data_var[data_var$id == "Ref", ]
+  data_var <- data %>% filter(Index == indicator_name)
+  data_ref <- data_var %>% filter(id == "Ref")
+
+  # Default limits from the data
   if (indicator_name != "MSY") {
-    data_lines <- data_var[data_var$teste == TRUE, ]
+    data_lines <- data_var %>% filter(keep == TRUE)
   } else {
     data_lines <- data_var
   }
-  rho_var <- rho_data[rho_data$Index == indicator_name, ]
-  
+  rho_var <- rho_data %>% filter(Index == indicator_name)
   if (indicator_name != "MSY") {
     max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
       min_y_val <- .round_to_nearest(min(data_ref$lci, na.rm = TRUE), FALSE, 1.1)
       y_lim <- c(min_y_val, max_y_val)
     }
-    if (is.null(x_lim)) {
-      max_x_val <- max(max(data_ref$Year), max(data_var$Year))
-      min_x_val <- min(min(data_ref$Year), min(data_var$Year))
-    }
+    if (is.null(x_lim)) x_lim <- range(data_ref$Year)
   } else {
     max_y_val <- .round_to_nearest(max(data_ref$SP, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {
       min_y_val <- .round_to_nearest(min(data_ref$SP, na.rm = TRUE), FALSE, 1.1)
       y_lim <- c(min_y_val, max_y_val)
     }
-
-    if (is.null(x_lim)) {
-      max_x_val <- max(max(data_ref$SB_i), max(data_var$SB_i))
-      min_x_val <- min(min(data_ref$SB_i), min(data_var$SB_i))
-      x_lim <- c(min_x_val, max_x_val)
-    }
-
+    if (is.null(x_lim)) x_lim <- range(data_ref$SB_i)
     max_x_val <- .round_to_nearest(max(data_ref$SB_i, na.rm = TRUE), TRUE, 1.1)
   }
   
@@ -861,6 +1067,7 @@ retrospective_analysis_ggplot <- function(
     )
   }
   
+  # rho table placed in each panel
   table <- .prepare_npc_table_data(
     data = rho_var, 
     pos_x = str_split_i(position, "-", 2), 
@@ -894,8 +1101,9 @@ retrospective_analysis_ggplot <- function(
     }  
   } 
   else {
-    data_lines <- data_lines[!is.na(data_lines$SB_i) & !is.na(data_lines$SP), ]
-    
+    data_lines <- data_lines %>% 
+      filter(!is.na(data_lines$SB_i) & !is.na(data_lines$SP))
+
     p <- p +
       geom_line(
         data = data_lines,
@@ -905,10 +1113,11 @@ retrospective_analysis_ggplot <- function(
   }
   
   p <- p +
-    geom_table_npc(data = table,
-                  aes(npcx = x, npcy = y, label = tb), 
-                  size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    geom_table_npc(
+      data = table,
+      aes(npcx = x, npcy = y, label = tb), 
+      size = text_size,
+      table.theme = ttheme_gtdefault(base_size = text_size * .pt)
     ) +
     facet_wrap(~Scenario, ncol = n_col, scales = "fixed") +
     scale_colour_manual(values = c("black", ss3col(8))) +
@@ -934,53 +1143,80 @@ retrospective_analysis_ggplot <- function(
 
 #' Plot runs test diagnostics
 #'
-#' Creates a ggplot2-based visualization of runs test diagnostics, including 
-#' residuals, credibility limits, and p-values across scenarios and indices.
+#' Creates a ggplot2-based visualization of the runs test diagnostics of the 
+#' CPUE residuals, showing the residuals, the 3-sigma limits of the test and 
+#' it's p-value, by scenario and index. The input is the output of 
+#' \code{\link{runs_tests_data}()}. 
+#' 
+#' @details
+#' Each panel show one scenario (rows) and one index (columns). The shaded 
+#' rectangle marks the 3-sigma limits of the runs test (\code{lcl} and
+#' \code{ucl}) over the years of the series. It is green when the runs test
+#' does not reject randomness (p-value >= 0.05) and red otherwise 
+#' (p-value < 0.05). The residuals are drawn as points joined by segments to
+#' the \code{Ref} value, with a horizontal line at zero. Residuals inside the
+#' limits are white and residuals outside the limits are red and larger. The
+#' p-value of each panel is shown in a table.
 #'
-#' @param df_lists A named list as returned by \code{runs_tests_data()}. It 
-#'   must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.
-#' @param position A character string specifying the table's position within 
-#'   each plot panel, combining a vertical and a horizontal keyword separated 
-#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
-#'   component must be one of \code{"top"}, \code{"middle"}, or 
-#'   \code{"bottom"}; the horizontal component must be one of \code{"left"}, 
-#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"}, 
-#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"}, 
-#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"}, 
-#'   \code{"bottom-center"}, and \code{"bottom-right"}.
+#' @param df_lists A \code{JAGGdata} list as returned by 
+#'   \code{\link{runs_tests_data}()}, with the elements \code{cpue_residuals}
+#'   and \code{SE3}.
+#' @param position A character string specifying the table's position within
+#'   each plot panel, combining a vertical and a horizontal keyword separated
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+#'   component must be one of \code{"top"}, \code{"middle"}, or
+#'   \code{"bottom"}; the horizontal component must be one of \code{"left"},
+#'   \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
+#'   \code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
+#'   \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
+#'   \code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+#'   \code{"top-left"}.
 #' @param text_size An integer value that determines the size of the text. 
 #'   Defaults to 6.
 #' @param title_x A character string for the x-axis label. Defaults to "Year".
 #' @param title_y A character string for the y-axis label. Defaults to 
 #'   "Residuals".
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param y_decimals Optional. Number of decimal places for y-axis.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places in the y-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from the first to the last
+#'   year of the series. Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from the lowest to the
+#'   highest 3-sigma limit, rounded. Defaults to \code{NULL}.
 #'
-#' @return A ggplot object showing residuals, credibility regions, and runs 
-#'   test results.
-#'
-#' @details
-#' The plot includes shaded regions representing credibility limits, residual 
-#' segments, highlighted points based on threshold exceedance, and p-value 
-#' annotations. Results are faceted by scenario and index.
+#' @return A \code{ggplot} object.
 #'
 #' @examples
 #' \dontrun{
-#' df <- runs_tests_data(list_fit_models)
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' df <- runs_tests_data(list(fit.S01, fit.S02))
 #' runs_tests_ggplot(df)
+#'
+#' # With the p-value table at the bottom right
+#' runs_tests_ggplot(df, position = "bottom-right")
 #' }
 #' 
 #' @family visualization functions
 #' @family cpue residuals runs tests functions
 #'
 #' @export
-#' @importFrom ggplot2 .pt ggplot geom_rect aes geom_hline geom_segment
-#' geom_point facet_grid scale_fill_manual labs theme
+#' @importFrom dplyr filter
+#' @importFrom ggplot2 .pt aes coord_cartesian facet_grid geom_hline geom_point 
+#' geom_rect geom_segment ggplot labs scale_fill_manual scale_y_continuous theme
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
 runs_tests_ggplot <- function(
@@ -992,10 +1228,11 @@ runs_tests_ggplot <- function(
     stop("Input data was expected to have 'JAGGdata' class.")
   }
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
     max_y_val <- .round_to_nearest(max(df_lists$SE3$ucl, na.rm = TRUE), TRUE, 
     2.5)
@@ -1003,13 +1240,9 @@ runs_tests_ggplot <- function(
     2.5)
     y_lim <- c(min_y_val, max_y_val)
   }
+  if (is.null(x_lim)) x_lim <- range(df_lists$SE3$ymin, df_lists$SE3$ymax)
 
-  if (is.null(x_lim)) {
-    max_x_val <- max(df_lists$SE3$ymax)
-    min_x_val <- min(df_lists$SE3$ymin)
-    x_lim <- c(min_x_val, max_x_val)
-  }
-
+  # p-value table placed in each panel
   table <- .prepare_npc_table_data(
     data = df_lists$SE3, 
     pos_x = str_split_i(position, "-", 2), 
@@ -1026,24 +1259,33 @@ runs_tests_ggplot <- function(
   }
 
   ggplot() +
-    geom_rect(data = df_lists$SE3,
-              aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, 
-                  fill = class),
-              alpha = 0.2) +
-    geom_table_npc(data = table,
-                  aes(npcx = x, npcy = y,label = tb), 
-                  size = text_size,
-                  table.theme = ttheme_gtdefault(base_size = text_size * .pt)) +
+    geom_rect(
+      data = df_lists$SE3,
+      aes(xmin = ymin, xmax = ymax, ymin = lcl, ymax = ucl, fill = class),
+      alpha = 0.2
+    ) +
+    geom_table_npc(
+      data = table,
+      aes(npcx = x, npcy = y,label = tb), 
+      size = text_size,
+      table.theme = ttheme_gtdefault(base_size = text_size * .pt)
+    ) +
     geom_hline(yintercept = 0, linetype = "longdash") +
-    geom_segment(data = df_lists$cpue_residuals,
-                 aes(x = Year, xend = Year, y = Ref, yend = Res)) +
-    geom_point(data = filter(df_lists$cpue_residuals, class == "white"),
-        aes(x = Year, y = Res), fill = "white",
-        pch = 21, size = 2) +
-    geom_point(data = filter(df_lists$cpue_residuals, class == "red"),
-        aes(x = Year, y = Res), fill = "red",
-        pch = 21, size = 2.5) +
-      facet_grid(Scenario ~ Index, scales = "free") +
+    geom_segment(
+      data = df_lists$cpue_residuals,
+      aes(x = Year, xend = Year, y = Ref, yend = Res)
+    ) +
+    geom_point(
+      data = filter(df_lists$cpue_residuals, class == "white"),
+      aes(x = Year, y = Res), 
+      fill = "white", pch = 21, size = 2
+    ) +
+    geom_point(
+      data = filter(df_lists$cpue_residuals, class == "red"), 
+      aes(x = Year, y = Res), 
+      fill = "red", pch = 21, size = 2.5
+    ) +
+    facet_grid(Scenario ~ Index, scales = "fixed") +
     scale_fill_manual(values = c("green", "red")) +
     scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
@@ -1054,22 +1296,39 @@ runs_tests_ggplot <- function(
 
 #' Create and display a summary table
 #' 
-#' Generates a formatted table from data returned by \code{get_*()} acessor 
-#' functions, using the \pkg{gt} package. The table can be displayed in the
-#' Viewer pane, printed to the console, and optionally saved to file.
+#' Creates a formatted table, using the \pkg{gt} package, from the data frames
+#' returned by the package \code{get_()} extraction functions. The table can be 
+#' displayed in the Viewer pane or printed to the console, and optionally saved 
+#' to file.
 #' 
-#' @param data A data frame containing extracted model results, returned by one 
-#'   of the package \code{get_*()} functions.
+#' @details
+#' The table has bold column labels and alternating row background colors.
+#'
+#' When \code{show} is \code{"html"} or \code{"png"}, the table is written to
+#' a temporary file and opened in the RStudio Viewer, or in the default web
+#' browser if the Viewer is not available. Nothing is displayed in
+#' non-interactive sessions. If \code{show = "console"}, the raw input data
+#' frame is printed instead of the formatted table.
+#'
+#' If \code{save = "xlsx"}, the raw input data frame is exported with
+#' \pkg{openxlsx}. For the other formats, the formatted table is exported
+#' with \code{gt::gtsave()}. The file is saved in the working directory,
+#' unless \code{filename} includes a path. Saving as \code{"png"} or
+#' \code{"pdf"} requires the \pkg{webshot2} package.
+#' 
+#' @param data A data frame with the extracted model results, as returned by 
+#'   one of the package \code{get_*()} functions.
 #' @param show Optional. Character string specifying how the table should be
-#'   displayed. Possible values are:
+#'   displayed. Must be one of:
 #'   \itemize{
 #'     \item \code{"html"}: displays the table as an HTML file in the Viewer.
 #'     \item \code{"png"}: displays the table as a PNG image in the Viewer.
 #'     \item \code{"console"}: prints the raw data frame to the console.
-#'     \item \code{NULL}: no display output.
+#'     \item \code{NULL}: nothing is displayed.
 #'   }
-#' @param save Optional. Character string specifying the output format used to
-#'   save the table. Possible values are:
+#'   Defaults to \code{"html"}.
+#' @param save Optional. Character string specifying the format used to save 
+#'   the table. Must be one of:
 #'   \itemize{
 #'     \item \code{"html"}: saves the table as an HTML file.
 #'     \item \code{"png"}: saves the table as a PNG image.
@@ -1077,47 +1336,39 @@ runs_tests_ggplot <- function(
 #'     \item \code{"xlsx"}: saves the raw data as an Excel file.
 #'     \item \code{NULL}: no file is saved.
 #'   }
-#' @param filename Optional. Character string specifying the output file name
-#'   without extension. Defaults to \code{"summary_table"}.
-#' @param digits A integer indicating the number of decimals places to display. 
+#'   Defaults to \code{NULL}.
+#' @param dir Optional. Character string for the output directory name, creates 
+#'   it if don't exists. Defaults to \code{NULL}.
+#' @param filename A character string for the output file name, without the 
+#'   extension. Defaults to \code{"summary_table"}.
+#' @param digits An integer indicating the number of decimals places to display. 
 #'   Defaults to 4.
-#' 
-#' @return
-#' Invisibly returns a formatted \code{gt} table object.
-#' 
-#' @details
-#' The generated table automatically formats column labels in bold and applies
-#' alternating row background colors to improve readability.
-#' 
-#' When \code{show} is enabled, temporary files are generated and displayed
-#' using the RStudio Viewer pane. If \code{show = "console"}, the raw input
-#' data frame is printed instead of the formatted table.
-#' 
-#' If \code{save = "xlsx"}, the raw input data frame is exported using
-#' \pkg{openxlsx}; otherwise, the formatted \pkg{gt} table is exported using
-#' \code{gtsave()}.
-#' 
-#' This function is designed as a general-purpose table formatter for outputs
-#' generated by package extraction functions.
 #' 
 #' @examples
 #' \dontrun{
+#' # Table in the Viewer
 #' summary_table(get_mase(hindcast_data(list_hc_models)))
-#' 
+#'
+#' # PNG image in the Viewer
 #' summary_table(get_ppmr(priors_posteriors_data(list_fit_models)), "png")
-#' 
-#' summary_table(get_pars(list_fit_models), "console", "xlsx", "pars_table")
+#'
+#' # Print to the console and save as an Excel file in the results folder
+#' summary_table(
+#'   data = get_pars(list_fit_models), show = "console", save = "xlsx", 
+#'   dir = "results", filename = "pars_table"
+#' )
 #' }
 #' 
 #' @family visualization functions
 #' 
 #' @export
 #' @importFrom gt gtsave
-#' @importFrom rstudioapi isAvailable viewer
 #' @importFrom openxlsx write.xlsx
+#' @importFrom rstudioapi isAvailable viewer
 #' @importFrom utils browseURL
 summary_table <- function(
-  data, show = "html", save = NULL, filename = "summary_table", digits = 4
+  data, show = "html", save = NULL, dir = NULL, filename = "summary_table", 
+  digits = 4
 ) {
   table <- .default_table(data, digits = digits)
   if (is.null(table)) stop("Argument 'data' cannot be NULL or empty.")
@@ -1154,83 +1405,116 @@ summary_table <- function(
       stop("Invalid save type")
     )
 
-    file <- paste0(filename, ext)
+    if (!is.null(dir)) {
+      if (!dir.exists(dir)) {
+        dir.create(dir)
+      }
+      file <- file.path(dir, paste0(filename, ext))
+    }
+    else {
+      file <- paste0(filename, ext)
+    }
+
+    
     if (ext != ".xlsx") {
       gtsave(table, file)
     }
     else {
       write.xlsx(data, file)
     }
+    message("Table saved to: ", normalizePath(file))
   }
+  invisible(table)
 }
 
 #' Plot model trajectories
 #'
-#' Creates a ggplot2-based visualization of model trajectories over time,
-#' including median trends and uncertainty intervals across scenarios.
-#'
-#' @param df A data frame as returned by \code{trajectories_data()}.
-#' @param indicator_name A character string indicating the indicator_name to 
-#'   plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
-#'   \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.
-#' @param title_x A character string for the x-axis label. Defaults to "Year".
-#' @param n_col An integer value that determines the maximum number of columns
-#'   per line. Defaults to 3.
-#' @param use_si_suffix A boolean value indicating whether SI suffixes will be 
-#'   used, or if FALSE then shows the absolute number, Defaults to FALSE.
-#' @param blim Optional. A numeric value indicating the limit reference point 
-#'   to be displayed as a horizontal dashed red line on the plot. Only used 
-#'   when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}.
-#' @param y_decimals Optional. Number of decimal places for y-axis.
-#' @param palette Optional. A character vector of colors used for plotting. 
-#'   If \code{NULL} (default), a color-blind-friendly palette is generated
-#'   automatically according to the number of index levels.
-#'   If the number of suplied colors is smaller than the number specified, 
-#'   than the code returns an error.
-#' @param title_y Optional. A character string or expression for the y-axis 
-#'   label. Defaults to a predefined label depending on the selected variable.
-#' @param x_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the x-axis c(min, max) used to restrict the plotting range.
-#' @param y_lim Optional. A numeric vector of length 2 specifying the lower and 
-#'   upper limits of the y-axis c(min, max) used to restrict the plotting range.
-#'
-#' @return A ggplot object displaying trajectory summaries with credibility 
-#'   intervals, faceted by scenario.
-#'
+#' Creates a ggplot2-based visualization of the trajectories of a selected 
+#' indicator over time (including median trends and uncertainty intervals), by 
+#' scenarios. The input is the output of \code{\link{trajectories_data}()}.
+#' 
 #' @details
-#' The functions filters the input data based on the selected 
-#' \code{indicator_name} (matching the \code{indicator} column). The plot 
-#' includes ribbons representing 80% (\code{lcl2}-\code{ucl2}) and 95% 
-#' (\code{lcl}-\code{ucl}) credibility intervals, as well as a median 
-#' trajectory line (\code{mu}).
+#' The input data is filtered by the selected \code{indicator_name}, which 
+#' matches the \code{indicator} column. Each panel shows one scenario. The 
+#' light ribbons are the 80% (\code{lcl2}-\code{ucl2}) and 95%
+#' (\code{lcl}-\code{ucl}) credibility intervals, and the line is the median
+#' trajectory (\code{mu}). Both ribbons use the first color of
+#' \code{palette}.
 #'
-#' Reference lines are added depending on the selected indicator_name:
+#' Reference lines are added depending on the selected indicator:
 #' \itemize{
-#'   \item \code{"BBmsy"}: horizontal lines at 1 and \code{blim} (0.4 by 
-#'     default)
-#'   \item \code{"FFmsy"}: horizontal line at 1
-#'   \item \code{"Bdev"}: horizontal line at 0
+#'   \item \code{"BBmsy"}: dashed lines at 1 and at \code{blim} (red);
+#'   \item \code{"FFmsy"}: dashed line at 1;
+#'   \item \code{"Bdev"}: dashed line at 0.
 #' }
 #'
-#' The y-axis limits are automatically adjusted based on the data range, and 
-#' labels are formatted dynamically. The y-axis label is automatically defined 
-#' unless provided by the user.
-#' 
+#' @param df A \code{JAGGdata} data frame as returned by
+#'   \code{\link{trajectories_data}()}.
+#' @param indicator_name A character string indicating the indicator to plot. 
+#'   Must be one of \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"}, 
+#'   \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.
+#' @param blim A numeric value indicating the limit reference point,
+#'   displayed as a red dashed horizontal line. Only used when
+#'   \code{indicator_name} is \code{"BBmsy"}. Defaults to \code{0.4}.
+#' @param n_col An integer value that determines the maximum number of columns
+#'   per line. Defaults to 3.
+#' @param title_x A character string for the x-axis label. Defaults to "Year".
+#' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
+#'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
+#'   absolute number, Defaults to \code{FALSE}.
+#' @param y_decimals Optional. Number of decimal places in the y-axis labels.
+#'   If \code{NULL}, up to two decimal places are shown and trailing zeros
+#'   are dropped. Defaults to \code{NULL}.
+#' @param palette Optional. A character vector of colors used for plotting.
+#'   Only the first color is used (the fill of the credibility intervals). If
+#'   \code{NULL}, a color-blind-friendly color is generated automatically.
+#'   If the vector is invalid, then the code returns an error. Defaults to
+#'   \code{NULL}.
+#' @param title_y Optional. A character string or an expression for the
+#'   y-axis label. If \code{NULL}, a default label is assigned based on
+#'   \code{indicator_name} (for example, "Biomass (t)" for \code{"B"}).
+#'   Defaults to \code{NULL}.
+#' @param x_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the years of the selected indicator.
+#'   Defaults to \code{NULL}.
+#' @param y_lim Optional. A numeric vector of length 2 specifying the lower
+#'   and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+#'   limits will be calculated based on the data, from the lowest 2.5%
+#'   quantile to the highest 97.5% quantile, rounded. Defaults to
+#'   \code{NULL}.
+#'
+#' @return A \code{ggplot} object.
+#'
 #' @examples
 #' \dontrun{
-#' df <- trajectories_data(out)
-#' trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
+#' # Build the JABBA input and fit the model for each scenario
+#' jb.S01 <- JABBA::build_jabba(...)
+#' fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+#'
+#' jb.S02 <- JABBA::build_jabba(...)
+#' fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+#'
+#' # Prepare the data and plot
+#' df <- trajectories_data(list(fit.S01, fit.S02))
+#' trajectories_ggplot(df, indicator_name = "BBmsy")
+#'
+#' # Custom color and limit reference point
+#' trajectories_ggplot(
+#'   df, "BBmsy", blim = 0.5, palette = "#1B4F8A"
+#' )
 #' }
 #' 
 #' @family visualization functions
 #' @family trajectories functions
 #'
 #' @export
+#' @importFrom dplyr %>% filter
 #' @importFrom ggplot2 aes coord_cartesian facet_wrap geom_hline geom_line 
 #' geom_ribbon ggplot labs scale_y_continuous theme
 trajectories_ggplot <- function(
-  df, indicator_name, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
-  blim = NULL, y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, 
+  df, indicator_name, blim = 0.4, n_col = 3, title_x = "Year", use_si_suffix = FALSE, 
+  y_decimals = NULL, palette = NULL, title_y = NULL, x_lim = NULL, 
   y_lim = NULL
 ) {
   if (!inherits(df, "JAGGdata")) {
@@ -1244,27 +1528,27 @@ trajectories_ggplot <- function(
       "'Bdev', 'B', 'H' or 'Catch'."
     ))
   }
+
+  # A single color is needed
   palette <- .resolve_palette(palette, 1)
 
+  # Validate the axis limits
   .axis_limit(y_lim)
-
   .axis_limit(x_lim)
 
+  # Filter data based on the indicator
   df <- df %>%
     filter(indicator == indicator_name)
 
+  # Default limits from the data
   if (is.null(y_lim)) {
     max_y_val <- .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
     min_y_val <- .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
     y_lim <- c(min_y_val, max_y_val)
   }
+  if (is.null(x_lim)) x_lim <- range(df$year, na.rm = TRUE)
 
-  if (is.null(x_lim)) {
-    max_x_val <- max(df$year, na.rm = TRUE)
-    min_x_val <- min(df$year, na.rm = TRUE)
-    x_lim <- c(min_x_val, max_x_val)
-  }
-
+  # Title set to receive label based on indicator
   labels_y <- list(
     BB0 = expression(B/B[0]),
     BBmsy = expression(B/B[MSY]),
@@ -1274,7 +1558,6 @@ trajectories_ggplot <- function(
     H = "Harvest rate",
     Catch = "Catch"
   )
-
   if (is.null(title_y)) {
     title_y <- labels_y[[indicator_name]]
   }
@@ -1285,17 +1568,19 @@ trajectories_ggplot <- function(
     )
   }
 
-  if (is.null(blim) && indicator_name == "BBmsy") {
-    blim <- 0.4
-  }
-
   p <- ggplot() +
-    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
-                aes(x = year, ymin = lcl, ymax = ucl)) +
-    geom_ribbon(data = df, fill = palette[1], alpha = 0.3,
-                aes(x = year, ymin = lcl2, ymax = ucl2))
+    geom_ribbon(
+      data = df,
+      aes(x = year, ymin = lcl, ymax = ucl), 
+      fill = palette[1], alpha = 0.3
+    ) +
+    geom_ribbon(
+      data = df,
+      aes(x = year, ymin = lcl2, ymax = ucl2), 
+      fill = palette[1], alpha = 0.3
+    )
   
-  if (!is.null(blim) && indicator_name == "BBmsy") {
+  if (indicator_name == "BBmsy") {
     p <- p +
       geom_hline(yintercept = blim, linetype = "longdash", colour = "red")
   }
@@ -1312,10 +1597,7 @@ trajectories_ggplot <- function(
   p <- p +
     geom_line(data = df, aes(x = year, y = mu), linewidth = 1) +
     facet_wrap(~ Scenario, scales = "fixed", ncol = n_col) +
-    scale_y_continuous(
-      expand = c(0, 0), 
-      labels = y_labels
-    ) +
+    scale_y_continuous(expand = c(0, 0), labels = y_labels) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     labs(x = title_x, y = title_y) +
     .my_theme() +

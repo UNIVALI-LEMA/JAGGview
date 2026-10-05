@@ -19,8 +19,9 @@ cpue_residuals_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
-must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{runs_tests_data}()}, with the elements
+\code{cpue_residuals} and \code{RMSE_data}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
@@ -40,37 +41,63 @@ Defaults to 6.}
 
 \item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
-\item{title_y}{A character string for the y-axis label.
-Defaults to "Residuals"}
+\item{title_y}{A character string for the y-axis label. Defaults to
+"Residuals".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{y_decimals}{Optional. Number of decimal places y-axis.}
+\item{y_decimals}{Optional. Number of decimal places y-axis labels.
+If \code{NULL}, up to two decimals places are shown and trailling zeros
+are dropped. Defaults to NULL.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
-If \code{NULL} (default), a color-blind-friendly palette is generated
-automatically according to the number of index levels.
-If the number of suplied colors is smaller than the number specified,
-than the code returns an error.}
+If \code{NULL}, a color-blind-friendly palette is generated automatically
+according to the number of index levels. If the number of supplied colors
+is smaller then the number specified, then the code returns an error.
+Defaults to NULL.}
 
 \item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+upper limits of the x-axis c(min, max). If \code{NULL}, the limits will be
+calculated based on the data. Defaults to NULL.}
 
 \item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+upper limits of the y-axis c(min, max). If \code{NULL}, the limits will be
+calculated based on the data. Defaults to NULL.}
 }
 \value{
-A ggplot object displaying CPUE residual diagnostics.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2- based visualization of CPUE residuals across
-years and scenarios, including reference lines, residual segments,
-smoothed trends, and RMSE annotations.
+Creates a ggplot2-based visualization of the CPUE residuals by year, index
+and scenarios, with a smoothed trend and the RMSE of each scenario. The
+input is the output of \code{\link{runs_tests_data}()}.
 }
 \details{
-The plot includes residual segments, observed values, a smoothed trend,
-and RMSE annotations for each scenario.
+Each panel shows one scenario. Residuals are drawn as points joined by
+segments to the \code{Ref} value, with a horizontal line at zero. The
+smoothed trend (black line and band) is computed by
+\code{ggplot2::geom_smooth()} on the residuals of the panel, and the RMSE
+table is placed at the position given by \code{position}.
+}
+\examples{
+\dontrun{
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+data <- runs_tests_data(list(fit.S01, fit.S02))
+cpue_residuals_ggplot(data)
+
+# Table at the bottom right, in two columns
+cpue_residuals_ggplot(data, n_col = 2, position = "bottom-right")
+}
+
 }
 \seealso{
 Other visualization functions: 

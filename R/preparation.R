@@ -796,7 +796,7 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' 
 #' A single LOESS curve is fitted to the residuals of all indices and scenarios 
 #' together (\code{Res - Year}). The bands (\code{lower} and \code{upper}) are 
-#' 95\% confidence bands, computed as the fit plus or minus 1.96 standart 
+#' 95% confidence bands, computed as the fit plus or minus 1.96 standart 
 #' errors.
 #' 
 #' Rows with missing values are removed. If \code{indices_factor} is supplied, 
@@ -970,10 +970,10 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #'   \item \code{year}: Year of the observation.
 #'   \item \code{Scenario}: Scenario name.
 #'   \item \code{mu}: Median value.
-#'   \item \code{lcl}: Lower 2.5\% quantile.
-#'   \item \code{ucl}: Upper 97.5\% quantile.
-#'   \item \code{lcl2}: Lower 10\% quantile.
-#'   \item \code{ucl2}: Upper 90\% quantile.
+#'   \item \code{lcl}: Lower 2.5% quantile.
+#'   \item \code{ucl}: Upper 97.5% quantile.
+#'   \item \code{lcl2}: Lower 10% quantile.
+#'   \item \code{ucl2}: Upper 90% quantile.
 #'   \item \code{indicator}: Name of the indicator summarised.
 #' }
 #' Returns \code{NULL} if the process is aborted due to low memory.

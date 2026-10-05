@@ -42,7 +42,7 @@ and scenario.\code{lcl} and \code{ucl} are it's 3-sigma limits, and
 
 A single LOESS curve is fitted to the residuals of all indices and scenarios
 together (\code{Res - Year}). The bands (\code{lower} and \code{upper}) are
-95\\% confidence bands, computed as the fit plus or minus 1.96 standart
+95\% confidence bands, computed as the fit plus or minus 1.96 standart
 errors.
 
 Rows with missing values are removed. If \code{indices_factor} is supplied,

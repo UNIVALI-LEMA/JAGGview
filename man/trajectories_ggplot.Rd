@@ -7,10 +7,10 @@
 trajectories_ggplot(
   df,
   indicator_name,
+  blim = 0.4,
   n_col = 3,
   title_x = "Year",
   use_si_suffix = FALSE,
-  blim = NULL,
   y_decimals = NULL,
   palette = NULL,
   title_y = NULL,
@@ -19,72 +19,92 @@ trajectories_ggplot(
 )
 }
 \arguments{
-\item{df}{A data frame as returned by \code{trajectories_data()}.}
+\item{df}{A \code{JAGGdata} data frame as returned by
+\code{\link{trajectories_data}()}.}
 
-\item{indicator_name}{A character string indicating the indicator_name to
-plot. Options are \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
+\item{indicator_name}{A character string indicating the indicator to plot.
+Must be one of \code{"BB0"}, \code{"BBmsy"}, \code{"FFmsy"},
 \code{"Bdev"}, \code{"B"}, \code{"H"} or \code{"Catch"}.}
+
+\item{blim}{A numeric value indicating the limit reference point,
+displayed as a red dashed horizontal line. Only used when
+\code{indicator_name} is \code{"BBmsy"}. Defaults to \code{0.4}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
 
 \item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{blim}{Optional. A numeric value indicating the limit reference point
-to be displayed as a horizontal dashed red line on the plot. Only used
-when \code{indicator_name = "BBmsy"}. Defaults to \code{0.4}.}
-
-\item{y_decimals}{Optional. Number of decimal places for y-axis.}
+\item{y_decimals}{Optional. Number of decimal places in the y-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
-If \code{NULL} (default), a color-blind-friendly palette is generated
-automatically according to the number of index levels.
-If the number of suplied colors is smaller than the number specified,
-than the code returns an error.}
+Only the first color is used (the fill of the credibility intervals). If
+\code{NULL}, a color-blind-friendly color is generated automatically.
+If the vector is invalid, then the code returns an error. Defaults to
+\code{NULL}.}
 
-\item{title_y}{Optional. A character string or expression for the y-axis
-label. Defaults to a predefined label depending on the selected variable.}
+\item{title_y}{Optional. A character string or an expression for the
+y-axis label. If \code{NULL}, a default label is assigned based on
+\code{indicator_name} (for example, "Biomass (t)" for \code{"B"}).
+Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the years of the selected indicator.
+Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from the lowest 2.5\%
+quantile to the highest 97.5\% quantile, rounded. Defaults to
+\code{NULL}.}
 }
 \value{
-A ggplot object displaying trajectory summaries with credibility
-intervals, faceted by scenario.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization of model trajectories over time,
-including median trends and uncertainty intervals across scenarios.
+Creates a ggplot2-based visualization of the trajectories of a selected
+indicator over time (including median trends and uncertainty intervals), by
+scenarios. The input is the output of \code{\link{trajectories_data}()}.
 }
 \details{
-The functions filters the input data based on the selected
-\code{indicator_name} (matching the \code{indicator} column). The plot
-includes ribbons representing 80\% (\code{lcl2}-\code{ucl2}) and 95\%
-(\code{lcl}-\code{ucl}) credibility intervals, as well as a median
-trajectory line (\code{mu}).
+The input data is filtered by the selected \code{indicator_name}, which
+matches the \code{indicator} column. Each panel shows one scenario. The
+light ribbons are the 80\% (\code{lcl2}-\code{ucl2}) and 95\%
+(\code{lcl}-\code{ucl}) credibility intervals, and the line is the median
+trajectory (\code{mu}). Both ribbons use the first color of
+\code{palette}.
 
-Reference lines are added depending on the selected indicator_name:
+Reference lines are added depending on the selected indicator:
 \itemize{
-\item \code{"BBmsy"}: horizontal lines at 1 and \code{blim} (0.4 by
-default)
-\item \code{"FFmsy"}: horizontal line at 1
-\item \code{"Bdev"}: horizontal line at 0
+\item \code{"BBmsy"}: dashed lines at 1 and at \code{blim} (red);
+\item \code{"FFmsy"}: dashed line at 1;
+\item \code{"Bdev"}: dashed line at 0.
 }
-
-The y-axis limits are automatically adjusted based on the data range, and
-labels are formatted dynamically. The y-axis label is automatically defined
-unless provided by the user.
 }
 \examples{
 \dontrun{
-df <- trajectories_data(out)
-trajectories_ggplot(df, indicator_name = "BB0", palette = c("blue"))
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+df <- trajectories_data(list(fit.S01, fit.S02))
+trajectories_ggplot(df, indicator_name = "BBmsy")
+
+# Custom color and limit reference point
+trajectories_ggplot(
+  df, "BBmsy", blim = 0.5, palette = "#1B4F8A"
+)
 }
 
 }

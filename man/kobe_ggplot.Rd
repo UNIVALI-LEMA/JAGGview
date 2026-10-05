@@ -14,47 +14,75 @@ kobe_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{kobe_data()}. It must
-contain the elements \code{col01}, \code{col02}, \code{col03},
-\code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{kobe_data}()}, with the elements \code{col01}, \code{col02},
+\code{col03}, \code{col04}, \code{ci_data}, \code{data_lines} and
+\code{highlight_years}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
 
-\item{title_x}{A character string for the x-axis label. Defaults to "B/Bmsy".}
+\item{title_x}{A character string or an expression for the x-axis label.
+Defaults to \code{expression(B/B[MSY])}.}
 
-\item{title_y}{A character string for the y-axis label. Defaults to "F/Fmsy".}
+\item{title_y}{A character string or an expression for the y-axis label.
+Defaults to \code{expression(F/F[MSY])}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from 0 to the maximum
+B/Bmsy. Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from 0 to the maximum
+F/Fmsy. Defaults to \code{NULL}.}
 }
 \value{
-A ggplot object representing the Kobe plot, faceted by scenario.
+A \code{ggplot} object.
 }
 \description{
-Creates a Kobe plot showing the status of fish stocks in terms of biomass
-(B/Bmsy) and fishing mortality (F/Fmsy), including uncertainty contours and
-temporal trajectories.
+Creates a ggplot2-based visualization of the stock status in a Kobe plot,
+with biomass (B/Bmsy) on the x-axis and fishing mortality (F/Fmsy) on the
+y-axis, showing the credibility contours of the terminal year and the
+trajectory of each scenario. The input is the output of
+\code{\link{kobe_data}()}.
 }
 \details{
-The plot includes:
+Each panel shows one scenario. The background is divided into four
+quadrants by the reference lines at B/Bmsy = 1 and F/Fmsy = 1:
 \itemize{
-\item Colored quadrants representing stock status regions.
-\item Kernel density contours (50\%, 80\%, 95\%) for uncertainty.
-\item Time series trajectory of stock status.
-\item Highlighted reference years.
-\item Reference lines at B/Bmsy = 1 and F/Fmsy = 1.
+\item green: B/Bmsy > 1 and F/Fmsy < 1;
+\item yellow: B/Bmsy < 1 and F/Fmsy < 1;
+\item orange: B/Bmsy > 1 and F/Fmsy > 1;
+\item red: B/Bmsy < 1 and F/Fmsy > 1.
 }
 
-Faceting is applied by scenario, allowing comparison across model runs.
+The gray polygons are the kernel density contours of the terminal year,
+one for each credibility level chosen in \code{kobe_data()} (argument
+\code{ci_levels}). The line is the trajectory of the median B/Bmsy and
+F/Fmsy, and the points mark the first, middle and last years of the series
+(circle, square and diamond, respectively).
+
+The quadrants extend up to the maximum ratio found in the data, so axis
+limits larger than that show blank areas. The lower limits cannot be
+negative, and the axis breaks are placed at every 1 unit.
 }
 \examples{
 \dontrun{
-df <- kobe_data(model_results)
-kobe_ggplot(df)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+data <- kobe_data(list(fit.S01, fit.S02))
+kobe_ggplot(data)
+
+# In two columns, with custom axis limits
+kobe_ggplot(data, n_col = 2, x_lim = c(0, 3), y_lim = c(0, 2))
 }
 
 }

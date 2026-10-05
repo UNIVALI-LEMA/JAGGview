@@ -23,10 +23,10 @@ year, scenario and indicator, and the columns:
 \item \code{year}: Year of the observation.
 \item \code{Scenario}: Scenario name.
 \item \code{mu}: Median value.
-\item \code{lcl}: Lower 2.5\\% quantile.
-\item \code{ucl}: Upper 97.5\\% quantile.
-\item \code{lcl2}: Lower 10\\% quantile.
-\item \code{ucl2}: Upper 90\\% quantile.
+\item \code{lcl}: Lower 2.5\% quantile.
+\item \code{ucl}: Upper 97.5\% quantile.
+\item \code{lcl2}: Lower 10\% quantile.
+\item \code{ucl2}: Upper 90\% quantile.
 \item \code{indicator}: Name of the indicator summarised.
 }
 Returns \code{NULL} if the process is aborted due to low memory.

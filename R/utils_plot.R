@@ -336,7 +336,7 @@
 #' tables across package outputs.
 #' 
 #' @param data A data frame to be formatted as a \pkg{gt} table.
-#' @param digits A integer indicating the number of decimals places to display. 
+#' @param digits An integer indicating the number of decimals places to display. 
 #'   Defaults to 2.
 #' 
 #' @return
