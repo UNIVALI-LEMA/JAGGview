@@ -87,7 +87,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_prior_color, {
-    if(!identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)){
+    if (
+      !identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)
+    ){
       pp_psi_change$prior_color_changed = TRUE
     }
     else {
@@ -154,10 +156,8 @@
     req(input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_psi")
     vec <- unlist(reactiveValuesToList(pp_psi_change))
-
-    empty_condition <- .is_empty(input$pp_psi_scenarios)
     
-    enable <- any(vec) && !empty_condition
+    enable <- any(vec) && !.is_empty(input$pp_psi_scenarios)
 
     return(enable)
   })
@@ -300,7 +300,8 @@
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = psi) %>%
       full_join(
-        df_lists$PPVR %>% select(Scenario, ppvr_value = psi),
+        df_lists$PPVR %>% 
+          select(Scenario, ppvr_value = psi),
         by = "Scenario"
       )
     

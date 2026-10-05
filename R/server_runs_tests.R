@@ -76,7 +76,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_title_x, {
-    if(!identical(input$runs_tests_title_x, runs_tests_values$title_x_current)){
+    if (
+      !identical(input$runs_tests_title_x, runs_tests_values$title_x_current)
+    ) {
       runs_tests_change$title_x_changed = TRUE
     }
     else {
@@ -261,17 +263,22 @@
 
       filtered_runs_tests(
         list(
-          cpue_residuals = res_df$cpue_residuals %>% filter(
-            Scenario %in% input$runs_tests_scenarios,
-            Index %in% input$runs_tests_indices
-          ) %>% droplevels(),
-          SE3 = res_df$SE3 %>% filter(
-            Scenario %in% input$runs_tests_scenarios,
-            Index %in% input$runs_tests_indices
-          ) %>% droplevels(),
-          RMSE_data = res_df$RMSE_data %>% filter(
-            Scenario %in% input$runs_tests_scenarios
-          )
+          cpue_residuals = res_df$cpue_residuals %>% 
+            filter(
+              Scenario %in% input$runs_tests_scenarios,
+              Index %in% input$runs_tests_indices
+            ) %>% 
+            droplevels(),
+          SE3 = res_df$SE3 %>% 
+            filter(
+              Scenario %in% input$runs_tests_scenarios,
+              Index %in% input$runs_tests_indices
+            ) %>% 
+            droplevels(),
+          RMSE_data = res_df$RMSE_data %>% 
+            filter(
+              Scenario %in% input$runs_tests_scenarios
+            )
         )
       )
       title_x_runs_tests(input$runs_tests_title_x)
@@ -445,7 +452,7 @@
             ) 
           ) %>%
           add_markers(
-            data = cpue_residuals %>% filter(class == "white"),
+            data = filter(cpue_residuals, class == "white"),
             x = ~Year,
             y = ~Res,
             marker = list(
@@ -462,7 +469,7 @@
             )
           ) %>%
           add_markers(
-            data = cpue_residuals %>% filter(class == "red"),
+            data = filter(cpue_residuals, class == "red"),
             x = ~Year,
             y = ~Res,
             marker = list(
@@ -537,7 +544,8 @@
         p
         
       })
-    }) %>% flatten()
+    }) %>% 
+      flatten()
     
 
     results <- subplot(

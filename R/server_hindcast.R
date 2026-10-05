@@ -159,7 +159,7 @@
     req(input$navmenu == "tab_hindcast")
     vec <- unlist(reactiveValuesToList(hc_change))
 
-    empty_condition <- .is_empty(input$hc_scenarios)|| 
+    empty_condition <- .is_empty(input$hc_scenarios) || 
       .is_empty(input$hc_indices)
     
     enable <- any(vec) && !empty_condition
@@ -247,22 +247,26 @@
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
-            ) %>% droplevels(),
+            ) %>% 
+              droplevels(),
           data_points = hind_df$data_points %>%
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
-            ) %>% droplevels(),
+            ) %>% 
+              droplevels(),
           data_lines = hind_df$data_lines %>%
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
-            ) %>% droplevels(),
+            ) %>% 
+              droplevels(),
           mase_data = hind_df$mase_data %>%
             filter(
               Scenario %in% input$hc_scenarios,
               Index %in% input$hc_indices
-            ) %>% droplevels(),
+            ) %>% 
+              droplevels(),
           min_year_retro = hind_df$min_year_retro
         )
       )
@@ -577,7 +581,8 @@
           .plotly_config("hindcast_plot")
         p
       })
-    }) %>% flatten()
+    }) %>% 
+      flatten()
     
     results <- subplot(
       plots, 

@@ -69,7 +69,9 @@
   )
 
   observeEvent(input$ra_procB_scenarios, {
-    if (!setequal(input$ra_procB_scenarios, ra_procB_values$scenarios_current)){
+    if (
+      !setequal(input$ra_procB_scenarios, ra_procB_values$scenarios_current)
+    ) {
       ra_procB_change$scenarios_changed = TRUE
     }
     else {
@@ -158,7 +160,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_procB_si_suffix, {
-    if (!identical(input$ra_procB_si_suffix, ra_procB_values$si_suffix_current)) {
+    if (
+      !identical(input$ra_procB_si_suffix, ra_procB_values$si_suffix_current)
+    ) {
       ra_procB_change$si_suffix_changed = TRUE
     }
     else {

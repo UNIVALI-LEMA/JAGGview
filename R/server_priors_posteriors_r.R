@@ -105,7 +105,6 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_text_size, {
-    # if (!identical(input$pp_r_text_size, pp_r_values$text_size_current)) {
     if (input$pp_r_text_size != pp_r_values$text_size_current) {
       pp_r_change$text_size_changed = TRUE
     }
@@ -115,7 +114,6 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_min, {
-    # if (!identical(input$pp_r_x_min, pp_r_values$x_min_current)) {
     if (input$pp_r_x_min != pp_r_values$x_min_current) {
       pp_r_change$x_min_changed = TRUE
     }
@@ -125,7 +123,6 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_max, {
-    # if (!identical(input$pp_r_x_max, pp_r_values$x_max_current)) {
     if (input$pp_r_x_max != pp_r_values$x_max_current) {
       pp_r_change$x_max_changed = TRUE
     }
@@ -263,8 +260,7 @@
     df_lists <- filtered_pp_r()
 
     palette <- .resolve_palette(
-      c(prior_color_pp_r(), posterior_color_pp_r()), 
-      2
+      c(prior_color_pp_r(), posterior_color_pp_r()), 2
     )
 
     scenarios <- unique(c(df_lists$prior$Scenario, df_lists$posterior$Scenario))
@@ -303,7 +299,8 @@
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = r) %>%
       full_join(
-        df_lists$PPVR %>% select(Scenario, ppvr_value = r),
+        df_lists$PPVR %>% 
+          select(Scenario, ppvr_value = r),
         by = "Scenario"
       )
     

@@ -158,7 +158,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_FFmsy_si_suffix, {
-    if(!identical(input$ra_FFmsy_si_suffix, ra_FFmsy_values$si_suffix_current)){
+    if (
+      !identical(input$ra_FFmsy_si_suffix, ra_FFmsy_values$si_suffix_current)
+    ) {
       ra_FFmsy_change$si_suffix_changed = TRUE
     }
     else {

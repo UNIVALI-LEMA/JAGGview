@@ -250,7 +250,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
     data = tmp00,
     data_points = tmp01,
     data_lines = tmp02,
-    mase_data = mase  %>% filter(!Index %in% na_index),
+    mase_data = mase  %>% 
+      filter(!Index %in% na_index),
     min_year_retro = min_year
   )
 
@@ -839,10 +840,10 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @family cpue residuals runs tests functions
 #'
 #' @export
-#' @importFrom tidyr pivot_longer
+#' @importFrom tidyr drop_na pivot_longer
 #' @importFrom dplyr %>% mutate filter left_join select
 #' @importFrom JABBA jbruns_sig3
-#' @importFrom stats complete.cases loess predict
+#' @importFrom stats loess predict
 #' @importFrom forcats fct_relevel
 runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
   # Accepts a single fit by wrapping it into a list
@@ -866,12 +867,15 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
       pvalue = NA
     )
   )
-  
+
   for(i in indices) {
     for(j in unique(tmp05$Scenario)) {
       name <- names(tmp05)[i]
-      index <- tmp05[tmp05$Scenario == j, i]
-      index <- index[complete.cases(index)]
+      index <- tmp05 %>% 
+        filter(Scenario == j) %>%
+        select(all_of(i)) %>%
+        drop_na() %>%
+        pull(1)
       test <- jbruns_sig3(index, type = "resid")
       rows <- out.test$Index == name & out.test$Scenario == j
       out.test$lcl[rows] <- test$sig3lim[1]
@@ -879,8 +883,10 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
       out.test$pvalue[rows] <- test$p.runs
     }
   }
+
   out.test$class <- ifelse(out.test$pvalue < 0.05, "red", "green")
-  out.test <- out.test[complete.cases(out.test), ]
+  out.test <- out.test %>% 
+    drop_na()
 
   # Reshape residuals to long format
   tmp05 <- pivot_longer(
@@ -1058,7 +1064,8 @@ trajectories_data <- function(
       )
   })
 
-  results <- bind_rows(result_list) %>% ungroup()
+  results <- bind_rows(result_list) %>% 
+    ungroup()
 
   class(results) <- c("JAGGdata", class(results))
 

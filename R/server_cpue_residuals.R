@@ -167,7 +167,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_si_suffix, {
-    if (!identical(input$cpue_res_si_suffix, cpue_res_values$si_suffix_current)) {
+    if (
+      !identical(
+        input$cpue_res_si_suffix, cpue_res_values$si_suffix_current
+      )
+    ) {
       cpue_res_change$si_suffix_changed = TRUE
     }
     else {
@@ -308,16 +312,21 @@
 
       filtered_cpue_res(
         list(
-          cpue_residuals = res_df$cpue_residuals %>% filter(
-            Scenario %in% input$cpue_res_scenarios,
-            Index %in% input$cpue_res_indices
-          ) %>% droplevels(),
-          SE3 = res_df$SE3 %>% filter(
-            Scenario %in% input$cpue_res_scenarios,
-            Index %in% input$cpue_res_indices
-          ) %>% droplevels(),
-          RMSE_data = res_df$RMSE_data %>% filter(
-            Scenario %in% input$cpue_res_scenarios
+          cpue_residuals = res_df$cpue_residuals %>% 
+            filter(
+              Scenario %in% input$cpue_res_scenarios,
+              Index %in% input$cpue_res_indices
+            ) %>% 
+            droplevels(),
+          SE3 = res_df$SE3 %>% 
+            filter(
+              Scenario %in% input$cpue_res_scenarios,
+              Index %in% input$cpue_res_indices
+            ) %>% 
+            droplevels(),
+          RMSE_data = res_df$RMSE_data %>% 
+            filter(
+              Scenario %in% input$cpue_res_scenarios
           )
         )
       )
@@ -523,7 +532,6 @@
         ) %>%
         .plotly_config("cpue_residuals_plot")
     })
-    
 
     results <- subplot(
       plots,

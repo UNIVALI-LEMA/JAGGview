@@ -53,7 +53,8 @@
     x_min_current = floor(
       min(
         pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE
-      ) - 1),
+      ) - 1
+    ),
     x_max_current = ceiling(
       quantile(
         c(pp_df$prior$K01, pp_df$posterior$K01), 
@@ -159,10 +160,8 @@
     req(input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_K")
     vec <- unlist(reactiveValuesToList(pp_K_change))
-
-    empty_condition <- .is_empty(input$pp_K_scenarios)
     
-    enable <- any(vec) && !empty_condition
+    enable <- any(vec) && !.is_empty(input$pp_K_scenarios)
 
     return(enable)
   })
@@ -304,7 +303,8 @@
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = K) %>%
       full_join(
-        df_lists$PPVR %>% select(Scenario, ppvr_value = K),
+        df_lists$PPVR %>% 
+          select(Scenario, ppvr_value = K),
         by = "Scenario"
       )
     

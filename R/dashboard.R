@@ -204,8 +204,10 @@ create_report <- function(
       fits_data <- reduce(
         list(
           fits_data$Li_Ui, 
-          fits_data$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci), 
-          fits_data$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
+          fits_data$CI_80 %>% 
+            rename(mu_80 = mu, lci_80 = lci, uci_80 = uci), 
+          fits_data$CI_95 %>% 
+            rename(lci_95 = lci, uci_95 = uci)
         ),
         full_join,
         by = c("Year", "Scenario", "Index")
@@ -248,8 +250,10 @@ create_report <- function(
       fits <- reduce(
         list(
           fits_data$Li_Ui, 
-          fits_data$CI_80 %>% rename(mu_80 = mu, lci_80 = lci, uci_80 = uci), 
-          fits_data$CI_95 %>% rename(lci_95 = lci, uci_95 = uci)
+          fits_data$CI_80 %>% 
+            rename(mu_80 = mu, lci_80 = lci, uci_80 = uci), 
+          fits_data$CI_95 %>% 
+            rename(lci_95 = lci, uci_95 = uci)
         ),
         full_join,
         by = c("Year", "Scenario", "Index")

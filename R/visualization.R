@@ -501,7 +501,8 @@ hindcast_ggplot <- function(
   )
 
   # Keep only the panels that have data
-  combos_valid <- combos %>% filter(!sapply(plot, is.null))
+  combos_valid <- combos %>% 
+    filter(!sapply(plot, is.null))
   combos_valid$x <- x_lim[2]
   combos_valid$y <- y_lim[2]
 
@@ -838,7 +839,8 @@ priors_posteriors_ggplot <- function(
   df_text <- df_lists$PPMR %>%
   select(Scenario, ppmr_value = all_of(indicator_name)) %>%
   full_join(
-    df_lists$PPVR %>% select(Scenario, ppvr_value = all_of(indicator_name)),
+    df_lists$PPVR %>% 
+      select(Scenario, ppvr_value = all_of(indicator_name)),
     by = "Scenario"
   ) 
 
@@ -1028,16 +1030,20 @@ retrospective_analysis_ggplot <- function(
   
   # Filtering the data base on the indicator
   rho_data <- df_lists$rho_data
-  data_var <- data %>% filter(Index == indicator_name)
-  data_ref <- data_var %>% filter(id == "Ref")
+  data_var <- data %>% 
+    filter(Index == indicator_name)
+  data_ref <- data_var %>% 
+    filter(id == "Ref")
 
   # Default limits from the data
   if (indicator_name != "MSY") {
-    data_lines <- data_var %>% filter(keep == TRUE)
+    data_lines <- data_var %>% 
+      filter(keep == TRUE)
   } else {
     data_lines <- data_var
   }
-  rho_var <- rho_data %>% filter(Index == indicator_name)
+  rho_var <- rho_data %>% 
+    filter(Index == indicator_name)
   if (indicator_name != "MSY") {
     max_y_val <- .round_to_nearest(max(data_ref$uci, na.rm = TRUE), TRUE, 1.1)
     if (is.null(y_lim)) {

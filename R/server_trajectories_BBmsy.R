@@ -83,7 +83,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_BBmsy_title_x, {
-    if(!identical(input$traj_BBmsy_title_x, traj_BBmsy_values$title_x_current)){
+    if (
+      !identical(input$traj_BBmsy_title_x, traj_BBmsy_values$title_x_current)
+    ) {
       traj_BBmsy_change$title_x_changed = TRUE
     }
     else {
@@ -92,7 +94,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_BBmsy_title_y, {
-    if(!identical(input$traj_BBmsy_title_y, traj_BBmsy_values$title_y_current)){
+    if (
+      !identical(input$traj_BBmsy_title_y, traj_BBmsy_values$title_y_current)
+    ) {
       traj_BBmsy_change$title_y_changed = TRUE
     }
     else {

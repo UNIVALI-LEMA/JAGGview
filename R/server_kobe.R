@@ -493,7 +493,8 @@
           annotations = annotations
         ) %>%
         .plotly_config("kobe_plot")
-    }) %>% flatten()
+    }) %>% 
+      flatten()
     
 
     results <- subplot(

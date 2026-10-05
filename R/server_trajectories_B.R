@@ -416,7 +416,6 @@
         .plotly_config("traj_B_plot")
     })
     
-
     results <- subplot(
       plots,
       nrows = nrow,

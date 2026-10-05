@@ -141,7 +141,8 @@
   colors = c("#CCCCCC", "#F2F2F2")
 ) {
 
-  cols_data <- data %>% select({{col}})
+  cols_data <- data %>% 
+    select({{col}})
 
   if (ncol(cols_data) != length(col_name)) {
     stop(paste0("Expected parameter 'col_name' to have the same length",
@@ -1001,7 +1002,8 @@
   data, pos_x, pos_y, col, col_name, suffix = "", decimals = 2
 ) {
 
-  cols_data <- data %>% select({{col}})
+  cols_data <- data %>% 
+    select({{col}})
 
   if (ncol(cols_data) != length(col_name)) {
     stop(paste0("Expected parameter 'col_name' to have the same length",

@@ -465,7 +465,8 @@
         ) %>%
           .plotly_config("fits_plot")
       })
-    }) %>% flatten()
+    }) %>% 
+      flatten()
 
     results <- subplot(
       plots, 

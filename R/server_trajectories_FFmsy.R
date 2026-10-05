@@ -79,7 +79,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_x, {
-    if(!identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)){
+    if (
+      !identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)
+    ) {
       traj_FFmsy_change$title_x_changed = TRUE
     }
     else {
@@ -88,7 +90,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_y, {
-    if(!identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)){
+    if (
+      !identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)
+    ) {
       traj_FFmsy_change$title_y_changed = TRUE
     }
     else {
@@ -367,10 +371,8 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(90): (", 
-            .international_system_prefixes(lcl2, si_suffix), 
-            ") - (", 
-            .international_system_prefixes(ucl2, si_suffix), ")"
+            "CI(90): (", .international_system_prefixes(lcl2, si_suffix), 
+            ") - (", .international_system_prefixes(ucl2, si_suffix), ")"
           )
         ) %>%
         add_ribbons(
@@ -384,10 +386,8 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(97,5): (", 
-            .international_system_prefixes(lcl, si_suffix), 
-            ") - (", 
-            .international_system_prefixes(ucl, si_suffix), ")"
+            "CI(97,5): (", .international_system_prefixes(lcl, si_suffix), 
+            ") - (", .international_system_prefixes(ucl, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -400,8 +400,7 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "Value: ", 
-            .international_system_prefixes(mu, si_suffix)
+            "Value: ", .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         add_segments(
@@ -509,5 +508,4 @@
     # toc()
     results
     })
-
-  }
+}

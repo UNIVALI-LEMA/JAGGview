@@ -69,8 +69,9 @@
   )
 
   observeEvent(input$traj_Bdev_scenarios, {
-    if (!setequal(input$traj_Bdev_scenarios, 
-      traj_Bdev_values$scenarios_current)) {
+    if (
+      !setequal(input$traj_Bdev_scenarios, traj_Bdev_values$scenarios_current)
+    ) {
       traj_Bdev_change$scenarios_changed = TRUE
     }
     else {
@@ -442,7 +443,6 @@
         ) %>%
         .plotly_config("traj_Bdev_plot")
     })
-    
 
     results <- subplot(
       plots,

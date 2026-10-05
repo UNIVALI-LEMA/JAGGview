@@ -69,8 +69,9 @@
   )
 
   observeEvent(input$traj_Catch_scenarios, {
-    if (!setequal(input$traj_Catch_scenarios, 
-      traj_Catch_values$scenarios_current)) {
+    if (
+      !setequal(input$traj_Catch_scenarios, traj_Catch_values$scenarios_current)
+    ) {
       traj_Catch_change$scenarios_changed = TRUE
     }
     else {
@@ -79,7 +80,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_title_x, {
-    if(!identical(input$traj_Catch_title_x, traj_Catch_values$title_x_current)){
+    if (
+      !identical(input$traj_Catch_title_x, traj_Catch_values$title_x_current)
+    ) {
       traj_Catch_change$title_x_changed = TRUE
     }
     else {
@@ -88,7 +91,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_Catch_title_y, {
-    if(!identical(input$traj_Catch_title_y, traj_Catch_values$title_y_current)){
+    if (
+      !identical(input$traj_Catch_title_y, traj_Catch_values$title_y_current)
+    ) {
       traj_Catch_change$title_y_changed = TRUE
     }
     else {
@@ -206,8 +211,12 @@
         )
       }
       
-      x_min <- .validate_year(input$traj_Catch_x_min, "traj_Catch_x_min", session)
-      x_max <- .validate_year(input$traj_Catch_x_max, "traj_Catch_x_max", session)
+      x_min <- .validate_year(
+        input$traj_Catch_x_min, "traj_Catch_x_min", session
+      )
+      x_max <- .validate_year(
+        input$traj_Catch_x_max, "traj_Catch_x_max", session
+      )
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
