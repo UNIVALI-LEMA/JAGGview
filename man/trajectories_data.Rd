@@ -4,17 +4,17 @@
 \alias{trajectories_data}
 \title{Summarise trajectory data from model outputs}
 \usage{
-trajectories_data(list_fit_models, reserve_mb = 2048, poll_interval = 0.5)
+trajectories_data(list_fit_models, poll_interval = 0.5, reserve_mb = 2048)
 }
 \arguments{
 \item{list_fit_models}{Either a single fit returned by
 \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 
-\item{reserve_mb}{A numeric value for the minimum free system memory, in
-megabytes, to keep available. Defaults to 2048.}
-
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
 between memory availability checks. Defaults to 0.5.}
+
+\item{reserve_mb}{A numeric value for the minimum free system memory, in
+megabytes, to keep available. Defaults to 2048.}
 }
 \value{
 An object of class \code{JAGGdata} (a data frame) with one row per

@@ -11,25 +11,25 @@
   palette_traj_BBmsy <- reactiveVal("#1B4F8A")
 
   x_lim_min_traj_BBmsy <- reactiveVal(
-    min((traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE)
+    .when_available(traj_df, min((traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE), data.frame())
   )
 
   x_lim_max_traj_BBmsy <- reactiveVal(
-    max((traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE)
+    .when_available(traj_df, max((traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE), data.frame())
   )
 
   y_lim_min_traj_BBmsy <- reactiveVal(
-    .round_to_nearest(
+    .when_available(traj_df, .round_to_nearest(
       min((traj_df %>% filter(indicator == "BBmsy"))$lcl, na.rm = TRUE), 
       FALSE, 1.1
-    )
+    ), data.frame())
   )
 
   y_lim_max_traj_BBmsy <- reactiveVal(
-    .round_to_nearest(
+    .when_available(traj_df, .round_to_nearest(
       max((traj_df %>% filter(indicator == "BBmsy"))$ucl, na.rm = TRUE), 
       TRUE, 1.1
-    )
+    ), data.frame())
   )
 
   si_suffix_traj_BBmsy <- reactiveVal(use_si_suffix)
@@ -50,24 +50,24 @@
   )
 
   traj_BBmsy_values <- reactiveValues(
-    scenarios_current = unique(traj_df$Scenario),
+    scenarios_current = .when_available(traj_df, unique(traj_df$Scenario), data.frame()),
     title_x_current = "Year",
     title_y_current = "B/Bmsy",
     color_current = "#1B4F8A",
-    x_min_current = min(
+    x_min_current = .when_available(traj_df, min(
       (traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE
-    ),
-    x_max_current = max(
+    ), data.frame()),
+    x_max_current = .when_available(traj_df, max(
       (traj_df %>% filter(indicator == "BBmsy"))$year, na.rm = TRUE
-    ),
-    y_min_current = .round_to_nearest(
+    ), data.frame()),
+    y_min_current = .when_available(traj_df, .round_to_nearest(
       min((traj_df %>% filter(indicator == "BBmsy"))$lcl, na.rm = TRUE), 
       FALSE, 1.1
-    ),
-    y_max_current = .round_to_nearest(
+    ), data.frame()),
+    y_max_current = .when_available(traj_df, .round_to_nearest(
       max((traj_df %>% filter(indicator == "BBmsy"))$ucl, na.rm = TRUE), 
       TRUE, 1.1
-    ),
+    ), data.frame()),
     si_suffix_current = use_si_suffix,
     blim_current = 0.4
   )

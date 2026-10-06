@@ -15,13 +15,13 @@
   text_size_pp_K <- reactiveVal(16)
 
   x_lim_min_pp_K <- reactiveVal(
-    floor(min(pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE) - 1)
+    .when_available(pp_df, floor(min(pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE) - 1))
   )
 
   x_lim_max_pp_K <- reactiveVal(
-    ceiling(
+    .when_available(pp_df, ceiling(
       quantile(c(pp_df$prior$K01, pp_df$posterior$K01), 0.95, na.rm = TRUE)
-    )
+    ))
   )
 
   position_pp_K <- reactiveVal("top-left")
@@ -42,25 +42,25 @@
   )
 
   pp_K_values <- reactiveValues(
-    scenarios_current = unique(
+    scenarios_current = .when_available(pp_df, unique(
       c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
-    ),
+    )),
     title_x_current = "Carrying capacity (K)",
     title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
     text_size_current = 16,
-    x_min_current = floor(
+    x_min_current = .when_available(pp_df, floor(
       min(
         pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE
       ) - 1
-    ),
-    x_max_current = ceiling(
+    )),
+    x_max_current = .when_available(pp_df, ceiling(
       quantile(
         c(pp_df$prior$K01, pp_df$posterior$K01), 
         0.95, na.rm = TRUE
       )
-    ),
+    )),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

@@ -5,7 +5,7 @@
 \title{Launch the report as a dashboard}
 \usage{
 create_report(
-  fits_data = data.frame(),
+  fits_data = list(),
   hind_data = list(),
   kobe_data = list(),
   pp_data = list(),
@@ -14,122 +14,217 @@ create_report(
   traj_data = data.frame(),
   list_fit_models = list(),
   list_hc_models = list(),
-  filename = NULL,
   dir = getwd(),
+  filename = NULL,
   animation = TRUE,
+  verbose = FALSE,
   use_si_suffix = FALSE,
-  verbose = FALSE
+  warn_level = 1
 )
 }
 \arguments{
-\item{fits_data}{A named list of data frames as returned by
-\code{fits_data()}. It must contain the elements \code{Li_Ui},
-\code{CI_80}, and \code{CI_95}.}
+\item{fits_data}{A named list as returned by \code{\link{fits_data}()},
+with the elements \code{Li_Ui}, \code{CI_80} and \code{CI_95}. If empty,
+it is computed from \code{list_fit_models}. Ignored if \code{filename}
+is supplied. Defaults to \code{list()}.}
 
-\item{hind_data}{A named list as returned by \code{hindcast_data()}. It must
-contain the elements \code{data}, \code{data_points},
-\code{data_lines} and \code{mase_data}.}
+\item{hind_data}{A named list as returned by
+\code{\link{hindcast_data}()}, with the elements \code{data},
+\code{data_points}, \code{data_lines}, \code{mase_data} and
+\code{min_year_retro}. If empty, it is computed from
+\code{list_hc_models}. Ignored if \code{filename} is supplied. Defaults
+to \code{list()}.}
 
-\item{kobe_data}{A named list as returned by \code{kobe_data()}. It must
-contain the elements \code{col01}, \code{col02}, \code{col03},
-\code{col04}, \code{ci_data}, \code{data_lines} and \code{highlight_years}.}
+\item{kobe_data}{A named list as returned by \code{\link{kobe_data}()},
+with the elements \code{col01}, \code{col02}, \code{col03},
+\code{col04}, \code{ci_data}, \code{data_lines} and
+\code{highlight_years}. If empty, it is computed from
+\code{list_fit_models}. Ignored if \code{filename} is supplied.
+Defaults to \code{list()}.}
 
-\item{pp_data}{A named list as returned by \code{priors_posteriors_data()}.
-It must contain the elements \code{prior}, \code{posterior}, \code{PPVR}
-and \code{PPMR}.}
+\item{pp_data}{A named list as returned by
+\code{\link{priors_posteriors_data}()}, with the elements \code{prior},
+\code{posterior}, \code{PPVR} and \code{PPMR}. If empty, it is computed
+from \code{list_fit_models}. Ignored if \code{filename} is supplied.
+Defaults to \code{list()}.}
 
 \item{ra_data}{A named list as returned by
-\code{retrospective_analysis_data()}. It must contain the elements
-\code{data}, \code{surplus_data} and \code{rho_data}.}
+\code{\link{retrospective_analysis_data}()}, with the elements
+\code{data}, \code{surplus_data} and \code{rho_data}. If empty, it is
+computed from \code{list_hc_models}. Ignored if \code{filename} is
+supplied. Defaults to \code{list()}.}
 
-\item{res_data}{A named list as returned by \code{runs_tests_data()}. It
-must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
+\item{res_data}{A named list as returned by \code{\link{runs_tests_data}()},
+with the elements \code{cpue_residuals}, \code{SE3} and \code{RMSE_data}.
+If empty, it is computed from \code{list_fit_models}. Ignored if
+\code{filename} is supplied. Defaults to \code{list()}.}
 
-\item{traj_data}{A data frame as returned by \code{trajectories_data()}.}
+\item{traj_data}{A data frame as returned by
+\code{\link{trajectories_data}()}. If empty, it is computed from
+\code{list_fit_models}. Ignored if \code{filename} is supplied. Defaults
+to \code{data.frame()}.}
 
-\item{list_fit_models}{A list of fitted model objects returned by
-\code{fit_jabba()}, or a single fitted model object.}
+\item{list_fit_models}{A list of fits returned by \code{JABBA::fit_jabba()},
+or a single fit. Used to compute the data structures derived from the fits
+that were not supplied, and to obtain the values shown in the summary
+tables. If \code{filename} is used and this argument is empty, the fits
+found in the files are used. Defaults to \code{list()}.}
 
-\item{list_hc_models}{A list of hindcast model objects returned by
-\code{hindcast_jabba()}, or a single hindcast model object.}
-
-\item{filename}{A character string with the name of the \code{.RData} file
-containing the model objects to be loaded (e.g. results from \pkg{JABBA}).}
+\item{list_hc_models}{A list of hindcasts returned by
+\code{JABBA::hindcast_jabba()}, or a single hindcast. Used to compute
+the data structures derived from the hindcasts that were not supplied,
+and to obtain the values shown in the summary tables. If \code{filename}
+is used and this argument is empty, the hindcasts found in the files are
+used. Defaults to \code{list()}.}
 
 \item{dir}{A character string with the directory where \code{filename} is
-located. Defaults to the currente working directory (\code{getwd()}).}
+located. Defaults to the current working directory (\code{getwd()}).}
 
-\item{animation}{A boolean value that if TRUE, shows animations in some
-plots. Defaults to TRUE.}
+\item{filename}{Optional. A character vector with the name(s) of the
+\code{.RData} or \code{.rds} file(s) containing the JABBA model objects
+to be loaded. If supplied, it has priority over the other data
+arguments. If \code{NULL}, the data are taken from the pre-computed data
+structures and/or the model objects. Defaults to \code{NULL}.}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{animation}{A boolean value that if \code{TRUE}, shows animations in
+some plots. Defaults to \code{TRUE}.}
 
-\item{verbose}{A boolean value that if TRUE, shows progress through messages
-in console. Defaults to FALSE.}
+\item{verbose}{A boolean value that if \code{TRUE}, shows progress through
+messages in the console. Defaults to \code{FALSE}.}
+
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
+
+\item{warn_level}{}
 }
 \value{
-Invisibly launch the interactive dashboard, a \pkg{shiny} object produced by
-\code{shinyApp()}, in the default viewer/browser.
+A \code{shiny.appobj} object, as returned by
+\code{shiny::shinyApp()}. Printing it launches the dashboard in the
+default viewer or browser.
 }
 \description{
 Launches an interactive \pkg{shiny}/\pkg{bs4Dash} dashboard summarizing
 model fits, hindcast, priors x posteriors, retrospective analysis, runs
-tests, kobe plots, and trajectories. There are two ways to supply the data
-for the dashboard: (i) the main one, passing each pre-computed data
-structure directly through \code{fits_data}, \code{hind_data},
-\code{kobe_data}, \code{pp_data}, \code{ra_data}, \code{res_data} and
-\code{traj_data}, as returned by the package's respective \code{*_data()}
-functions (see \strong{Examples}); or (ii) passing \code{filename} with the
-path(s) to one or more saved model results file(s)
-(\code{.RData}/\code{.rds}), from which all of those data structures are
-computed internally.#'
+tests, Kobe plots, and trajectories. The data can be supplied in three ways,
+with the following order of priority: (i) \code{filename}, with the path(s)
+to one or more saved model results files (\code{.RData} or \code{.rds}),
+from which everything is computed internally; (ii) the pre-computed data
+structures \code{fits_data}, \code{hind_data}, \code{kobe_data},
+\code{pp_data}, \code{ra_data}, \code{res_data} and \code{traj_data}, as
+returned by the respective \code{*_data()} functions of the package; or
+(iii) the model objects \code{list_fit_models} and \code{list_hc_models},
+from which the data structures that were not supplied are computed (see
+\strong{Details} and \strong{Examples}).
 }
 \details{
-If \code{filename} is supplied, the function loads all objects contained in
-each \code{.Rdata}/\code{.rds} file and, through the internal helper
-\code{.classify_object()}, which classifies it as a model fit, a hindcast
-object, or an ignored object.
+The data source is chosen in the following order:
 
-From the classified fit objects, the function pre-computes model fits
-(\code{fits_data()}), priors x posteriors (\code{priors_posteriors_data()})
-and runs tests (\code{runs_tests_data()}), as well as kobe plots and
-trajectories, both obtained together via the internal helper
-\code{.ensemble_data()}. From #' the classified hindcast objects, it
-pre-computes hindcasts (\code{hindcast_data()}) and retrospective analysis
-(\code{retrospective_analysis_data()}).
+\enumerate{
+\item \strong{\code{filename}}: if supplied, it has priority over all
+the other data arguments. All the objects in each file are loaded and
+classified by the internal helper \code{.classify_object()} as a model
+fit, a hindcast, or an ignored object. Files with other extensions are
+not supported. All the data structures are computed from the fits and
+hindcasts found in the files, replacing the ones supplied through
+\code{fits_data}, \code{hind_data}, etc. If \code{list_fit_models} or
+\code{list_hc_models} are empty, the fits and hindcasts found in the
+files are used in their place.
+\item \strong{No \code{filename}}: each data structure is handled
+separately.
+\itemize{
+\item If it was supplied by the user (for example, \code{kobe_data}),
+it is used as it is.
+\item If it was left empty and the models are available, it is
+computed from \code{list_fit_models} (for \code{fits_data},
+\code{pp_data}, \code{res_data}, \code{kobe_data} and
+\code{traj_data}) or from \code{list_hc_models} (for
+\code{hind_data} and \code{ra_data}). \code{kobe_data} and
+\code{traj_data} are computed together by the internal helper
+\code{.ensemble_data()}.
+\item If it was left empty and there are no models to compute it from,
+it stays empty, a warning is issued, and the corresponding section of
+the dashboard has no data.
+}
+}
 
-The internal helpers \code{.build_server()} and \code{.build_ui()} then use
-the pre-computed (or user-supplied) data objects above to assemble,
-respectively, the \code{server} and \code{ui} objects, which are passed to
-\code{shinyApp()} to build the Shiny application.
+Even when all the pre-computed data structures are supplied, the model
+objects (\code{list_fit_models} and \code{list_hc_models}) are still
+needed to obtain the values shown in the summary tables of the dashboard.
+If they are not supplied, those tables have no data. On the other hand,
+if only the model objects are supplied, all the data structures are
+computed from them. The user can also mix both: supply some of the
+pre-computed structures and let the others be computed from the models.
+
+If \code{verbose = TRUE}, a message reports the origin of each data
+structure (input files, models or user).
+
+The internal helpers \code{.build_server()} and \code{.build_ui()} use the
+data (computed or supplied) to build the \code{server} and \code{ui}
+objects, which are passed to \code{shiny::shinyApp()}.
+
+The \code{warn_level} argument sets the R option \code{warn} while the
+data are being prepared, and the previous value is restored when the
+function exits. It does not change how warnings are handled after the
+dashboard is launched.
+
+The dashboard is launched when the returned object is printed, for example
+when the function is called at the console. In scripts, use
+\code{shiny::runApp()} on the returned object.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
 list_fit_models <- list(fit.S01, fit.S02)
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
 list_hc_models <- list(hc_S01, hc_S02)
 
-fits_data <- fits_data(list_fit_models)
-hind_data <- hindcast_data(list_hc_models)
-kobe_data <- kobe_data(list_fit_models)
-pp_data <- priors_posteriors_data(list_fit_models)
-ra_data <- retrospective_analysis_data(list_hc_models)
-res_data <- runs_tests_data(list_fit_models)
-traj_data <- trajectories_data(list_fit_models)
-
-create_report(
-  fits_data = fits_data, hind_data =  hind_data, kobe_data =  kobe_data,
-  pp_data = pp_data, ra_data = ra_data, res_data = res_data, 
-  traj_data = traj_data, animation = FALSE
-)
-
+# (i) Saved model results (highest priority)
 create_report(filename = "model_results.RData")
 
-create_report(filename = "model_results.RData", dir = "dev", verbose = TRUE)
+# File in another directory, with progress messages
+create_report(
+  filename = "model_results.RData", dir = "dev", verbose = TRUE
+)
+
+# (ii) Pre-computed data (the models are still used for the summary tables)
+fits <- fits_data(list_fit_models)
+hind <- hindcast_data(list_hc_models)
+kobe <- kobe_data(list_fit_models)
+pp <- priors_posteriors_data(list_fit_models)
+ra <- retrospective_analysis_data(list_hc_models)
+res <- runs_tests_data(list_fit_models)
+traj <- trajectories_data(list_fit_models)
+
+create_report(
+  fits_data = fits, hind_data = hind, kobe_data = kobe,
+  pp_data = pp, ra_data = ra, res_data = res, traj_data = traj,
+  list_fit_models = list_fit_models, list_hc_models = list_hc_models,
+  animation = FALSE, use_si_suffix = TRUE
+)
+
+# (iii) Only the models (all the data are computed from them)
+create_report(
+  list_fit_models = list_fit_models, list_hc_models = list_hc_models
+)
+
+# Mixed: Kobe data supplied, the others computed from the models
+create_report(
+  kobe_data = kobe, list_fit_models = list_fit_models,
+  list_hc_models = list_hc_models, verbose = TRUE
+)
+
+# Show warnings only at the end
+create_report(
+  list_fit_models = list_fit_models, warn_level = 0
+)
 }
 
 }

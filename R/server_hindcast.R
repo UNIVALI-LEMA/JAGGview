@@ -8,16 +8,16 @@
 
   text_size_hc <- reactiveVal(16)
 
-  x_lim_min_hc <- reactiveVal(min(hind_df$data$year))
+  x_lim_min_hc <- reactiveVal(.when_available(hind_df, min(hind_df$data$year)))
 
-  x_lim_max_hc <- reactiveVal(max(hind_df$data$year))
+  x_lim_max_hc <- reactiveVal(.when_available(hind_df, max(hind_df$data$year)))
 
   y_lim_min_hc <- reactiveVal(
-    .round_to_nearest(min(hind_df$data$hat.lci, na.rm = TRUE), FALSE)
+    .when_available(hind_df, .round_to_nearest(min(hind_df$data$hat.lci, na.rm = TRUE), FALSE))
   )
 
   y_lim_max_hc <- reactiveVal(
-    .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE)
+    .when_available(hind_df, .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE))
   )
 
   position_hc <- reactiveVal("top-left")
@@ -44,14 +44,14 @@
     title_x_current = "Year",
     title_y_current = "Index",
     text_size_current = 16,
-    x_min_current = min(hind_df$data$year),
-    x_max_current = max(hind_df$data$year),
-    y_min_current = .round_to_nearest(
+    x_min_current = .when_available(hind_df, min(hind_df$data$year)),
+    x_max_current = .when_available(hind_df, max(hind_df$data$year)),
+    y_min_current = .when_available(hind_df, .round_to_nearest(
       min(hind_df$data$hat.lci, na.rm = TRUE), FALSE
-    ),
-    y_max_current = .round_to_nearest(
+    )),
+    y_max_current = .when_available(hind_df, .round_to_nearest(
       max(hind_df$data$hat.uci, na.rm = TRUE), TRUE
-    ),
+    )),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

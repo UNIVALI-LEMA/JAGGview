@@ -7,25 +7,34 @@
   title_y_cpue_res <- reactiveVal("Residuals")
 
   palette_cpue_res <- reactiveVal(
-    .resolve_palette(NULL, length(unique(res_df$cpue_residuals$Index)))
+    .when_available(
+      res_df, 
+      .resolve_palette(NULL, length(unique(res_df$cpue_residuals$Index)))
+    )
   )
 
   text_size_cpue_res <- reactiveVal(16)
 
   x_lim_min_cpue_res <- reactiveVal(
-    min(res_df$cpue_residuals$Year, na.rm = TRUE)
+    .when_available(res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE))
   )
 
   x_lim_max_cpue_res <- reactiveVal(
-    max(res_df$cpue_residuals$Year, na.rm = TRUE)
+    .when_available(res_df, max(res_df$cpue_residuals$Year, na.rm = TRUE))
   )
 
   y_lim_min_cpue_res <- reactiveVal(
-    .round_to_nearest(min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE)
+    .when_available(
+      res_df,
+      .round_to_nearest(min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE)
+    )
   )
 
   y_lim_max_cpue_res <- reactiveVal(
-    .round_to_nearest(max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE)
+    .when_available(
+      res_df,
+      .round_to_nearest(max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE)
+    )
   )
 
   position_cpue_res <- reactiveVal("top-left")
@@ -48,22 +57,25 @@
   )
 
   cpue_res_values <- reactiveValues(
-    scenarios_current = unique(res_df$cpue_residuals$Scenario),
-    indices_current = unique(res_df$cpue_residuals$Index),
+    scenarios_current = .when_available(res_df, unique(res_df$cpue_residuals$Scenario)),
+    indices_current = .when_available(res_df, unique(res_df$cpue_residuals$Index)),
     title_x_current = "Year",
     title_y_current = "Residuals",
-    color_current = .resolve_palette(
-      NULL, length(unique(res_df$cpue_residuals$Index))
+    color_current = .when_available(
+      res_df, 
+      .resolve_palette(
+        NULL, length(unique(res_df$cpue_residuals$Index))
+      )
     ),
     text_size_current = 16,
-    x_min_current = min(res_df$cpue_residuals$Year, na.rm = TRUE),
-    x_max_current = max(res_df$cpue_residuals$Year, na.rm = TRUE),
-    y_min_current = .round_to_nearest(
+    x_min_current = .when_available(res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE)),
+    x_max_current = .when_available(res_df, max(res_df$cpue_residuals$Year, na.rm = TRUE)),
+    y_min_current = .when_available(res_df, .round_to_nearest(
       min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE
-    ),
-    y_max_current = .round_to_nearest(
+    )),
+    y_max_current = .when_available(res_df, .round_to_nearest(
       max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
-    ),
+    )),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

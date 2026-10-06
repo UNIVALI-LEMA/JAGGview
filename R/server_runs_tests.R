@@ -8,16 +8,16 @@
 
   text_size_runs_tests <- reactiveVal(16)
 
-  x_lim_min_runs_tests <- reactiveVal(min(res_df$SE3$ymin))
+  x_lim_min_runs_tests <- reactiveVal(.when_available(res_df, min(res_df$SE3$ymin)))
 
-  x_lim_max_runs_tests <- reactiveVal(max(res_df$SE3$ymax))
+  x_lim_max_runs_tests <- reactiveVal(.when_available(res_df, max(res_df$SE3$ymax)))
 
   y_lim_min_runs_tests <- reactiveVal(
-    .round_to_nearest(min(res_df$SE3$lcl, na.rm = TRUE), FALSE, 2.5)
+    .when_available(res_df, .round_to_nearest(min(res_df$SE3$lcl, na.rm = TRUE), FALSE, 2.5))
   )
 
   y_lim_max_runs_tests <- reactiveVal(
-    .round_to_nearest(max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5)
+    .when_available(res_df, .round_to_nearest(max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5))
   )
 
   position_runs_tests <- reactiveVal("top-left")
@@ -39,19 +39,19 @@
   )
 
   runs_tests_values <- reactiveValues(
-    scenarios_current = unique(res_df$cpue_residuals$Scenario),
-    indices_current = unique(res_df$cpue_residuals$Index),
+    scenarios_current = .when_available(res_df, unique(res_df$cpue_residuals$Scenario)),
+    indices_current = .when_available(res_df, unique(res_df$cpue_residuals$Index)),
     title_x_current = "Year",
     title_y_current = "Residuals",
     text_size_current = 16,
-    x_min_current = min(res_df$SE3$ymin),
-    x_max_current = max(res_df$SE3$ymax),
-    y_min_current = .round_to_nearest(
+    x_min_current = .when_available(res_df, min(res_df$SE3$ymin)),
+    x_max_current = .when_available(res_df, max(res_df$SE3$ymax)),
+    y_min_current = .when_available(res_df, .round_to_nearest(
       min(res_df$SE3$lcl, na.rm = TRUE), FALSE, 2.5
-    ),
-    y_max_current = .round_to_nearest(
+    )),
+    y_max_current = .when_available(res_df, .round_to_nearest(
       max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5
-    ),
+    )),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

@@ -8,16 +8,16 @@
 
   palette_fits <- reactiveVal("#1B4F8A")
 
-  x_lim_min_fits <- reactiveVal(min(fits_df$Year, na.rm = TRUE))
+  x_lim_min_fits <- reactiveVal(.when_available(fits_df, min(fits_df$Year, na.rm = TRUE)))
 
-  x_lim_max_fits <- reactiveVal(max(fits_df$Year, na.rm = TRUE))
+  x_lim_max_fits <- reactiveVal(.when_available(fits_df, max(fits_df$Year, na.rm = TRUE)))
 
   y_lim_min_fits <- reactiveVal(
-    .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)
+    .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE))
   )
 
   y_lim_max_fits <- reactiveVal(
-    .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)
+    .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE))
   )
 
   si_suffix_fits <- reactiveVal(use_si_suffix)
@@ -36,15 +36,15 @@
   )
 
   fits_values <- reactiveValues(
-    scenarios_current = unique(fits_df$Scenario),
-    indices_current = unique(fits_df$Index),
+    scenarios_current = .when_available(fits_df, unique(fits_df$Scenario)),
+    indices_current = .when_available(fits_df, unique(fits_df$Index)),
     title_x_current = "Year",
     title_y_current = "Abundance index",
     color_current = "#1B4F8A",
-    x_min_current = min(fits_df$Year, na.rm = TRUE),
-    x_max_current = max(fits_df$Year, na.rm = TRUE),
-    y_min_current = .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE),
-    y_max_current = .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE),
+    x_min_current = .when_available(fits_df, min(fits_df$Year, na.rm = TRUE)),
+    x_max_current = .when_available(fits_df, max(fits_df$Year, na.rm = TRUE)),
+    y_min_current = .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)),
+    y_max_current = .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)),
     si_suffix_current = use_si_suffix
   )
 
@@ -243,7 +243,7 @@
 
   output$fits <- renderPlotly({
     req(filtered_fits())
-    if (nrow(filtered_fits()) == 0) {
+    if (nrow(filtered_fits()) == 0 || identical(filtered_fits(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 

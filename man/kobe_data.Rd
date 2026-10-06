@@ -7,8 +7,8 @@
 kobe_data(
   list_fit_models,
   ci_levels = c(0.5, 0.8, 0.95),
-  reserve_mb = 2048,
-  poll_interval = 0.5
+  poll_interval = 0.5,
+  reserve_mb = 2048
 )
 }
 \arguments{
@@ -18,11 +18,11 @@ kobe_data(
 \item{ci_levels}{A numeric vector with the credibility levels of the
 contours, strictly between 0 and 1. Defaults to \code{c(0.5, 0.8, 0.95)}.}
 
-\item{reserve_mb}{A numeric value for the minimum free system memory, in
-megabytes, to keep available. Defaults to 2048.}
-
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
 between memory availability checks. Defaults to 0.5.}
+
+\item{reserve_mb}{A numeric value for the minimum free system memory, in
+megabytes, to keep available. Defaults to 2048.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:

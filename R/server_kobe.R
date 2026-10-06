@@ -10,11 +10,11 @@
 
   x_lim_min_kobe <- reactiveVal(0)
 
-  x_lim_max_kobe <- reactiveVal(kobe_df$col02$xmax)
+  x_lim_max_kobe <- reactiveVal(.when_available(kobe_df, kobe_df$col02$xmax))
 
   y_lim_min_kobe <- reactiveVal(0)
 
-  y_lim_max_kobe <- reactiveVal(kobe_df$col02$ymax)
+  y_lim_max_kobe <- reactiveVal(.when_available(kobe_df, kobe_df$col02$ymax))
 
   si_suffix_kobe <- reactiveVal(use_si_suffix)
 
@@ -30,13 +30,13 @@
   )
 
   kobe_values <- reactiveValues(
-    scenarios_current = unique(kobe_df$cpue_residuals$Scenario),
+    scenarios_current = .when_available(kobe_df, unique(kobe_df$cpue_residuals$Scenario)),
     title_x_current = "B/Bmsy",
     title_y_current = "F/Fmsy",
     x_min_current = 0,
-    x_max_current = kobe_df$col02$xmax,
+    x_max_current = .when_available(kobe_df, kobe_df$col02$xmax),
     y_min_current = 0,
-    y_max_current = kobe_df$col02$ymax,
+    y_max_current = .when_available(kobe_df, kobe_df$col02$ymax),
     si_suffix_current = use_si_suffix
   )
 
