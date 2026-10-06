@@ -2,19 +2,23 @@
 .fits_server <- function(input, output, session, fits_df, use_si_suffix) { 
   filtered_fits <- reactiveVal(fits_df)
 
-  title_x_fits <- reactiveVal(NULL)
+  title_x_fits <- reactiveVal("Year")
 
-  title_y_fits <- reactiveVal(NULL)
+  title_y_fits <- reactiveVal("Abundance index")
 
-  palette_fits <- reactiveVal(NULL)
+  palette_fits <- reactiveVal("#1B4F8A")
 
-  x_lim_min_fits <- reactiveVal(NULL)
+  x_lim_min_fits <- reactiveVal(.when_available(fits_df, min(fits_df$Year, na.rm = TRUE)))
 
-  x_lim_max_fits <- reactiveVal(NULL)
+  x_lim_max_fits <- reactiveVal(.when_available(fits_df, max(fits_df$Year, na.rm = TRUE)))
 
-  y_lim_min_fits <- reactiveVal(NULL)
+  y_lim_min_fits <- reactiveVal(
+    .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE))
+  )
 
-  y_lim_max_fits <- reactiveVal(NULL)
+  y_lim_max_fits <- reactiveVal(
+    .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE))
+  )
 
   si_suffix_fits <- reactiveVal(use_si_suffix)
 
@@ -32,15 +36,15 @@
   )
 
   fits_values <- reactiveValues(
-    scenarios_current = unique(fits_df$Scenario),
-    indices_current = unique(fits_df$Index),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = .when_available(fits_df, unique(fits_df$Scenario)),
+    indices_current = .when_available(fits_df, unique(fits_df$Index)),
+    title_x_current = "Year",
+    title_y_current = "Abundance index",
     color_current = "#1B4F8A",
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = .when_available(fits_df, min(fits_df$Year, na.rm = TRUE)),
+    x_max_current = .when_available(fits_df, max(fits_df$Year, na.rm = TRUE)),
+    y_min_current = .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)),
+    y_max_current = .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)),
     si_suffix_current = use_si_suffix
   )
 
@@ -90,7 +94,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_min, {
-    if (!identical(input$fits_x_min, fits_values$x_min_current)) {
+    if (input$fits_x_min != fits_values$x_min_current) {
       fits_change$x_min_changed = TRUE
     }
     else {
@@ -99,7 +103,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_max, {
-    if (!identical(input$fits_x_max, fits_values$x_max_current)) {
+    if (input$fits_x_max != fits_values$x_max_current) {
       fits_change$x_max_changed = TRUE
     }
     else {
@@ -108,7 +112,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_min, {
-    if (!identical(input$fits_y_min, fits_values$y_min_current)) {
+    if (input$fits_y_min != fits_values$y_min_current) {
       fits_change$y_min_changed = TRUE
     }
     else {
@@ -117,7 +121,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_max, {
-    if (!identical(input$fits_y_max, fits_values$y_max_current)) {
+    if (input$fits_y_max != fits_values$y_max_current) {
       fits_change$y_max_changed = TRUE
     }
     else {
@@ -138,9 +142,9 @@
     req(input$navmenu == "tab_fits")
     vec <- unlist(reactiveValuesToList(fits_change))
 
-    empty_condition <- .is_empty(input$fits_scenarios)|| 
+    empty_condition <- .is_empty(input$fits_scenarios) ||
       .is_empty(input$fits_indices)
-    
+
     enable <- any(vec) && !empty_condition
 
     return(enable)
@@ -176,9 +180,9 @@
           type = "warning", duration = 10
         )
       }
-      
-      x_min <- input$fits_x_min
-      x_max <- input$fits_x_max
+
+      x_min <- .validate_year(input$fits_x_min, "fits_x_min", session)
+      x_max <- .validate_year(input$fits_x_max, "fits_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -239,7 +243,7 @@
 
   output$fits <- renderPlotly({
     req(filtered_fits())
-    if (nrow(filtered_fits()) == 0) {
+    if (nrow(filtered_fits()) == 0 || identical(filtered_fits(), list())) {
       return(.empty_plotly("There is no data for this plot"))
     }
 
@@ -247,26 +251,8 @@
 
     df <- filtered_fits()
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_fits, min(df$Year, na.rm = TRUE)
-    )
-
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_fits, max(df$Year, na.rm = TRUE)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_fits, .round_to_nearest(min(df$lci_95, na.rm = TRUE), FALSE)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_fits, .round_to_nearest(max(df$uci_95, na.rm = TRUE), TRUE)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    x_lim <- .expand_range(c(x_lim_min_fits(), x_lim_max_fits()))
+    y_lim <- .expand_range(c(y_lim_min_fits(), y_lim_max_fits()))
 
     scenarios <- unique(df$Scenario)
     indices <- levels(df$Index)
@@ -274,9 +260,7 @@
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
 
-    title_x <- .get_value_or_default(title_x_fits, "Year")
-
-    title_y <- .get_value_or_default(title_y_fits, "Abundance index")
+    si_suffix <- si_suffix_fits()
 
     plots <- map(scenarios, function(s) {
       map(indices, function(i) {
@@ -398,8 +382,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(95%): ", 
-            .international_system_prefixes(lci_95, si_suffix_fits()), "-", 
-            .international_system_prefixes(uci_95, si_suffix_fits())
+            .international_system_prefixes(lci_95, si_suffix), "-", 
+            .international_system_prefixes(uci_95, si_suffix)
           )
         ) %>%
         add_ribbons(
@@ -413,8 +397,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(80%): ", 
-            .international_system_prefixes(lci_80, si_suffix_fits()), "-", 
-            .international_system_prefixes(uci_80, si_suffix_fits())  
+            .international_system_prefixes(lci_80, si_suffix), "-", 
+            .international_system_prefixes(uci_80, si_suffix)  
           )
         ) %>%
         add_lines(
@@ -426,7 +410,7 @@
           line = list(width = 2, color = "black"),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Mean: ", .international_system_prefixes(mu_80, si_suffix_fits())
+            "Mean: ", .international_system_prefixes(mu_80, si_suffix)
           )
         ) %>%
         add_markers(
@@ -447,10 +431,10 @@
           ),
           hoverinfo = "text+x",
           text = ~paste0(
-            "Point: ", .international_system_prefixes(Mean, si_suffix_fits()), 
+            "Point: ", .international_system_prefixes(Mean, si_suffix), 
             "<br>Interval: ", 
-            .international_system_prefixes(Li, si_suffix_fits()), "-", 
-            .international_system_prefixes(Ui, si_suffix_fits())
+            .international_system_prefixes(Li, si_suffix), "-", 
+            .international_system_prefixes(Ui, si_suffix)
           )
         ) %>%
         layout(
@@ -478,9 +462,11 @@
           ),
           shapes = shapes,
           annotations = annotations
-        ) 
+        ) %>%
+          .plotly_config("fits_plot")
       })
-    }) %>% flatten()
+    }) %>% 
+      flatten()
 
     results <- subplot(
       plots, 
@@ -501,7 +487,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = .format_title(title_x_fits()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -516,7 +502,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = .format_title(title_y_fits()),
             showarrow = FALSE,
             font = list(
               size = 20

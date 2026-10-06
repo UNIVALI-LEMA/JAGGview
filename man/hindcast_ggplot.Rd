@@ -18,9 +18,10 @@ hindcast_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{hindcast_data()}. It must
-contain the elements \code{data}, \code{data_points},
-\code{data_lines} and \code{mase_data}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{hindcast_data}()}, with the elements \code{data},
+\code{data_points}, \code{data_lines}, \code{mase_data} and
+\code{min_year_retro}.}
 
 \item{position}{A character string specifying the table's position within
 each plot panel, combining a vertical and a horizontal keyword separated
@@ -39,40 +40,73 @@ Defaults to 6.}
 
 \item{title_y}{A character string for the y-axis label. Defaults to "Index".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{zoom}{Optional. A boolean value that if \code{TRUE} shows a subplot of
-a zoomed view of the hindcast window. Facets with no data for a given
-Scenario and Index combination are left blank. Defaults to \code{FALSE}.}
+\item{zoom}{A boolean value that if \code{TRUE} adds a zoomed view of the
+hindcast window to each panel. Defaults to \code{FALSE}.}
 
-\item{y_decimals}{Optional. Number of decimal places y-axis.}
+\item{y_decimals}{Optional. Number of decimal places in the y-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the years in the data. Defaults to
+\code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the credibility intervals of the
+fitted values, rounded. Defaults to \code{NULL}.}
 }
 \value{
-A ggplot object displaying hindcast trajectories, observed data
-points, uncertainty ribbons, and MASE annotations, faceted by scenario and
-index.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization of hindcast diagnostics, including
-observed and predicted values, uncertainty intervals, and model performance
-metrics (MASE).
+Creates a ggplot2-based visualization of the hindcast (retrospective
+forecast) diagnostics, showing the observed and predicted values, the
+credibility intervals of the reference run and the MASE of each index, by
+scenario and index. The input is the output of \code{\link{hindcast_data}()}.
 }
 \details{
+Each panel shows one scenario (rows) and one index (columns). The gray
+ribbon is the credibility interval of the reference run, the colored lines
+are the retrospective runs, and the white lines are the hindcast
+trajectories. Points show the observed values (large) and the predicted
+values (small) at the first hindcast year of each run. The MASE of each
+panel is shown in a table.
+
+The colors of the retrospective runs come from \code{JABBA::ss3col()},
+which supports up to 8 runs.
+
+If \code{zoom = TRUE}, a zoomed view of the hindcast window is inserted in
+the upper right corner of each panel, and the window is marked by a dashed
+rectangle. Panels with no data for a Scenario and Index combination are left
+blank.
+
 The plot includes credibility ribbons for reference runs, hindcast
 trajectories, observed and predicted points, and annotations of MASE values.
 Results are faceted by scenario and index.
 }
 \examples{
 \dontrun{
-df <- hindcast_data(list_hc_models)
-hindcast_ggplot(df)
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# Prepare the data and plot
+data <- hindcast_data(list(hc_S01, hc_S02))
+hindcast_ggplot(data)
+
+# With the zoomed view and the MASE table at the bottom right
+hindcast_ggplot(data, zoom = TRUE, position = "bottom-right")
 }
 
 }

@@ -4,19 +4,23 @@
 ) {
   filtered_pp_psi <- reactiveVal(pp_df)
 
-  title_x_pp_psi <- reactiveVal(NULL)
+  title_x_pp_psi <- reactiveVal("Initial biomass depletion ratio (psi)")
 
-  title_y_pp_psi <- reactiveVal(NULL)
+  title_y_pp_psi <- reactiveVal("Density")
 
-  prior_color_pp_psi <- reactiveVal(NULL)
+  prior_color_pp_psi <- reactiveVal("#1B4F8A")
   
-  posterior_color_pp_psi <- reactiveVal(NULL)
+  posterior_color_pp_psi <- reactiveVal("#2A9D5C")
 
   text_size_pp_psi <- reactiveVal(16)
 
-  x_lim_min_pp_psi <- reactiveVal(NULL)
+  x_lim_min_pp_psi <- reactiveVal(
+    .when_available(pp_df, round(min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3))
+  )
 
-  x_lim_max_pp_psi <- reactiveVal(NULL)
+  x_lim_max_pp_psi <- reactiveVal(
+    .when_available(pp_df, round(max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3))
+  )
 
   position_pp_psi <- reactiveVal("top-left")
 
@@ -37,15 +41,20 @@
   )
 
   pp_psi_values <- reactiveValues(
-    scenarios_current = unique(c(pp_df$prior$Scenario, 
-      pp_df$posterior$Scenario)),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = .when_available(pp_df, unique(
+      c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
+    )),
+    title_x_current = "Initial biomass depletion ratio (psi)",
+    title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
     text_size_current = 16,
-    x_min_current = NA,
-    x_max_current = NA,
+    x_min_current = .when_available(pp_df, round(
+      min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3
+    )),
+    x_max_current = .when_available(pp_df, round(
+      max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3
+    )),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )
@@ -78,7 +87,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_prior_color, {
-    if(!identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)){
+    if (
+      !identical(input$pp_psi_prior_color, pp_psi_values$prior_color_current)
+    ){
       pp_psi_change$prior_color_changed = TRUE
     }
     else {
@@ -97,7 +108,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_text_size, {
-    if (!identical(input$pp_psi_text_size, pp_psi_values$text_size_current)) {
+    if (input$pp_psi_text_size != pp_psi_values$text_size_current) {
       pp_psi_change$text_size_changed = TRUE
     }
     else {
@@ -106,7 +117,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_x_min, {
-    if (!identical(input$pp_psi_x_min, pp_psi_values$x_min_current)) {
+    if (input$pp_psi_x_min != pp_psi_values$x_min_current) {
       pp_psi_change$x_min_changed = TRUE
     }
     else {
@@ -115,7 +126,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_psi_x_max, {
-    if (!identical(input$pp_psi_x_max, pp_psi_values$x_max_current)) {
+    if (input$pp_psi_x_max != pp_psi_values$x_max_current) {
       pp_psi_change$x_max_changed = TRUE
     }
     else {
@@ -145,10 +156,8 @@
     req(input$navmenu == "tab_priors_posteriors" && 
       input$priors_posteriors_tabs == "tab_pp_psi")
     vec <- unlist(reactiveValuesToList(pp_psi_change))
-
-    empty_condition <- .is_empty(input$pp_psi_scenarios)
     
-    enable <- any(vec) && !empty_condition
+    enable <- any(vec) && !.is_empty(input$pp_psi_scenarios)
 
     return(enable)
   })
@@ -268,41 +277,31 @@
     }
 
     prior_all <- df_lists$prior %>% 
-      select(Scenario, psi01, psi02) %>%
-      filter(psi02 > 0.005e-9)
+      select(Scenario, psi01, psi02)
 
     posterior_all <- df_lists$posterior %>% 
-      select(Scenario, psi01, psi02) %>%
-      filter(psi02 > 0.005e-9)
+      select(Scenario, psi01, psi02)
 
-    x_lim_min <- .get_value_or_default(
-      x_lim_min_pp_psi, min(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)
+    x_lim <- c(x_lim_min_pp_psi(), x_lim_max_pp_psi())
+
+    y_lim <- c(
+      .round_to_nearest(
+        min(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), FALSE, 1.1
+      ), 
+      .round_to_nearest(
+        max(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), TRUE, 1.1
+      )
     )
 
-    x_lim_max <- .get_value_or_default(
-      x_lim_max_pp_psi, max(prior_all$psi01, posterior_all$psi01, na.rm = TRUE)
-    )
-    x_lim <- c(x_lim_min, x_lim_max)
-
-    y_lim_min <- .round_to_nearest(
-      min(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), FALSE, 1.1
-    )
-    
-    y_lim_max <- .round_to_nearest(
-      max(prior_all$psi02, posterior_all$psi02, na.rm = TRUE), TRUE, 1.1
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(
-      title_x_pp_psi, "Initial biomass depletion ratio (psi)"
-    )
-
-    title_y <- .get_value_or_default(title_y_pp_psi, "Density")
+    si_suffix <- si_suffix_pp_psi()
+    text_size <- text_size_pp_psi()
+    position <- position_pp_psi()
 
     df_text_all <- df_lists$PPMR %>%
       select(Scenario, ppmr_value = psi) %>%
       full_join(
-        df_lists$PPVR %>% select(Scenario, ppvr_value = psi),
+        df_lists$PPVR %>% 
+          select(Scenario, ppvr_value = psi),
         by = "Scenario"
       )
     
@@ -368,10 +367,9 @@
           )
         )
       )
-      position <- position_pp_psi()
 
       table <- .build_metric_table(
-        df_text, text_size_pp_psi(), 
+        df_text, text_size, 
         str_split_i(position, "-", 2),
         str_split_i(position, "-", 1), 
         c("ppmr_value", "ppvr_value"), 
@@ -398,7 +396,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Prior<br>psi: ", 
-            .international_system_prefixes(psi01, si_suffix_pp_psi())
+            .international_system_prefixes(psi01, si_suffix)
           )
         ) %>%
         add_trace(
@@ -416,7 +414,7 @@
           hoverinfo = "text",
           text = ~paste0(
             "Posterior<br>psi: ", 
-            .international_system_prefixes(psi01, si_suffix_pp_psi())
+            .international_system_prefixes(psi01, si_suffix)
           )
         ) %>%
         layout(
@@ -444,7 +442,8 @@
           ),
           shapes = shapes,
           annotations = annotations
-        )
+        ) %>%
+        .plotly_config("priors_posteriors_psi_plot")
     })
     
 
@@ -455,7 +454,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.02
+      margin = c(0.005, 0.005, 0.035, 0.035)
     ) %>%
       layout(
         annotations = list(
@@ -467,7 +466,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = .format_title(title_x_pp_psi()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -482,7 +481,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = .format_title(title_y_pp_psi()),
             showarrow = FALSE,
             font = list(
               size = 20

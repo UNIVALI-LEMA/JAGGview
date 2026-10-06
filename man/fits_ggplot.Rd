@@ -16,49 +16,70 @@ fits_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list of data frames as returned by
-\code{fits_data()}. It must contain the elements \code{Li_Ui},
-\code{CI_80}, and \code{CI_95}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{fits_data}()}, with the elements \code{Li_Ui}, \code{CI_80}
+and \code{CI_95}.}
 
 \item{title_x}{A character string for the x-axis label. Defaults to "Year".}
 
 \item{title_y}{A character string for the y-axis label. Defaults to
 "Abundance index".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{y_decimals}{Optional. Number of decimal places y-axis.}
+\item{y_decimals}{Optional. Number of decimal places in the y-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
 \item{palette}{Optional. A character vector of colors used for plotting.
-If \code{NULL} (default), a color-blind-friendly palette is generated
-automatically according to the number of index levels.
-If the number of suplied colors is smaller than the number specified,
-than the code returns an error.}
+Only the first color is used (the fill of the credibility intervals).
+If \code{NULL}, a default color-blind-friendly color is used. An error
+is returned if the supplied vector is invalid. Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits are calculated from the years in the data. Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits are calculated from the 95\% credibility intervals, rounded.
+Defaults to \code{NULL}.}
 }
 \value{
-A ggplot object displaying fitted indices with uncertainty ribbons,
-error bars, and observed values, faceted by scenario and index.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization of fitted abundance indices,
-including mean values and credibility intervals (80\% and 95\%).
+Creates a ggplot2-based visualization of the observed abundance indices
+together with the fitted values and their 80\% and 95\% credibility
+intervals, by scenario and index. The input is the output of
+\code{\link{fits_data}()}.
 }
 \details{
-The plot includes ribbons representing 80\% and 95\% credibility intervals, a
-fitted line, observed points with error bars, and faceting by scenario and
-index.
+Each panel shows one scenario (rows) and one index (columns). The ribbons
+are the 80\% and 95\% credibility intervals of the fit, the line is the
+fitted value, and the points with error bars are the observed values with
+their bounds (\code{Li} and \code{Ui}).
+
+The axis limits (\code{x_lim} and \code{y_lim}) are applied with
+\code{ggplot2::coord_cartesian()}, so they are the same in all panels.
 }
 \examples{
 \dontrun{
-df <- fits_data(list_fit_models)
-fits_ggplot(df, palette = "blue")
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+data <- fits_data(list(fit.S01, fit.S02))
+fits_ggplot(data)
+
+# Custom color and y-axis limits
+fits_ggplot(data, palette = "#1B4F8A", y_lim = c(0, 5))
 }
 
 }

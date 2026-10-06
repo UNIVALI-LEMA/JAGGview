@@ -4,22 +4,36 @@
 ) { 
   filtered_traj_FFmsy <- reactiveVal(traj_df)
 
-  title_x_traj_FFmsy <- reactiveVal(NULL)
+  title_x_traj_FFmsy <- reactiveVal("Year")
 
-  title_y_traj_FFmsy <- reactiveVal(NULL)
+  title_y_traj_FFmsy <- reactiveVal("F/Fmsy")
 
-  palette_traj_FFmsy <- reactiveVal(NULL)
+  palette_traj_FFmsy <- reactiveVal("#1B4F8A")
 
-  x_lim_min_traj_FFmsy <- reactiveVal(NULL)
+  x_lim_min_traj_FFmsy <- reactiveVal(
+    .when_available(traj_df, min((traj_df %>% filter(indicator == "FFmsy"))$year, na.rm = TRUE), data.frame())
+  )
 
-  x_lim_max_traj_FFmsy <- reactiveVal(NULL)
+  x_lim_max_traj_FFmsy <- reactiveVal(
+    .when_available(traj_df, max((traj_df %>% filter(indicator == "FFmsy"))$year, na.rm = TRUE), data.frame())
+  )
 
-  y_lim_min_traj_FFmsy <- reactiveVal(NULL)
+  y_lim_min_traj_FFmsy <- reactiveVal(
+    .when_available(traj_df, .round_to_nearest(
+      min((traj_df %>% filter(indicator == "FFmsy"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ), data.frame())
+  )
 
-  y_lim_max_traj_FFmsy <- reactiveVal(NULL)
+  y_lim_max_traj_FFmsy <- reactiveVal(
+    .when_available(traj_df, .round_to_nearest(
+      max((traj_df %>% filter(indicator == "FFmsy"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ), data.frame())
+  )
 
   si_suffix_traj_FFmsy <- reactiveVal(use_si_suffix)
-
+  
   traj_FFmsy_change <- reactiveValues(
     scenarios_changed = FALSE,
     title_x_changed = FALSE,
@@ -33,14 +47,24 @@
   )
 
   traj_FFmsy_values <- reactiveValues(
-    scenarios_current = unique(traj_df$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = .when_available(traj_df, unique(traj_df$Scenario), data.frame()),
+    title_x_current = "Year",
+    title_y_current = "B/B0",
     color_current = "#1B4F8A",
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = .when_available(traj_df, min(
+      (traj_df %>% filter(indicator == "FFmsy"))$year, na.rm = TRUE
+    ), data.frame()),
+    x_max_current = .when_available(traj_df, max(
+      (traj_df %>% filter(indicator == "FFmsy"))$year, na.rm = TRUE
+    ), data.frame()),
+    y_min_current = .when_available(traj_df, .round_to_nearest(
+      min((traj_df %>% filter(indicator == "FFmsy"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ), data.frame()),
+    y_max_current = .when_available(traj_df, .round_to_nearest(
+      max((traj_df %>% filter(indicator == "FFmsy"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ), data.frame()),
     si_suffix_current = use_si_suffix
   )
 
@@ -55,7 +79,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_x, {
-    if(!identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)){
+    if (
+      !identical(input$traj_FFmsy_title_x, traj_FFmsy_values$title_x_current)
+    ) {
       traj_FFmsy_change$title_x_changed = TRUE
     }
     else {
@@ -64,7 +90,9 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_title_y, {
-    if(!identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)){
+    if (
+      !identical(input$traj_FFmsy_title_y, traj_FFmsy_values$title_y_current)
+    ) {
       traj_FFmsy_change$title_y_changed = TRUE
     }
     else {
@@ -82,7 +110,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_x_min, {
-    if (!identical(input$traj_FFmsy_x_min, traj_FFmsy_values$x_min_current)) {
+    if (input$traj_FFmsy_x_min != traj_FFmsy_values$x_min_current) {
       traj_FFmsy_change$x_min_changed = TRUE
     }
     else {
@@ -91,7 +119,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_x_max, {
-    if (!identical(input$traj_FFmsy_x_max, traj_FFmsy_values$x_max_current)) {
+    if (input$traj_FFmsy_x_max != traj_FFmsy_values$x_max_current) {
       traj_FFmsy_change$x_max_changed = TRUE
     }
     else {
@@ -100,7 +128,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_y_min, {
-    if (!identical(input$traj_FFmsy_y_min, traj_FFmsy_values$y_min_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_FFmsy_y_min, traj_FFmsy_values$y_min_current)
+      )
+    ) {
       traj_FFmsy_change$y_min_changed = TRUE
     }
     else {
@@ -109,7 +141,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_FFmsy_y_max, {
-    if (!identical(input$traj_FFmsy_y_max, traj_FFmsy_values$y_max_current)) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_FFmsy_y_max, traj_FFmsy_values$y_max_current)
+      )
+    ) {
       traj_FFmsy_change$y_max_changed = TRUE
     }
     else {
@@ -174,8 +210,8 @@
         )
       }
       
-      x_min <- input$traj_FFmsy_x_min
-      x_max <- input$traj_FFmsy_x_max
+      x_min <- .validate_year(input$traj_FFmsy_x_min, "traj_FFmsy_x_min", session)
+      x_max <- .validate_year(input$traj_FFmsy_x_max, "traj_FFmsy_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -252,31 +288,14 @@
 
     palette <- .resolve_palette(palette_traj_FFmsy(), 1)
 
-    min_x <- min(df$year, na.rm = TRUE)
-    max_x <- max(df$year, na.rm = TRUE)
+    min_x <- x_lim_min_traj_FFmsy()
+    max_x <- x_lim_max_traj_FFmsy()
     range <- max_x - min_x
 
-    x_lim_min <- .get_value_or_default(x_lim_min_traj_FFmsy, min_x)
-    x_lim_max <- .get_value_or_default(x_lim_max_traj_FFmsy, max_x)
-    x_lim <- c(x_lim_min, x_lim_max)
+    x_lim <- .expand_range(c(min_x, max_x))
+    y_lim <- .expand_range(c(y_lim_min_traj_FFmsy(), y_lim_max_traj_FFmsy()))
 
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_traj_FFmsy, 
-      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_traj_FFmsy, 
-      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_traj_FFmsy, "Year")
-
-    title_y <- .get_value_or_default(title_y_traj_FFmsy, "F/F<sub>MSY</sub>")
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_traj_FFmsy()
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -352,10 +371,8 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(90): (", 
-            .international_system_prefixes(lcl2, si_suffix_traj_FFmsy()), 
-            ") - (", 
-            .international_system_prefixes(ucl2, si_suffix_traj_FFmsy()), ")"
+            "CI(90): (", .international_system_prefixes(lcl2, si_suffix), 
+            ") - (", .international_system_prefixes(ucl2, si_suffix), ")"
           )
         ) %>%
         add_ribbons(
@@ -369,10 +386,8 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(97,5): (", 
-            .international_system_prefixes(lcl, si_suffix_traj_FFmsy()), 
-            ") - (", 
-            .international_system_prefixes(ucl, si_suffix_traj_FFmsy()), ")"
+            "CI(97,5): (", .international_system_prefixes(lcl, si_suffix), 
+            ") - (", .international_system_prefixes(ucl, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -385,8 +400,7 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "Value: ", 
-            .international_system_prefixes(mu, si_suffix_traj_FFmsy())
+            "Value: ", .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         add_segments(
@@ -427,7 +441,8 @@
           ),
           shapes = shapes,
           annotations = annotations
-        )
+        ) %>%
+        .plotly_config("traj_FFmsy_plot")
     })
     
 
@@ -438,7 +453,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.02
+      margin = c(0.005, 0.005, 0.035, 0.035)
     ) %>%
       layout(
         annotations = list(
@@ -450,7 +465,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = .format_title(title_x_traj_FFmsy()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -465,7 +480,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = .format_title(title_y_traj_FFmsy()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -493,5 +508,4 @@
     # toc()
     results
     })
-
-  }
+}

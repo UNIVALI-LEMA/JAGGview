@@ -59,6 +59,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
     ),
     sidebar = dashboardSidebar(disable = TRUE),
     body = dashboardBody(
+      tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/style.css"),
+      ),
       useShinyjs(),
       tabItems(
         tabItem(
@@ -392,28 +395,66 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "fits_scenarios",
               label = "Scenarios: ",
-              choices = unique(fits_data$Scenario),
-              selected = unique(fits_data$Scenario),
+              choices = .when_available(fits_data, unique(fits_data$Scenario)),
+              selected = .when_available(fits_data, unique(fits_data$Scenario)),
               multiple = TRUE
             ),
             selectInput(
               inputId = "fits_indices",
               label = "Indices: ",
-              choices = unique(fits_data$Index),
-              selected = unique(fits_data$Index),
+              choices = .when_available(fits_data, unique(fits_data$Index)),
+              selected = .when_available(fits_data, unique(fits_data$Index)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "fits_title_x",
-              label = "Title X:",
-              placeholder = "Year",
-              value = NA
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "fits_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "fits_title_y",
-              label = "Title Y:",
-              placeholder = "Abundance index",
-              value = NA
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "fits_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Abundance index",
+                value = "Abundance index"
+              )
             ),
             colourInput(
               inputId = "fits_color",
@@ -432,7 +473,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_min",
                   label = NULL,
-                  value = NA,
+                  value = .when_available(fits_data, min(fits_data$Year, na.rm = TRUE)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -442,7 +483,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_x_max",
                   label = NULL,
-                  value = NA,
+                  value = .when_available(fits_data, max(fits_data$Year, na.rm = TRUE)),
                   width = "100%"
                 )
               )
@@ -459,7 +500,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_min",
                   label = NULL,
-                  value = NA,
+                  value = .when_available(
+                    fits_data, 
+                    .round_to_nearest(
+                      min(fits_data$lci_95, na.rm = TRUE), FALSE
+                    )
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -469,15 +515,36 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "fits_y_max",
                   label = NULL,
-                  value = NA,
+                  value = .when_available(
+                    fits_data, 
+                    .round_to_nearest(
+                      max(fits_data$uci_95, na.rm = TRUE), TRUE
+                    )
+                  ),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "fits_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "fits_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -485,26 +552,66 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "runs_tests_scenarios",
               label = "Scenarios: ",
-              choices = unique(res_data$cpue_residuals$Scenario),
-              selected = unique(res_data$cpue_residuals$Scenario),
+              choices = .when_available(res_data,unique(res_data$cpue_residuals$Scenario)),
+              selected = .when_available(res_data,unique(res_data$cpue_residuals$Scenario)),
               multiple = TRUE
             ),
             selectInput(
               inputId = "runs_tests_indices",
               label = "Indices: ",
-              choices = unique(res_data$cpue_residuals$Index),
-              selected = unique(res_data$cpue_residuals$Index),
+              choices = .when_available(res_data, unique(res_data$cpue_residuals$Index)),
+              selected = .when_available(res_data, unique(res_data$cpue_residuals$Index)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "runs_tests_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "runs_tests_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "runs_tests_title_y",
-              label = "Title Y:",
-              placeholder = "Residuals"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "runs_tests_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Residuals",
+                value = "Residuals"
+              )
             ),
             numericInput(
               inputId = "runs_tests_text_size",
@@ -524,7 +631,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, min(res_data$SE3$ymin)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -534,7 +641,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, max(res_data$SE3$ymax)),
                   width = "100%"
                 )
               )
@@ -551,7 +658,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    res_data,
+                    .round_to_nearest(
+                      min(res_data$SE3$lcl, na.rm = TRUE), FALSE, 2.5
+                    ) 
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -561,7 +673,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "runs_tests_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    res_data,
+                    .round_to_nearest(
+                      max(res_data$SE3$ucl, na.rm = TRUE), TRUE, 2.5
+                    )
+                  ),
                   width = "100%"
                 )
               )
@@ -575,10 +692,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "runs_tests_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "runs_tests_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -586,27 +719,67 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "cpue_res_scenarios",
               label = "Scenarios: ",
-              choices = unique(res_data$cpue_residuals$Scenario),
-              selected = unique(res_data$cpue_residuals$Scenario),
+              choices = .when_available(res_data, unique(res_data$cpue_residuals$Scenario)),
+              selected = .when_available(res_data, unique(res_data$cpue_residuals$Scenario)),
               multiple = TRUE
             ),
             selectInput(
               inputId = "cpue_res_indices",
               label = "Indices: ",
-              choices = unique(res_data$cpue_residuals$Index),
-              selected = unique(res_data$cpue_residuals$Index),
+              choices = .when_available(res_data, unique(res_data$cpue_residuals$Index)),
+              selected = .when_available(res_data, unique(res_data$cpue_residuals$Index)),
               multiple = TRUE
             ),
             uiOutput("cpue_res_color_inputs"),
-            textInput(
-              inputId = "cpue_res_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "cpue_res_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "cpue_res_title_y",
-              label = "Title Y:",
-              placeholder = "Residuals"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "cpue_res_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Residuals",
+                value = "Residuals"
+              )
             ),
             numericInput(
               inputId = "cpue_res_text_size",
@@ -626,7 +799,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, min(res_data$cpue_residuals$Year, na.rm = TRUE)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -636,7 +809,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, max(res_data$cpue_residuals$Year, na.rm = TRUE)),
                   width = "100%"
                 )
               )
@@ -653,7 +826,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, .round_to_nearest(
+                    min(res_data$cpue_residuals$Res, na.rm = TRUE), FALSE
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -663,7 +838,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "cpue_res_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(res_data, .round_to_nearest(
+                    max(res_data$cpue_residuals$Res, na.rm = TRUE), TRUE
+                  )),
                   width = "100%"
                 )
               )
@@ -677,10 +854,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "cpue_res_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "cpue_res_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -689,19 +882,69 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "pp_K_scenarios",
               label = "Scenarios: ",
-              choices = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
-              selected = unique(c(pp_data$prior$Scenario, pp_data$posterior$Scenario)),
+              choices = .when_available(
+                pp_data, 
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
+              ),
+              selected = .when_available(
+                pp_data, 
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
+              ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_K_title_x",
-              label = "Title X:",
-              placeholder = "Carrying capacity (K)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_K_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Carrying capacity (K)",
+                value = "Carrying capacity (K)"
+              )
             ),
-            textInput(
-              inputId = "pp_K_title_y",
-              label = "Title Y:",
-              placeholder = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_K_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_K_prior_color",
@@ -731,7 +974,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_K_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(pp_data, floor(
+                    min(
+                      pp_data$prior$K01, pp_data$posterior$K01, na.rm = TRUE
+                    ) - 1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -741,7 +988,15 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_K_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    pp_data,
+                    ceiling(
+                      quantile(
+                        c(pp_data$prior$K01, pp_data$posterior$K01), 
+                        0.95, na.rm = TRUE
+                      )
+                    )
+                  ),
                   width = "100%"
                 )
               )
@@ -755,10 +1010,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_K_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_K_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -767,23 +1038,69 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "pp_r_scenarios",
               label = "Scenarios: ",
-              choices = unique(
-                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              choices = .when_available(
+                pp_data,
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
               ),
-              selected = unique(
-                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              selected = .when_available(
+                pp_data,
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
               ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_r_title_x",
-              label = "Title X:",
-              placeholder = "Intrinsic growth rate (r)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_r_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Intrinsic growth rate (r)",
+                value = "Intrinsic growth rate (r)"
+              )
             ),
-            textInput(
-              inputId = "pp_r_title_y",
-              label = "Title Y:",
-              placeholder = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_r_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_r_prior_color",
@@ -813,7 +1130,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_r_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    pp_data,
+                    round(
+                      min(pp_data$prior$r01, pp_data$posterior$r01, na.rm = TRUE),
+                      3
+                    )
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -823,7 +1146,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_r_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    pp_data,
+                    round(
+                      max(pp_data$prior$r01, pp_data$posterior$r01, na.rm = TRUE),
+                      3
+                    )
+                  ),
                   width = "100%"
                 )
               )
@@ -837,10 +1166,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_r_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_r_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -849,23 +1194,69 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "pp_psi_scenarios",
               label = "Scenarios: ",
-              choices = unique(
-                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              choices = .when_available(
+                pp_data,
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
               ),
-              selected = unique(
-                c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+              selected = .when_available(
+                pp_data,
+                unique(
+                  c(pp_data$prior$Scenario, pp_data$posterior$Scenario)
+                )
               ),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "pp_psi_title_x",
-              label = "Title X:",
-              placeholder = "Initial biomass depletion ratio (psi)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_psi_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Initial biomass depletion ratio (psi)",
+                value = "Initial biomass depletion ratio (psi)"
+              )
             ),
-            textInput(
-              inputId = "pp_psi_title_y",
-              label = "Title Y:",
-              placeholder = "Density"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "pp_psi_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Density",
+                value = "Density"
+              )
             ),
             colourInput(
               inputId = "pp_psi_prior_color",
@@ -895,7 +1286,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_psi_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    pp_data,
+                    round(
+                      min(
+                        pp_data$prior$psi01, pp_data$posterior$psi01, na.rm = TRUE
+                      ), 3
+                    )
+                  ),
                   width = "100%"
                 ), 
                 tags$span(
@@ -905,7 +1303,14 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "pp_psi_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(
+                    pp_data,
+                    round(
+                      max(
+                        pp_data$prior$psi01, pp_data$posterior$psi01, na.rm = TRUE
+                      ), 3
+                    )
+                  ),
                   width = "100%"
                 )
               )
@@ -919,10 +1324,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "pp_psi_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "pp_psi_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -931,19 +1352,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_B_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_B_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_B_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_B_title_y",
-              label = "Title Y:",
-              placeholder = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_B_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
             numericInput(
               inputId = "ra_B_text_size",
@@ -963,7 +1424,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min((ra_data$data %>% filter(Index == "B"))$Year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -973,7 +1434,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max((ra_data$data %>% filter(Index == "B"))$Year)),
                   width = "100%"
                 )
               )
@@ -990,7 +1451,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "B"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1000,7 +1466,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_B_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "B"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1014,10 +1485,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_B_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_B_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1026,19 +1513,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_F_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_F_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_F_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_F_title_y",
-              label = "Title Y:",
-              placeholder = "Fishing Mortality (F)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_F_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Fishing Mortality (F)",
+                value = "Fishing Mortality (F)"
+              )
             ),
             numericInput(
               inputId = "ra_F_text_size",
@@ -1058,7 +1585,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min((ra_data$data %>% filter(Index == "F"))$Year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1068,7 +1595,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max((ra_data$data %>% filter(Index == "F"))$Year)),
                   width = "100%"
                 )
               )
@@ -1085,7 +1612,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "F"))$lci, na.rm = TRUE
+                    ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1095,7 +1626,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_F_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "F"))$uci, na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1109,10 +1644,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_F_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_F_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1121,19 +1672,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_BBmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_BBmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_BBmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_BBmsy_title_y",
-              label = "Title Y:",
-              placeholder = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_BBmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
             numericInput(
               inputId = "ra_BBmsy_text_size",
@@ -1153,7 +1744,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min((ra_data$data %>% filter(Index == "BBmsy"))$Year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1163,7 +1754,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max((ra_data$data %>% filter(Index == "BBmsy"))$Year)),
                   width = "100%"
                 )
               )
@@ -1180,7 +1771,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "BBmsy"))$lci,
+                       na.rm = TRUE
+                      ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1190,7 +1786,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_BBmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "BBmsy"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1204,10 +1805,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_BBmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_BBmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1216,19 +1833,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_FFmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_FFmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_FFmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_FFmsy_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_FFmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             numericInput(
               inputId = "ra_FFmsy_text_size",
@@ -1248,7 +1905,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min((ra_data$data %>% filter(Index == "FFmsy"))$Year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1258,7 +1915,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max((ra_data$data %>% filter(Index == "FFmsy"))$Year)),
                   width = "100%"
                 )
               )
@@ -1275,7 +1932,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "FFmsy"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1285,7 +1947,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_FFmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "FFmsy"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1299,10 +1966,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_FFmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_FFmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1311,19 +1994,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_procB_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_procB_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_procB_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "ra_procB_title_y",
-              label = "Title Y:",
-              placeholder = "Process error on log(Biomass)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_procB_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Process error on log(Biomass)",
+                value = "Process error on log(Biomass)"
+              )
             ),
             numericInput(
               inputId = "ra_procB_text_size",
@@ -1343,7 +2066,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min((ra_data$data %>% filter(Index == "procB"))$Year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1353,7 +2076,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max((ra_data$data %>% filter(Index == "procB"))$Year)),
                   width = "100%"
                 )
               )
@@ -1370,7 +2093,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$data %>% filter(Index == "procB"))$lci, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1380,7 +2108,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_procB_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$data %>% filter(Index == "procB"))$uci, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1394,10 +2127,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_procB_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_procB_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1406,19 +2155,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "ra_MSY_scenarios",
               label = "Scenarios: ",
-              choices = unique(ra_data$data$Scenario),
-              selected = unique(ra_data$data$Scenario),
+              choices = .when_available(ra_data, unique(ra_data$data$Scenario)),
+              selected = .when_available(ra_data, unique(ra_data$data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "ra_MSY_title_x",
-              label = "Title X:",
-              placeholder = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_MSY_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
-            textInput(
-              inputId = "ra_MSY_title_y",
-              label = "Title Y:",
-              placeholder = "Surplus Production (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "ra_MSY_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Surplus Production (t)",
+                value = "Surplus Production (t)"
+              )
             ),
             numericInput(
               inputId = "ra_MSY_text_size",
@@ -1438,7 +2227,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, min(
+                    (ra_data$surplus_data %>% filter(Index == "MSY"))$SB_i
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1448,7 +2239,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, max(
+                    (ra_data$surplus_data %>% filter(Index == "MSY"))$SB_i
+                  )),
                   width = "100%"
                 )
               )
@@ -1465,7 +2258,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    min(
+                      (ra_data$surplus_data %>% filter(Index == "MSY"))$SP, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1475,7 +2273,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "ra_MSY_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(ra_data, .round_to_nearest(
+                    max(
+                      (ra_data$surplus_data %>% filter(Index == "MSY"))$SP, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  )),
                   width = "100%"
                 )
               )
@@ -1489,10 +2292,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "ra_MSY_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "ra_MSY_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1500,26 +2319,66 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "hc_scenarios",
               label = "Scenarios: ",
-              choices = unique(hind_data$data$Scenario),
-              selected = unique(hind_data$data$Scenario),
+              choices = .when_available(hind_data, unique(hind_data$data$Scenario)),
+              selected = .when_available(hind_data, unique(hind_data$data$Scenario)),
               multiple = TRUE
             ),
             selectInput(
               inputId = "hc_indices",
               label = "Indices: ",
-              choices = unique(hind_data$data$Index),
-              selected = unique(hind_data$data$Index),
+              choices = .when_available(hind_data, unique(hind_data$data$Index)),
+              selected = .when_available(hind_data, unique(hind_data$data$Index)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "hc_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "hc_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "hc_title_y",
-              label = "Title Y:",
-              placeholder = "Index"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "hc_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Index",
+                value = "Index"
+              )
             ),
             numericInput(
               inputId = "hc_text_size",
@@ -1539,7 +2398,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(hind_data, min(hind_data$data$year)),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1549,7 +2408,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(hind_data, max(hind_data$data$year)),
                   width = "100%"
                 )
               )
@@ -1566,7 +2425,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(hind_data, .round_to_nearest(
+                    min(hind_data$data$hat.lci, na.rm = TRUE), FALSE
+                  )),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1576,7 +2437,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "hc_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(hind_data, .round_to_nearest(
+                    max(hind_data$data$hat.uci, na.rm = TRUE), TRUE
+                  )),
                   width = "100%"
                 )
               )
@@ -1590,10 +2453,26 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
               multiple = FALSE,
               width = "100%"
             ),
-            checkboxInput(
-              inputId = "hc_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "hc_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1602,19 +2481,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_BB0_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_BB0_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BB0_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_BB0_title_y",
-              label = "Title Y:",
-              placeholder = "B/B0"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BB0_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/B0",
+                value = "B/B0"
+              )
             ),
             colourInput(
               inputId = "traj_BB0_color",
@@ -1633,7 +2552,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "BB0"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1643,7 +2565,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "BB0"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -1660,7 +2585,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "BB0"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1670,15 +2600,36 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BB0_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "BB0"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_BB0_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_BB0_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1687,19 +2638,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_BBmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_BBmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BBmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_BBmsy_title_y",
-              label = "Title Y:",
-              placeholder = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_BBmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
             colourInput(
               inputId = "traj_BBmsy_color",
@@ -1718,7 +2709,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "BBmsy"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1728,7 +2722,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "BBmsy"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -1745,7 +2742,13 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "BBmsy"))$lcl, 
+                      na.rm = TRUE
+                    ), 
+                    FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1755,20 +2758,43 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_BBmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "BBmsy"))$ucl, 
+                      na.rm = TRUE
+                    ), 
+                    TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_BBmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_BBmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             ),
             numericInput(
               inputId = "traj_BBmsy_blim",
               label = "Blim:",
-              value = NULL,
+              value = 0.4,
+              step = 0.1,
               width = "100%"
             )
           ),
@@ -1778,19 +2804,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_FFmsy_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_FFmsy_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_FFmsy_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_FFmsy_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_FFmsy_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             colourInput(
               inputId = "traj_FFmsy_color",
@@ -1809,7 +2875,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "FFmsy"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1819,7 +2888,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "FFmsy"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -1836,7 +2908,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "FFmsy"))$lcl, 
+                      na.rm = TRUE), FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1846,15 +2922,35 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_FFmsy_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "FFmsy"))$ucl, 
+                      na.rm = TRUE), TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_FFmsy_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_FFmsy_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1863,19 +2959,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_Bdev_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_Bdev_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Bdev_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_Bdev_title_y",
-              label = "Title Y:",
-              placeholder = "Process Error on log(Biomass)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Bdev_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Process Error on log(Biomass)",
+                value = "Process Error on log(Biomass)"
+              )
             ),
             colourInput(
               inputId = "traj_Bdev_color",
@@ -1894,7 +3030,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "Bdev"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1904,7 +3043,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "Bdev"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -1921,7 +3063,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "Bdev"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1931,15 +3078,36 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Bdev_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "Bdev"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_Bdev_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_Bdev_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -1948,19 +3116,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_B_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_B_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_B_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_B_title_y",
-              label = "Title Y:",
-              placeholder = "Biomass (t)"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_B_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Biomass (t)",
+                value = "Biomass (t)"
+              )
             ),
             colourInput(
               inputId = "traj_B_color",
@@ -1979,7 +3187,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "B"))$year, na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -1989,7 +3199,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "B"))$year, na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -2006,7 +3218,11 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "B"))$lcl, na.rm = TRUE
+                    ), FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2016,15 +3232,35 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_B_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "B"))$ucl, na.rm = TRUE
+                    ), TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_B_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_B_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2033,19 +3269,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_H_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_H_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_H_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_H_title_y",
-              label = "Title Y:",
-              placeholder = "Harvest rate"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_H_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Harvest rate",
+                value = "Harvest rate"
+              )
             ),
             colourInput(
               inputId = "traj_H_color",
@@ -2064,7 +3340,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "H"))$year, na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2074,7 +3352,9 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "H"))$year, na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -2091,7 +3371,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "H"))$lcl, na.rm = TRUE
+                    ), 
+                    FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2101,15 +3386,36 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_H_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "H"))$ucl, na.rm = TRUE
+                    ), 
+                    TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_H_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_H_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2118,19 +3424,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "traj_Catch_scenarios",
               label = "Scenarios: ",
-              choices = unique(traj_data$Scenario),
-              selected = unique(traj_data$Scenario),
+              choices = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
+              selected = .when_available(traj_data, unique(traj_data$Scenario), data.frame()),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "traj_Catch_title_x",
-              label = "Title X:",
-              placeholder = "Year"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Catch_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Year",
+                value = "Year"
+              )
             ),
-            textInput(
-              inputId = "traj_Catch_title_y",
-              label = "Title Y:",
-              placeholder = "Catch"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "traj_Catch_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "Catch",
+                value = "Catch"
+              )
             ),
             colourInput(
               inputId = "traj_Catch_color",
@@ -2149,7 +3495,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, min(
+                    (traj_data %>% filter(indicator == "Catch"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2159,7 +3508,10 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, max(
+                    (traj_data %>% filter(indicator == "Catch"))$year, 
+                    na.rm = TRUE
+                  ), data.frame()),
                   width = "100%"
                 )
               )
@@ -2176,7 +3528,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    min(
+                      (traj_data %>% filter(indicator == "Catch"))$lcl, 
+                      na.rm = TRUE
+                    ), FALSE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 ), 
                 tags$span(
@@ -2186,15 +3543,36 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "traj_Catch_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(traj_data, .round_to_nearest(
+                    max(
+                      (traj_data %>% filter(indicator == "Catch"))$ucl, 
+                      na.rm = TRUE
+                    ), TRUE, 1.1
+                  ), data.frame()),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "traj_Catch_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "traj_Catch_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           conditionalPanel(
@@ -2202,19 +3580,59 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             selectInput(
               inputId = "kobe_scenarios",
               label = "Scenarios: ",
-              choices = unique(kobe_data$ci_data$Scenario),
-              selected = unique(kobe_data$ci_data$Scenario),
+              choices = .when_available(kobe_data, unique(kobe_data$ci_data$Scenario)),
+              selected = .when_available(kobe_data, unique(kobe_data$ci_data$Scenario)),
               multiple = TRUE
             ),
-            textInput(
-              inputId = "kobe_title_x",
-              label = "Title X:",
-              placeholder = "B/Bmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "kobe_title_x",
+                label = div(
+                  class = "title-container",
+                  "Title X:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "B/Bmsy",
+                value = "B/Bmsy"
+              )
             ),
-            textInput(
-              inputId = "kobe_title_y",
-              label = "Title Y:",
-              placeholder = "F/Fmsy"
+            div(
+              class = "input-wrapper",
+              textInput(
+                inputId = "kobe_title_y",
+                label = div(
+                  class = "title-container",
+                  "Title Y:",
+                  div(
+                    class = "info-container",
+                    div(
+                      class = "title-card",
+                      icon("circle-info"),
+                      div(
+                        class = "title-popup hover-popup",
+                        "Accepts plain text or expressions like B/Bmsy, which will",
+                        " be automatically formatted as B/B<sub>MSY</sub>",
+                        div(class = "info-card-popup-triangle")
+                      )
+                    )
+                  )
+                ),
+                placeholder = "F/Fmsy",
+                value = "F/Fmsy"
+              )
             ),
             div(
               div(
@@ -2228,7 +3646,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_x_min",
                   label = NULL,
-                  value = NULL,
+                  value = 0,
                   width = "100%"
                 ), 
                 tags$span(
@@ -2238,7 +3656,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_x_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(kobe_data, kobe_data$col02$xmax),
                   width = "100%"
                 )
               )
@@ -2255,7 +3673,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_y_min",
                   label = NULL,
-                  value = NULL,
+                  value = 0,
                   width = "100%"
                 ), 
                 tags$span(
@@ -2265,15 +3683,31 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 numericInput(
                   inputId = "kobe_y_max",
                   label = NULL,
-                  value = NULL,
+                  value = .when_available(kobe_data, kobe_data$col02$ymax),
                   width = "100%"
                 )
               )
             ),
-            checkboxInput(
-              inputId = "kobe_si_suffix", 
-              label = "Use SI suffixes", 
-              value = use_si_suffix
+            div(
+              class = "input-wrapper",
+              checkboxInput(
+                inputId = "kobe_si_suffix", 
+                label = "Use SI suffixes", 
+                value = use_si_suffix
+              ),
+              div(
+                class = "info-container",
+                div(
+                  class = "title-card",
+                  icon("circle-info"),
+                  div(
+                    class = "title-popup hover-popup",
+                    "If marked, then hover information will use formatted",
+                    " numbers with International System (SI) of prefixes",
+                    div(class = "info-card-popup-triangle")
+                  )
+                )
+              )
             )
           ),
           div(

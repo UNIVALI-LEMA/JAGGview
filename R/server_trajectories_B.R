@@ -4,19 +4,33 @@
 ) { 
   filtered_traj_B <- reactiveVal(traj_df)
 
-  title_x_traj_B <- reactiveVal(NULL)
+  title_x_traj_B <- reactiveVal("Year")
 
-  title_y_traj_B <- reactiveVal(NULL)
+  title_y_traj_B <- reactiveVal("Biomass (t)")
 
-  palette_traj_B <- reactiveVal(NULL)
+  palette_traj_B <- reactiveVal("#1B4F8A")
 
-  x_lim_min_traj_B <- reactiveVal(NULL)
+  x_lim_min_traj_B <- reactiveVal(
+    .when_available(traj_df, min((traj_df %>% filter(indicator == "B"))$year, na.rm = TRUE), data.frame())
+  )
 
-  x_lim_max_traj_B <- reactiveVal(NULL)
+  x_lim_max_traj_B <- reactiveVal(
+    .when_available(traj_df, max((traj_df %>% filter(indicator == "B"))$year, na.rm = TRUE), data.frame())
+  )
 
-  y_lim_min_traj_B <- reactiveVal(NULL)
+  y_lim_min_traj_B <- reactiveVal(
+    .when_available(traj_df, .round_to_nearest(
+      min((traj_df %>% filter(indicator == "B"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ), data.frame())
+  )
 
-  y_lim_max_traj_B <- reactiveVal(NULL)
+  y_lim_max_traj_B <- reactiveVal(
+    .when_available(traj_df, .round_to_nearest(
+      max((traj_df %>% filter(indicator == "B"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ), data.frame())
+  )
 
   si_suffix_traj_B <- reactiveVal(use_si_suffix)
 
@@ -33,14 +47,24 @@
   )
 
   traj_B_values <- reactiveValues(
-    scenarios_current = unique(traj_df$Scenario),
-    title_x_current = NA,
-    title_y_current = NA,
+    scenarios_current = .when_available(traj_df, unique(traj_df$Scenario), data.frame()),
+    title_x_current = "Year",
+    title_y_current = "Biomass (t)",
     color_current = "#1B4F8A",
-    x_min_current = NA,
-    x_max_current = NA,
-    y_min_current = NA,
-    y_max_current = NA,
+    x_min_current = .when_available(traj_df, min(
+      (traj_df %>% filter(indicator == "B"))$year, na.rm = TRUE
+    ), data.frame()),
+    x_max_current = .when_available(traj_df, max(
+      (traj_df %>% filter(indicator == "B"))$year, na.rm = TRUE
+    ), data.frame()),
+    y_min_current = .when_available(traj_df, .round_to_nearest(
+      min((traj_df %>% filter(indicator == "B"))$lcl, na.rm = TRUE), 
+      FALSE, 1.1
+    ), data.frame()),
+    y_max_current = .when_available(traj_df, .round_to_nearest(
+      max((traj_df %>% filter(indicator == "B"))$ucl, na.rm = TRUE), 
+      TRUE, 1.1
+    ), data.frame()),
     si_suffix_current = use_si_suffix
   )
 
@@ -81,7 +105,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_B_x_min, {
-    if (!identical(input$traj_B_x_min, traj_B_values$x_min_current)) {
+    if (input$traj_B_x_min != traj_B_values$x_min_current) {
       traj_B_change$x_min_changed = TRUE
     }
     else {
@@ -90,7 +114,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_B_x_max, {
-    if (!identical(input$traj_B_x_max, traj_B_values$x_max_current)) {
+    if (input$traj_B_x_max != traj_B_values$x_max_current) {
       traj_B_change$x_max_changed = TRUE
     }
     else {
@@ -99,7 +123,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_B_y_min, {
-    if (!identical(input$traj_B_y_min, traj_B_values$y_min_current)) {
+    if (!isTRUE(all.equal(input$traj_B_y_min, traj_B_values$y_min_current))) {
       traj_B_change$y_min_changed = TRUE
     }
     else {
@@ -108,7 +132,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_B_y_max, {
-    if (!identical(input$traj_B_y_max, traj_B_values$y_max_current)) {
+    if (!isTRUE(all.equal(input$traj_B_y_max, traj_B_values$y_max_current))) {
       traj_B_change$y_max_changed = TRUE
     }
     else {
@@ -169,8 +193,8 @@
         )
       }
       
-      x_min <- input$traj_B_x_min
-      x_max <- input$traj_B_x_max
+      x_min <- .validate_year(input$traj_B_x_min, "traj_B_x_min", session)
+      x_max <- .validate_year(input$traj_B_x_max, "traj_B_x_max", session)
 
       if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
         tmp_x <- x_min
@@ -247,31 +271,14 @@
 
     palette <- .resolve_palette(palette_traj_B(), 1)
 
-    min_x <- min(df$year, na.rm = TRUE)
-    max_x <- max(df$year, na.rm = TRUE)
+    min_x <- x_lim_min_traj_B()
+    max_x <- x_lim_max_traj_B()
     range <- max_x - min_x
 
-    x_lim_min <- .get_value_or_default(x_lim_min_traj_B, min_x)
-    x_lim_max <- .get_value_or_default(x_lim_max_traj_B, max_x)
-    x_lim <- c(x_lim_min, x_lim_max)
+    x_lim <- .expand_range(c(min_x, max_x))
+    y_lim <- .expand_range(c(y_lim_min_traj_B(), y_lim_max_traj_B()))
 
-    y_lim_min <- .get_value_or_default(
-      y_lim_min_traj_B, 
-      .round_to_nearest(min(df$lcl, na.rm = TRUE), FALSE, 1.1)
-    )
-
-    y_lim_max <- .get_value_or_default(
-      y_lim_max_traj_B, 
-      .round_to_nearest(max(df$ucl, na.rm = TRUE), TRUE, 1.1)
-    )
-    y_lim <- c(y_lim_min, y_lim_max)
-
-    title_x <- .get_value_or_default(title_x_traj_B, "Year")
-
-    title_y <- .get_value_or_default(title_y_traj_B, "Biomass (t)")
-
-    y_lim <- .expand_range(y_lim)
-    x_lim <- .expand_range(x_lim)
+    si_suffix <- si_suffix_traj_B()
 
     plots <- map(scenarios, function(s) {
       df <- df %>%
@@ -347,8 +354,8 @@
           line = list(width = 0),
           hoverinfo = "text+x",
           text = ~paste0(
-            "CI(90): (", .international_system_prefixes(lcl2, si_suffix_traj_B()), 
-            ") - (", .international_system_prefixes(ucl2, si_suffix_traj_B()), ")"
+            "CI(90): (", .international_system_prefixes(lcl2, si_suffix), 
+            ") - (", .international_system_prefixes(ucl2, si_suffix), ")"
           )
         ) %>%
         add_ribbons(
@@ -363,8 +370,8 @@
           hoverinfo = "text+x",
           text = ~paste0(
             "CI(97,5): (", 
-            .international_system_prefixes(lcl, si_suffix_traj_B()), ") - (", 
-            .international_system_prefixes(ucl, si_suffix_traj_B()), ")"
+            .international_system_prefixes(lcl, si_suffix), ") - (", 
+            .international_system_prefixes(ucl, si_suffix), ")"
           )
         ) %>%
         add_lines(
@@ -377,7 +384,7 @@
           frame =  if (animation) ~frame else NULL,
           hoverinfo = "text+x",
           text = ~paste0(
-            "Value: ", .international_system_prefixes(mu, si_suffix_traj_B())
+            "Value: ", .international_system_prefixes(mu, si_suffix)
           )
         ) %>%
         layout(
@@ -405,10 +412,10 @@
           ),
           shapes = shapes,
           annotations = annotations
-        )
+        ) %>%
+        .plotly_config("traj_B_plot")
     })
     
-
     results <- subplot(
       plots,
       nrows = nrow,
@@ -416,7 +423,7 @@
       shareY = TRUE,
       titleX = TRUE,
       titleY = TRUE, 
-      margin = 0.02
+      margin = c(0.005, 0.005, 0.035, 0.035)
     ) %>%
       layout(
         annotations = list(
@@ -428,7 +435,7 @@
             yshift = -20,
             xref = "paper",
             yref = "paper",
-            text = title_x,
+            text = .format_title(title_x_traj_B()),
             showarrow = FALSE,
             font = list(
               size = 20
@@ -443,7 +450,7 @@
             xshift = -35,
             xref = "paper",
             yref = "paper",
-            text = title_y,
+            text = .format_title(title_y_traj_B()),
             showarrow = FALSE,
             font = list(
               size = 20

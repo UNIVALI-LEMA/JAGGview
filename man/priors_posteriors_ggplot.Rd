@@ -20,12 +20,12 @@ priors_posteriors_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{priors_posteriors_data()}.
-It must contain the elements \code{prior}, \code{posterior}, \code{PPVR}
-and \code{PPMR}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{priors_posteriors_data}()}, with the elements \code{prior},
+\code{posterior}, \code{PPVR} and \code{PPMR}.}
 
 \item{indicator_name}{A character string specifying the parameter to plot.
-Supported values include "K", "r", and "psi".}
+Must be one of \code{"K"}, \code{"r"} or \code{"psi"}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
@@ -38,7 +38,8 @@ component must be one of \code{"top"}, \code{"middle"}, or
 \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
 \code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
 \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
-\code{"bottom-center"}, and \code{"bottom-right"}.}
+\code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+\code{"top-left"}.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 6.}
@@ -46,43 +47,74 @@ Defaults to 6.}
 \item{title_y}{A character string for the y-axis label. Defaults to
 "Density".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{palette}{Optional. A character vector of colors used for plotting.
-If \code{NULL} (default), a color-blind-friendly palette is generated
-automatically according to the number of index levels.
-If the number of suplied colors is smaller than the number specified,
-than the code returns an error.}
+\item{palette}{Optional. A character vector of colors used for plotting,
+with at least two colors (prior and posterior). If \code{NULL}, a
+color-blind-friendly palette with two colors is generated automatically.
+If more than two colors are supplied, only the first two are used. If the
+number of supplied colors is smaller than two, then the code returns an
+error. Defaults to \code{NULL}.}
 
-\item{title_x}{A character string for the x-axis label. If \code{NULL}, a
-default label is assigned based on \code{indicator_name}.}
+\item{title_x}{Optional. A character string for the x-axis label. If
+\code{NULL}, a default label is assigned based on \code{indicator_name}
+("Carrying capacity (K)", "Intrinsic growth rate (r)" or "Initial biomass
+depletion ratio (psi)"). Defaults to \code{NULL}.}
 
-\item{x_decimals}{Optional. Number of decimal places.}
+\item{x_decimals}{Optional. Number of decimal places in the x-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from the minimum to the
+maximum value of the prior and posterior. For \code{"K"}, the upper
+limit is the 95\% quantile of these values, to avoid the long tail.
+Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from the minimum to the
+maximum density of the prior and posterior, rounded. Defaults to
+\code{NULL}.}
 }
 \value{
-A ggplot object displaying prior and posterior densities, annotated
-with prior-posterior metrics (PPMR and PPVR).
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization comparing prior and posterior
-distributions for a selected parameter across scenarios.
+Creates a ggplot2-based visualization comparing the prior and posterior
+densities of a selected parameter (K, r or psi), by scenario, annotated with
+the prior-posterior mean and variance ratios. The input is the output of
+\code{\link{priors_posteriors_data}()}.
 }
 \details{
-The plot overlays prior and posterior density curves, includes annotations
-for prior-posterior mean and variance ratios, and faceted views by scenario.
+Each panel shows one scenario. The prior density is drawn with the first
+color of \code{palette} and the posterior density with the second one. The
+table in each panel shows the prior-posterior mean ratio (PPMR) and the
+prior-posterior variance ratio (PPVR) of the selected parameter.
+
+The y-axis labels and ticks are hidden, since densities are only compared
+in shape. The axis limits are applied with
+\code{ggplot2::coord_cartesian()}, so they are the same in all panels.
 }
 \examples{
 \dontrun{
-df <- priors_posteriors_data(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+data <- priors_posteriors_data(list(fit.S01, fit.S02))
+priors_posteriors_ggplot(data, "K")
+
+# Custom colors and SI suffixes on the x-axis
 priors_posteriors_ggplot(
-  df, "K", use_si_suffix  TRUE, palette = c("#4285f4", "#34a853")
+  data, "K", use_si_suffix = TRUE, palette = c("#4285f4", "#34a853")
 )
 }
 

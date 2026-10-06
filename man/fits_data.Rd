@@ -7,53 +7,52 @@
 fits_data(list_fit_models, indices_factor = NULL)
 }
 \arguments{
-\item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 
-\item{indices_factor}{Optional. A vector of indices_factor to include. Must
-exist in the \code{Index} column.}
+\item{indices_factor}{Optional. A character vector with the index names to
+use and their order. All values must exist in the \code{Index} column.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{Li_Ui}{A data frame containing mean values and lower (Li) and
-upper (Ui) credibility bounds.}
-\item{CI_80}{A data frame containing fitted values and 80\% credibility
-intervals.}
-\item{CI_95}{A data frame containing fitted values and 95\% credibility
-intervals.}
+\item{Li_Ui}{Mean values and lower (\code{Li}) and upper (\code{Ui})
+bounds.}
+\item{CI_80}{Fitted values with 80\% credibility intervals.}
+\item{CI_95}{Fitted values with 95\% credibility intervals.}
 }
 }
 \description{
-Processes model outputs to generate formatted data for fitted
-indices_factor, including mean values and credibility intervals (80\% and
-95\%).
+Extracts observed indices, fitted values and uncertainty from one or more
+JABBA fits and returns a list with data frames ready for
+\code{\link{fits_ggplot}()}.
 }
 \details{
-Extracts index and uncertainty information from a list of model results,
-computes upper and lower credibility bounds, and organizes the data for
-downstream visualization.
+Credibility intervals in \code{Li_Ui} assume normality: the standard error
+is the square root of the \code{SE2} variance, multiplied by 1.96.
+\code{CI_80} and \code{CI_95} are taken from the posterior predictive
+(\code{ppd}) and fitted (\code{hat}) values, respectively.
 
-The function processes scenario-based outputs for indices_factor (\code{I}),
-standard errors (\code{SE2}), and fitted values (\code{ppd} and \code{hat}).
-Missing values are handled using reference index data when necessary.
+Missing standard errors are filled using the observed index series.
+Incomplete rows are dropped from \code{Li_Ui}.
 
-Credibility intervals for \code{Li_Ui} are computed assuming normality,
-using a multiplier of 1.96 applied to the standard error.
-
-If \code{indices_factor} is provided, the results are filtered and reordered
-accordingly. The function also ensures consistency across different
-model outputs and removes incomplete cases before returning results.
-
-The output is designed to be used directly with \code{\link{fits_ggplot}()}.
+If \code{indices_factor} is supplied, the \code{Index} column is reordered
+following that vector.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-result <- fits_data(list_fit_models)
-result
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+res1 <- fits_data(fit.S01)
+
+# A list of fits (one per scenario)
+res2 <- fits_data(list(fit.S01, fit.S02))
 }
 
 }

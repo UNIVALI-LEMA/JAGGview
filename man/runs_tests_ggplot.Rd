@@ -17,8 +17,9 @@ runs_tests_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by \code{runs_tests_data()}. It
-must contain \code{cpue_residuals}, \code{SE3}, \code{RMSE_data}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{runs_tests_data}()}, with the elements \code{cpue_residuals}
+and \code{SE3}.}
 
 \item{position}{A character string specifying the table's position within
 each plot panel, combining a vertical and a horizontal keyword separated
@@ -28,7 +29,8 @@ component must be one of \code{"top"}, \code{"middle"}, or
 \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
 \code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
 \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
-\code{"bottom-center"}, and \code{"bottom-right"}.}
+\code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+\code{"top-left"}.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 6.}
@@ -38,34 +40,58 @@ Defaults to 6.}
 \item{title_y}{A character string for the y-axis label. Defaults to
 "Residuals".}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{y_decimals}{Optional. Number of decimal places for y-axis.}
+\item{y_decimals}{Optional. Number of decimal places in the y-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from the first to the last
+year of the series. Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data, from the lowest to the
+highest 3-sigma limit, rounded. Defaults to \code{NULL}.}
 }
 \value{
-A ggplot object showing residuals, credibility regions, and runs
-test results.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization of runs test diagnostics, including
-residuals, credibility limits, and p-values across scenarios and indices.
+Creates a ggplot2-based visualization of the runs test diagnostics of the
+CPUE residuals, showing the residuals, the 3-sigma limits of the test and
+it's p-value, by scenario and index. The input is the output of
+\code{\link{runs_tests_data}()}.
 }
 \details{
-The plot includes shaded regions representing credibility limits, residual
-segments, highlighted points based on threshold exceedance, and p-value
-annotations. Results are faceted by scenario and index.
+Each panel show one scenario (rows) and one index (columns). The shaded
+rectangle marks the 3-sigma limits of the runs test (\code{lcl} and
+\code{ucl}) over the years of the series. It is green when the runs test
+does not reject randomness (p-value >= 0.05) and red otherwise
+(p-value < 0.05). The residuals are drawn as points joined by segments to
+the \code{Ref} value, with a horizontal line at zero. Residuals inside the
+limits are white and residuals outside the limits are red and larger. The
+p-value of each panel is shown in a table.
 }
 \examples{
 \dontrun{
-df <- runs_tests_data(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and plot
+df <- runs_tests_data(list(fit.S01, fit.S02))
 runs_tests_ggplot(df)
+
+# With the p-value table at the bottom right
+runs_tests_ggplot(df, position = "bottom-right")
 }
 
 }

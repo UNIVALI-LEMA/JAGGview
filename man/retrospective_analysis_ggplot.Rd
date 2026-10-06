@@ -20,13 +20,13 @@ retrospective_analysis_ggplot(
 )
 }
 \arguments{
-\item{df_lists}{A named list as returned by
-\code{retrospective_analysis_data()}. It must contain the elements
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{retrospective_analysis_data}()}, with the elements
 \code{data}, \code{surplus_data} and \code{rho_data}.}
 
-\item{indicator_name}{A character string specifying the name of the
-indicator to plot. Supported values include "B", "F", "BBmsy", "FFmsy",
-"procB", and "MSY".}
+\item{indicator_name}{A character string specifying the indicator to plot.
+Must be one of \code{"B"}, \code{"F"}, \code{"BBmsy"}, \code{"FFmsy"},
+\code{"procB"} or \code{"MSY"}.}
 
 \item{n_col}{An integer value that determines the maximum number of columns
 per line. Defaults to 3.}
@@ -39,48 +39,88 @@ component must be one of \code{"top"}, \code{"middle"}, or
 \code{"center"}, or \code{"right"}. Valid values are: \code{"top-left"},
 \code{"top-center"}, \code{"top-right"}, \code{"middle-left"},
 \code{"middle-center"}, \code{"middle-right"}, \code{"bottom-left"},
-\code{"bottom-center"}, and \code{"bottom-right"}.}
+\code{"bottom-center"}, and \code{"bottom-right"}. Defaults to
+\code{"top-left"}.}
 
 \item{text_size}{An integer value that determines the size of the text.
 Defaults to 6.}
 
-\item{use_si_suffix}{A boolean value indicating whether SI suffixes will be
-used, or if FALSE then shows the absolute number, Defaults to FALSE.}
+\item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
+whether SI suffixes will be used, or if \code{FALSE} then shows the
+absolute number, Defaults to \code{FALSE}.}
 
-\item{title_x}{A character string for the x-axis label. If \code{NULL}, a
-default label is assigned based on \code{indicator_name}.}
+\item{title_x}{Optional. A character string for the x-axis label. If
+\code{NULL}, a default label is assigned based on \code{indicator_name}
+("Biomass (t)" for \code{"MSY"} and "Year" for the others). Defaults to
+\code{NULL}.}
 
-\item{title_y}{A character string for the y-axis label. If \code{NULL}, a
-default label is assigned based on \code{indicator_name}.}
+\item{title_y}{Optional. A character string or an expression for the
+y-axis label. If \code{NULL}, a default label is assigned based on
+\code{indicator_name} (for example, "Biomass (t)" for \code{"B"} and
+"Surplus Production (t)" for \code{"MSY"}). Defaults to \code{NULL}.}
 
-\item{x_decimals}{Optional. Number of decimal places for x-axis.}
+\item{x_decimals}{Optional. Number of decimal places in the x-axis labels,
+used only when \code{indicator_name} is \code{"MSY"}. If \code{NULL}, up
+to two decimal places are shown and trailing zeros are dropped. Defaults
+to \code{NULL}.}
 
-\item{y_decimals}{Optional. Number of decimal places for y-axis.}
+\item{y_decimals}{Optional. Number of decimal places in the y-axis labels.
+If \code{NULL}, up to two decimal places are shown and trailing zeros
+are dropped. Defaults to \code{NULL}.}
 
-\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the x-axis c(min, max) used to restrict the plotting range.}
+\item{x_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the x-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data. Defaults to \code{NULL}.}
 
-\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower and
-upper limits of the y-axis c(min, max) used to restrict the plotting range.}
+\item{y_lim}{Optional. A numeric vector of length 2 specifying the lower
+and upper limits of the y-axis, \code{c(min, max)}. If \code{NULL}, the
+limits will be calculated based on the data (the credibility interval of
+the reference run, or its surplus production for \code{"MSY"}), rounded.
+Defaults to \code{NULL}.}
 }
 \value{
-A ggplot object displaying retrospective trajectories, credibility
-intervals (when applicable), and rho annotations.
+A \code{ggplot} object.
 }
 \description{
-Creates a ggplot2-based visualization of retrospective analyses, including
-time series of key indices and surplus production curves, along with
-retrospective bias (rho) annotations.
+Creates a ggplot2-based visualization of the retrospective analysis of a
+selected indicator (B, F, B/Bmsy, F/Fmsy, process error or surplus
+production), by scenario, annotated with the retrospective bias (rho). The
+input is the output of \code{\link{retrospective_analysis_data}()}.
 }
 \details{
-For standard indices, the plot shows time series with credibility ribbons
-and retrospective trajectories. For "MSY", the plot displays surplus
-production curves as a function of biomass. Results are faceted by scenario.
+Each panel shows one scenario. For the time series indicators (\code{"B"},
+\code{"F"}, \code{"BBmsy"}, \code{"FFmsy"} and \code{"procB"}), the gray
+ribbon is the credibility interval of the reference run, and the lines are
+the reference run (black) and the retrospective runs (colored), drawn only
+for the years flagged by the \code{keep} column. A dashed line marks 1 for
+\code{"BBmsy"} and \code{"FFmsy"}, and 0 for \code{"procB"}.
+
+For \code{"MSY"}, the plot shows the surplus production curves as a function
+of biomass, one for each run.
+
+The table in each panel shows the retrospective bias (rho) of the selected
+indicator. The colors of the retrospective runs come from
+\code{JABBA::ss3col()}, which supports up to 8 runs. The axis limits are
+applied with \code{ggplot2::coord_cartesian()}, so they are the same in all
+panels.
 }
 \examples{
 \dontrun{
-df <- retrospective_analysis_data(list_hc_models)
-retrospective_analysis_ggplot(df, indicator_name = "B")
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# Prepare the data and plot
+data <- retrospective_analysis_data(list(hc_S01, hc_S02))
+retrospective_analysis_ggplot(data, indicator_name = "B")
+
+# Surplus production curves, in two columns
+retrospective_analysis_ggplot(data, "MSY", n_col = 2)
 }
 
 }

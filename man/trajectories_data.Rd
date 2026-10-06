@@ -4,54 +4,72 @@
 \alias{trajectories_data}
 \title{Summarise trajectory data from model outputs}
 \usage{
-trajectories_data(list_fit_models, reserve_mb = 2048, poll_interval = 0.5)
+trajectories_data(list_fit_models, poll_interval = 0.5, reserve_mb = 2048)
 }
 \arguments{
-\item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.}
-
-\item{reserve_mb}{A numeric value specifying the minimum amount of free
-system memory, in megabytes, to reserve for the operating system. Defaults
-to 2048.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
 between memory availability checks. Defaults to 0.5.}
+
+\item{reserve_mb}{A numeric value for the minimum free system memory, in
+megabytes, to keep available. Defaults to 2048.}
 }
 \value{
-An object of class \code{JAGGdata} (a data frame) containing:
+An object of class \code{JAGGdata} (a data frame) with one row per
+year, scenario and indicator, and the columns:
 \itemize{
-\item \code{year}: Year of the observation
-\item \code{Scenario}: Scenario name
-\item \code{mu}: Median value
-\item \code{lcl}: Lower 2.5\% quantile
-\item \code{ucl}: Upper 97.5\% quantile
-\item \code{lcl2}: Lower 10\% quantile
-\item \code{ucl2}: Upper 90\% quantile
-\item \code{indicator}: Name of the indicator summarised
+\item \code{year}: Year of the observation.
+\item \code{Scenario}: Scenario name.
+\item \code{mu}: Median value.
+\item \code{lcl}: Lower 2.5\% quantile.
+\item \code{ucl}: Upper 97.5\% quantile.
+\item \code{lcl2}: Lower 10\% quantile.
+\item \code{ucl2}: Upper 90\% quantile.
+\item \code{indicator}: Name of the indicator summarised.
 }
+Returns \code{NULL} if the process is aborted due to low memory.
 }
 \description{
-Computes summary statistics (median and quantiles) selected variables from
-model outputs, grouped by year and scenario.
+Computes the median and quantile intervals of biomass, fishing mortality and
+related indicators from the posterior samples of one or more JABBA fits, by
+year and scenario. The result is ready for
+\code{\link{trajectories_ggplot}()}.
 }
 \details{
-The function maps user-friendly indicator_name names to:
-\itemize{
-\item \code{"BB0"}: \code{BB0}
-\item \code{"BBmsy"}: \code{stock}
-\item \code{"FFmsy"}: \code{harvest}
-}
+Posterior samples are extracted with memory monitoring. If the free memory
+falls bellow \code{reserve_mb}, the process is aborted with a message and
+\code{NULL} is returned.
 
-The output is designed to be used directly with
-\code{\link{trajectories_ggplot}()}.
+The indicators are summarised from the following columns of the posterior
+samples:
+\itemize{
+\item \code{"BB0"}: \code{BB0} (B/B0)
+\item \code{"BBmsy"}: \code{stock} (B/Bmsy)
+\item \code{"FFmsy"}: \code{harvest} (F/Fmsy)
+\item \code{"Bdev"}: \code{Bdev} (process deviations)
+\item \code{"B"}: \code{B} (biomass)
+\item \code{"H"}: \code{H} (harvest rate)
+\item \code{"Catch"}: \code{Catch}
+\item \code{"BBfrac"}: \code{BBfrac} (B/Bfrac)
+\item \code{"Bref"}: \code{Bref} (biomass reference)
+}
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-df <- trajectories_data(list_fit_models)
-df
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+res1 <- trajectories_data(fit.S01)
+
+# A list of fits (one per scenario)
+res2 <- trajectories_data(list(fit.S01, fit.S02))
 }
 
 }

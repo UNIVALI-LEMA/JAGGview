@@ -1,0 +1,91 @@
+.info-card, .info-card .btn-default{
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.info-card .btn-default{
+    padding: 0 12px;
+}
+.info-cards-row .selectize-input{
+    width: 100px !important;
+}
+.info-card{
+    border-radius: 30px;
+    height: 40px;
+    position: relative;
+    padding: 0 16px;
+    gap: 10px;
+}
+.info-card-icon{
+    font-size: 18px;
+}
+.info-card:hover, .title-card:hover .title-popup{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.info-card-popup-triangle {
+   width: 0px;
+   height: 0px;
+   border-style: solid;
+   border-width: 0 8px 20px 8px;
+   border-color: transparent transparent #00234B transparent;
+   transform: rotate(30deg);
+   position: absolute;
+   right: 0;
+   z-index: -1;
+   top: -5px;
+}
+
+.info-cards-row{
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+.hover-popup{
+    position: absolute;
+    display: none;
+    border-radius: 10px !important;
+    background: #00234B;
+    color: #fff;
+    padding: 5px 13px;
+    right: 15px;
+    font-weight: 500 !important;
+    width: 300px;
+    font-size: 1rem;
+    gap: 8px;
+    z-index: 2;
+    box-shadow: 3px 3px 9px #01010166;
+}
+.hover-popup i{
+    margin-right: 10px;
+}
+.title-card{
+    position: relative;
+    cursor: help;
+}
+
+.input-wrapper {
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.input-wrapper .form-group{
+    margin-bottom: 0px !important;
+}
+.info-container {
+    display: flex; 
+    justify-content: end;
+    margin-left: auto;
+}
+.title-container {
+    display:flex;
+}
+.control-label {
+    width:100%;
+}

@@ -124,12 +124,30 @@
 #' @importFrom stats median quantile
 #' @importFrom gplots ci2d
 #' @importFrom forcats fct_relevel
-.ensemble_data <- function(list_fit_models, ci_levels = c(0.5, 0.8, 0.95)) {
-  model_results <- .jbplot_ensemble2(
-    kb = list_fit_models,
-    kbout = TRUE,
-    plot = FALSE
-  )
+.ensemble_data <- function(
+  list_fit_models, ci_levels = c(0.5, 0.8, 0.95), poll_interval = 0.5, 
+  reserve_mb = 2048
+) {
+  model_results <- tryCatch({
+    .safe_execute(
+      fn = function(kb) {
+        .jbplot_ensemble2(
+          kb = kb,
+          kbout = TRUE,
+          plot = FALSE
+        )
+      },
+      args = list(
+        kb = list_fit_models
+      ),
+      reserve_mb = reserve_mb,
+      poll_interval = poll_interval
+    )
+  }, memoryLimitExceeded = function(e) {
+    message("Process aborted to prevent the system from running out of memory")
+    NULL
+  })
+  if (is.null(model_results)) return(invisible(NULL))
 
   model_results <- model_results %>%
     rename(Scenario = run) %>%
@@ -142,13 +160,13 @@
     Bdev  = "Bdev",
     B = "B",
     H = "H",
-    Catch = "Catch"
+    Catch = "Catch",
+    BBfrac = "BBfrac",
+    Bref = "Bref"
   )
 
   result_list <- lapply(names(columns), function(var_name) {
-
     var_col <- columns[[var_name]]
-
     model_results %>%
       summarise(
         mu   = median(.data[[var_col]]),
@@ -299,6 +317,7 @@
   index_inputseries <- index_inputseries[!index_inputseries == "year"]
   NA_index <- setdiff(index_inputseries, index_data)
   data$Index[is.na(data$Index)] <- NA_index
+  return(data)
 }
 
 #' Filter data based on conditional transitions
@@ -333,6 +352,34 @@
       }
     }) %>%
     ungroup()
+}
+
+#' Extract scenario identifiers
+#'
+#' Internal helper that extracts the scenario identifier from each model fit
+#' in a collection of JABBA model fits.
+#'
+#' @param data A collection of JABBA model fits containing a \code{scenario}
+#' element in each fit.
+#'
+#' @details
+#' The function iterates over the supplied collection and extracts the value
+#' of the \code{scenario} element from each model fit.
+#'
+#' @return
+#' A vector containing the scenario identifier associated with each model fit.
+#'
+#' @keywords internal
+#' @noRd
+.get_scenarios <- function(data) {
+  temp00 <- sapply(
+    data,
+    function(fit) {
+      fit$scenario
+    }
+  )
+  
+  return(temp00)
 }
 
 #' Check if object is a valid JABBA model fit
@@ -1058,6 +1105,51 @@
         return(out)
 }
 
+#' Report the origin of a data structure
+#'
+#' Internal helper used by \code{create_report()} to tell where a data
+#' structure came from. With \code{verbose = TRUE}, prints a message for the
+#' sources \code{"file"}, \code{"models"} and \code{"user"}. For
+#' \code{"none"}, it issues a warning, because the corresponding section of
+#' the dashboard will have no data.
+#'
+#' @param verbose Logical. If \code{FALSE}, the function does nothing.
+#' @param label A character string with the name of the data structure (for
+#'   example, \code{"Kobe"}).
+#' @param source A character string with the origin of the data. Must be one
+#'   of \code{"file"} (obtained from the input file(s)), \code{"models"}
+#'   (computed from the fitted/hindcast models), \code{"user"} (provided by
+#'   the user) or \code{"none"} (not available). Defaults to \code{"file"}.
+#'
+#' @return Invisibly returns \code{NULL}. Called for its side effects, a
+#'   message or a warning in the console.
+#'
+#' @noRd
+#' @keywords internal
+.msg_source <- function(
+  verbose, label, source = c("file", "models", "user", "none")
+) {
+  source <- match.arg(source)
+  if (source == "none") {
+    warning(
+      label, " data is not available: no data was provided and there are ",
+      "no models to compute it from. This section will have no data.",
+      call. = FALSE
+    )
+    return(invisible(NULL))
+  }
+  
+  if (!verbose) return(invisible(NULL))
+  
+  origin <- switch(
+    source,
+    file   = "obtained from the input file(s)",
+    models = "computed from the fitted/hindcast models",
+    user   = "provided by the user" 
+  )
+  message(label, " data was sucessfully ", origin)
+}
+
 #' Extract and combine CPUE data
 #'
 #' Internal helper that extracts CPUE-related outputs from a list of model 
@@ -1459,16 +1551,71 @@
   }
 }
 
+#' Validate and update year input
+#'
+#' Internal helper that ensures a year value is stored as an integer and
+#' updates the corresponding Shiny select input when conversion is required.
+#'
+#' @param year A numeric or integer value representing a year.
+#' @param inputId A character string specifying the ID of the Shiny input to
+#' update.
+#' @param session A Shiny session object used to update the input value.
+#'
+#' @details
+#' If \code{year} is not already an integer, it is converted using
+#' \code{as.integer()} and the corresponding Shiny \code{selectInput} is
+#' updated to reflect the converted value.
+#'
+#' @return
+#' An integer representation of \code{year}.
+#'
 #' @keywords internal
 #' @noRd
-.get_scenarios <- function(data) {
-  temp00 <- sapply(
-    data,
-    function(fit) {
-      fit$scenario
-    }
-  )
-  
-  return(temp00)
+.validate_year <- function(year, inputId, session) {
+  if (!is.integer(year)) {
+    year <- as.integer(year)
+    updateSelectInput(
+      session, inputId = inputId, selected = year
+    )
+  }
+  return(year)
 }
 
+#' Return a value only if the data is available
+#'
+#' Internal helper used to build the dashboard inputs (for example, the
+#' choices of a \code{selectInput()}) without errors when a data structure
+#' is empty. If \code{data} is identical to \code{empty}, returns
+#' \code{NULL}; otherwise returns \code{value}.
+#'
+#' Since \code{value} is only evaluated when it is returned (lazy
+#' evaluation), an expression that depends on \code{data}, such as
+#' \code{unique(kobe_data$ci_data$Scenario)}, is never run when the data is
+#' empty.
+#'
+#' @param data The data structure to be checked (for example, a list or a
+#'   data frame).
+#' @param value The value (or expression) to be returned when \code{data} is
+#'   not empty.
+#' @param empty The object that represents an empty \code{data}. Defaults to
+#'   \code{list()}. Use \code{data.frame()} for data frames.
+#'
+#' @return Invisibly returns \code{NULL} if \code{data} is identical to
+#'   \code{empty}; otherwise returns \code{value}.
+#'
+#' @examples
+#' \dontrun{
+#' .when_available(list(), unique(kobe_data$ci_data$Scenario))
+#' # NULL
+#'
+#' .when_available(
+#'   traj_data, unique(traj_data$Scenario), empty = data.frame()
+#' )
+#' }
+#'
+#' @noRd
+#' @keywords internal
+.when_available <- function(data, value, empty = list()) {
+  if (identical(data, empty)) return(invisible(NULL))
+  value
+}

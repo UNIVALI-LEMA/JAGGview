@@ -7,46 +7,61 @@
 runs_tests_data(list_fit_models, indices_factor = NULL)
 }
 \arguments{
-\item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 
-\item{indices_factor}{Optional. A vector of indices to include. Must exist
-in the \code{Index} column.}
+\item{indices_factor}{Optional. A character vector with the index names to
+use and their order. All values must exist in the \code{Index} column.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{cpue_residuals}{A data frame containing residuals, fitted
-LOESS values, and credibility bands.}
-\item{SE3}{A data frame containing runs test results, including
-lower and upper credibility limits and p-values.}
-\item{RMSE_data}{A data frame with RMSE-related diagnostics.}
+\item{cpue_residuals}{Residuals (\code{Res}) by year, scenario and index,
+with the runs test limits (\code{lci}, \code{ucl}), the \code{class} of
+each residual, and the LOESS fit (\code{fit}) with it's band
+(\code{lower},\code{upper}).}
+\item{SE3}{Runs test results by index and scenario: year range
+(\code{ymin}, \code{ymax}), 3-sigma limits (\code{lcl}, \code{ucl}),
+\code{pvalue} and \code{class}.}
+\item{RMSE_data}{Root mean square error (RMSE) by index and scenario.}
 }
 }
 \description{
-Processes model outputs to compute runs test diagnostics and residual
-structures for CPUE indices, including credibility limits and LOESS
-smoothing.
+Computes runs tests on the residuals of the CPUE indices of one or more
+JABBA fits, and smooths the residuals with LOESS. The result is ready for
+\code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
 }
 \details{
-The function computes runs tests using \code{JABBA::jbruns_sig3} and
-classifies results based on statistical significance. Residuals are smoothed
-using LOESS, and credibility intervals are derived from the fitted model.
+The runs test is computed with \code{JABBA::jbruns_sig3()} for each index
+and scenario.\code{lcl} and \code{ucl} are it's 3-sigma limits, and
+\code{pvalue} is the runs test p-value. In \code{SE3}, \code{class} is
+\code{"red"} when \code{pvalue < 0.05} (residuals are not random) and
+\code{"green"} otherwise. In \code{cpue_residuals}, \code{class} is
+\code{"red"} when the residual falls outisde the 3-sigma limits and
+\code{"white"} otherwise.
 
-If \code{indices_factor} is provided, the results are filtered and reordered
-accordingly. The function also ensures consistency across different model
-outputs and removes incomplete cases before returning results.
+A single LOESS curve is fitted to the residuals of all indices and scenarios
+together (\code{Res - Year}). The bands (\code{lower} and \code{upper}) are
+95\% confidence bands, computed as the fit plus or minus 1.96 standart
+errors.
 
-The output is designed to be used directly with
-\code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
+Rows with missing values are removed. If \code{indices_factor} is supplied,
+the \code{Index} column is reordered following that vector.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-df <- runs_tests_data(list_fit_models)
-df
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+res1 <- runs_tests_data(fit.S01)
+
+# A list of fits (one per scenario)
+res2 <- runs_tests_data(list(fit.S01, fit.S02))
 }
 
 }

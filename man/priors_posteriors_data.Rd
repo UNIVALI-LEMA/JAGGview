@@ -7,39 +7,53 @@
 priors_posteriors_data(list_fit_models)
 }
 \arguments{
-\item{list_fit_models}{A list containing model outputs as returned by the
-JABBA function \code{JABBA::fit_jabba()}.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:
 \describe{
-\item{prior}{A data frame containing sampled prior distributions.}
-\item{posterior}{A data frame containing posterior density estimates.}
-\item{PPVR}{A data frame with prior-posterior variance ratios.}
-\item{PPMR}{A data frame with prior-posterior mean ratios.}
+\item{prior}{Simulated prior values and densities, by scenario.}
+\item{posterior}{Posterior density estimates, by scenario.}
+\item{PPVR}{Prior-posterior variance ratio (posterior squared coefficient
+of variation divided by the prior one) for K, r and psi.}
+\item{PPMR}{Prior-posterior mean ratio (posterior mean divided by prior
+mean) for K, r and psi.}
 }
 }
 \description{
-Processes model outputs to generate prior and posterior distributions for
-key parameters (e.g., K, r, psi), along with summary metrics for
-prior-posterior comparisons.
+Simulates the prior distributions and estimates the posterior densities of
+the main JABBA parameters (K, R, psi and sigma) for each scenario, and
+computes summary ratios comparing them. The result is ready for
+\code{\link{priors_posteriors_ggplot}()}.
 }
 \details{
-Prior distributions are simulated using log-normal and gamma distributions
-based on model settings, while posterior distributions are estimated using
-kernel density methods. Summary metrics (PPVR and PPMR) are computed to
-assess the influence of priors on posterior estimates.
+Priors for K, r and psi are simulated from log-normal distributions (10,000
+draws) and the prior for sigma is evaluated on a gamma density, using the
+settings stored in each fit. Posterior densities are estimated with
+\code{stats::density()} (\code{adjust = 2}).
 
-The output is designed to be used directly with
-\code{\link{priors_posteriors_ggplot}()}.
+In \code{prior} and \code{posterior}, columns ending in \code{01} hold the
+parameter values amd columns ending in \code{02} hold the density. For sigma
+in \code{prior}, \code{sigma02} is the log-density.
+
+Since priors are simulated randomly, \code{PPVR} and \code{PPMR} can vary
+slightly between runs. Use \code{set.seed()} for reproducible results.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-df <- priors_posteriors_data(list_fit_models)
-df
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+res1 <- priors_posteriors_data(fit.S01)
+
+# A list of fits (one per scenario)
+res2 <- priors_posteriors_data(list(fit.S01, fit.S02))
 }
 
 }
