@@ -187,7 +187,7 @@
 #' # Mixed: Kobe and trajectories data supplied, the others computed from the 
 #' # models
 #' create_report(
-#'   kobe_data = kobe, list_fit_models = list_fit_models,
+#'   kobe_data = kobe, traj_data = traj, list_fit_models = list_fit_models,
 #'   list_hc_models = list_hc_models, verbose = TRUE
 #' )
 #'
