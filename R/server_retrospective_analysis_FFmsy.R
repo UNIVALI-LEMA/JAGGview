@@ -1,6 +1,6 @@
 #' @keywords internal
 .retrospective_analysis_FFmsy_server <- function(
-  input, output, session, ra_df, use_si_suffix
+  input, output, session, ra_df, use_si_suffix, text_size_tb, position_tb
 ){
   filtered_ra_FFmsy <- reactiveVal(ra_df)
 
@@ -8,7 +8,7 @@
 
   title_y_ra_FFmsy <- reactiveVal("F/Fmsy")
 
-  text_size_ra_FFmsy <- reactiveVal(16)
+  text_size_ra_FFmsy <- reactiveVal(text_size_tb)
 
   x_lim_min_ra_FFmsy <- reactiveVal(
     .when_available(ra_df, min((ra_df$data %>% filter(Index == "FFmsy"))$Year))
@@ -38,7 +38,7 @@
     )
   )
 
-  position_ra_FFmsy <- reactiveVal("top-left")
+  position_ra_FFmsy <- reactiveVal(position_tb)
 
   si_suffix_ra_FFmsy <- reactiveVal(use_si_suffix)
 
@@ -59,7 +59,7 @@
     scenarios_current = unique(ra_df$data$Scenario),
     title_x_current = "Year",
     title_y_current = "F/Fmsy",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       ra_df, min((ra_df$data %>% filter(Index == "FFmsy"))$Year)
     ),
@@ -80,7 +80,7 @@
         TRUE, 1.1
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -511,7 +511,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

@@ -1,5 +1,7 @@
 #' @keywords internal
-.cpue_res_server <- function(input, output, session, res_df, use_si_suffix) {
+.cpue_res_server <- function(
+  input, output, session, res_df, use_si_suffix, text_size_tb, position_tb
+) {
   filtered_cpue_res <- reactiveVal(res_df)
 
   title_x_cpue_res <- reactiveVal("Year")
@@ -13,7 +15,7 @@
     )
   )
 
-  text_size_cpue_res <- reactiveVal(16)
+  text_size_cpue_res <- reactiveVal(text_size_tb)
 
   x_lim_min_cpue_res <- reactiveVal(
     .when_available(res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE))
@@ -37,7 +39,7 @@
     )
   )
 
-  position_cpue_res <- reactiveVal("top-left")
+  position_cpue_res <- reactiveVal(position_tb)
 
   si_suffix_cpue_res <- reactiveVal(use_si_suffix)
 
@@ -71,7 +73,7 @@
         NULL, length(unique(res_df$cpue_residuals$Index))
       )
     ),
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE)
     ),
@@ -88,7 +90,7 @@
         max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -599,7 +601,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

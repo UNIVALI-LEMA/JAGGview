@@ -1,6 +1,6 @@
 #' @keywords internal
 .retrospective_analysis_MSY_server <- function(
-  input, output, session, ra_df, use_si_suffix
+  input, output, session, ra_df, use_si_suffix, text_size_tb, position_tb
 ) {
   filtered_ra_MSY <- reactiveVal(ra_df)
 
@@ -8,7 +8,7 @@
 
   title_y_ra_MSY <- reactiveVal("Surplus Production (t)")
 
-  text_size_ra_MSY <- reactiveVal(16)
+  text_size_ra_MSY <- reactiveVal(text_size_tb)
 
   x_lim_min_ra_MSY <- reactiveVal(
     .when_available(
@@ -41,7 +41,7 @@
     )
   )
 
-  position_ra_MSY <- reactiveVal("top-left")
+  position_ra_MSY <- reactiveVal(position_tb)
 
   si_suffix_ra_MSY <- reactiveVal(use_si_suffix)
 
@@ -62,7 +62,7 @@
     scenarios_current = unique(ra_df$data$Scenario),
     title_x_current = "Biomass (t)",
     title_y_current = "Surplus Production (t)",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       ra_df, min((ra_df$surplus_data %>% filter(Index == "MSY"))$SB_i)
     ),
@@ -83,7 +83,7 @@
         TRUE, 1.1
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -492,7 +492,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

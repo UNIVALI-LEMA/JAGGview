@@ -1147,7 +1147,7 @@
     models = "computed from the fitted/hindcast models",
     user   = "provided by the user" 
   )
-  message(label, " data was sucessfully ", origin)
+  message(label, " data was successfully ", origin)
 }
 
 #' Extract and combine CPUE data

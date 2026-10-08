@@ -3,7 +3,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
 
 .build_ui <- function(
   fits_data, hind_data, kobe_data, pp_data, ra_data, res_data, traj_data, 
-  use_si_suffix
+  use_si_suffix, text_size_tb, position_tb
 ) {
   addResourcePath("www", system.file("www", package = "JAGGview"))
 
@@ -632,7 +632,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "runs_tests_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -706,7 +706,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -810,7 +810,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "cpue_res_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -890,7 +890,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -995,7 +995,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "pp_K_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1047,7 +1047,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1152,7 +1152,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "pp_r_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1205,7 +1205,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1310,7 +1310,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "pp_psi_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1363,7 +1363,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1455,7 +1455,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_B_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1541,7 +1541,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1632,7 +1632,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_F_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1716,7 +1716,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1807,7 +1807,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_BBmsy_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -1895,7 +1895,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -1986,7 +1986,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_FFmsy_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -2074,7 +2074,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -2165,7 +2165,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_procB_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -2253,7 +2253,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -2344,7 +2344,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "ra_MSY_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -2436,7 +2436,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),
@@ -2539,7 +2539,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
             numericInput(
               inputId = "hc_text_size",
               label = "Select text size: ",
-              value = 16,
+              value = text_size_tb,
               width = "100%"
             ),
             div(
@@ -2613,7 +2613,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                 "top-left", "top-center", "top-right", "bottom-left", 
                 "bottom-center", "bottom-right"
               ),
-              selected = "top-left",
+              selected = position_tb,
               multiple = FALSE,
               width = "100%"
             ),

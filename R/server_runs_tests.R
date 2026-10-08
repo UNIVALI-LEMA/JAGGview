@@ -1,12 +1,14 @@
 #' @keywords internal
-.runs_tests_server <- function(input, output, session, res_df, use_si_suffix) {
+.runs_tests_server <- function(
+  input, output, session, res_df, use_si_suffix, text_size_tb, position_tb
+) {
   filtered_runs_tests <- reactiveVal(res_df)
 
   title_x_runs_tests <- reactiveVal("Year")
 
   title_y_runs_tests <- reactiveVal("Residuals")
 
-  text_size_runs_tests <- reactiveVal(16)
+  text_size_runs_tests <- reactiveVal(text_size_tb)
 
   x_lim_min_runs_tests <- reactiveVal(
     .when_available(res_df, min(res_df$SE3$ymin))
@@ -28,7 +30,7 @@
     )
   )
 
-  position_runs_tests <- reactiveVal("top-left")
+  position_runs_tests <- reactiveVal(position_tb)
 
   si_suffix_runs_tests <- reactiveVal(use_si_suffix)
 
@@ -55,7 +57,7 @@
     ),
     title_x_current = "Year",
     title_y_current = "Residuals",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(res_df, min(res_df$SE3$ymin)),
     x_max_current = .when_available(res_df, max(res_df$SE3$ymax)),
     y_min_current = .when_available(res_df, .round_to_nearest(
@@ -64,7 +66,7 @@
     y_max_current = .when_available(res_df, .round_to_nearest(
       max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5
     )),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -602,7 +604,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

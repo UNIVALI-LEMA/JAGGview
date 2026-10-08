@@ -1,6 +1,6 @@
 #' @keywords internal
 .priors_posteriors_r_server <- function(
-  input, output, session, pp_df, use_si_suffix
+  input, output, session, pp_df, use_si_suffix, text_size_tb, position_tb
 ) {
   filtered_pp_r <- reactiveVal(pp_df)
 
@@ -12,7 +12,7 @@
   
   posterior_color_pp_r <- reactiveVal("#2A9D5C")
 
-  text_size_pp_r <- reactiveVal(16)
+  text_size_pp_r <- reactiveVal(text_size_tb)
 
   x_lim_min_pp_r <- reactiveVal(
     .when_available(
@@ -26,7 +26,7 @@
     )
   )
 
-  position_pp_r <- reactiveVal("top-left")
+  position_pp_r <- reactiveVal(position_tb)
 
   si_suffix_pp_r <- reactiveVal(use_si_suffix)
 
@@ -52,14 +52,14 @@
     title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       pp_df, round(min(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3)
     ),
     x_max_current = .when_available(
       pp_df, round(max(pp_df$prior$r01, pp_df$posterior$r01, na.rm = TRUE), 3)
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -493,7 +493,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

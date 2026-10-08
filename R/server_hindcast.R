@@ -1,12 +1,14 @@
 #' @keywords internal
-.hindcast_server <- function(input, output, session, hind_df, use_si_suffix) { 
+.hindcast_server <- function(
+  input, output, session, hind_df, use_si_suffix, text_size_tb, position_tb
+) { 
   filtered_hc <- reactiveVal(hind_df)
 
   title_x_hc <- reactiveVal("Year")
 
   title_y_hc <- reactiveVal("Index")
 
-  text_size_hc <- reactiveVal(16)
+  text_size_hc <- reactiveVal(text_size_tb)
 
   x_lim_min_hc <- reactiveVal(.when_available(hind_df, min(hind_df$data$year)))
 
@@ -24,7 +26,7 @@
     )
   )
 
-  position_hc <- reactiveVal("top-left")
+  position_hc <- reactiveVal(position_tb)
 
   si_suffix_hc <- reactiveVal(use_si_suffix)
 
@@ -47,7 +49,7 @@
     indices_current = unique(hind_df$data$Index),
     title_x_current = "Year",
     title_y_current = "Index",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(hind_df, min(hind_df$data$year)),
     x_max_current = .when_available(hind_df, max(hind_df$data$year)),
     y_min_current = .when_available(hind_df, .round_to_nearest(
@@ -56,7 +58,7 @@
     y_max_current = .when_available(
       hind_df, .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE)
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -630,7 +632,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }
