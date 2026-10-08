@@ -10,8 +10,9 @@
 #' \code{pp_data}, \code{ra_data}, \code{res_data} and \code{traj_data}, as 
 #' returned by the respective \code{*_data()} functions of the package; or 
 #' (iii) the model objects \code{list_fit_models} and \code{list_hc_models}, 
-#' from which the data structures that were not supplied are computed (see 
-#' \strong{Details} and \strong{Examples}).
+#' from which the data structures that were not supplied are computed, only
+#' if \code{use_models_for_data = TRUE} (see \strong{Details} and
+#' \strong{Examples}).
 #'
 #' @details
 #' The data source is chosen in the following order:
@@ -31,26 +32,27 @@
 #'   \itemize{
 #'     \item If it was supplied by the user (for example, \code{kobe_data}),
 #'     it is used as it is.
-#'     \item If it was left empty and the models are available, it is
-#'     computed from \code{list_fit_models} (for \code{fits_data},
-#'     \code{pp_data}, \code{res_data}, \code{kobe_data} and
-#'     \code{traj_data}) or from \code{list_hc_models} (for
-#'     \code{hind_data} and \code{ra_data}). \code{kobe_data} and
+#'     \item If it was left empty, \code{use_models_for_data = TRUE} and the
+#'     models are available, it is computed from \code{list_fit_models}
+#'     (for \code{fits_data}, \code{pp_data}, \code{res_data},
+#'     \code{kobe_data} and \code{traj_data}) or from \code{list_hc_models}
+#'     (for \code{hind_data} and \code{ra_data}). \code{kobe_data} and
 #'     \code{traj_data} are computed together by the internal helper
 #'     \code{.ensemble_data()}.
-#'     \item If it was left empty and there are no models to compute it from,
-#'     it stays empty, a warning is issued, and the corresponding section of
-#'     the dashboard has no data.
+#'     \item If it was left empty and \code{use_models_for_data = FALSE}, or
+#'     there are no models to compute it from, it stays empty, a warning is
+#'     issued, and the corresponding section of the dashboard has no data.
 #'   }
 #' }
 #' 
-#' Even when all the pre-computed data structures are supplied, the model
-#' objects (\code{list_fit_models} and \code{list_hc_models}) are still
-#' needed to obtain the values shown in the summary tables of the dashboard.
-#' If they are not supplied, those tables have no data. On the other hand,
-#' if only the model objects are supplied, all the data structures are
-#' computed from them. The user can also mix both: supply some of the
-#' pre-computed structures and let the others be computed from the models.
+#' With the default \code{use_models_for_data = FALSE}, only the data
+#' structures supplied explicitly are used. The model objects
+#' (\code{list_fit_models} and \code{list_hc_models}) are still needed to
+#' obtain the values shown in the summary tables of the dashboard, and if
+#' they are not supplied, those tables have no data. With
+#' \code{use_models_for_data = TRUE}, the data structures that were not
+#' supplied are computed from the models, so the user can supply only the
+#' model objects, or mix them with some pre-computed structures.
 #'
 #' If \code{verbose = TRUE}, a message reports the origin of each data
 #' structure (input files, models or user).
@@ -74,25 +76,26 @@
 #' 
 #' @param fits_data A named list as returned by \code{\link{fits_data}()},
 #'   with the elements \code{Li_Ui}, \code{CI_80} and \code{CI_95}. If empty,
-#'   it is computed from \code{list_fit_models}. Ignored if \code{filename}
-#'   is supplied. Defaults to \code{list()}.
+#'   it is computed from \code{list_fit_models} only if 
+#'   \code{use_models_for_data = TRUE}. Ignored if \code{filename} is supplied. 
+#'   Defaults to \code{list()}.
 #' @param hind_data A named list as returned by
 #'   \code{\link{hindcast_data}()}, with the elements \code{data},
 #'   \code{data_points}, \code{data_lines}, \code{mase_data} and
 #'   \code{min_year_retro}. If empty, it is computed from 
-#'   \code{list_hc_models}. Ignored if \code{filename} is supplied. Defaults
-#'   to \code{list()}.
+#'   \code{list_hc_models} only if \code{use_models_for_data = TRUE}. Ignored 
+#'   if \code{filename} is supplied. Defaults to \code{list()}.
 #' @param kobe_data A named list as returned by \code{\link{kobe_data}()},
 #'   with the elements \code{col01}, \code{col02}, \code{col03},
-#'   \code{col04}, \code{ci_data}, \code{data_lines} and
+#'   \code{col04}, \code{ci_data}, \code{data_lines} and 
 #'   \code{highlight_years}. If empty, it is computed from
-#'   \code{list_fit_models}. Ignored if \code{filename} is supplied.
-#'   Defaults to \code{list()}.
+#'   \code{list_fit_models} only if \code{use_models_for_data = TRUE}. Ignored 
+#'   if \code{filename} is supplied. Defaults to \code{list()}.
 #' @param pp_data A named list as returned by
 #'   \code{\link{priors_posteriors_data}()}, with the elements \code{prior},
 #'   \code{posterior}, \code{PPVR} and \code{PPMR}. If empty, it is computed
-#'   from \code{list_fit_models}. Ignored if \code{filename} is supplied.
-#'   Defaults to \code{list()}.
+#'   from \code{list_fit_models} only if \code{use_models_for_data = TRUE}. 
+#'   Ignored if \code{filename} is supplied. Defaults to \code{list()}.
 #' @param ra_data A named list as returned by
 #'   \code{\link{retrospective_analysis_data}()}, with the elements 
 #'   \code{data}, \code{surplus_data} and \code{rho_data}. If empty, it is
@@ -100,23 +103,33 @@
 #'   supplied. Defaults to \code{list()}.
 #' @param res_data A named list as returned by \code{\link{runs_tests_data}()}, 
 #'   with the elements \code{cpue_residuals}, \code{SE3} and \code{RMSE_data}. 
-#'   If empty, it is computed from \code{list_fit_models}. Ignored if 
-#'   \code{filename} is supplied. Defaults to \code{list()}.
+#'   If empty, it is computed from \code{list_fit_models} only if
+#'   \code{use_models_for_data = TRUE}. Ignored if \code{filename} is supplied. 
+#'   Defaults to \code{list()}.
 #' @param traj_data A data frame as returned by
 #'   \code{\link{trajectories_data}()}. If empty, it is computed from 
-#'   \code{list_fit_models}. Ignored if \code{filename} is supplied. Defaults 
-#'   to \code{data.frame()}.
+#'   \code{list_fit_models} only if \code{use_models_for_data = TRUE}. Ignored 
+#'   if \code{filename} is supplied. Defaults to \code{data.frame()}.
 #' @param list_fit_models A list of fits returned by \code{JABBA::fit_jabba()}, 
-#'   or a single fit. Used to compute the data structures derived from the fits 
-#'   that were not supplied, and to obtain the values shown in the summary 
-#'   tables. If \code{filename} is used and this argument is empty, the fits 
-#'   found in the files are used. Defaults to \code{list()}.
+#'   or a single fit. Used to obtain the values shown in the summary tables
+#'   and, if \code{use_models_for_data = TRUE}, to compute the data
+#'   structures derived from the fits that were not supplied. If 
+#'   \code{filename} is used and this argument is empty, the fits found in
+#'   the files are used. Defaults to \code{list()}.
 #' @param list_hc_models A list of hindcasts returned by 
-#'   \code{JABBA::hindcast_jabba()}, or a single hindcast. Used to compute
-#'   the data structures derived from the hindcasts that were not supplied,
-#'   and to obtain the values shown in the summary tables. If \code{filename}
-#'   is used and this argument is empty, the hindcasts found in the files are
+#'   \code{JABBA::hindcast_jabba()}, or a single hindcast. Used to obtain the 
+#'   values shown in the summary tables and, if 
+#'   \code{use_models_for_data = TRUE}, to compute the data structures derived 
+#'   from the hindcasts that were not supplied.  If \code{filename} is used and 
+#'   this argument is empty, the hindcasts found in the files are
 #'   used. Defaults to \code{list()}.
+#' @param use_models_for_data A boolean value that if \code{TRUE}, computes 
+#'   from \code{list_fit_models} and \code{list_hc_models} the data structures
+#'   that were not supplied. If \code{FALSE}, only the data structures
+#'   supplied explicitly are used, and the model objects are used just to
+#'   obtain the values shown in the summary tables. The sections whose data
+#'   are not supplied stay empty and a warning is issued. Ignored if 
+#'   \code{filename} is supplied. Defaults to \code{FALSE}.
 #' @param dir A character string with the directory where \code{filename} is
 #'   located. Defaults to the current working directory (\code{getwd()}).
 #' @param filename Optional. A character vector with the name(s) of the
@@ -185,19 +198,21 @@
 #'
 #' # (iii) Only the models (all the data are computed from them)
 #' create_report(
-#'   list_fit_models = list_fit_models, list_hc_models = list_hc_models
+#'   list_fit_models = list_fit_models, list_hc_models = list_hc_models, 
+#'   use_models_for_data = TRUE
 #' )
 #'
 #' # Mixed: Kobe and trajectories data supplied, the others computed from the 
 #' # models
 #' create_report(
 #'   kobe_data = kobe, traj_data = traj, list_fit_models = list_fit_models,
-#'   list_hc_models = list_hc_models, verbose = TRUE
+#'   list_hc_models = list_hc_models, use_models_for_data = TRUE, verbose = TRUE
 #' )
 #'
 #' # Show warnings only at the end
 #' create_report(
-#'   list_fit_models = list_fit_models, warn_level = 0
+#'   list_fit_models = list_fit_models, use_models_for_data = TRUE, 
+#'   warn_level = 0
 #' )
 #' }
 #' 
@@ -230,8 +245,8 @@ create_report <- function(
   fits_data = list(), hind_data = list(), kobe_data = list(), 
   pp_data = list(), ra_data = list(), res_data = list(), 
   traj_data = data.frame(), list_fit_models = list(), list_hc_models = list(), 
-  dir = getwd(), filename = NULL, animation = TRUE, verbose = FALSE, 
-  use_si_suffix = FALSE, warn_level = 1
+  use_models_for_data = FALSE, dir = getwd(), filename = NULL, 
+  animation = TRUE, verbose = FALSE, use_si_suffix = FALSE, warn_level = 1
 ) {
 
   if (!warn_level %in% c(-1, 0, 1, 2) || length(warn_level) != 1) {
@@ -327,8 +342,7 @@ create_report <- function(
         full_join,
         by = c("Year", "Scenario", "Index")
       )
-      fits_data <- fits_data %>% 
-        mutate(Year = as.integer(Year))
+      fits_data <- fits_data %>% mutate(Year = as.integer(Year))
       .msg_source(verbose, "Fits", "file")
       pp_data <- priors_posteriors_data(fits_list)
       .msg_source(verbose, "Priors x Posterior", "file")
@@ -360,7 +374,7 @@ create_report <- function(
   else {
     # Fits
     if (identical(fits_data, list())) {
-      if (identical(list_fit_models, list())) {
+      if (identical(list_fit_models, list()) || !use_models_for_data) {
         .msg_source(verbose, "Fits", "none")
       }
       else {
@@ -389,7 +403,7 @@ create_report <- function(
 
     # Priors x Posteriors
     if (identical(pp_data, list())) {
-      if (identical(list_fit_models, list())) {
+      if (identical(list_fit_models, list()) || !use_models_for_data) {
         .msg_source(verbose, "Priors x Posteriors", "none")
       }
       else {
@@ -403,7 +417,7 @@ create_report <- function(
 
     # Residuals
     if (identical(res_data, list())) {
-      if (identical(list_fit_models, list())) {
+      if (identical(list_fit_models, list()) || !use_models_for_data) {
         .msg_source(verbose, "Residuals", "none")
       }
       else {
@@ -414,38 +428,46 @@ create_report <- function(
     else {
       .msg_source(verbose, "Residuals", "user")
     }
-
-    # Kobe and Trajectories
-    if (identical(kobe_data, list()) || identical(traj_data, data.frame())) {
-      if (identical(list_fit_models, list())) {
-        if (identical(kobe_data, list())) .msg_source(verbose, "Kobe", "none")
-        if (identical(traj_data, data.frame())) {
-          .msg_source(verbose, "Trajectories", "none")
-        }
+    
+    # Kobe
+    var_kobe <- FALSE
+    if (identical(kobe_data, list())) {
+      if (identical(list_fit_models, list()) || !use_models_for_data) {
+        .msg_source(verbose, "Kobe", "none")
       }
       else {
-        ensemble_data <- .ensemble_data(list_fit_models)
-        if (identical(kobe_data, list())) {
-          kobe_data <- ensemble_data$kobe_dfs
-          .msg_source(verbose, "Kobe", "models")
-        }
-        else {
-          .msg_source(verbose, "Kobe", "user")
-        }
-        if (identical(traj_data, data.frame())) {
-          traj_data <- ensemble_data$trajectories_df
-          .msg_source(verbose, "Trajectories", "models")
-        }
-        else {
-          .msg_source(verbose, "Trajectories", "user")
-        }
-        rm(ensemble_data)
+        var_kobe <- TRUE
+        .msg_source(verbose, "Kobe", "models")
       }
+    }
+    else {
+      .msg_source(verbose, "Kobe", "user")
+    }
+
+    # Trajectories
+    var_traj <- FALSE
+    if (identical(traj_data, data.frame())) {
+      if (identical(list_fit_models, list()) || !use_models_for_data) {
+        .msg_source(verbose, "Trajectories", "none")
+      }
+      else {
+        var_traj <- TRUE
+        .msg_source(verbose, "Trajectories", "models")
+      }
+    }
+    else {
+      .msg_source(verbose, "Trajectories", "user")
+    }
+
+    if (var_kobe || var_traj) {
+      ensemble_data <- .ensemble_data(list_fit_models)
+      if (var_kobe) kobe_data <- ensemble_data$kobe_dfs
+      if (var_traj) traj_data <- ensemble_data$trajectories_df
     }
 
     # Hindcast
     if (identical(hind_data, list())) {
-      if (identical(list_hc_models, list())) {
+      if (identical(list_hc_models, list()) || !use_models_for_data) {
         .msg_source(verbose, "Hindcast", "none")
       }
       else {
@@ -459,7 +481,7 @@ create_report <- function(
     
     # Retrospective Analysis
     if (identical(ra_data, list())) {
-      if (identical(list_hc_models, list())) {
+      if (identical(list_hc_models, list()) || !use_models_for_data) {
         .msg_source(verbose, "Retrospective Analysis", "none")
       }
       else {
