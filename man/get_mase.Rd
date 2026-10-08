@@ -7,32 +7,45 @@
 get_mase(df_lists)
 }
 \arguments{
-\item{df_lists}{A named list object returned by \code{hindcast_data()},
-which must contain a component named \code{"mase_data"}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{hindcast_data}()}, with the element \code{mase_data}.}
 }
 \value{
-A data frame containing Mean Absolute Scaled Error (MASE) metrics
-for each index and scenario.
+A data frame with the MASE of each scenario and index.
 }
 \description{
-Retrieves the data frame containing MASE (Mean Absolute Scaled Errors)
-values for all indices and scenarios, as returned by \code{hindcast_data()}.
+Extracts the Mean Absolute Scaled Error (MASE) of each index and scenario
+from the output of \code{\link{hindcast_data}()}. The result can be
+displayed with \code{\link{summary_table}()}.
 }
 \details{
-The returned data frame is in wide format, with one row per combination of
-Index and Scenario. This function is a convenience acessor for extracting
-MASE results for further analysis or visualization.
+The MASE is a measure of the prediction skill of the hindcast. The data
+frame has one row per combination of scenario and index. Indices whose
+MASE is undefined are already removed by \code{hindcast_data()}.
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-df <- hindcast_data(list_hc_models)
-get_mase(df)
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# Prepare the data and extract the MASE
+data <- hindcast_data(list(hc_S01, hc_S02))
+get_mase(data)
+
+# Display as a table
+summary_table(get_mase(data))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},

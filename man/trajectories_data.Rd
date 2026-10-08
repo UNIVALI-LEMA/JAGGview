@@ -8,7 +8,8 @@ trajectories_data(list_fit_models, poll_interval = 0.5, reserve_mb = 2048)
 }
 \arguments{
 \item{list_fit_models}{Either a single fit returned by
-\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 
 \item{poll_interval}{A numeric value giving the time interval, in seconds,
 between memory availability checks. Defaults to 0.5.}

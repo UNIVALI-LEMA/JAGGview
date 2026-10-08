@@ -57,8 +57,12 @@
   )
 
   cpue_res_values <- reactiveValues(
-    scenarios_current = .when_available(res_df, unique(res_df$cpue_residuals$Scenario)),
-    indices_current = .when_available(res_df, unique(res_df$cpue_residuals$Index)),
+    scenarios_current = .when_available(
+      res_df, unique(res_df$cpue_residuals$Scenario)
+    ),
+    indices_current = .when_available(
+      res_df, unique(res_df$cpue_residuals$Index)
+    ),
     title_x_current = "Year",
     title_y_current = "Residuals",
     color_current = .when_available(
@@ -68,14 +72,22 @@
       )
     ),
     text_size_current = 16,
-    x_min_current = .when_available(res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE)),
-    x_max_current = .when_available(res_df, max(res_df$cpue_residuals$Year, na.rm = TRUE)),
-    y_min_current = .when_available(res_df, .round_to_nearest(
-      min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE
-    )),
-    y_max_current = .when_available(res_df, .round_to_nearest(
-      max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
-    )),
+    x_min_current = .when_available(
+      res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE)
+    ),
+    x_max_current = .when_available(
+      res_df, max(res_df$cpue_residuals$Year, na.rm = TRUE)
+    ),
+    y_min_current = .when_available(
+      res_df, .round_to_nearest(
+        min(res_df$cpue_residuals$Res, na.rm = TRUE), FALSE
+      )
+    ),
+    y_max_current = .when_available(
+      res_df, .round_to_nearest(
+        max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
+      )
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

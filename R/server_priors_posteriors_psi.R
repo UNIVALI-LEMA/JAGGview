@@ -15,11 +15,17 @@
   text_size_pp_psi <- reactiveVal(16)
 
   x_lim_min_pp_psi <- reactiveVal(
-    .when_available(pp_df, round(min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3))
+    .when_available(
+      pp_df, 
+      round(min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3)
+    )
   )
 
   x_lim_max_pp_psi <- reactiveVal(
-    .when_available(pp_df, round(max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3))
+    .when_available(
+      pp_df, 
+      round(max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3)
+    )
   )
 
   position_pp_psi <- reactiveVal("top-left")
@@ -41,20 +47,22 @@
   )
 
   pp_psi_values <- reactiveValues(
-    scenarios_current = .when_available(pp_df, unique(
-      c(pp_df$prior$Scenario, pp_df$posterior$Scenario)
-    )),
+    scenarios_current = .when_available(
+      pp_df, unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario))
+    ),
     title_x_current = "Initial biomass depletion ratio (psi)",
     title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
     text_size_current = 16,
-    x_min_current = .when_available(pp_df, round(
-      min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3
-    )),
-    x_max_current = .when_available(pp_df, round(
-      max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3
-    )),
+    x_min_current = .when_available(
+      pp_df, 
+      round(min(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3)
+    ),
+    x_max_current = .when_available(
+      pp_df, 
+      round(max(pp_df$prior$psi01, pp_df$posterior$psi01, na.rm = TRUE), 3)
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

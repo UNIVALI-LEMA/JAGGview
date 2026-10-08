@@ -7,40 +7,57 @@
 get_hc_stats(list_hc_models)
 }
 \arguments{
-\item{list_hc_models}{A list of hindcast model objects returned by
-\code{hindcast_jabba()}, or a single hindcast model object.}
+\item{list_hc_models}{Either a single hindcast returned by
+\code{JABBA::hindcast_jabba()}, or a list of such hindcasts (one per
+scenario). A single hindcast is automatically wrapped into a list.}
 }
 \value{
-A data frame in wide format, with one row per combination of
-scenario and peel, having one column for each statistic.
+A data frame in wide format, with one row per scenario and peel.
+The first two columns are \code{Scenario} and \code{Peel}, followed by
+one column for each statistic. Returns \code{NULL} if
+\code{list_hc_models} is \code{NULL} or an empty list.
 }
 \description{
-Retrieves and reshapes the summary statistics extracted from one or more
-sets of hindcast retrospective models returned by \code{hindcast_jabba()}.
+Extracts the summary statistics of each retrospective run (peel) of one or
+more JABBA hindcasts and combines them into a single data frame in wide
+format, with one row per scenario and peel and one column per statistic.
+The result can be displayed with \code{\link{summary_table}()}.
 }
 \details{
-If a single hindcast model object is provided, it is automatically wrapped
-into a list to ensure consistent processing. For each hindcast model, the
-function iterates over all retrospective peels, extracting the \code{stats}
-component and appending the corresponding \code{scenario} and peel
-identifiers. The combined long-format data frame is then pivoted to wide
-format, with statistic names taken from the \code{Stastistic} column
-becoming individual columns and their corresponding \code{Value} entries
-populating the cells.
-
-This function is a convenience accessor to facilitate comparison of summary
-statistics across peels, scenarios, or models.
+For each hindcast, the function goes through all of its retrospective runs
+(the elements of the object, named after the peels). The \code{stats}
+component of each run is converted to a data frame, and the \code{Scenario}
+and \code{Peel} are added as other columns. The data frames of all runs and
+hindcasts are combined by rows and then pivoted to wide format: the names in
+the \code{Stastistic} column become the columns, and the \code{Value}
+entries fill the cells. This makes it easier to compare the statistics
+across peels and scenarios.
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-list_hc_models <- list(hc_S01, hc_S02)
-get_hc_stats(list_hc_models)
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# A single hindcast
+get_hc_stats(hc_S01)
+
+# A list of hindcasts (one per scenario)
+get_hc_stats(list(hc_S01, hc_S02))
+
+# Display as a table
+summary_table(get_hc_stats(list(hc_S01, hc_S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},
@@ -52,13 +69,5 @@ Other extraction functions:
 \code{\link{get_refpts}()},
 \code{\link{get_rho}()},
 \code{\link{get_stats}()}
-
-Other retrospective analysis functions: 
-\code{\link{get_hc_estimates}()},
-\code{\link{get_hc_pars}()},
-\code{\link{get_rho}()},
-\code{\link{retrospective_analysis_data}()},
-\code{\link{retrospective_analysis_ggplot}()}
 }
 \concept{extraction functions}
-\concept{retrospective analysis functions}

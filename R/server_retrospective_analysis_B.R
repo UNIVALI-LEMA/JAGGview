@@ -19,15 +19,21 @@
   )
 
   y_lim_min_ra_B <- reactiveVal(
-    .when_available(ra_df, .round_to_nearest(
-      min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
-    ))
+    .when_available(
+      ra_df, 
+      .round_to_nearest(
+        min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
+      )
+    )
   )
 
   y_lim_max_ra_B <- reactiveVal(
-    .when_available(ra_df, .round_to_nearest(
-      max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
-    ))
+    .when_available(
+      ra_df, 
+      .round_to_nearest(
+        max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
+      )
+    )
   )
 
   position_ra_B <- reactiveVal("top-left")
@@ -52,14 +58,24 @@
     title_x_current = "Year",
     title_y_current = "Biomass (t)",
     text_size_current = 16,
-    x_min_current = .when_available(ra_df, min((ra_df$data %>% filter(Index == "B"))$Year)),
-    x_max_current = .when_available(ra_df, max((ra_df$data %>% filter(Index == "B"))$Year)),
-    y_min_current = .when_available(ra_df, .round_to_nearest(
-      min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
-    )),
-    y_max_current = .when_available(ra_df, .round_to_nearest(
-      max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
-    )),
+    x_min_current = .when_available(
+      ra_df, min((ra_df$data %>% filter(Index == "B"))$Year)
+    ),
+    x_max_current = .when_available(
+      ra_df, max((ra_df$data %>% filter(Index == "B"))$Year)
+    ),
+    y_min_current = .when_available(
+      ra_df, 
+      .round_to_nearest(
+        min((ra_df$data %>% filter(Index == "B"))$lci, na.rm = TRUE), FALSE, 1.1
+      )
+    ),
+    y_max_current = .when_available(
+      ra_df, 
+      .round_to_nearest(
+        max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
+      )
+    ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
   )

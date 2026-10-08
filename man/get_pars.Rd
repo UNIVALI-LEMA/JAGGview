@@ -7,18 +7,30 @@
 get_pars(list_fit_models)
 }
 \arguments{
-\item{list_fit_models}{A list of fitted model objects returned by
-\code{fit_jabba()}, or a single fitted model object.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 }
 \value{
 A data frame containing parameter estimates for each model,
 including the parameter name and associated scenario.
+
+A data frame with one row per scenario and indicator. The firts two
+columns are \code{Scenario} and \code{Indicator}, followed by the columns
+of the \code{pars} component. Returns \code{NULL} if
+\code{lits_fit_models} is \code{NULL} or an empty list.
 }
 \description{
-Retrieves a combined data frame containing model parameters extracted from
-one or more fitted JABBA models returned by \code{fit_jabba()}.
+Extracts the model parameter of one or more JABBA fits and combines them
+into a single data frame, with one row per scenario and parameter. The
+result can be displayed with \code{\link{summary_table}()}.
 }
 \details{
+For each fit, the \code{pars} component is converted to a data frame. The
+row names become the \code{Indicator} column, and the \code{Scenario} of the
+is added as another column. The data frame of all fits are then combined by
+rows, which makes it easier to compare the estimates across scenarios.
+
 If a single fitted model is provided, it is automatically wrapped into a
 list to ensure consistent processing. For each model, the \code{pars}
 component is converted to a data frame, with row names extracted as an
@@ -30,14 +42,27 @@ facilitating comparison of parameter estimates across scenarios or models.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-get_pars(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+get_pars(fit.S01)
+
+# A list of fits (one per scenario)
+get_pars(list(fit.S01, fit.S02))
+
+# Display as a table
+summary_table(get_pars(list(fit.S01, fit.S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},

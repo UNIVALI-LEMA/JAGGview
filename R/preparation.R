@@ -17,7 +17,8 @@
 #' following that vector.
 #'
 #' @param list_fit_models Either a single fit returned by 
-#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).
+#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+#'   single fit is automatically wrapped into a list.
 #' @param indices_factor Optional. A character vector with the index names to 
 #'   use and their order. All values must exist in the \code{Index} column.
 #' 
@@ -280,7 +281,8 @@ hindcast_data <- function(list_hc_models, indices_factor = NULL) {
 #' message and \code{NULL} is returned.
 #'
 #' @param list_fit_models Either a single fit returned by 
-#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).
+#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+#'   single fit is automatically wrapped into a list.
 #' @param ci_levels A numeric vector with the credibility levels of the 
 #'   contours, strictly between 0 and 1. Defaults to \code{c(0.5, 0.8, 0.95)}.
 #' @param poll_interval A numeric value giving the time interval, in seconds, 
@@ -483,7 +485,8 @@ kobe_data <- function(
 #' slightly between runs. Use \code{set.seed()} for reproducible results.
 #'
 #' @param list_fit_models Either a single fit returned by 
-#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).
+#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+#'   single fit is automatically wrapped into a list.
 #'
 #' @return An object of class \code{JAGGdata} (a named list) containing:
 #' \describe{
@@ -804,7 +807,8 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' the \code{Index} column is reordered following that vector.
 #'
 #' @param list_fit_models Either a single fit returned by 
-#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).
+#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+#'   single fit is automatically wrapped into a list.
 #' @param indices_factor Optional. A character vector with the index names to 
 #'   use and their order. All values must exist in the \code{Index} column.
 #'
@@ -964,7 +968,8 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
 #' }
 #'
 #' @param list_fit_models Either a single fit returned by 
-#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).
+#'   \code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+#'   single fit is automatically wrapped into a list.
 #' @param poll_interval A numeric value giving the time interval, in seconds, 
 #'   between memory availability checks. Defaults to 0.5.
 #' @param reserve_mb A numeric value for the minimum free system memory, in 

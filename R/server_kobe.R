@@ -30,7 +30,9 @@
   )
 
   kobe_values <- reactiveValues(
-    scenarios_current = .when_available(kobe_df, unique(kobe_df$cpue_residuals$Scenario)),
+    scenarios_current = .when_available(
+      kobe_df, unique(kobe_df$cpue_residuals$Scenario)
+    ),
     title_x_current = "B/Bmsy",
     title_y_current = "F/Fmsy",
     x_min_current = 0,

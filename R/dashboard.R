@@ -135,7 +135,11 @@
 #' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
 #'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
 #'   absolute number, Defaults to \code{FALSE}.
-#' @param warn_level 
+#' @param warn_level An integer value that sets how warnings are handled while
+#'   the data are being prepared. Must be one of \code{-1} (warnings are
+#'   ignored), \code{0} (warnings are shown after the function finishes, the R
+#'   default), \code{1} (warnings are shown immediately) or \code{2}
+#'   (warnings are turned into errors). Defaults to \code{1}.
 #' 
 #' @return A \code{shiny.appobj} object, as returned by
 #'   \code{shiny::shinyApp()}. Printing it launches the dashboard in the
@@ -323,7 +327,7 @@ create_report <- function(
         full_join,
         by = c("Year", "Scenario", "Index")
       )
-      fits_data <- fits_data %>%
+      fits_data <- fits_data %>% 
         mutate(Year = as.integer(Year))
       .msg_source(verbose, "Fits", "file")
       pp_data <- priors_posteriors_data(fits_list)
@@ -336,9 +340,7 @@ create_report <- function(
       traj_data <- ensemble_data$trajectories_df
       .msg_source(verbose, "Trajectories", "file")
       rm(ensemble_data)
-      if (identical(list_fit_models, list())) {
-        list_fit_models <- fits_list
-      }
+      if (identical(list_fit_models, list())) list_fit_models <- fits_list
     }
     rm(fits_list, fits_NULL)
     gc()
@@ -381,8 +383,7 @@ create_report <- function(
         full_join,
         by = c("Year", "Scenario", "Index")
       )
-      fits_data <- fits %>%
-        mutate(Year = as.integer(Year))
+      fits_data <- fits %>% mutate(Year = as.integer(Year))
       rm(fits)
     }
 
@@ -415,9 +416,7 @@ create_report <- function(
     }
 
     # Kobe and Trajectories
-    if (
-      identical(kobe_data, list()) || identical(traj_data, data.frame())
-    ) {
+    if (identical(kobe_data, list()) || identical(traj_data, data.frame())) {
       if (identical(list_fit_models, list())) {
         if (identical(kobe_data, list())) .msg_source(verbose, "Kobe", "none")
         if (identical(traj_data, data.frame())) {

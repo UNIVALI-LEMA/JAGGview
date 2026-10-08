@@ -7,37 +7,53 @@
 get_estimates(list_fit_models)
 }
 \arguments{
-\item{list_fit_models}{A list of fitted model objects returned by
-\code{fit_jabba()}, or a single fitted model object.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 }
 \value{
-A data frame containing fitted estimates for each model, including
-the associated scenario and indicator name.
+A data frame with one row per scenario and indicator. The first two
+columns are \code{Scenario} and \code{Indicator}, followed by the columns
+of the \code{estimates} component of the fits (including \code{LCI} and
+\code{UCI}). Returns \code{NULL} if \code{list_fit_models} is \code{NULL}
+or an empty list.
 }
 \description{
-Retrieves a combined data frame containing fitted estimates extracted from
-one or more fitted JABBA models returned by \code{fit_jabba()}.
+Extracts the parameter estimates of one or more JABBA fits and combines them
+into a single data frame, with one row per scenario and indicator. The
+result can be displayed with \code{\link{summary_table}()}.
 }
 \details{
-If a single fitted model is provided, it is automatically wrapped into a
-list to ensure consistent processing. For each model, the \code{estimates}
-component is converted to a data frame, with row names extracted as an
-\code{Indicator} column and the model \code{Scenario} appended as an
-additional column.
-
-The resulting data frames are combined by rows into a single data frame,
-facilitating comparison of fitted estimates across scenarios or models.
+For each fit, the \code{estimates} component is converted to a data frame.
+The row names become the \code{Indicator} column, and the \code{Scenario} of
+the fit is added as another column. The data frames of all fits are then
+combined by rows, which makes it easier to compare the estimates across
+scenarios. The columns \code{lci} and \code{uci} are renamed to \code{LCI}
+and \code{UCI}.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-get_estimates(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+get_estimates(fit.S01)
+
+# A list of fits (one per scenario)
+get_estimates(list(fit.S01, fit.S02))
+
+# Display as a table
+summary_table(get_estimates(list(fit.S01, fit.S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_hc_estimates}()},
 \code{\link{get_hc_pars}()},

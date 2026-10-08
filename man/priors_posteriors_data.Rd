@@ -8,7 +8,8 @@ priors_posteriors_data(list_fit_models)
 }
 \arguments{
 \item{list_fit_models}{Either a single fit returned by
-\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 }
 \value{
 An object of class \code{JAGGdata} (a named list) containing:

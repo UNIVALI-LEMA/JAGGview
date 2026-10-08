@@ -7,47 +7,51 @@
 get_rho(df_lists)
 }
 \arguments{
-\item{df_lists}{A named list object returned by
-\code{retrospective_analysis_data()}, which must contain a component named
-\code{"rho_data"}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{retrospective_analysis_data}()}, with the element
+\code{rho_data}.}
 }
 \value{
-A data frame where each row represents a combination of scenario and
-index, typically including the following columns:
-\describe{
-\item{Scenario}{Scenario identifier}
-\item{Index}{Short name of the indicator (e.g., \code{B}, \code{F},
-\code{BBmsy})}
-\item{Index2}{Descriptive name of the indicator}
-\item{rho}{Numeric value representing retrospective bias for the given
-index}
-}
+A data frame in wide format, with one row per scenario. The first
+column is \code{Scenario}, followed by one column of rho values for each
+indicator (for example, \code{B}, \code{F}, \code{BBmsy}). Returns
+\code{NULL} if \code{rho_data} is not found in \code{df_lists}.
 }
 \description{
-Retrieves the data frame containing rho (retrospective bias metrics) values
-for all indices and scenarios, as returned by
-\code{retrospective_analysis_data()}.
+Extracts the retrospective bias (rho) of each indicator and scenario from
+the output of \code{\link{retrospective_analysis_data}()}, in wide format.
+The result can be displayed with \code{\link{summary_table}()}.
 }
 \details{
-The returned data frame is in long format, with one row per combination of
-scenario and index. The \code{rho} metric represents retrospective bias,
-where values close to zero indicate low bias, positive values indicate
-overestimation, and negative values indicate underestimation.
-
-This function is a convenience acessor for extracting retrospective analysis
-results for further analysis or visualization.
+The \code{rho_data} element is reduced to the columns \code{Scenario},
+\code{Index} and \code{rho}, and pivoted to wide format: one row per
+scenario and one column per indicator. The rho is the retrospective bias:
+values close to zero indicate low bias, positive values indicate
+overestimation and negative values indicate underestimation.
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-list_hc_models <- list(hc_S01, hc_S02)
-df <- retrospective_analysis_data(list_hc_models)
-get_rho(df)
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# Prepare the data and extract rho
+data <- retrospective_analysis_data(list(hc_S01, hc_S02))
+get_rho(data)
+
+# Display as a table
+summary_table(get_rho(df))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},
@@ -61,9 +65,6 @@ Other extraction functions:
 \code{\link{get_stats}()}
 
 Other retrospective analysis functions: 
-\code{\link{get_hc_estimates}()},
-\code{\link{get_hc_pars}()},
-\code{\link{get_hc_stats}()},
 \code{\link{retrospective_analysis_data}()},
 \code{\link{retrospective_analysis_ggplot}()}
 }
