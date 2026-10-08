@@ -7,35 +7,56 @@
 get_refpts(list_fit_models)
 }
 \arguments{
-\item{list_fit_models}{A list of fitted model objects returned by
-\code{fit_jabba()}, or a single fitted model object.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 }
 \value{
-A combined data frame containing reference points (refpts) for all
-fitted models provided in \code{list_fit_models}.
+A data frame with one row per scenario and type of estimate
+(\code{Quant}, for example \code{"hat"} for the estimate and
+\code{"logse"} for its standard error), with the columns
+\code{Factor}, \code{Scenario}, \code{Quant}, \code{k}, \code{bmsy},
+\code{fmsy} and \code{msy}. Returns \code{NULL} if
+\code{list_fit_models} is \code{NULL} or an empty list.
 }
 \description{
-Retrieves the data frame containing reference points (refpts) extracted from
-one or more fitted JABBA models returned by \code{fit_jabba()}.
+Extracts the reference points (refpts) of one or more JABBA fits and
+combines them into a single data frame, with one row per scenario and
+type of estimate. The result can be displayed with
+\code{\link{summary_table}()}.
 }
 \details{
-If a single fitted model is provided, it is automatically wrapped into a list
-to ensure consistent processing. The function extracts the \code{refpts}
-component from each model and binds them by rows into a single data frame.
-
-This function is a convenience accessor to facilitate comparison and further
-analysis of reference points across multiple fitted models.
+The \code{refpts} component of each fit is extracted and the data frames are
+combined by rows. In the rows where \code{Quant} is \code{"logse"}, the
+values of \code{k}, \code{bmsy}, \code{fmsy} and \code{msy} are
+exponentiated, so they are shown on the original scale (a multiplicative
+factor) instead of the log scale. The columns \code{level}, \code{factor}
+and \code{quant} are renamed to \code{Scenario}, \code{Factor} and
+\code{Quant}.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-get_refpts(lits_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+get_refpts(fit.S01)
+
+# A list of fits (one per scenario)
+get_refpts(list(fit.S01, fit.S02))
+
+# Display as a table
+summary_table(get_refpts(list(fit.S01, fit.S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},

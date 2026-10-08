@@ -68,9 +68,6 @@ Other preparation functions:
 \code{\link{trajectories_data}()}
 
 Other retrospective analysis functions: 
-\code{\link{get_hc_estimates}()},
-\code{\link{get_hc_pars}()},
-\code{\link{get_hc_stats}()},
 \code{\link{get_rho}()},
 \code{\link{retrospective_analysis_ggplot}()}
 }

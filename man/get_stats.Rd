@@ -2,44 +2,58 @@
 % Please edit documentation in R/extraction.R
 \name{get_stats}
 \alias{get_stats}
-\title{Extract summary from fitted models}
+\title{Extract summary statistics from fitted models}
 \usage{
 get_stats(list_fit_models)
 }
 \arguments{
-\item{list_fit_models}{A list of fitted model objects returned by
-\code{fit_jabba()}, or a single fitted model object.}
+\item{list_fit_models}{Either a single fit returned by
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 }
 \value{
-A data frame in wide format, with one row per scenario and one
-column for each statistic.
+A data frame in wide format, with one row per scenario. The first
+column is \code{Scenario}, followed by one column for each statistic.
+Returns \code{NULL} if \code{list_fit_models} is \code{NULL} or an empty
+list.
 }
 \description{
-Retrieves and reshapes the summary statistics (\code{stats}) extracted from
-one or more fitted JABBA models returned by \code{fit_jabba()}.
+Extracts the summary statistics of one or more JABBA fits and combines them
+into a single data frame in wide format, with one row per scenario and one
+column per statistic. The result can be displayed with
+\code{\link{summary_table}()}.
 }
 \details{
-If a single fitted model is provided, it is automatically wrapped into a
-list to ensure consistent processing. The function extracts the \code{stats}
-component from each model, adds a \code{scenario} column identifying the
-model of origin, and binds them by rows into a single long-format data
-frame. This combined data frame is then pivoted to wide format, with
-statistic names taken from the \code{Stastistic} column becoming individual
-columns and their corresponding \code{Value} entries populating the cells.
-
-This function is a convenience accessor to facilitate comparison of summary
-statistics across multiple fitted models.
+For each fit, the \code{stats} component is converted to a data frame and
+the \code{Scenario} is added as another column. The data frames of all
+fits are combined by rows and then pivoted to wide format: the names in
+the \code{Stastistic} column become the columns, and the \code{Value}
+entries fill the cells. This makes it easier to compare the statistics
+across scenarios.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-get_stats(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# A single fit
+get_stats(fit.S01)
+
+# A list of fits (one per scenario)
+get_stats(list(fit.S01, fit.S02))
+
+# Display as a table
+summary_table(get_stats(list(fit.S01, fit.S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},

@@ -87,7 +87,11 @@ arguments. If \code{NULL}, the data are taken from the pre-computed data
 structures and/or the model objects. Defaults to \code{NULL}.}
 
 \item{animation}{A boolean value that if \code{TRUE}, shows animations in
-some plots. Defaults to \code{TRUE}.}
+some plots. Defaults to \code{TRUE}. Building the animated plots may
+issue repeated \pkg{plotly} warnings (for example, "'scatter' objects
+don't have these attributes: 'frameOrder'"). They are harmless and the
+animations work normally. Use \code{animation = FALSE} to avoid them,
+or \code{warn_level = -1} to hide them.}
 
 \item{verbose}{A boolean value that if \code{TRUE}, shows progress through
 messages in the console. Defaults to \code{FALSE}.}
@@ -96,7 +100,11 @@ messages in the console. Defaults to \code{FALSE}.}
 whether SI suffixes will be used, or if \code{FALSE} then shows the
 absolute number, Defaults to \code{FALSE}.}
 
-\item{warn_level}{}
+\item{warn_level}{An integer value that sets how warnings are handled while
+the data are being prepared. Must be one of \code{-1} (warnings are
+ignored), \code{0} (warnings are shown after the function finishes, the R
+default), \code{1} (warnings are shown immediately) or \code{2}
+(warnings are turned into errors). Defaults to \code{1}.}
 }
 \value{
 A \code{shiny.appobj} object, as returned by
@@ -171,6 +179,10 @@ dashboard is launched.
 The dashboard is launched when the returned object is printed, for example
 when the function is called at the console. In scripts, use
 \code{shiny::runApp()} on the returned object.
+
+With \code{animation = TRUE}, \pkg{plotly} may issue many repeated
+warnings about the \code{frameOrder} attribute. They do not affect the
+result.
 }
 \examples{
 \dontrun{
@@ -215,9 +227,10 @@ create_report(
   list_fit_models = list_fit_models, list_hc_models = list_hc_models
 )
 
-# Mixed: Kobe data supplied, the others computed from the models
+# Mixed: Kobe and trajectories data supplied, the others computed from the 
+# models
 create_report(
-  kobe_data = kobe, list_fit_models = list_fit_models,
+  kobe_data = kobe, traj_data = traj, list_fit_models = list_fit_models,
   list_hc_models = list_hc_models, verbose = TRUE
 )
 

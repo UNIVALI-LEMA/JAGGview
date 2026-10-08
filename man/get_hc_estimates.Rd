@@ -7,40 +7,58 @@
 get_hc_estimates(list_hc_models)
 }
 \arguments{
-\item{list_hc_models}{A list of hindcast model objects returned by
-\code{hindcast_jabba()}, or a single hindcast model object.}
+\item{list_hc_models}{Either a single hindcast returned by
+\code{JABBA::hindcast_jabba()}, or a list of such hindcasts (one per
+scenario). A single hindcast is automatically wrapped into a list.}
 }
 \value{
-A data frame containing fitted estimates for each peel, including
-the associated scenario and indicator name.
+A data frame with one row per scenario, peel and indicator. The
+first three columns are \code{Scenario}, \code{Peel} and \code{Indicator},
+followed by the columns of the \code{estimates} component (including
+\code{LCI} and \code{UCI}). Returns \code{NULL} if \code{list_hc_models}
+is \code{NULL} or an empty list.
 }
 \description{
-Retrieves a combined data frame containing fitted estimates extracted from
-one or more sets of hindcast retrospective models returned by
-\code{hindcast_jabba()}.
+Extracts the parameter estimates of each retrospective run (peel) of one
+or more JABBA hindcasts and combines them into a single data frame, with
+one row per scenario, peel and indicator. The result can be displayed with
+\code{\link{summary_table}()}.
 }
 \details{
-If a single hindcast model object is provided, it is automatically wrapped
-into a list to ensure consistent processing. For each hindcast model, the
-function iterates over all retrospective peels, extracting the
-\code{estimates} component and appending the corresponding \code{scenario}
-and peel identifiers. Row names from the \code{estimates} component are
-extracted as an \code{Indicator} column.
-
-The resulting data frames are combined by rows into a single data frame,
-facilitating comparison of fitted estimates across peels, scenarios, or
-models.
+For each hindcast, the function goes through all of its retrospective runs
+(the elements of the object, named after the peels). The \code{estimates}
+component of each run is converted to a data frame, the row names become
+the \code{Indicator} column, and the \code{Scenario} and \code{Peel} are
+added as other columns. The data frames of all runs and hindcasts are then
+combined by rows, which makes it easier to compare the estimates across
+peels and scenarios. The columns \code{lci} and \code{uci} are renamed to
+\code{LCI} and \code{UCI}.
 }
 \examples{
 \dontrun{
-hc_S01 <- hindcast_jabba()
-hc_S02 <- hindcast_jabba()
-list_hc_models <- list(hc_S01, hc_S02)
-get_hc_estimates(list_hc_models)
+# Build the JABBA input, fit the model and run the hindcast per scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+hc_S01 <- JABBA::hindcast_jabba(jb.S01, fit.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+hc_S02 <- JABBA::hindcast_jabba(jb.S02, fit.S02, ...)
+
+# A single hindcast
+get_hc_estimates(hc_S01)
+
+# A list of hindcasts (one per scenario)
+get_hc_estimates(list(hc_S01, hc_S02))
+
+# Display as a table
+summary_table(get_hc_estimates(list(hc_S01, hc_S02)))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_pars}()},
@@ -52,13 +70,5 @@ Other extraction functions:
 \code{\link{get_refpts}()},
 \code{\link{get_rho}()},
 \code{\link{get_stats}()}
-
-Other retrospective analysis functions: 
-\code{\link{get_hc_pars}()},
-\code{\link{get_hc_stats}()},
-\code{\link{get_rho}()},
-\code{\link{retrospective_analysis_data}()},
-\code{\link{retrospective_analysis_ggplot}()}
 }
 \concept{extraction functions}
-\concept{retrospective analysis functions}

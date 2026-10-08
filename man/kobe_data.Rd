@@ -13,7 +13,8 @@ kobe_data(
 }
 \arguments{
 \item{list_fit_models}{Either a single fit returned by
-\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 
 \item{ci_levels}{A numeric vector with the credibility levels of the
 contours, strictly between 0 and 1. Defaults to \code{c(0.5, 0.8, 0.95)}.}

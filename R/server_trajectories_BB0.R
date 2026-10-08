@@ -11,25 +11,41 @@
   palette_traj_BB0 <- reactiveVal("#1B4F8A")
 
   x_lim_min_traj_BB0 <- reactiveVal(
-    .when_available(traj_df, min((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), data.frame())
+    .when_available(
+      traj_df, 
+      min((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), 
+      data.frame()
+    )
   )
 
   x_lim_max_traj_BB0 <- reactiveVal(
-    .when_available(traj_df, max((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), data.frame())
+    .when_available(
+      traj_df, 
+      max((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), 
+      data.frame()
+    )
   )
 
   y_lim_min_traj_BB0 <- reactiveVal(
-    .when_available(traj_df, .round_to_nearest(
-      min((traj_df %>% filter(indicator == "BB0"))$lcl, na.rm = TRUE), 
-      FALSE, 1.1
-    ), data.frame())
+    .when_available(
+      traj_df, 
+      .round_to_nearest(
+        min((traj_df %>% filter(indicator == "BB0"))$lcl, na.rm = TRUE), 
+        FALSE, 1.1
+      ), 
+      data.frame()
+    )
   )
 
   y_lim_max_traj_BB0 <- reactiveVal(
-    .when_available(traj_df, .round_to_nearest(
-      max((traj_df %>% filter(indicator == "BB0"))$ucl, na.rm = TRUE), 
-      TRUE, 1.1
-    ), data.frame())
+    .when_available(
+      traj_df, 
+      .round_to_nearest(
+        max((traj_df %>% filter(indicator == "BB0"))$ucl, na.rm = TRUE), 
+        TRUE, 1.1
+      ), 
+      data.frame()
+    )
   )
 
   si_suffix_traj_BB0 <- reactiveVal(use_si_suffix)
@@ -47,24 +63,38 @@
   )
 
   traj_BB0_values <- reactiveValues(
-    scenarios_current = .when_available(traj_df, unique(traj_df$Scenario), data.frame()),
+    scenarios_current = .when_available(
+      traj_df, 
+      unique(traj_df$Scenario), data.frame()
+    ),
     title_x_current = "Year",
     title_y_current = "B/B0",
     color_current = "#1B4F8A",
-    x_min_current = .when_available(traj_df, min(
-      (traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE
-    ), data.frame()),
-    x_max_current = .when_available(traj_df, max(
-      (traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE
-    ), data.frame()),
-    y_min_current = .when_available(traj_df, .round_to_nearest(
-      min((traj_df %>% filter(indicator == "BB0"))$lcl, na.rm = TRUE), 
-      FALSE, 1.1
-    ), data.frame()),
-    y_max_current = .when_available(traj_df, .round_to_nearest(
-      max((traj_df %>% filter(indicator == "BB0"))$ucl, na.rm = TRUE), 
-      TRUE, 1.1
-    ), data.frame()),
+    x_min_current = .when_available(
+      traj_df, 
+      min((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), 
+      data.frame()
+    ),
+    x_max_current = .when_available(
+      traj_df, 
+      max((traj_df %>% filter(indicator == "BB0"))$year, na.rm = TRUE), 
+      data.frame()
+    ),
+    y_min_current = .when_available(
+      traj_df, 
+      .round_to_nearest(
+        min((traj_df %>% filter(indicator == "BB0"))$lcl, na.rm = TRUE), 
+        FALSE, 1.1
+      ), data.frame()
+    ),
+    y_max_current = .when_available(
+      traj_df, 
+      .round_to_nearest(
+        max((traj_df %>% filter(indicator == "BB0"))$ucl, na.rm = TRUE), 
+        TRUE, 1.1
+      ), 
+      data.frame()
+    ),
     si_suffix_current = use_si_suffix
   )
 

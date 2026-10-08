@@ -8,16 +8,24 @@
 
   palette_fits <- reactiveVal("#1B4F8A")
 
-  x_lim_min_fits <- reactiveVal(.when_available(fits_df, min(fits_df$Year, na.rm = TRUE)))
+  x_lim_min_fits <- reactiveVal(
+    .when_available(fits_df, min(fits_df$Year, na.rm = TRUE))
+  )
 
-  x_lim_max_fits <- reactiveVal(.when_available(fits_df, max(fits_df$Year, na.rm = TRUE)))
+  x_lim_max_fits <- reactiveVal(
+    .when_available(fits_df, max(fits_df$Year, na.rm = TRUE))
+  )
 
   y_lim_min_fits <- reactiveVal(
-    .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE))
+    .when_available(
+      fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)
+    )
   )
 
   y_lim_max_fits <- reactiveVal(
-    .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE))
+    .when_available(
+      fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)
+    )
   )
 
   si_suffix_fits <- reactiveVal(use_si_suffix)
@@ -43,8 +51,12 @@
     color_current = "#1B4F8A",
     x_min_current = .when_available(fits_df, min(fits_df$Year, na.rm = TRUE)),
     x_max_current = .when_available(fits_df, max(fits_df$Year, na.rm = TRUE)),
-    y_min_current = .when_available(fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)),
-    y_max_current = .when_available(fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)),
+    y_min_current = .when_available(
+      fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)
+    ),
+    y_max_current = .when_available(
+      fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)
+    ),
     si_suffix_current = use_si_suffix
   )
 

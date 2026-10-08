@@ -7,37 +7,51 @@
 get_ppvr(df_lists)
 }
 \arguments{
-\item{df_lists}{A named list object returned by
-\code{priors_posteriors_data()}, which must contain a component named
-\code{"PPVR"}.}
+\item{df_lists}{A \code{JAGGdata} list as returned by
+\code{\link{priors_posteriors_data}()}, with the element \code{PPVR}.}
 }
 \value{
-A data frame with the following structure:
-\describe{
-\item{Scenario}{Scenario identifier}
-\item{K, r, psi, ...}{Numeric PPVR values for each indicator}
-}
+A data frame with one row per scenario. The first column is
+\code{Scenario}, followed by the PPVR of \code{K}, \code{r} and
+\code{psi}.
 }
 \description{
-Retrieves the data frame containing PPVR (Posterior Probability of
-Variable in a reference region) values for all indicators and scenarios, as
-returned by \code{priors_posteriors_data()}.
+Extracts the prior-posterior variance ratio (PPVR) of each parameter and
+scenario from the output of \code{\link{priors_posteriors_data}()}. The
+result can be displayed with \code{\link{summary_table}()}.
 }
 \details{
+The PPVR is the squared coefficient of variation of the posterior divided
+by that of the prior. Values close to 1 indicate that the data did not
+change the uncertainty of the prior much, and values below 1 indicate that
+the posterior is more concentrated than the prior. The data frame is in
+wide format, with one row per scenario and one column per parameter.
+
 The returned data frame is in wide format, with one row per scenario and one
 column per indicator. This function is a convenience accessor for extracting
 PPVR results for further analysis or visualization.
 }
 \examples{
 \dontrun{
-fit.S01 <- fit_jabba()
-fit.S02 <- fit_jabba()
-list_fit_models <- list(fit.S01, fit.S02)
-get_ppvr(list_fit_models)
+# Build the JABBA input and fit the model for each scenario
+jb.S01 <- JABBA::build_jabba(...)
+fit.S01 <- JABBA::fit_jabba(jb.S01, ...)
+
+jb.S02 <- JABBA::build_jabba(...)
+fit.S02 <- JABBA::fit_jabba(jb.S02, ...)
+
+# Prepare the data and extract the PPVR
+data <- priors_posteriors_data(list(fit.S01, fit.S02))
+get_ppvr(data)
+
+# Display as a table
+summary_table(get_ppvr(data))
 }
 
 }
 \seealso{
+\code{\link{summary_table}}
+
 Other extraction functions: 
 \code{\link{get_estimates}()},
 \code{\link{get_hc_estimates}()},

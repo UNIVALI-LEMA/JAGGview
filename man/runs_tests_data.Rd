@@ -8,7 +8,8 @@ runs_tests_data(list_fit_models, indices_factor = NULL)
 }
 \arguments{
 \item{list_fit_models}{Either a single fit returned by
-\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario).}
+\code{JABBA::fit_jabba()}, or a list of such fits (one per scenario). A
+single fit is automatically wrapped into a list.}
 
 \item{indices_factor}{Optional. A character vector with the index names to
 use and their order. All values must exist in the \code{Index} column.}
