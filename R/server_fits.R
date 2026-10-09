@@ -106,7 +106,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_min, {
-    if (input$fits_x_min != fits_values$x_min_current) {
+    if (!isTRUE(all.equal(input$fits_x_min, fits_values$x_min_current))) {
       fits_change$x_min_changed = TRUE
     }
     else {
@@ -115,7 +115,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_max, {
-    if (input$fits_x_max != fits_values$x_max_current) {
+    if (!isTRUE(all.equal(input$fits_x_max, fits_values$x_max_current))) {
       fits_change$x_max_changed = TRUE
     }
     else {
@@ -124,7 +124,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_min, {
-    if (input$fits_y_min != fits_values$y_min_current) {
+    if (!isTRUE(all.equal(input$fits_y_min, fits_values$y_min_current))) {
       fits_change$y_min_changed = TRUE
     }
     else {
@@ -133,7 +133,7 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_max, {
-    if (input$fits_y_max != fits_values$y_max_current) {
+    if (!isTRUE(all.equal(input$fits_y_max, fits_values$y_max_current))) {
       fits_change$y_max_changed = TRUE
     }
     else {
@@ -173,44 +173,33 @@
   observeEvent(input$confirm_button, {
     if (input$navmenu == "tab_fits") {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$fits_y_min
-      y_max <- input$fits_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "fits_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "fits_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$fits_y_min,
+        val2 = input$fits_y_max,
+        val1_current = fits_values$y_min_current,
+        val2_current = fits_values$y_max_current,
+        input_id1 = "fits_y_min",
+        input_id2 = "fits_y_max",
+        axis = "y"
+      )
 
-      x_min <- .validate_year(input$fits_x_min, "fits_x_min", session)
-      x_max <- .validate_year(input$fits_x_max, "fits_x_max", session)
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(input$fits_x_min, "fits_x_min", session),
+        val2 = .validate_year(input$fits_x_max, "fits_x_max", session),
+        val1_current = fits_values$x_min_current,
+        val2_current = fits_values$x_max_current,
+        input_id1 = "fits_x_min",
+        input_id2 = "fits_x_max",
+        axis = "x"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "fits_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "fits_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       fits_values$scenarios_current = input$fits_scenarios
       fits_values$indices_current = input$fits_indices

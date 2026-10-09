@@ -141,6 +141,10 @@
   colors = c("#CCCCCC", "#F2F2F2")
 ) {
 
+  if (is.null(text_size) || is.na(text_size) || text_size == 0) {
+    return(invisible(NULL))
+  }
+
   cols_data <- data %>% 
     select({{col}})
 
@@ -1333,4 +1337,87 @@
       tab_options(column_labels.hidden = TRUE) %>%
       cols_align(align = "center", columns = everything())
   )
+}
+
+#' Validate an interval of two numeric inputs
+#'
+#' Internal helper used by the dashboard server to validate the lower and
+#' upper limits of an axis typed by the user. A missing value (\code{NA}) is
+#' replaced by its current value, and if the lower limit is higher than the
+#' upper limit, the two are swapped. Whenever a value is changed, the
+#' corresponding input is updated in the interface.
+#'
+#' @details
+#' The function works in three steps:
+#' \enumerate{
+#'   \item If \code{val1} is \code{NA}, it is replaced by \code{val1_current}
+#'   and the input \code{input_id1} is updated.
+#'   \item If \code{val2} is \code{NA}, it is replaced by \code{val2_current}
+#'   and the input \code{input_id2} is updated.
+#'   \item If \code{val1} is higher than \code{val2}, the values are swapped,
+#'   both inputs are updated and a warning notification is shown for 10
+#'   seconds.
+#' }
+#' The inputs are updated with \code{shiny::updateSelectInput()}. If the
+#' inputs are \code{numericInput()}, consider using
+#' \code{shiny::updateNumericInput()} instead.
+#'
+#' @param session The Shiny \code{session} object of the server.
+#' @param val1 Numeric. The lower limit typed by the user (may be \code{NA}).
+#' @param val2 Numeric. The upper limit typed by the user (may be \code{NA}).
+#' @param val1_current Numeric. The value of the lower limit currently
+#'   applied, used when \code{val1} is \code{NA}.
+#' @param val2_current Numeric. The value of the upper limit currently
+#'   applied, used when \code{val2} is \code{NA}.
+#' @param input_id1 A character string with the id of the input of the lower
+#'   limit.
+#' @param input_id2 A character string with the id of the input of the upper
+#'   limit.
+#' @param axis A character string with the name of the axis (for example,
+#'   \code{"x"} or \code{"y"}), used in the notification message.
+#'
+#' @return A list with two elements: \code{min}, the validated lower limit,
+#'   and \code{max}, the validated upper limit.
+#'
+#' @examples
+#' \dontrun{
+#' lim <- .validate_interval(
+#'   session, input$x_min, input$x_max, 1990, 2020,
+#'   "x_min", "x_max", "x"
+#' )
+#' lim$min
+#' lim$max
+#' }
+#' 
+#' @keywords internal
+#' @noRd
+.validate_interval <- function(
+  session, val1, val2, val1_current, val2_current, input_id1, 
+  input_id2, axis
+) {
+  if (is.na(val1)) {
+    val1 <- val1_current
+    updateSelectInput(session, inputId = input_id1, selected = val1)
+  }
+
+  if (is.na(val2)) {
+    val2 <- val2_current
+    updateSelectInput(session, inputId = input_id2, selected = val2)
+  }
+
+  if (!is.na(val1) && !is.na(val2) && val1 > val2) {
+    tmp_x <- val1
+    val1 <- val2
+    val2 <- tmp_x
+    updateSelectInput(session, inputId = input_id1, selected = val1)
+    updateSelectInput(session, inputId = input_id2, selected = val2)
+    showNotification(
+      ui = paste0(
+        "First ", axis, " value shouldn't be higher than the second ", 
+        axis, " value"
+      ),
+      type = "warning", duration = 10
+    )
+  }
+  list(min = val1, max = val2)
 }

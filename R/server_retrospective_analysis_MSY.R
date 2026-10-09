@@ -201,44 +201,33 @@
       input$retrospective_analysis_tabs == "tab_ra_MSY"
     ) {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$ra_MSY_y_min
-      y_max <- input$ra_MSY_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "ra_MSY_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_MSY_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-      
-      x_min <- .validate_year(input$ra_MSY_x_min, "ra_MSY_x_min", session)
-      x_max <- .validate_year(input$ra_MSY_x_max, "ra_MSY_x_max", session)
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$ra_MSY_y_min,
+        val2 = input$ra_MSY_y_max,
+        val1_current = ra_MSY_values$y_min_current,
+        val2_current = ra_MSY_values$y_max_current,
+        input_id1 = "ra_MSY_y_min",
+        input_id2 = "ra_MSY_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "ra_MSY_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_MSY_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = input$ra_MSY_x_min,
+        val2 = input$ra_MSY_x_max,
+        val1_current = ra_MSY_values$x_min_current,
+        val2_current = ra_MSY_values$x_max_current,
+        input_id1 = "ra_MSY_x_min",
+        input_id2 = "ra_MSY_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       ra_MSY_values$scenarios_current = input$ra_MSY_scenarios
       ra_MSY_values$indices_current = input$ra_MSY_indices

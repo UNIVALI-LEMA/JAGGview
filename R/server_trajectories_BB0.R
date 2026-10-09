@@ -135,7 +135,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_BB0_x_min, {
-    if (input$traj_BB0_x_min != traj_BB0_values$x_min_current) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_BB0_x_min, traj_BB0_values$x_min_current)
+      )
+    ) {
       traj_BB0_change$x_min_changed = TRUE
     }
     else {
@@ -144,7 +148,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$traj_BB0_x_max, {
-    if (input$traj_BB0_x_max != traj_BB0_values$x_max_current) {
+    if (
+      !isTRUE(
+        all.equal(input$traj_BB0_x_max, traj_BB0_values$x_max_current)
+      )
+    ) {
       traj_BB0_change$x_max_changed = TRUE
     }
     else {
@@ -211,44 +219,33 @@
       input$trajectories_tabs == "tab_traj_BB0"
     ) {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$traj_BB0_y_min
-      y_max <- input$traj_BB0_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "traj_BB0_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "traj_BB0_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-      
-      x_min <- .validate_year(input$traj_BB0_x_min, "traj_BB0_x_min", session)
-      x_max <- .validate_year(input$traj_BB0_x_max, "traj_BB0_x_max", session)
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$traj_BB0_y_min,
+        val2 = input$traj_BB0_y_max,
+        val1_current = traj_BB0_values$y_min_current,
+        val2_current = traj_BB0_values$y_max_current,
+        input_id1 = "traj_BB0_y_min",
+        input_id2 = "traj_BB0_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "traj_BB0_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "traj_BB0_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(input$traj_BB0_x_min, "traj_BB0_x_min", session),
+        val2 = .validate_year(input$traj_BB0_x_max, "traj_BB0_x_max", session),
+        val1_current = traj_BB0_values$x_min_current,
+        val2_current = traj_BB0_values$x_max_current,
+        input_id1 = "traj_BB0_x_min",
+        input_id2 = "traj_BB0_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       traj_BB0_values$scenarios_current = input$traj_BB0_scenarios
       traj_BB0_values$title_x_current = input$traj_BB0_title_x

@@ -1572,6 +1572,9 @@
 #' @keywords internal
 #' @noRd
 .validate_year <- function(year, inputId, session) {
+  if (is.na(year) || is.null(year)) {
+    return(invisible(NA))
+  }
   if (!is.integer(year)) {
     year <- as.integer(year)
     updateSelectInput(

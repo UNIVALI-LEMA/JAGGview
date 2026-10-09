@@ -111,7 +111,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_BBmsy_text_size, {
-    if(input$ra_BBmsy_text_size != ra_BBmsy_values$text_size_current){
+    if (
+      !isTRUE(
+        all.equal(input$ra_BBmsy_text_size, ra_BBmsy_values$text_size_current)
+      )
+    ) {
       ra_BBmsy_change$text_size_changed = TRUE
     }
     else {
@@ -120,7 +124,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_BBmsy_x_min, {
-    if (input$ra_BBmsy_x_min != ra_BBmsy_values$x_min_current) {
+    if (
+      !isTRUE(
+        all.equal(input$ra_BBmsy_x_min, ra_BBmsy_values$x_min_current)
+      )
+    ) {
       ra_BBmsy_change$x_min_changed = TRUE
     }
     else {
@@ -129,7 +137,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_BBmsy_x_max, {
-    if (input$ra_BBmsy_x_max != ra_BBmsy_values$x_max_current) {
+    if (
+      !isTRUE(
+        all.equal(input$ra_BBmsy_x_max, ra_BBmsy_values$x_max_current)
+      )
+    ) {
       ra_BBmsy_change$x_max_changed = TRUE
     }
     else {
@@ -206,43 +218,33 @@
     ) {
       updateControlbar(id = "controlbar", session = session)
 
-      y_min <- input$ra_BBmsy_y_min
-      y_max <- input$ra_BBmsy_y_max
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$ra_BBmsy_y_min,
+        val2 = input$ra_BBmsy_y_max,
+        val1_current = ra_BBmsy_values$y_min_current,
+        val2_current = ra_BBmsy_values$y_max_current,
+        input_id1 = "ra_BBmsy_y_min",
+        input_id2 = "ra_BBmsy_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "ra_BBmsy_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_BBmsy_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(input$ra_BBmsy_x_min, "ra_BBmsy_x_min", session),
+        val2 = .validate_year(input$ra_BBmsy_x_max, "ra_BBmsy_x_max", session),
+        val1_current = ra_BBmsy_values$x_min_current,
+        val2_current = ra_BBmsy_values$x_max_current,
+        input_id1 = "ra_BBmsy_x_min",
+        input_id2 = "ra_BBmsy_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
       
-      x_min <- .validate_year(input$ra_BBmsy_x_min, "ra_BBmsy_x_min", session)
-      x_max <- .validate_year(input$ra_BBmsy_x_max, "ra_BBmsy_x_max", session)
-
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "ra_BBmsy_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_BBmsy_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
       ra_BBmsy_values$scenarios_current = input$ra_BBmsy_scenarios
       ra_BBmsy_values$indices_current = input$ra_BBmsy_indices
       ra_BBmsy_values$title_x_current = input$ra_BBmsy_title_x

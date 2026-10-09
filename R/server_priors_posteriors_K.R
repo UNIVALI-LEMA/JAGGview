@@ -115,7 +115,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_text_size, {
-    if (input$pp_K_text_size != pp_K_values$text_size_current) {
+    if (
+      !isTRUE(
+        all.equal(input$pp_K_text_size, pp_K_values$text_size_current)
+      )
+    ) {
       pp_K_change$text_size_changed = TRUE
     }
     else {
@@ -124,7 +128,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_min, {
-    if (input$pp_K_x_min != pp_K_values$x_min_current) {
+    if (
+      !isTRUE(
+        all.equal(input$pp_K_x_min, pp_K_values$x_min_current)
+      )
+    ) {
       pp_K_change$x_min_changed = TRUE
     }
     else {
@@ -133,7 +141,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_max, {
-    if (input$pp_K_x_max != pp_K_values$x_max_current) {
+    if (
+      !isTRUE(
+        all.equal(input$pp_K_x_max, pp_K_values$x_max_current)
+      )
+    ) {
       pp_K_change$x_max_changed = TRUE
     }
     else {
@@ -183,25 +195,20 @@
       input$priors_posteriors_tabs == "tab_pp_K"
     ) {
       updateControlbar(id = "controlbar", session = session)
-      
-      x_min <- input$pp_K_x_min
-      x_max <- input$pp_K_x_max
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "pp_K_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "pp_K_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = input$pp_K_x_min,
+        val2 = input$pp_K_x_max,
+        val1_current = pp_K_values$x_min_current,
+        val2_current = pp_K_values$x_max_current,
+        input_id1 = "pp_K_x_min",
+        input_id2 = "pp_K_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
 
       pp_K_values$scenarios_current = input$pp_K_scenarios
       pp_K_values$indices_current = input$pp_K_indices
