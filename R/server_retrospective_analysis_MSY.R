@@ -88,93 +88,63 @@
   )
 
   observeEvent(input$ra_MSY_scenarios, {
-    if (!setequal(input$ra_MSY_scenarios, ra_MSY_values$scenarios_current)) {
-      ra_MSY_change$scenarios_changed = TRUE
-    }
-    else {
-      ra_MSY_change$scenarios_changed = FALSE
-    }
+    ra_MSY_change$scenarios_changed <- !setequal(
+      input$ra_MSY_scenarios, ra_MSY_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_title_x, {
-    if (!identical(input$ra_MSY_title_x, ra_MSY_values$title_x_current)) {
-      ra_MSY_change$title_x_changed = TRUE
-    }
-    else {
-      ra_MSY_change$title_x_changed = FALSE
-    }
+    ra_MSY_change$title_x_changed <- !identical(
+      input$ra_MSY_title_x, ra_MSY_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_title_y, {
-    if (!identical(input$ra_MSY_title_y, ra_MSY_values$title_y_current)) {
-      ra_MSY_change$title_y_changed = TRUE
-    }
-    else {
-      ra_MSY_change$title_y_changed = FALSE
-    }
+    ra_MSY_change$title_y_changed <- !identical(
+      input$ra_MSY_title_y, ra_MSY_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_text_size, {
-    if (input$ra_MSY_text_size != ra_MSY_values$text_size_current) {
-      ra_MSY_change$text_size_changed = TRUE
-    }
-    else {
-      ra_MSY_change$text_size_changed = FALSE
-    }
+    ra_MSY_change$text_size_changed <- !isTRUE(
+      all.equal(input$ra_MSY_text_size != ra_MSY_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_x_min, {
-    if (input$ra_MSY_x_min != ra_MSY_values$x_min_current) {
-      ra_MSY_change$x_min_changed = TRUE
-    }
-    else {
-      ra_MSY_change$x_min_changed = FALSE
-    }
+    ra_MSY_change$x_min_changed <- !isTRUE(
+      all.equal(input$ra_MSY_x_min, ra_MSY_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_x_max, {
-    if (input$ra_MSY_x_max != ra_MSY_values$x_max_current) {
-      ra_MSY_change$x_max_changed = TRUE
-    }
-    else {
-      ra_MSY_change$x_max_changed = FALSE
-    }
+    ra_MSY_change$x_max_changed <- !isTRUE(
+      all.equal(input$ra_MSY_x_max, ra_MSY_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_y_min, {
-    if (!isTRUE(all.equal(input$ra_MSY_y_min, ra_MSY_values$y_min_current))) {
-      ra_MSY_change$y_min_changed = TRUE
-    }
-    else {
-      ra_MSY_change$y_min_changed = FALSE
-    }
+    ra_MSY_change$y_min_changed <- !isTRUE(
+      all.equal(input$ra_MSY_y_min, ra_MSY_values$y_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_y_max, {
-    if (!isTRUE(all.equal(input$ra_MSY_y_max, ra_MSY_values$y_max_current))) {
-      ra_MSY_change$y_max_changed = TRUE
-    }
-    else {
-      ra_MSY_change$y_max_changed = FALSE
-    }
+    ra_MSY_change$y_max_changed <- !isTRUE(
+      all.equal(input$ra_MSY_y_max, ra_MSY_values$y_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_position, {
-    if (!identical(input$ra_MSY_position, ra_MSY_values$position_current)) {
-      ra_MSY_change$position_changed = TRUE
-    }
-    else {
-      ra_MSY_change$position_changed = FALSE
-    }
+    ra_MSY_change$position_changed <- !identical(
+      input$ra_MSY_position, ra_MSY_values$position_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_MSY_si_suffix, {
-    if (!identical(input$ra_MSY_si_suffix, ra_MSY_values$si_suffix_current)) {
-      ra_MSY_change$si_suffix_changed = TRUE
-    }
-    else {
-      ra_MSY_change$si_suffix_changed = FALSE
-    }
+    ra_MSY_change$si_suffix_changed <- !identical(
+      input$ra_MSY_si_suffix, ra_MSY_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_ra_MSY <- reactive({

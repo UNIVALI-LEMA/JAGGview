@@ -64,106 +64,63 @@
   )
 
   observeEvent(input$pp_r_scenarios, {
-    if (!setequal(input$pp_r_scenarios, pp_r_values$scenarios_current)) {
-      pp_r_change$scenarios_changed = TRUE
-    }
-    else {
-      pp_r_change$scenarios_changed = FALSE
-    }
+    pp_r_change$scenarios_changed <- !setequal(
+      input$pp_r_scenarios, pp_r_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_title_x, {
-    if (!identical(input$pp_r_title_x, pp_r_values$title_x_current)) {
-      pp_r_change$title_x_changed = TRUE
-    }
-    else {
-      pp_r_change$title_x_changed = FALSE
-    }
+    pp_r_change$title_x_changed <- !identical(
+      input$pp_r_title_x, pp_r_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_title_y, {
-    if (!identical(input$pp_r_title_y, pp_r_values$title_y_current)) {
-      pp_r_change$title_y_changed = TRUE
-    }
-    else {
-      pp_r_change$title_y_changed = FALSE
-    }
+    pp_r_change$title_y_changed <- !identical(
+      input$pp_r_title_y, pp_r_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_prior_color, {
-    if (!identical(input$pp_r_prior_color, pp_r_values$prior_color_current)) {
-      pp_r_change$prior_color_changed = TRUE
-    }
-    else {
-      pp_r_change$prior_color_changed = FALSE
-    }
+    pp_r_change$prior_color_changed <- !identical(
+      input$pp_r_prior_color, pp_r_values$prior_color_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_posterior_color, {
-    if (!identical(input$pp_r_posterior_color, 
-      pp_r_values$posterior_color_current)) {
-      pp_r_change$posterior_color_changed = TRUE
-    }
-    else {
-      pp_r_change$posterior_color_changed = FALSE
-    }
+    pp_r_change$posterior_color_changed <- !identical(
+      input$pp_r_posterior_color, pp_r_values$posterior_color_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_text_size, {
-    if (
-      !isTRUE(
-        all.equal(input$pp_r_text_size, pp_r_values$text_size_current)
-      )
-    ) {
-      pp_r_change$text_size_changed = TRUE
-    }
-    else {
-      pp_r_change$text_size_changed = FALSE
-    }
+    pp_r_change$text_size_changed <- !isTRUE(
+      all.equal(input$pp_r_text_size, pp_r_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_min, {
-    if (
-      !isTRUE(
-        all.equal(input$pp_r_x_min, pp_r_values$x_min_current)
-      )
-    ) {
-      pp_r_change$x_min_changed = TRUE
-    }
-    else {
-      pp_r_change$x_min_changed = FALSE
-    }
+    pp_r_change$x_min_changed <- !isTRUE(
+      all.equal(input$pp_r_x_min, pp_r_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_x_max, {
-    if (
-      !isTRUE(
-        all.equal(input$pp_r_x_max, pp_r_values$x_max_current)
-      )
-    ) {
-      pp_r_change$x_max_changed = TRUE
-    }
-    else {
-      pp_r_change$x_max_changed = FALSE
-    }
+    pp_r_change$x_max_changed <- !isTRUE(
+      all.equal(input$pp_r_x_max, pp_r_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_position, {
-    if (!identical(input$pp_r_position, pp_r_values$position_current)) {
-      pp_r_change$position_changed = TRUE
-    }
-    else {
-      pp_r_change$position_changed = FALSE
-    }
+    pp_r_change$position_changed <- !identical(
+      input$pp_r_position, pp_r_values$position_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_r_si_suffix, {
-    if (!identical(input$pp_r_si_suffix, pp_r_values$si_suffix_current)) {
-      pp_r_change$si_suffix_changed = TRUE
-    }
-    else {
-      pp_r_change$si_suffix_changed = FALSE
-    }
+    pp_r_change$si_suffix_changed <- !identical(
+      input$pp_r_si_suffix, pp_r_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_pp_r <- reactive({

@@ -61,93 +61,63 @@
   )
 
   observeEvent(input$fits_scenarios, {
-    if (!setequal(input$fits_scenarios, fits_values$scenarios_current)) {
-      fits_change$scenarios_changed = TRUE
-    }
-    else {
-      fits_change$scenarios_changed = FALSE
-    }
+    fits_change$scenarios_changed <- !setequal(
+      input$fits_scenarios, fits_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_indices, {
-    if (!setequal(input$fits_indices, fits_values$indices_current)) {
-      fits_change$indices_changed = TRUE
-    }
-    else {
-      fits_change$indices_changed = FALSE
-    }
+    fits_change$indices_changed <- !setequal(
+      input$fits_indices, fits_values$indices_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_title_x, {
-    if (!identical(input$fits_title_x, fits_values$title_x_current)) {
-      fits_change$title_x_changed = TRUE
-    }
-    else {
-      fits_change$title_x_changed = FALSE
-    }
+    fits_change$title_x_changed <- !identical(
+      input$fits_title_x, fits_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_title_y, {
-    if (!identical(input$fits_title_y, fits_values$title_y_current)) {
-      fits_change$title_y_changed = TRUE
-    }
-    else {
-      fits_change$title_y_changed = FALSE
-    }
+    fits_change$title_y_changed <- !identical(
+      input$fits_title_y, fits_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_color, {
-    if (!identical(input$fits_color, fits_values$color_current)) {
-      fits_change$color_changed = TRUE
-    }
-    else {
-      fits_change$color_changed = FALSE
-    }
+    fits_change$color_changed <- !identical(
+      input$fits_color, fits_values$color_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_min, {
-    if (!isTRUE(all.equal(input$fits_x_min, fits_values$x_min_current))) {
-      fits_change$x_min_changed = TRUE
-    }
-    else {
-      fits_change$x_min_changed = FALSE
-    }
+    fits_change$x_min_changed <- !isTRUE(
+      all.equal(input$fits_x_min, fits_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_x_max, {
-    if (!isTRUE(all.equal(input$fits_x_max, fits_values$x_max_current))) {
-      fits_change$x_max_changed = TRUE
-    }
-    else {
-      fits_change$x_max_changed = FALSE
-    }
+    fits_change$x_max_changed <- !isTRUE(
+      all.equal(input$fits_x_max, fits_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_min, {
-    if (!isTRUE(all.equal(input$fits_y_min, fits_values$y_min_current))) {
-      fits_change$y_min_changed = TRUE
-    }
-    else {
-      fits_change$y_min_changed = FALSE
-    }
+    fits_change$y_min_changed <- !isTRUE(
+      all.equal(input$fits_y_min, fits_values$y_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_y_max, {
-    if (!isTRUE(all.equal(input$fits_y_max, fits_values$y_max_current))) {
-      fits_change$y_max_changed = TRUE
-    }
-    else {
-      fits_change$y_max_changed = FALSE
-    }
+    fits_change$y_max_changed <- !isTRUE(
+      all.equal(input$fits_y_max, fits_values$y_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$fits_si_suffix, {
-    if (!identical(input$fits_si_suffix, fits_values$si_suffix_current)) {
-      fits_change$si_suffix_changed = TRUE
-    }
-    else {
-      fits_change$si_suffix_changed = FALSE
-    }
+    fits_change$si_suffix_changed <- !identical(
+      input$fits_si_suffix, fits_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_fits <- reactive({

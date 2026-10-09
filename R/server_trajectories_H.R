@@ -260,7 +260,6 @@
         # traj_H_change[[name]] <- FALSE
       # }
 
-
       filtered_traj_H(
         traj_df %>%
           filter(Scenario %in% input$traj_H_scenarios) %>%

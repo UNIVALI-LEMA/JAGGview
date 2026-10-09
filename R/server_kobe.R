@@ -43,88 +43,57 @@
   )
 
   observeEvent(input$kobe_scenarios, {
-    if (!setequal(input$kobe_scenarios, kobe_values$scenarios_current)) {
-      kobe_change$scenarios_changed = TRUE
-    }
-    else {
-      kobe_change$scenarios_changed = FALSE
-    }
+    kobe_change$scenarios_changed <- !setequal(
+      input$kobe_scenarios, kobe_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_title_x, {
-    if (!identical(input$kobe_title_x, kobe_values$title_x_current)) {
-      kobe_change$title_x_changed = TRUE
-    }
-    else {
-      kobe_change$title_x_changed = FALSE
-    }
+    kobe_change$title_x_changed <- !identical(
+      input$kobe_title_x, kobe_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_title_y, {
-    if (!identical(input$kobe_title_y, kobe_values$title_y_current)) {
-      kobe_change$title_y_changed = TRUE
-    }
-    else {
-      kobe_change$title_y_changed = FALSE
-    }
+    kobe_change$title_y_changed <- !identical(
+      input$kobe_title_y, kobe_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_text_size, {
-    if (
-      !isTRUE(
-        all.equal(input$kobe_text_size, kobe_values$text_size_current)
-      )
-    ) {
-      kobe_change$text_size_changed = TRUE
-    }
-    else {
-      kobe_change$text_size_changed = FALSE
-    }
+    kobe_change$text_size_changed <- !isTRUE(
+      all.equal(input$kobe_text_size, kobe_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_min, {
-    if (!isTRUE(all.equal(input$kobe_x_min, kobe_values$x_min_current))) {
-      kobe_change$x_min_changed = TRUE
-    }
-    else {
-      kobe_change$x_min_changed = FALSE
-    }
+    kobe_change$x_min_changed <- !isTRUE(
+      all.equal(input$kobe_x_min, kobe_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_max, {
-    if (!isTRUE(all.equal(input$kobe_x_max, kobe_values$x_max_current))) {
-      kobe_change$x_max_changed = TRUE
-    }
-    else {
-      kobe_change$x_max_changed = FALSE
-    }
+    kobe_change$x_max_changed <- !isTRUE(
+      all.equal(input$kobe_x_max, kobe_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_min, {
-    if (!isTRUE(all.equal(input$kobe_y_min, kobe_values$y_min_current))) {
-      kobe_change$y_min_changed = TRUE
-    }
-    else {
-      kobe_change$y_min_changed = FALSE
-    }
+    kobe_change$y_min_changed <- !isTRUE(
+      all.equal(input$kobe_y_min, kobe_values$y_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_max, {
-    if (!isTRUE(all.equal(input$kobe_y_max, kobe_values$y_max_current))) {
-      kobe_change$y_max_changed = TRUE
-    }
-    else {
-      kobe_change$y_max_changed = FALSE
-    }
+    kobe_change$y_max_changed <- !isTRUE(
+      all.equal(input$kobe_y_max, kobe_values$y_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_si_suffix, {
-    if (!identical(input$kobe_si_suffix, kobe_values$si_suffix_current)) {
-      kobe_change$si_suffix_changed = TRUE
-    }
-    else {
-      kobe_change$si_suffix_changed = FALSE
-    }
+    kobe_change$si_suffix_changed <- !identical(
+      input$kobe_si_suffix, kobe_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_kobe <- reactive({

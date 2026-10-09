@@ -85,14 +85,9 @@
   )
 
   observeEvent(input$ra_procB_scenarios, {
-    if (
-      !setequal(input$ra_procB_scenarios, ra_procB_values$scenarios_current)
-    ) {
-      ra_procB_change$scenarios_changed = TRUE
-    }
-    else {
-      ra_procB_change$scenarios_changed = FALSE
-    }
+    ra_procB_change$scenarios_changed <- !setequal(
+      input$ra_procB_scenarios, ra_procB_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_procB_title_x, {
