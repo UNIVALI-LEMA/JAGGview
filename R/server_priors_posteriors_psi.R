@@ -4,7 +4,7 @@
 ) {
   filtered_pp_psi <- reactiveVal(pp_df)
 
-  title_x_pp_psi <- reactiveVal("Initial biomass depletion ratio (psi)")
+  title_x_pp_psi <- reactiveVal("Initial biomass depletion ratio (\u03a8)")
 
   title_y_pp_psi <- reactiveVal("Density")
 
@@ -50,7 +50,7 @@
     scenarios_current = .when_available(
       pp_df, unique(c(pp_df$prior$Scenario, pp_df$posterior$Scenario))
     ),
-    title_x_current = "Initial biomass depletion ratio (psi)",
+    title_x_current = "Initial biomass depletion ratio (\u03a8)",
     title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",

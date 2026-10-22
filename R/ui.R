@@ -511,7 +511,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   value = .when_available(
                     fits_data, 
                     .round_to_nearest(
-                      min(fits_data$lci_95, na.rm = TRUE), FALSE
+                      min(fits_data$lci_80, na.rm = TRUE), FALSE
                     )
                   ),
                   width = "100%"
@@ -526,7 +526,7 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   value = .when_available(
                     fits_data, 
                     .round_to_nearest(
-                      max(fits_data$uci_95, na.rm = TRUE), TRUE
+                      max(fits_data$uci_80, na.rm = TRUE), TRUE
                     )
                   ),
                   width = "100%"
@@ -1268,8 +1268,8 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                     )
                   )
                 ),
-                placeholder = "Initial biomass depletion ratio (psi)",
-                value = "Initial biomass depletion ratio (psi)"
+                placeholder = "Initial biomass depletion ratio (\u03a8)",
+                value = "Initial biomass depletion ratio (\u03a8)"
               )
             ),
             div(
@@ -2584,7 +2584,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   value = .when_available(
                     hind_data, 
                     .round_to_nearest(
-                      min(hind_data$data$hat.lci, na.rm = TRUE), FALSE
+                      min(
+                        filter(hind_data$data, retro.peels == 0)$hat.lci,
+                        hind_data$data$obs, 
+                        na.rm = TRUE
+                      ), 
+                      FALSE
                     )
                   ),
                   width = "100%"
@@ -2599,7 +2604,12 @@ plot_height_tab <- "calc(100vh - 57px - 30px - 42px)"
                   value = .when_available(
                     hind_data, 
                     .round_to_nearest(
-                      max(hind_data$data$hat.uci, na.rm = TRUE), TRUE
+                      max(
+                        filter(hind_data$data, retro.peels == 0)$hat.uci,
+                        hind_data$data$obs, 
+                        na.rm = TRUE
+                      ), 
+                      TRUE
                     )
                   ),
                   width = "100%"

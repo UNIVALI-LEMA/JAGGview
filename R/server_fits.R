@@ -18,13 +18,13 @@
 
   y_lim_min_fits <- reactiveVal(
     .when_available(
-      fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)
+      fits_df, .round_to_nearest(min(fits_df$lci_80, na.rm = TRUE), FALSE)
     )
   )
 
   y_lim_max_fits <- reactiveVal(
     .when_available(
-      fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)
+      fits_df, .round_to_nearest(max(fits_df$uci_80, na.rm = TRUE), TRUE)
     )
   )
 
@@ -52,10 +52,10 @@
     x_min_current = .when_available(fits_df, min(fits_df$Year, na.rm = TRUE)),
     x_max_current = .when_available(fits_df, max(fits_df$Year, na.rm = TRUE)),
     y_min_current = .when_available(
-      fits_df, .round_to_nearest(min(fits_df$lci_95, na.rm = TRUE), FALSE)
+      fits_df, .round_to_nearest(min(fits_df$lci_80, na.rm = TRUE), FALSE)
     ),
     y_max_current = .when_available(
-      fits_df, .round_to_nearest(max(fits_df$uci_95, na.rm = TRUE), TRUE)
+      fits_df, .round_to_nearest(max(fits_df$uci_80, na.rm = TRUE), TRUE)
     ),
     si_suffix_current = use_si_suffix
   )

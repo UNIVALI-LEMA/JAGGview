@@ -385,8 +385,6 @@
   labels <- label_map[names(label_map) %in% names(data)]
 
   value_map <- c(
-    "q.1" = "q<sub>1</sub>",
-    "q.2" = "q<sub>2</sub>",
     "psi" = "psi (\u03a8)",
     "sigma2" = "sigma<sup>2</sup> (\u03c3<sup>2</sup>)",
     "sigma.proc" = "sigma<sub>proc</sub> (\u03c3<sub>proc</sub>)",
@@ -433,7 +431,7 @@
               yr <- substring(val, 2)
               html(paste0("P<sub>", yr, "</sub>"))
             } 
-            else if (grepl("tau2.[0-9]{1}$", val)) {
+            else if (grepl("tau2.[0-9]{1,2}$", val)) {
               num <- substr(val, 6, 7)
               html(
                 paste0(
@@ -442,6 +440,10 @@
                   "</sub><sup>2</sup>)"
                 )
               )
+            }
+            else if (grepl("q.[0-9]{1,2}$", val)) {
+              num <- substr(val, 3, 4)
+              html(paste0("q<sub>", num, "</sub>"))
             }
             else {
               val
