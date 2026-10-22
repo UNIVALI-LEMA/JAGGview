@@ -22,6 +22,7 @@
 - [Analysis modules](#analysis-modules)
 - [Build static figures](#build-static-figures)
 - [Useful extractors](#useful-extractors)
+- [Visualize table](#visualize-table)
 - [Input expectations](#input-expectations)
 - [Testing and package checks](#testing-and-package-checks)
 - [License and authors](#license-and-authors)
@@ -222,7 +223,7 @@ ggsave(
 
 ## Useful extractors
 
-These helpers can be used in analyses, tables, or reports.
+These functions can be used in analyses, tables, or reports.
 
 | Function | Returns |
 | :-- | :-- |
@@ -237,6 +238,13 @@ These helpers can be used in analyses, tables, or reports.
 | `get_hc_estimates(list_hc_models)` | Hindcast estimates. |
 | `get_hc_pars(list_hc_models)` | Hindcast parameter summaries. |
 | `get_hc_stats(list_hc_models)` | Hindcast summary statistics. |
+
+## Visualize table
+
+The results of the extraction functions can be presented in formatted tables.
+
+| Function | Returns |
+| :-- | :-- |
 | `summary_table(...)` | A formatted summary table. |
 
 ## Input expectations
