@@ -238,8 +238,8 @@ fits_ggplot <- function(
 
   # Default limits from the data
   if (is.null(y_lim)) {
-    max_y_val <- .round_to_nearest(max(df_lists$CI_95$uci, na.rm = TRUE), TRUE)
-    min_y_val <- .round_to_nearest(min(df_lists$CI_95$lci, na.rm = TRUE), FALSE)
+    max_y_val <- .round_to_nearest(max(df_lists$CI_80$uci, na.rm = TRUE), TRUE)
+    min_y_val <- .round_to_nearest(min(df_lists$CI_80$lci, na.rm = TRUE), FALSE)
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -390,10 +390,23 @@ hindcast_ggplot <- function(
   # Default limits from the data
   if (is.null(y_lim)) {
     max_y_val <- .round_to_nearest(
-      max(df_lists$data$hat.uci, na.rm = TRUE), TRUE
+      max(
+        filter(df_lists$data, retro.peels == 0)$hat.uci, 
+        df_lists$data$obs, 
+        na.rm = TRUE
+      ), 
+      TRUE,
+      1.5
     )
-    min_y_val <- .round_to_nearest(min(df_lists$data$hat.lci, na.rm = TRUE), 
-    FALSE)
+    min_y_val <- .round_to_nearest(
+      min(
+        filter(df_lists$data, retro.peels == 0)$hat.lci, 
+        df_lists$data$obs, 
+        na.rm = TRUE
+      ), 
+      FALSE,
+      1.5
+    )
     y_lim <- c(min_y_val, max_y_val)
   }
 
@@ -807,7 +820,7 @@ priors_posteriors_ggplot <- function(
   labels_x <- list(
     K = "Carrying capacity (K)",
     r = "Intrinsic growth rate (r)",
-    psi = "Initial biomass depletion ratio (psi)"
+    psi = "Initial biomass depletion ratio (\u03a8)"
   )
   if (is.null(title_x)) title_x <- labels_x[[indicator_name]]
   

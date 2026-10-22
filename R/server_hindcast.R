@@ -14,13 +14,29 @@
 
   y_lim_min_hc <- reactiveVal(
     .when_available(
-      hind_df, .round_to_nearest(min(hind_df$data$hat.lci, na.rm = TRUE), FALSE)
+      hind_df, 
+      .round_to_nearest(
+        min(
+          filter(hind_df$data, retro.peels == 0)$hat.lci,
+          hind_df$data$obs, 
+          na.rm = TRUE
+        ), 
+        FALSE
+      )
     )
   )
 
   y_lim_max_hc <- reactiveVal(
     .when_available(
-      hind_df, .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE)
+      hind_df, 
+      .round_to_nearest(
+        max(
+          filter(hind_df$data, retro.peels == 0)$hat.uci,
+          hind_df$data$obs, 
+          na.rm = TRUE
+        ), 
+        TRUE
+      )
     )
   )
 
@@ -50,11 +66,27 @@
     text_size_current = 16,
     x_min_current = .when_available(hind_df, min(hind_df$data$year)),
     x_max_current = .when_available(hind_df, max(hind_df$data$year)),
-    y_min_current = .when_available(hind_df, .round_to_nearest(
-      min(hind_df$data$hat.lci, na.rm = TRUE), FALSE
-    )),
+    y_min_current = .when_available(
+      hind_df, 
+      .round_to_nearest(
+        min(
+          filter(hind_df$data, retro.peels == 0)$hat.lci,
+          hind_df$data$obs, 
+          na.rm = TRUE
+        ), 
+        FALSE
+      )
+    ),
     y_max_current = .when_available(
-      hind_df, .round_to_nearest(max(hind_df$data$hat.uci, na.rm = TRUE), TRUE)
+      hind_df, 
+      .round_to_nearest(
+        max(
+          filter(hind_df$data, retro.peels == 0)$hat.uci,
+          hind_df$data$obs, 
+          na.rm = TRUE
+        ), 
+        TRUE
+      )
     ),
     position_current = "top-left",
     si_suffix_current = use_si_suffix
@@ -299,13 +331,6 @@
     
     n_scenarios <- length(scenarios)
     n_indices <- length(indices)
-    
-    nrow <- case_when(
-      n_scenarios > n_indices ~ n_scenarios,
-      n_scenarios < 3         ~ 1,
-      n_scenarios < 8         ~ 2,
-      TRUE                    ~ 3
-    )
 
     x_lim <- .expand_range(c(x_lim_min_hc(), x_lim_max_hc()))
     y_lim <- .expand_range(c(y_lim_min_hc(), y_lim_max_hc()))
@@ -590,7 +615,7 @@
     
     results <- subplot(
       plots, 
-      nrows = nrow,
+      nrows = length(scenarios),
       shareX = TRUE, 
       shareY = TRUE,
       titleX = TRUE,

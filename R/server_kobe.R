@@ -465,7 +465,13 @@
             line = list(color = "black")
           ),
           name = "Years",
-          hoverinfo = "none"
+          hoverinfo = "text",
+          text = ~paste0(
+            "Year: ", year, "<br>B/B<sub>MSY</sub>: ", 
+            .international_system_prefixes(Bratio, si_suffix), 
+            "<br>F/F<sub>MSY</sub>: ", 
+            .international_system_prefixes(Fratio, si_suffix)
+          )
         ) %>%
         layout(
           showlegend = FALSE,
