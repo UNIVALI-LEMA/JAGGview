@@ -17,80 +17,76 @@
 - [Workflow at a glance](#workflow-at-a-glance)
 - [Installation](#installation)
 - [Quick start](#quick-start)
+- [Complete tutorial](#complete-tutorial)
 - [Launch the interactive dashboard](#launch-the-interactive-dashboard)
 - [Analysis modules](#analysis-modules)
 - [Build static figures](#build-static-figures)
 - [Useful extractors](#useful-extractors)
+- [Visualize table](#visualize-table)
 - [Input expectations](#input-expectations)
-- [Testing](#testing)
+- [Testing and package checks](#testing-and-package-checks)
 - [License and authors](#license-and-authors)
 
 ---
 
 ## What JAGGview does
 
-**JAGGview** turns fitted and hindcast objects produced by **JABBA** into structured data, publication-ready `ggplot2` charts, and an interactive `shiny`/`bs4Dash` report.
+**JAGGview** converts fitted-model and hindcast results produced by **JABBA** into structured data, static `ggplot2` visualizations, summary tables, and an interactive `shiny`/`bs4Dash` dashboard. It focuses on visualizing and interpreting model outputs; model fitting itself is performed by JABBA.
 
-It is designed to help you move from JABBA output to a clear assessment narrative:
-
-| Stage | JAGGview provides | Typical questions it helps answer |
+| Stage | JAGGview provides | Typical questions |
 | :-- | :-- | :-- |
-| 🔧 **Prepare** | Standardized `*_data()` objects | What values and uncertainty should be plotted? |
-| 📊 **Diagnose** | Fits, hindcast, residual, run-test, and retrospective views | Does the model describe the data consistently? |
-| 🎯 **Interpret** | Trajectories, Kobe plots, priors vs. posteriors, and summary tables | What do the results imply for stock status and management? |
-| 🖥️ **Communicate** | Customizable static plots and an interactive dashboard | How can results be reviewed and shared clearly? |
+| **Prepare** | Standardized `*_data()` objects | Which estimates and uncertainty intervals should be visualized? |
+| **Diagnose** | Fit, hindcast, residual, run-test, and retrospective views | Are there patterns or potential conflicts in model results? |
+| **Interpret** | Trajectories, Kobe plots, prior/posterior comparisons, and summary tables | What do the results indicate about stock status? |
+| **Communicate** | Customizable figures and an interactive dashboard | How can results be reviewed and shared? |
 
 ## Workflow at a glance
 
 ```mermaid
 flowchart LR
-    A["JABBA model results<br/><i>fit_jabba() / hindcast_jabba()</i>"] --> B{"Choose a workflow"}
-    B --> C["Prepare module data<br/><i>*_data()</i>"]
-    B --> D["Load saved .RData or .rds<br/>with create_report()"]
-    C --> E["Static figures<br/><i>*_ggplot()</i>"]
-    C --> F["Interactive dashboard<br/><i>create_report()</i>"]
+    A["JABBA model results"] --> B{"Choose workflow"}
+    B --> C["Prepare data with *_data()"]
+    B --> D["Load saved .RData or .rds"]
+    C --> E["Static figures with *_ggplot()"]
+    C --> F["Interactive dashboard"]
     D --> F
-    E --> G["Assessment figures & tables"]
+    E --> G["Figures and tables"]
     F --> G
 ```
 
-> **Two ways to work:** use the data-preparation and plot functions for a scripted, reproducible workflow, or use `create_report()` to review results in an interactive dashboard.
+Use the preparation and plotting functions for a scripted, reproducible workflow, or use `create_report()` to explore results in the dashboard.
 
 ## Installation
 
-### 1. System prerequisite: JAGS
+### 1. Install JAGS
 
 JABBA uses JAGS through R interfaces such as `rjags`. Install JAGS for your operating system before installing the R packages.
 
-<details>
-<summary><strong>Ubuntu / Debian</strong></summary>
+On Ubuntu/Debian:
 
 ```bash
 sudo apt update
 sudo apt install jags
 ```
-</details>
 
-For other operating systems, install JAGS from the [official JAGS project](https://mcmc-jags.sourceforge.io/), then restart R if necessary.
+For other operating systems, follow the [official JAGS project instructions](https://mcmc-jags.sourceforge.io/).
 
-### 2. Install JABBA and JAGGview from GitHub
-
-Run the following in an R session:
+### 2. Install the R dependencies and packages
 
 ```r
 install.packages(c("remotes", "rjags", "R2jags"))
 
-remotes::install_github("jabbamodel/JABBA")
-remotes::install_github("UNIVALI-LEMA/JAGGview")
+remotes::install_github("jabbamodel/JABBA", dependencies = TRUE)
+remotes::install_github("UNIVALI-LEMA/JAGGview", dependencies = TRUE)
 ```
 
-To install a particular development branch, append `@branch_name`:
+To install a specific branch, append its name after `@`, for example:
 
 ```r
-remotes::install_github("UNIVALI-LEMA/JAGGview@branch_name")
+remotes::install_github("UNIVALI-LEMA/JAGGview@develop", dependencies = TRUE)
 ```
 
-### 3. Install from a local clone
+To install from a local clone of the repository:
 
 ```r
 remotes::install_local(".")
@@ -98,15 +94,13 @@ remotes::install_local(".")
 
 ## Quick start
 
-Load the package and prepare a fitted-index plot from one or more JABBA fit objects. `list_fit_models` below is a list of objects returned by `JABBA::fit_jabba()`.
+The functions below expect JABBA model output already created with `JABBA::fit_jabba()`. Replace `list_fit_models` with your fitted object or list of fitted objects.
 
 ```r
 library(JAGGview)
 
-# Convert JABBA fit output into the data required by the plotting function.
 fits <- fits_data(list_fit_models)
 
-# Create a ggplot2 object with observed indices and 80% / 95% intervals.
 p <- fits_ggplot(
   fits,
   palette = "#2C7FB8",
@@ -116,21 +110,31 @@ p <- fits_ggplot(
 print(p)
 ```
 
-For a hindcast workflow, pass a list of objects produced by `JABBA::hindcast_jabba()`:
+For hindcast output created with `JABBA::hindcast_jabba()`:
 
 ```r
 hindcast <- hindcast_data(list_hc_models)
-hindcast_plot <- hindcast_ggplot(hindcast)
-print(hindcast_plot)
+p_hindcast <- hindcast_ggplot(hindcast)
+print(p_hindcast)
 ```
+
+## Complete tutorial
+
+A longer, runnable R script is provided at **[`inst/scripts/tutorial.R`](inst/scripts/tutorial.R)**. It demonstrates an end-to-end example using the `iccat` dataset included with JABBA: building and fitting example scenarios, generating hindcasts, preparing data, creating plots for the main analysis modules, extracting summary values, and launching the dashboard.
+
+After installing JAGGview, the installed tutorial can be located with:
+
+```r
+system.file("scripts", "tutorial.R", package = "JAGGview")
+```
+
+You can open that path in RStudio/Positron and run the sections as needed. The script is intended as a user-facing example, not as an automated test; it therefore lives under `inst/scripts/` rather than `tests/`. The tutorial may take time to run because it fits example JABBA models and generates multiple plots.
 
 ## Launch the interactive dashboard
 
-`create_report()` assembles an interactive Shiny dashboard with the available diagnostics and result views. It supports two input patterns.
+`create_report()` builds an interactive Shiny dashboard. You can either let it load saved model results or pass data objects that you have already prepared.
 
-### Option A — Load saved JABBA results
-
-Give the function one or more `.RData` or `.rds` files. JAGGview identifies compatible fit and hindcast objects, prepares the necessary data, and opens the report.
+### Option A — Load saved results
 
 ```r
 library(JAGGview)
@@ -143,27 +147,27 @@ create_report(
 )
 ```
 
-### Option B — Supply precomputed JAGGview data
+The loader supports `.RData` and `.rds` inputs containing compatible JABBA fit or hindcast objects.
 
-This is useful when you want full control over preprocessing or already have the objects in memory.
+### Option B — Supply prepared data
 
 ```r
 fits <- fits_data(list_fit_models)
 hind <- hindcast_data(list_hc_models)
 kobe <- kobe_data(list_fit_models)
-priors_posteriors <- priors_posteriors_data(list_fit_models)
-retrospective <- retrospective_analysis_data(list_hc_models)
+pp <- priors_posteriors_data(list_fit_models)
+ra <- retrospective_analysis_data(list_hc_models)
 runs <- runs_tests_data(list_fit_models)
-trajectories <- trajectories_data(list_fit_models)
+traj <- trajectories_data(list_fit_models)
 
 create_report(
   fits_data = fits,
   hind_data = hind,
   kobe_data = kobe,
-  pp_data = priors_posteriors,
-  ra_data = retrospective,
+  pp_data = pp,
+  ra_data = ra,
   res_data = runs,
-  traj_data = trajectories,
+  traj_data = traj,
   animation = FALSE
 )
 ```
@@ -174,45 +178,40 @@ create_report(
 | :-- | :-- |
 | **Fits** | Observed abundance indices, fitted values, and 80% / 95% credibility intervals. |
 | **Runs Tests** | Residual run-test diagnostics across model scenarios. |
-| **CPUE Residuals** | Residual patterns, smooth trends, and RMSE annotations. |
+| **CPUE Residuals** | Residual patterns, smoothed trends, and RMSE annotations. |
 | **Priors × Posteriors** | Prior and posterior distributions for carrying capacity (`K`), intrinsic growth rate (`r`), and initial depletion (`psi`). |
 | **Retrospective Analysis** | Biomass, fishing mortality, B/Bmsy, F/Fmsy, process error, and surplus-production peels. |
 | **Hindcast** | Observed versus predicted hindcast values and MASE performance measures. |
-| **Trajectories** | BB0, BBmsy, FFmsy, biomass, harvest rate, catch, and biomass-deviation views. |
+| **Trajectories** | Biomass, harvest rate, catch, and related reference-point ratios over time. |
 | **Kobe** | Stock-status trajectories relative to biomass and fishing-mortality reference points. |
+| **Summary tables** | Tabular summaries of model estimates and derived indicators. |
 
 ## Analysis modules
 
-Every major analysis follows the same simple pattern: **prepare data** with a `*_data()` function, then **plot it** with the matching `*_ggplot()` function.
+The typical workflow is to prepare a `JAGGdata` object with a `*_data()` function and pass it to the corresponding plotting function.
 
-| Module | Prepare | Visualize | Focus |
+| Module | Prepare data | Plot | Focus |
 | :-- | :-- | :-- | :-- |
-| Fitted indices | `fits_data()` | `fits_ggplot()` | Observations, fitted index, and credibility intervals. |
-| Hindcast | `hindcast_data()` | `hindcast_ggplot()` | Predictive performance and Mean Absolute Scaled Error (MASE). |
+| Fitted indices | `fits_data()` | `fits_ggplot()` | Observations, fitted indices, and credibility intervals. |
+| Hindcast | `hindcast_data()` | `hindcast_ggplot()` | Predictive performance and MASE. |
 | Kobe | `kobe_data()` | `kobe_ggplot()` | Biomass and fishing-mortality status relative to reference points. |
-| Priors vs. posteriors | `priors_posteriors_data()` | `priors_posteriors_ggplot()` | How model fitting updates `K`, `r`, and `psi`. |
+| Priors vs. posteriors | `priors_posteriors_data()` | `priors_posteriors_ggplot()` | Prior and posterior distributions for model parameters. |
 | Retrospective analysis | `retrospective_analysis_data()` | `retrospective_analysis_ggplot()` | Peel behavior and retrospective-bias diagnostics. |
 | Runs tests | `runs_tests_data()` | `runs_tests_ggplot()` | Residual structure by scenario. |
-| CPUE residuals | `runs_tests_data()` | `cpue_residuals_ggplot()` | Residual time series, trend, and RMSE. |
-| Trajectories | `trajectories_data()` | `trajectories_ggplot()` | Core biomass, harvest, catch, and ratio trajectories. |
+| CPUE residuals | `runs_tests_data()` | `cpue_residuals_ggplot()` | Residual time series, trends, and RMSE. |
+| Trajectories | `trajectories_data()` | `trajectories_ggplot()` | Biomass, harvest, catch, and related indicators. |
 
-Most plotting functions return a `ggplot` object. Adjust labels, palettes, axis limits, facet layout, and other parameters in the corresponding function call, then add normal `ggplot2` layers or save the result with `ggplot2::ggsave()`.
+Most plotting functions return a `ggplot` object. Customize labels, palettes, axis limits, and facet layout through function arguments or additional `ggplot2` layers. Save figures with `ggplot2::ggsave()`.
 
 ## Build static figures
-
-A compact example for a reproducible analysis script:
 
 ```r
 library(JAGGview)
 library(ggplot2)
 
-# 1. Prepare data from JABBA model fits.
 trajectory_data <- trajectories_data(list_fit_models)
-
-# 2. Create a chart. See ?trajectories_ggplot for available options.
 trajectory_plot <- trajectories_ggplot(trajectory_data)
 
-# 3. Save a high-resolution figure.
 ggsave(
   filename = "trajectory.png",
   plot = trajectory_plot,
@@ -224,45 +223,64 @@ ggsave(
 
 ## Useful extractors
 
-JAGGview also includes convenience functions for incorporating result summaries into your own analyses, tables, or reports.
+These functions can be used in analyses, tables, or reports.
 
 | Function | Returns |
 | :-- | :-- |
 | `get_mase(hindcast_data)` | Hindcast MASE values by index and scenario. |
-| `get_pars(list_fit_models)` | Parameter estimates from fitted JABBA models. |
+| `get_pars(list_fit_models)` | Parameter estimates from fitted models. |
 | `get_ppmr(priors_posteriors_data)` | Posterior probability metric results. |
 | `get_ppvr(priors_posteriors_data)` | Posterior probability variable results. |
 | `get_refpts(list_fit_models)` | Reference points from fitted models. |
 | `get_rho(retrospective_analysis_data)` | Retrospective-bias (`rho`) metrics. |
-| `summary_table(...)` | A formatted summary table for reporting. |
+| `get_estimates(list_fit_models)` | Fitted estimates. |
+| `get_stats(list_fit_models)` | Model summary statistics. |
+| `get_hc_estimates(list_hc_models)` | Hindcast estimates. |
+| `get_hc_pars(list_hc_models)` | Hindcast parameter summaries. |
+| `get_hc_stats(list_hc_models)` | Hindcast summary statistics. |
+
+## Visualize table
+
+The results of the extraction functions can be presented in formatted tables.
+
+| Function | Returns |
+| :-- | :-- |
+| `summary_table(...)` | A formatted summary table. |
 
 ## Input expectations
 
-- **Fit-based functions** accept a JABBA fitted-model object or a list of fitted objects returned by `JABBA::fit_jabba()`.
-- **Hindcast-based functions** accept a JABBA hindcast object or a list of hindcast objects returned by `JABBA::hindcast_jabba()`.
-- A list lets you compare **scenarios** in the same visualization.
-- Functions that prepare data return structured objects used directly by their paired plotting functions and by `create_report()`.
-- The report loader accepts saved `.RData` and `.rds` files; unrelated objects in those files are ignored.
+- Fit-based functions accept a JABBA fitted-model object or a list of fitted objects returned by `JABBA::fit_jabba()`.
+- Hindcast-based functions accept a JABBA hindcast object or a list of hindcast objects returned by `JABBA::hindcast_jabba()`.
+- Lists allow comparison of multiple scenarios in a single visualization.
+- Preparation functions return structured data objects for their paired plotting functions and, where supported, `create_report()`.
+- When loading saved files, use `.RData` or `.rds` files containing compatible fit or hindcast results.
 
-## Testing
+## Testing and package checks
 
-From the repository root, run the test suite with:
+Run the package tests from the repository root:
+
+```r
+devtools::test()
+```
+
+Alternatively, run testthat tests directly:
 
 ```r
 testthat::test_dir("tests/testthat")
 ```
 
-Or, for the standard package-development workflow:
+Before submitting package changes, it is also good practice to run:
 
 ```r
-devtools::test()
+devtools::document()
+devtools::check()
 ```
 
 ## License and authors
 
 JAGGview is distributed under the [Creative Commons Attribution–NonCommercial–ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-**Authors:** Thiago Yukio Horita Pacheco (creator) and Rodrigo Sant'Ana.
+**Authors:** Thiago Yukio Horita Pacheco and Rodrigo Sant'Ana.
 
 ---
 
