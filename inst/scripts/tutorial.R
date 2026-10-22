@@ -101,8 +101,7 @@ priors_posteriors_ggplot(
   title_y = "Density",
   title_x = "Carrying capacity (K)",
   x_lim = c(0, 2.5e6),
-  palette = c("red", "blue"),
-  
+  palette = c("red", "blue")
 )
 
 priors_posteriors_ggplot(
@@ -304,7 +303,7 @@ print(PPMR)
 summary_table(PPMR)
 
 # Extract PPVR values
-PPVR <- get_ppmr(priors_posteriors)
+PPVR <- get_ppvr(priors_posteriors)
 print(PPVR)
 
 # Visualize PPVR values as table
