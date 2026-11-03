@@ -1,5 +1,7 @@
 #' @keywords internal
-.cpue_res_server <- function(input, output, session, res_df, use_si_suffix) {
+.cpue_res_server <- function(
+  input, output, session, res_df, use_si_suffix, text_size_tb, position_tb
+) {
   filtered_cpue_res <- reactiveVal(res_df)
 
   title_x_cpue_res <- reactiveVal("Year")
@@ -13,7 +15,7 @@
     )
   )
 
-  text_size_cpue_res <- reactiveVal(16)
+  text_size_cpue_res <- reactiveVal(text_size_tb)
 
   x_lim_min_cpue_res <- reactiveVal(
     .when_available(res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE))
@@ -37,7 +39,7 @@
     )
   )
 
-  position_cpue_res <- reactiveVal("top-left")
+  position_cpue_res <- reactiveVal(position_tb)
 
   si_suffix_cpue_res <- reactiveVal(use_si_suffix)
 
@@ -71,7 +73,7 @@
         NULL, length(unique(res_df$cpue_residuals$Index))
       )
     ),
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       res_df, min(res_df$cpue_residuals$Year, na.rm = TRUE)
     ),
@@ -88,12 +90,14 @@
         max(res_df$cpue_residuals$Res, na.rm = TRUE), TRUE
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$cpue_res_scenarios, {
-    if (!setequal(input$cpue_res_scenarios, cpue_res_values$scenarios_current)){
+    if (
+      !setequal(input$cpue_res_scenarios, cpue_res_values$scenarios_current)
+    ) {
       cpue_res_change$scenarios_changed = TRUE
     }
     else {
@@ -129,7 +133,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_text_size, {
-    if (input$cpue_res_text_size != cpue_res_values$text_size_current) {
+    if (
+      !isTRUE(
+        all.equal(input$cpue_res_text_size, cpue_res_values$text_size_current)
+      )
+    ) {
       cpue_res_change$text_size_changed = TRUE
     }
     else {
@@ -138,7 +146,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_x_min, {
-    if (input$cpue_res_x_min != cpue_res_values$x_min_current) {
+    if (
+      !isTRUE(
+        all.equal(input$cpue_res_x_min, cpue_res_values$x_min_current)
+      )
+    ) {
       cpue_res_change$x_min_changed = TRUE
     }
     else {
@@ -147,7 +159,11 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$cpue_res_x_max, {
-    if (input$cpue_res_x_max != cpue_res_values$x_max_current) {
+    if (
+      !isTRUE(
+        all.equal(input$cpue_res_x_max, cpue_res_values$x_max_current)
+      )
+    ) {
       cpue_res_change$x_max_changed = TRUE
     }
     else {
@@ -268,43 +284,32 @@
     if (input$navmenu == "tab_cpue_residuals") {
       updateControlbar(id = "controlbar", session = session)
 
-      y_min <- input$cpue_res_y_min
-      y_max <- input$cpue_res_y_max
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$cpue_res_y_min,
+        val2 = input$cpue_res_y_max,
+        val1_current = cpue_res_values$y_min_current,
+        val2_current = cpue_res_values$y_max_current,
+        input_id1 = "cpue_res_y_min",
+        input_id2 = "cpue_res_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "cpue_res_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "cpue_res_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-      
-      x_min <- .validate_year(input$cpue_res_x_min, "cpue_res_x_min", session)
-      x_max <- .validate_year(input$cpue_res_x_max, "cpue_res_x_max", session)
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(input$cpue_res_x_min, "cpue_res_x_min", session),
+        val2 = .validate_year(input$cpue_res_x_max, "cpue_res_x_max", session),
+        val1_current = cpue_res_values$x_min_current,
+        val2_current = cpue_res_values$x_max_current,
+        input_id1 = "cpue_res_x_min",
+        input_id2 = "cpue_res_x_max",
+        axis = "x"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "cpue_res_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "cpue_res_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       selected_colors <- current_colors_cpue_res()
 
@@ -599,7 +604,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

@@ -1,6 +1,6 @@
 #' @keywords internal
 .retrospective_analysis_B_server <- function(
-  input, output, session, ra_df, use_si_suffix
+  input, output, session, ra_df, use_si_suffix, text_size_tb, position_tb
 ) {
   filtered_ra_B <- reactiveVal(ra_df)
 
@@ -8,7 +8,7 @@
 
   title_y_ra_B <- reactiveVal("Biomass (t)")
 
-  text_size_ra_B <- reactiveVal(16)
+  text_size_ra_B <- reactiveVal(text_size_tb)
 
   x_lim_min_ra_B <- reactiveVal(
     .when_available(ra_df, min((ra_df$data %>% filter(Index == "B"))$Year))
@@ -36,7 +36,7 @@
     )
   )
 
-  position_ra_B <- reactiveVal("top-left")
+  position_ra_B <- reactiveVal(position_tb)
 
   si_suffix_ra_B <- reactiveVal(use_si_suffix)
 
@@ -57,7 +57,7 @@
     scenarios_current = unique(ra_df$data$Scenario),
     title_x_current = "Year",
     title_y_current = "Biomass (t)",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       ra_df, min((ra_df$data %>% filter(Index == "B"))$Year)
     ),
@@ -76,106 +76,68 @@
         max((ra_df$data %>% filter(Index == "B"))$uci, na.rm = TRUE), TRUE, 1.1
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$ra_B_scenarios, {
-    if (!setequal(input$ra_B_scenarios, ra_B_values$scenarios_current)) {
-      ra_B_change$scenarios_changed = TRUE
-    }
-    else {
-      ra_B_change$scenarios_changed = FALSE
-    }
+    ra_B_change$scenarios_changed <- !setequal(
+      input$ra_B_scenarios, ra_B_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_title_x, {
-    if (!identical(input$ra_B_title_x, ra_B_values$title_x_current)) {
-      ra_B_change$title_x_changed = TRUE
-    }
-    else {
-      ra_B_change$title_x_changed = FALSE
-    }
+    ra_B_change$title_x_changed <- !identical(
+      input$ra_B_title_x, ra_B_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_title_y, {
-    if (!identical(input$ra_B_title_y, ra_B_values$title_y_current)) {
-      ra_B_change$title_y_changed = TRUE
-    }
-    else {
-      ra_B_change$title_y_changed = FALSE
-    }
+    ra_B_change$title_y_changed <- !identical(
+      input$ra_B_title_y, ra_B_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_text_size, {
-    if (input$ra_B_text_size != ra_B_values$text_size_current) {
-      ra_B_change$text_size_changed = TRUE
-    }
-    else {
-      ra_B_change$text_size_changed = FALSE
-    }
+    ra_B_change$text_size_changed <- !isTRUE(
+      all.equal(input$ra_B_text_size, ra_B_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_x_min, {
-    if (input$ra_B_x_min != ra_B_values$x_min_current) {
-      ra_B_change$x_min_changed = TRUE
-    }
-    else {
-      ra_B_change$x_min_changed = FALSE
-    }
+    ra_B_change$x_min_changed <- !isTRUE(
+      all.equal(input$ra_B_x_min, ra_B_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_x_max, {
-    if (input$ra_B_x_max != ra_B_values$x_max_current) {
-      ra_B_change$x_max_changed = TRUE
-    }
-    else {
-      ra_B_change$x_max_changed = FALSE
-    }
+    ra_B_change$x_max_changed <- !isTRUE(
+      all.equal(input$ra_B_x_max, ra_B_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_y_min, {
-    if (
-      !isTRUE(
-        all.equal(input$ra_B_y_min, ra_B_values$y_min_current)
-      )
-    ) {
-      ra_B_change$y_min_changed = TRUE
-    }
-    else {
-      ra_B_change$y_min_changed = FALSE
-    }
+    ra_B_change$y_min_changed <- !isTRUE(
+      all.equal(input$ra_B_y_min, ra_B_values$y_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_y_max, {
-    if (
-      !isTRUE(
-        all.equal(input$ra_B_y_max, ra_B_values$y_max_current)
-      )
-    ) {
-      ra_B_change$y_max_changed = TRUE
-    }
-    else {
-      ra_B_change$y_max_changed = FALSE
-    }
+    ra_B_change$y_max_changed <- !isTRUE(
+      all.equal(input$ra_B_y_max, ra_B_values$y_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_position, {
-    if (!identical(input$ra_B_position, ra_B_values$position_current)) {
-      ra_B_change$position_changed = TRUE
-    }
-    else {
-      ra_B_change$position_changed = FALSE
-    }
+    ra_B_change$position_changed <- !identical(
+      input$ra_B_position, ra_B_values$position_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$ra_B_si_suffix, {
-    if (!identical(input$ra_B_si_suffix, ra_B_values$si_suffix_current)) {
-      ra_B_change$si_suffix_changed = TRUE
-    }
-    else {
-      ra_B_change$si_suffix_changed = FALSE
-    }
+    ra_B_change$si_suffix_changed <- !identical(
+      input$ra_B_si_suffix, ra_B_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_ra_B <- reactive({
@@ -202,44 +164,33 @@
       input$retrospective_analysis_tabs == "tab_ra_B"
     ) {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$ra_B_y_min
-      y_max <- input$ra_B_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "ra_B_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_B_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-      
-      x_min <- .validate_year(input$ra_B_x_min, "ra_B_x_min", session)
-      x_max <- .validate_year(input$ra_B_x_max, "ra_B_x_max", session)
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$ra_B_y_min,
+        val2 = input$ra_B_y_max,
+        val1_current = ra_B_values$y_min_current,
+        val2_current = ra_B_values$y_max_current,
+        input_id1 = "ra_B_y_min",
+        input_id2 = "ra_B_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "ra_B_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "ra_B_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(input$ra_B_x_min, "ra_B_x_min", session),
+        val2 = .validate_year(input$ra_B_x_max, "ra_B_x_max", session),
+        val1_current = ra_B_values$x_min_current,
+        val2_current = ra_B_values$x_max_current,
+        input_id1 = "ra_B_x_min",
+        input_id2 = "ra_B_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       ra_B_values$scenarios_current = input$ra_B_scenarios
       ra_B_values$indices_current = input$ra_B_indices
@@ -505,7 +456,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

@@ -5,6 +5,8 @@
 \title{Launch the report as a dashboard}
 \usage{
 create_report(
+  filename = NULL,
+  dir = getwd(),
   fits_data = list(),
   hind_data = list(),
   kobe_data = list(),
@@ -15,15 +17,24 @@ create_report(
   list_fit_models = list(),
   list_hc_models = list(),
   use_models_for_data = FALSE,
-  dir = getwd(),
-  filename = NULL,
   animation = TRUE,
   verbose = FALSE,
   use_si_suffix = FALSE,
+  position_tb = "top-left",
+  text_size_tb = 16,
   warn_level = 1
 )
 }
 \arguments{
+\item{filename}{Optional. A character vector with the name(s) of the
+\code{.RData} or \code{.rds} file(s) containing the JABBA model objects
+to be loaded. If supplied, it has priority over the other data
+arguments. If \code{NULL}, the data are taken from the pre-computed data
+structures and/or the model objects. Defaults to \code{NULL}.}
+
+\item{dir}{A character string with the directory where \code{filename} is
+located. Defaults to the current working directory (\code{getwd()}).}
+
 \item{fits_data}{A named list as returned by \code{\link{fits_data}()},
 with the elements \code{Li_Ui}, \code{CI_80} and \code{CI_95}. If empty,
 it is computed from \code{list_fit_models} only if
@@ -90,15 +101,6 @@ obtain the values shown in the summary tables. The sections whose data
 are not supplied stay empty and a warning is issued. Ignored if
 \code{filename} is supplied. Defaults to \code{FALSE}.}
 
-\item{dir}{A character string with the directory where \code{filename} is
-located. Defaults to the current working directory (\code{getwd()}).}
-
-\item{filename}{Optional. A character vector with the name(s) of the
-\code{.RData} or \code{.rds} file(s) containing the JABBA model objects
-to be loaded. If supplied, it has priority over the other data
-arguments. If \code{NULL}, the data are taken from the pre-computed data
-structures and/or the model objects. Defaults to \code{NULL}.}
-
 \item{animation}{A boolean value that if \code{TRUE}, shows animations in
 some plots. Defaults to \code{TRUE}. Building the animated plots may
 issue repeated \pkg{plotly} warnings (for example, "'scatter' objects
@@ -112,6 +114,18 @@ messages in the console. Defaults to \code{FALSE}.}
 \item{use_si_suffix}{A boolean value that if \code{TRUE}, will indicate
 whether SI suffixes will be used, or if \code{FALSE} then shows the
 absolute number, Defaults to \code{FALSE}.}
+
+\item{position_tb}{A character string specifying the table's position within
+each plot panel, combining a vertical and a horizontal keyword separated
+by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical
+component must be one of \code{"top"} or \code{"bottom"}; the horizontal
+component must be one of \code{"left"}, \code{"center"}, or
+\code{"right"}. Valid values are: \code{"top-left"}, \code{"top-center"},
+\code{"top-right"}, \code{"bottom-left"}, \code{"bottom-center"}, and
+\code{"bottom-right"}.}
+
+\item{text_size_tb}{An integer value that determines the size of the text.
+Defaults to 6.}
 
 \item{warn_level}{An integer value that sets how warnings are handled while
 the data are being prepared. Must be one of \code{-1} (warnings are
@@ -214,7 +228,7 @@ list_fit_models <- list(fit.S01, fit.S02)
 list_hc_models <- list(hc_S01, hc_S02)
 
 # (i) Saved model results (highest priority)
-create_report(filename = "model_results.RData")
+create_report("model_results.RData")
 
 # File in another directory, with progress messages
 create_report(

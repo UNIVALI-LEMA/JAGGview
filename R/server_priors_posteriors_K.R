@@ -1,6 +1,6 @@
 #' @keywords internal
 .priors_posteriors_K_server <- function(
-  input, output, session, pp_df, use_si_suffix
+  input, output, session, pp_df, use_si_suffix, text_size_tb, position_tb
 ) {
   filtered_pp_K <- reactiveVal(pp_df)
 
@@ -12,7 +12,7 @@
   
   posterior_color_pp_K <- reactiveVal("#2A9D5C")
 
-  text_size_pp_K <- reactiveVal(16)
+  text_size_pp_K <- reactiveVal(text_size_tb)
 
   x_lim_min_pp_K <- reactiveVal(
     .when_available(
@@ -29,7 +29,7 @@
     )
   )
 
-  position_pp_K <- reactiveVal("top-left")
+  position_pp_K <- reactiveVal(position_tb)
 
   si_suffix_pp_K <- reactiveVal(use_si_suffix)
 
@@ -54,7 +54,7 @@
     title_y_current = "Density",
     prior_color_current = "#1B4F8A",
     posterior_color_current = "#2A9D5C",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(
       pp_df, floor(min(pp_df$prior$K01, pp_df$posterior$K01, na.rm = TRUE) - 1)
     ),
@@ -64,99 +64,68 @@
         quantile(c(pp_df$prior$K01, pp_df$posterior$K01), 0.95, na.rm = TRUE)
       )
     ),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
   observeEvent(input$pp_K_scenarios, {
-    if (!setequal(input$pp_K_scenarios, pp_K_values$scenarios_current)) {
-      pp_K_change$scenarios_changed = TRUE
-    }
-    else {
-      pp_K_change$scenarios_changed = FALSE
-    }
+    pp_K_change$scenarios_changed <- !setequal(
+      input$pp_K_scenarios, pp_K_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_title_x, {
-    if (!identical(input$pp_K_title_x, pp_K_values$title_x_current)) {
-      pp_K_change$title_x_changed = TRUE
-    }
-    else {
-      pp_K_change$title_x_changed = FALSE
-    }
+    pp_K_change$title_x_changed <- !identical(
+      input$pp_K_title_x, pp_K_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_title_y, {
-    if (!identical(input$pp_K_title_y, pp_K_values$title_y_current)) {
-      pp_K_change$title_y_changed = TRUE
-    }
-    else {
-      pp_K_change$title_y_changed = FALSE
-    }
+    pp_K_change$title_y_changed <- !identical(
+      input$pp_K_title_y, pp_K_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_prior_color, {
-    if (!identical(input$pp_K_prior_color, pp_K_values$prior_color_current)) {
-      pp_K_change$prior_color_changed = TRUE
-    }
-    else {
-      pp_K_change$prior_color_changed = FALSE
-    }
+    pp_K_change$prior_color_changed <- !identical(
+      input$pp_K_prior_color, pp_K_values$prior_color_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_posterior_color, {
-    if (!identical(input$pp_K_posterior_color, 
-      pp_K_values$posterior_color_current)) {
-      pp_K_change$posterior_color_changed = TRUE
-    }
-    else {
-      pp_K_change$posterior_color_changed = FALSE
-    }
+    pp_K_change$posterior_color_changed <- !identical(
+      input$pp_K_posterior_color, pp_K_values$posterior_color_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_text_size, {
-    if (input$pp_K_text_size != pp_K_values$text_size_current) {
-      pp_K_change$text_size_changed = TRUE
-    }
-    else {
-      pp_K_change$text_size_changed = FALSE
-    }
+    pp_K_change$text_size_changed <- !isTRUE(
+      all.equal(input$pp_K_text_size, pp_K_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_min, {
-    if (input$pp_K_x_min != pp_K_values$x_min_current) {
-      pp_K_change$x_min_changed = TRUE
-    }
-    else {
-      pp_K_change$x_min_changed = FALSE
-    }
+    pp_K_change$x_min_changed <- !isTRUE(
+      all.equal(input$pp_K_x_min, pp_K_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_x_max, {
-    if (input$pp_K_x_max != pp_K_values$x_max_current) {
-      pp_K_change$x_max_changed = TRUE
-    }
-    else {
-      pp_K_change$x_max_changed = FALSE
-    }
+    pp_K_change$x_max_changed <- !isTRUE(
+      all.equal(input$pp_K_x_max, pp_K_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_position, {
-    if (!identical(input$pp_K_position, pp_K_values$position_current)) {
-      pp_K_change$position_changed = TRUE
-    }
-    else {
-      pp_K_change$position_changed = FALSE
-    }
+    pp_K_change$position_changed <- !identical(
+      input$pp_K_position, pp_K_values$position_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$pp_K_si_suffix, {
-    if (!identical(input$pp_K_si_suffix, pp_K_values$si_suffix_current)) {
-      pp_K_change$si_suffix_changed = TRUE
-    }
-    else {
-      pp_K_change$si_suffix_changed = FALSE
-    }
+    pp_K_change$si_suffix_changed <- !identical(
+      input$pp_K_si_suffix, pp_K_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_pp_K <- reactive({
@@ -183,25 +152,20 @@
       input$priors_posteriors_tabs == "tab_pp_K"
     ) {
       updateControlbar(id = "controlbar", session = session)
-      
-      x_min <- input$pp_K_x_min
-      x_max <- input$pp_K_x_max
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "pp_K_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "pp_K_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = input$pp_K_x_min,
+        val2 = input$pp_K_x_max,
+        val1_current = pp_K_values$x_min_current,
+        val2_current = pp_K_values$x_max_current,
+        input_id1 = "pp_K_x_min",
+        input_id2 = "pp_K_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
 
       pp_K_values$scenarios_current = input$pp_K_scenarios
       pp_K_values$indices_current = input$pp_K_indices
@@ -495,7 +459,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }

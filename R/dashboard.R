@@ -11,7 +11,7 @@
 #' returned by the respective \code{*_data()} functions of the package; or 
 #' (iii) the model objects \code{list_fit_models} and \code{list_hc_models}, 
 #' from which the data structures that were not supplied are computed, only
-#' if \code{use_models_for_data = TRUE} (see \strong{Details} and
+#' if \code{use_models_for_data = TRUE} (see \strong{Details} and 
 #' \strong{Examples}).
 #'
 #' @details
@@ -74,6 +74,13 @@
 #' warnings about the \code{frameOrder} attribute. They do not affect the
 #' result.
 #' 
+#' @param filename Optional. A character vector with the name(s) of the
+#'   \code{.RData} or \code{.rds} file(s) containing the JABBA model objects
+#'   to be loaded. If supplied, it has priority over the other data
+#'   arguments. If \code{NULL}, the data are taken from the pre-computed data
+#'   structures and/or the model objects. Defaults to \code{NULL}.
+#' @param dir A character string with the directory where \code{filename} is
+#'   located. Defaults to the current working directory (\code{getwd()}).
 #' @param fits_data A named list as returned by \code{\link{fits_data}()},
 #'   with the elements \code{Li_Ui}, \code{CI_80} and \code{CI_95}. If empty,
 #'   it is computed from \code{list_fit_models} only if 
@@ -130,13 +137,6 @@
 #'   obtain the values shown in the summary tables. The sections whose data
 #'   are not supplied stay empty and a warning is issued. Ignored if 
 #'   \code{filename} is supplied. Defaults to \code{FALSE}.
-#' @param dir A character string with the directory where \code{filename} is
-#'   located. Defaults to the current working directory (\code{getwd()}).
-#' @param filename Optional. A character vector with the name(s) of the
-#'   \code{.RData} or \code{.rds} file(s) containing the JABBA model objects
-#'   to be loaded. If supplied, it has priority over the other data
-#'   arguments. If \code{NULL}, the data are taken from the pre-computed data
-#'   structures and/or the model objects. Defaults to \code{NULL}.
 #' @param animation A boolean value that if \code{TRUE}, shows animations in
 #'   some plots. Defaults to \code{TRUE}. Building the animated plots may
 #'   issue repeated \pkg{plotly} warnings (for example, "'scatter' objects
@@ -148,6 +148,16 @@
 #' @param use_si_suffix A boolean value that if \code{TRUE}, will indicate 
 #'   whether SI suffixes will be used, or if \code{FALSE} then shows the 
 #'   absolute number, Defaults to \code{FALSE}.
+#' @param position_tb A character string specifying the table's position within 
+#'   each plot panel, combining a vertical and a horizontal keyword separated 
+#'   by a hyphen, in the form \code{"<vertical>-<horizontal>"}. The vertical 
+#'   component must be one of \code{"top"} or \code{"bottom"}; the horizontal 
+#'   component must be one of \code{"left"}, \code{"center"}, or 
+#'   \code{"right"}. Valid values are: \code{"top-left"}, \code{"top-center"}, 
+#'   \code{"top-right"}, \code{"bottom-left"}, \code{"bottom-center"}, and 
+#'   \code{"bottom-right"}.
+#' @param text_size_tb An integer value that determines the size of the text. 
+#'   Defaults to 6.
 #' @param warn_level An integer value that sets how warnings are handled while
 #'   the data are being prepared. Must be one of \code{-1} (warnings are
 #'   ignored), \code{0} (warnings are shown after the function finishes, the R
@@ -173,7 +183,7 @@
 #' list_hc_models <- list(hc_S01, hc_S02)
 #'
 #' # (i) Saved model results (highest priority)
-#' create_report(filename = "model_results.RData")
+#' create_report("model_results.RData")
 #'
 #' # File in another directory, with progress messages
 #' create_report(
@@ -242,11 +252,12 @@
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom gt render_gt gt_output
 create_report <- function(
-  fits_data = list(), hind_data = list(), kobe_data = list(), 
-  pp_data = list(), ra_data = list(), res_data = list(), 
+  filename = NULL, dir = getwd(), fits_data = list(), hind_data = list(), 
+  kobe_data = list(), pp_data = list(), ra_data = list(), res_data = list(), 
   traj_data = data.frame(), list_fit_models = list(), list_hc_models = list(), 
-  use_models_for_data = FALSE, dir = getwd(), filename = NULL, 
-  animation = TRUE, verbose = FALSE, use_si_suffix = FALSE, warn_level = 1
+  use_models_for_data = FALSE, animation = TRUE, verbose = FALSE, 
+  use_si_suffix = FALSE, position_tb = "top-left", text_size_tb = 16, 
+  warn_level = 1
 ) {
 
   if (!warn_level %in% c(-1, 0, 1, 2) || length(warn_level) != 1) {
@@ -505,7 +516,9 @@ create_report <- function(
     list_fit_models = list_fit_models,
     list_hc_models = list_hc_models,
     animation = animation,
-    use_si_suffix = use_si_suffix
+    use_si_suffix = use_si_suffix,
+    text_size_tb = text_size_tb,
+    position_tb = position_tb
   )
   
   ui <- .build_ui(
@@ -516,7 +529,9 @@ create_report <- function(
     ra_data = ra_data,
     res_data = res_data,
     traj_data = traj_data,
-    use_si_suffix = use_si_suffix
+    use_si_suffix = use_si_suffix,
+    text_size_tb = text_size_tb,
+    position_tb = position_tb
   )
   if (verbose) message("Initializing Interactive Data Visualization")
   shinyApp(ui, server)

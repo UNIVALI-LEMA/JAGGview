@@ -31,7 +31,7 @@
 
   kobe_values <- reactiveValues(
     scenarios_current = .when_available(
-      kobe_df, unique(kobe_df$cpue_residuals$Scenario)
+      kobe_df, unique(kobe_df$ci_data$Scenario)
     ),
     title_x_current = "B/Bmsy",
     title_y_current = "F/Fmsy",
@@ -43,84 +43,57 @@
   )
 
   observeEvent(input$kobe_scenarios, {
-    if (!setequal(input$kobe_scenarios, kobe_values$scenarios_current)) {
-      kobe_change$scenarios_changed = TRUE
-    }
-    else {
-      kobe_change$scenarios_changed = FALSE
-    }
+    kobe_change$scenarios_changed <- !setequal(
+      input$kobe_scenarios, kobe_values$scenarios_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_title_x, {
-    if (!identical(input$kobe_title_x, kobe_values$title_x_current)) {
-      kobe_change$title_x_changed = TRUE
-    }
-    else {
-      kobe_change$title_x_changed = FALSE
-    }
+    kobe_change$title_x_changed <- !identical(
+      input$kobe_title_x, kobe_values$title_x_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_title_y, {
-    if (!identical(input$kobe_title_y, kobe_values$title_y_current)) {
-      kobe_change$title_y_changed = TRUE
-    }
-    else {
-      kobe_change$title_y_changed = FALSE
-    }
+    kobe_change$title_y_changed <- !identical(
+      input$kobe_title_y, kobe_values$title_y_current
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_text_size, {
-    if (input$kobe_text_size != kobe_values$text_size_current) {
-      kobe_change$text_size_changed = TRUE
-    }
-    else {
-      kobe_change$text_size_changed = FALSE
-    }
+    kobe_change$text_size_changed <- !isTRUE(
+      all.equal(input$kobe_text_size, kobe_values$text_size_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_min, {
-    if (!isTRUE(all.equal(input$kobe_x_min, kobe_values$x_min_current))) {
-      kobe_change$x_min_changed = TRUE
-    }
-    else {
-      kobe_change$x_min_changed = FALSE
-    }
+    kobe_change$x_min_changed <- !isTRUE(
+      all.equal(input$kobe_x_min, kobe_values$x_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_x_max, {
-    if (!isTRUE(all.equal(input$kobe_x_max, kobe_values$x_max_current))) {
-      kobe_change$x_max_changed = TRUE
-    }
-    else {
-      kobe_change$x_max_changed = FALSE
-    }
+    kobe_change$x_max_changed <- !isTRUE(
+      all.equal(input$kobe_x_max, kobe_values$x_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_min, {
-    if (!isTRUE(all.equal(input$kobe_y_min, kobe_values$y_min_current))) {
-      kobe_change$y_min_changed = TRUE
-    }
-    else {
-      kobe_change$y_min_changed = FALSE
-    }
+    kobe_change$y_min_changed <- !isTRUE(
+      all.equal(input$kobe_y_min, kobe_values$y_min_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_y_max, {
-    if (!isTRUE(all.equal(input$kobe_y_max, kobe_values$y_max_current))) {
-      kobe_change$y_max_changed = TRUE
-    }
-    else {
-      kobe_change$y_max_changed = FALSE
-    }
+    kobe_change$y_max_changed <- !isTRUE(
+      all.equal(input$kobe_y_max, kobe_values$y_max_current)
+    )
   }, ignoreInit = TRUE)
 
   observeEvent(input$kobe_si_suffix, {
-    if (!identical(input$kobe_si_suffix, kobe_values$si_suffix_current)) {
-      kobe_change$si_suffix_changed = TRUE
-    }
-    else {
-      kobe_change$si_suffix_changed = FALSE
-    }
+    kobe_change$si_suffix_changed <- !identical(
+      input$kobe_si_suffix, kobe_values$si_suffix_current
+    )
   }, ignoreInit = TRUE)
 
   status_sliders_kobe <- reactive({
@@ -143,44 +116,33 @@
   observeEvent(input$confirm_button, {
     if (input$navmenu == "tab_kobe") {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$kobe_y_min
-      y_max <- input$kobe_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "kobe_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "kobe_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-      
-      x_min <- input$kobe_x_min
-      x_max <- input$kobe_x_max
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$kobe_y_min,
+        val2 = input$kobe_y_max,
+        val1_current = kobe_values$y_min_current,
+        val2_current = kobe_values$y_max_current,
+        input_id1 = "kobe_y_min",
+        input_id2 = "kobe_y_max",
+        axis = "y"
+      )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "kobe_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "kobe_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = input$kobe_x_min,
+        val2 = input$kobe_x_max,
+        val1_current = kobe_values$x_min_current,
+        val2_current = kobe_values$x_max_current,
+        input_id1 = "kobe_x_min",
+        input_id2 = "kobe_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       kobe_values$scenarios_current = input$kobe_scenarios
       kobe_values$title_x_current = input$kobe_title_x
@@ -564,7 +526,6 @@
           }
         ")
     }
-    # toc()
     results
   })
 }

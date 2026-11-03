@@ -1,12 +1,14 @@
 #' @keywords internal
-.runs_tests_server <- function(input, output, session, res_df, use_si_suffix) {
+.runs_tests_server <- function(
+  input, output, session, res_df, use_si_suffix, text_size_tb, position_tb
+) {
   filtered_runs_tests <- reactiveVal(res_df)
 
   title_x_runs_tests <- reactiveVal("Year")
 
   title_y_runs_tests <- reactiveVal("Residuals")
 
-  text_size_runs_tests <- reactiveVal(16)
+  text_size_runs_tests <- reactiveVal(text_size_tb)
 
   x_lim_min_runs_tests <- reactiveVal(
     .when_available(res_df, min(res_df$SE3$ymin))
@@ -28,7 +30,7 @@
     )
   )
 
-  position_runs_tests <- reactiveVal("top-left")
+  position_runs_tests <- reactiveVal(position_tb)
 
   si_suffix_runs_tests <- reactiveVal(use_si_suffix)
 
@@ -55,7 +57,7 @@
     ),
     title_x_current = "Year",
     title_y_current = "Residuals",
-    text_size_current = 16,
+    text_size_current = text_size_tb,
     x_min_current = .when_available(res_df, min(res_df$SE3$ymin)),
     x_max_current = .when_available(res_df, max(res_df$SE3$ymax)),
     y_min_current = .when_available(res_df, .round_to_nearest(
@@ -64,7 +66,7 @@
     y_max_current = .when_available(res_df, .round_to_nearest(
       max(res_df$SE3$ucl, na.rm = TRUE), TRUE, 2.5
     )),
-    position_current = "top-left",
+    position_current = position_tb,
     si_suffix_current = use_si_suffix
   )
 
@@ -108,7 +110,13 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_text_size, {
-    if (input$runs_tests_text_size != runs_tests_values$text_size_current) {
+    if (
+      !isTRUE(
+        all.equal(
+          input$runs_tests_text_size, runs_tests_values$text_size_current
+        )
+      )
+    ) {
       runs_tests_change$text_size_changed = TRUE
     }
     else {
@@ -117,7 +125,13 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_x_min, {
-    if (input$runs_tests_x_min != runs_tests_values$x_min_current) {
+    if (
+      !isTRUE(
+        all.equal(
+          input$runs_tests_x_min, runs_tests_values$x_min_current
+        )
+      )
+    ) {
       runs_tests_change$x_min_changed = TRUE
     }
     else {
@@ -126,7 +140,13 @@
   }, ignoreInit = TRUE)
 
   observeEvent(input$runs_tests_x_max, {
-    if (input$runs_tests_x_max != runs_tests_values$x_max_current) {
+    if (
+      !isTRUE(
+        all.equal(
+          input$runs_tests_x_max, runs_tests_values$x_max_current
+        )
+      )
+    ) {
       runs_tests_change$x_max_changed = TRUE
     }
     else {
@@ -206,48 +226,37 @@
   observeEvent(input$confirm_button, {
     if (input$navmenu == "tab_runs_tests") {
       updateControlbar(id = "controlbar", session = session)
-      
-      y_min <- input$runs_tests_y_min
-      y_max <- input$runs_tests_y_max
 
-      if (!is.na(y_min) && !is.na(y_max) && y_min > y_max) {
-        tmp_y <- y_min
-        y_min <- y_max
-        y_max <- tmp_y
-        updateSelectInput(
-          session, inputId = "runs_tests_y_min", selected = y_min
-        )
-        updateSelectInput(
-          session, inputId = "runs_tests_y_max", selected = y_max
-        )
-        showNotification(
-          ui = "First y value shouldn't be higher than the second y value",
-          type = "warning", duration = 10
-        )
-      }
-
-      x_min <- .validate_year(
-        input$runs_tests_x_min, "runs_tests_x_min", session
-      )
-      x_max <- .validate_year(
-        input$runs_tests_x_max, "runs_tests_x_max", session
+      lim_y <- .validate_interval(
+        session, 
+        val1 = input$runs_tests_y_min,
+        val2 = input$runs_tests_y_max,
+        val1_current = runs_tests_values$y_min_current,
+        val2_current = runs_tests_values$y_max_current,
+        input_id1 = "runs_tests_y_min",
+        input_id2 = "runs_tests_y_max",
+        axis = "y"
       )
 
-      if (!is.na(x_min) && !is.na(x_max) && x_min > x_max) {
-        tmp_x <- x_min
-        x_min <- x_max
-        x_max <- tmp_x
-        updateSelectInput(
-          session, inputId = "runs_tests_x_min", selected = x_min
-        )
-        updateSelectInput(
-          session, inputId = "runs_tests_x_max", selected = x_max
-        )
-        showNotification(
-          ui = "First x value shouldn't be higher than the second x value",
-          type = "warning", duration = 10
-        )
-      }
+      lim_x <- .validate_interval(
+        session,
+        val1 = .validate_year(
+          input$runs_tests_x_min, "runs_tests_x_min", session
+        ),
+        val2 = .validate_year(
+          input$runs_tests_x_max, "runs_tests_x_max", session
+        ),
+        val1_current = runs_tests_values$x_min_current,
+        val2_current = runs_tests_values$x_max_current,
+        input_id1 = "runs_tests_x_min",
+        input_id2 = "runs_tests_x_max",
+        axis = "x"
+      )
+
+      x_min <- lim_x$min
+      x_max <- lim_x$max
+      y_min <- lim_y$min
+      y_max <- lim_y$max
 
       runs_tests_values$scenarios_current = input$runs_tests_scenarios
       runs_tests_values$indices_current = input$runs_tests_indices
@@ -602,7 +611,6 @@
           )
         )
       )
-    # toc()
     results
   })
 }
