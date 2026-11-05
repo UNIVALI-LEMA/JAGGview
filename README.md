@@ -77,6 +77,17 @@ For other operating systems, follow the [official JAGS project instructions](htt
 install.packages(c("remotes", "rjags", "R2jags"))
 
 remotes::install_github("jabbamodel/JABBA", dependencies = TRUE)
+```
+
+To install stable version, after approval from CRAN:
+
+```r
+install.packages("JAGGview", dependencies = TRUE)
+```
+
+To install develop version (GitHub):
+
+```r
 remotes::install_github("UNIVALI-LEMA/JAGGview", dependencies = TRUE)
 ```
 
