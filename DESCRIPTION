@@ -8,17 +8,17 @@ Authors@R:
         person("Laboratório de Estudos Marinhos Aplicados da Univali", , , "univalilema@gmail.com", role = "cph"),
         person("Henning", "Winker", role = "cph")
     )
-Description: A package designed for the preparation and visualization, in both static and dynamic formats, 
-    of key diagnostics and results from JABBA model workflows. The package includes functions 
-    for structuring data derived from model outputs, covering features such as hindcasts, 
-    retrospective analyses, time-series visualizations, Kobe plots, prior and posterior 
-    parameter distributions, sequential tests, hypothesis testing summaries, and overviews of 
-    model performance and results.
+Description: Description: Provides functions to prepare, visualize, and report results from 'JABBA'
+    stock assessment models. The package structures data for model fits, hindcasts,
+    retrospective analyses, residual runs tests, Kobe plots, prior and posterior
+    distributions, and trajectories. Static figures are built with 'ggplot2', and an
+    interactive dashboard is provided with 'shiny' and 'bs4Dash'.
 License: CC BY-NC-SA 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests: 
+    JABBA,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
@@ -49,7 +49,5 @@ Imports:
     stringr,
     tidyr,
     tools
-Remotes:
-    jabbamodel/JABBA
 URL: https://github.com/UNIVALI-LEMA/JAGGview
 BugReports: https://github.com/UNIVALI-LEMA/JAGGview/issues
