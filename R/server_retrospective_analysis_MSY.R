@@ -363,7 +363,7 @@
       data_lines <- data_lines %>%
         filter(!is.na(SB_i), !is.na(SP))
 
-      plot_ly(colors = c("black", ss3col(8))) %>%
+      plot_ly(colors = c("black", .ss3col(8))) %>%
         add_lines(
           data = data_lines,
           x = ~SB_i,

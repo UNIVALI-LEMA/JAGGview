@@ -359,7 +359,7 @@
 
       annotations <- append(annotations, table$annotations)
 
-      plot_ly(colors = c("black", ss3col(8))) %>%
+      plot_ly(colors = c("black", .ss3col(8))) %>%
         add_ribbons(
           data = data_ref,
           x = ~Year,

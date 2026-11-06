@@ -38,6 +38,8 @@ Imports:
     plotly,
     ps,
     purrr,
+    randtests,
+    reshape2,
     rlang,
     rstudioapi,
     scales,

@@ -152,8 +152,9 @@ fits_data <- function(list_fit_models, indices_factor = NULL) {
 #'
 #' @details
 #' Hindcast runs are extracted and the retrospective labels are formatted. MASE 
-#' is computed with \code{JABBA::jbmase()}. Indices whose MASE is \code{NA} are 
-#' removed from all returned data frames.
+#' is computed with internal function \code{.jbmase()}, imported from 
+#' \code{JABBA} package. Indices whose MASE is \code{NA} are removed from all 
+#' returned data frames.
 #' 
 #' If \code{indices_factor} is supplied, the \code{Index} column is reordered
 #' following that vector.
@@ -790,13 +791,13 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' \code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
 #' 
 #' @details
-#' The runs test is computed with \code{JABBA::jbruns_sig3()} for each index 
-#' and scenario.\code{lcl} and \code{ucl} are it's 3-sigma limits, and 
-#' \code{pvalue} is the runs test p-value. In \code{SE3}, \code{class} is
-#' \code{"red"} when \code{pvalue < 0.05} (residuals are not random) and 
-#' \code{"green"} otherwise. In \code{cpue_residuals}, \code{class} is
-#' \code{"red"} when the residual falls outisde the 3-sigma limits and 
-#' \code{"white"} otherwise.
+#' The runs test is computed with a \code{JABBA} imported function, used as a 
+#' internal function, \code{.jbruns_sig3()} for each index and scenario. 
+#' \code{lcl} and \code{ucl} are it's 3-sigma limits, and \code{pvalue} is the 
+#' runs test p-value. In \code{SE3}, \code{class} is \code{"red"} when 
+#' \code{pvalue < 0.05} (residuals are not random) and \code{"green"} 
+#' otherwise. In \code{cpue_residuals}, \code{class} is \code{"red"} when the 
+#' residual falls outisde the 3-sigma limits and \code{"white"} otherwise.
 #' 
 #' A single LOESS curve is fitted to the residuals of all indices and scenarios 
 #' together (\code{Res - Year}). The bands (\code{lower} and \code{upper}) are 
@@ -846,7 +847,6 @@ retrospective_analysis_data <- function(list_hc_models) {
 #' @export
 #' @importFrom tidyr drop_na pivot_longer
 #' @importFrom dplyr %>% mutate filter left_join select
-#' @importFrom JABBA jbruns_sig3
 #' @importFrom stats loess predict
 #' @importFrom forcats fct_relevel
 runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
@@ -880,7 +880,7 @@ runs_tests_data <- function(list_fit_models, indices_factor = NULL) {
         select(all_of(i)) %>%
         drop_na() %>%
         pull(1)
-      test <- jbruns_sig3(index, type = "resid")
+      test <- .jbruns_sig3(index, type = "resid")
       rows <- out.test$Index == name & out.test$Scenario == j
       out.test$lcl[rows] <- test$sig3lim[1]
       out.test$ucl[rows] <- test$sig3lim[2]

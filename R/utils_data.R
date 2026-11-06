@@ -1,3 +1,32 @@
+# Imported function from JABBA used as internal function (addBfrac())
+#' .addBfrac()
+#'
+#' add biomass reference to kb ouput as fraction Bmsy or B0, e.g. for Blim or MSST
+#' @param jabba bfrac fraction of Bmsy or B0
+#' @param base defines biomass base "bmsy" or "b0"
+#' @param quantiles default is 95CIs as c(0.025,0.975)
+#' @return ratios in kobe object 
+#' @noRd
+#' @keywords internal
+.addBfrac <- function(kb, bfrac=0.5, bref = c("bmsy","b0"),quantiles = c(0.025,0.975)){
+  if(!is.null(kb$settings)){ 
+    if(is.null(jabba$kbtrj)) stop("rerun with fit_jabba(...,save.trj = TRUE)")
+    kb = kb$kbtrj
+  } 
+  if(bref[1]=="bmsy"){
+    kb$BBfrac = kb$stock/bfrac
+    kb$Bref =  kb$B/(kb$stock/bfrac)
+  }
+  
+  if(bref[1]=="b0"){
+    kb$BBfrac = kb$BB0/bfrac
+    kb$Bref =  kb$B/(kb$BB0/bfrac)
+  }
+  Bref = data.frame(t(quantile(kb$Bref,c(0.5,quantiles[1],quantiles[2]))))
+  colnames(Bref) = c("mu","lci","uci")
+  return(list(kb=kb,bref=Bref))
+}
+
 #' Convert a 3D array into a long-format data frame
 #'
 #' Internal helper that transforms a three-dimensional array into a data frame 
@@ -424,6 +453,164 @@
   any(grepl("^-[0-9]{4}$", names(obj)))
 }
 
+# Imported function from JABBA used as internal function (jbmase())
+#' .jbmase()
+#'
+#' Computes Mean Absolute Scaled Errors as a measure of prediction skill
+#' @param hc object list of hindcasts from hindcast_jabba() or jbhcxval()
+#' @param naive.min minimum MASE denominator (naive predictions) for MASE.adj (default = 0.1)
+#' @param index option to compute for specific indices (numeric & in order)
+#' @param residuals if TRUE, outputs individual prediction and naive residuals   
+#' @param verbose if FALSE run silent
+#' @return hc containing estimates of key joint results from all hindcast run 
+#' @noRd
+#' @keywords internal
+#' @importFrom utils tail
+#' @importFrom reshape2 melt
+.jbmase<-function (hc, naive.min = 0.1, index = NULL, residuals = FALSE, verbose = TRUE) {
+  MASE = Residuals = NULL
+  d. = do.call(rbind, lapply(hc, function(x) {
+    x$diags
+  }))
+  xmin = min(d.$year)
+  all.indices = unique(d.$name)
+  if (is.null(index)) 
+    index = 1:length(all.indices)
+  d. = d.[d.$name %in% all.indices[index], ]
+  peels = unique(d.$retro.peels)
+  styr = max(hc[[1]]$yr) - max(peels)
+  years = min(d.$year):max(d.$year)
+  yr = unique(d.$year)
+  endyrvec = rev(sort(years[length(years) - peels]))
+  if (verbose) 
+    cat("\n", "><> Only including indices that have years overlapping hind-cast horizan", 
+        "\n")
+  indices = unique(d.$name)
+  valid = NULL
+  for (i in 1:length(indices)) {
+    if (nrow(d.[d.$name %in% indices[i] & d.$year > styr & 
+                d.$retro.peels %in% peels[1], ]) > 1) {
+      valid = c(valid, paste(indices[i]))
+    }
+  }
+  if (verbose) 
+    cat("\n", "><> Including indices:", valid, "\n")
+  n.indices = length(valid)
+  for (i in 1:length(indices)) {
+    if (nrow(d.[d.$name %in% indices[i] & d.$year > styr & 
+                d.$retro.peels %in% peels[1], ]) > 1) {
+      xv = d.[d.$name %in% indices[i], ]
+      yr = unique(xv$year)
+      yr.eval <- sort(endyrvec)
+      yr.obs <- yr.eval %in% yr
+      pe.eval = which(yr.eval %in% yr)[-1]
+      if (length(which(yr.eval %in% yr)) - length(pe.eval) < 
+          1) {
+        pe.eval = pe.eval[-1]
+      }
+      npe <- length(pe.eval)
+      obs.eval <- rep(NA, length(yr.eval))
+      obs.eval[yr.eval %in% yr] = xv$obs[xv$retro.peels == 
+                                           min(xv$retro.peels)][yr %in% yr.eval]
+      if (is.na(obs.eval[1])) 
+        nhc = length(endyrvec) - 1
+      py = xv$year[xv$retro.peels == min(xv$retro.peels) & 
+                     xv$year > styr - xmin]
+      obs = xv$obs[xv$retro.peels == min(xv$retro.peels) & 
+                     xv$year > styr - xmin]
+      if (verbose) 
+        cat(paste("\n", "Computing MASE with", ifelse(npe < 
+                                                        (length(endyrvec) - 1), "only", "all"), npe, 
+                  "of", length(endyrvec) - 1, " prediction residuals for Index", 
+                  xv$name[1]), "\n")
+      if (verbose & npe < (length(endyrvec) - 1)) 
+        cat(paste("\n", "Warning:  Unequal spacing of naive predictions residuals may influence the interpretation of MASE", 
+                  "\n", "\n"))
+      naive.eval = log(obs.eval[is.na(obs.eval)==F][-length(obs.eval[is.na(obs.eval)== F])]) - log(obs.eval[is.na(obs.eval) == F][-1])
+      naive.obs  = log(obs.eval[is.na(obs.eval)==F][-length(obs.eval[is.na(obs.eval)== F])])
+      naive.hat  = log(obs.eval[is.na(obs.eval) == F][-1])
+      nhc = length(endyrvec) - 1
+      
+      pred.resid=pred.obs=pred.hat=hcyr=NULL #rep(NA,(length(peels) - 1))
+      for (j in 1:(length(peels) - 1)) {
+        if (endyrvec[j] %in% xv$year) {
+          x <- min(py):max(yr.eval)
+          x <- x[1:(length(x) - (j-1))]
+          #x = x[x %in% unique(xv$year)]
+          y <- tail(xv[xv$retro.peels == peels[j + 1] & xv$year==max(x),]$hat,1)
+          yobs <- tail(xv[xv$retro.peels == peels[j + 1]& xv$year==max(x),]$obs,1)
+          pred.resid = c(pred.resid,log(y) - log(yobs))
+          pred.obs   = c(pred.obs, log(yobs))
+          pred.hat   = c(pred.hat,log(y))
+          hcyr   = c(hcyr, max(x))
+          
+        }
+      }
+      pred.resid = pred.resid[1:length(naive.eval)]
+      maepr = mean(abs(pred.resid))
+      if (is.na(obs.eval[1])) 
+        obs.eval[1] = rev(obs[obs %in% obs.eval == F])[1]
+      scaler = mean(abs(naive.eval))
+      scaler.adj = mean(pmax(abs(naive.eval), naive.min))
+      res.i = NULL
+      res.i = data.frame(Index    =unique(xv$name)[1], Year      =yr.eval[pe.eval],
+                         Pred.Res =pred.resid,         Naive.Res =naive.eval,  n.eval = npe,
+                         Pred.obs =pred.obs,           Pred.hat  =pred.hat,
+                         Naive.obs=naive.obs,          Naive.hat =naive.hat)
+      MASE.i = NULL
+      MASE.i = data.frame(Index = unique(xv$name)[1], MASE = maepr/scaler, 
+                          MASE.adj = maepr/scaler.adj, MAE.PR = maepr, 
+                          MAE.base = scaler, n.eval = npe)
+      Residuals = rbind(Residuals, res.i)
+    }
+    else {
+      xv = d.[d.$name %in% indices[i], ]
+      if (verbose) 
+        cat(paste0("\n", "No observations in evaluation years to compute prediction residuals for Index ", 
+                   xv$name[1]), "\n")
+      MASE.i = NULL
+      MASE.i = data.frame(Index = unique(xv$name)[1], MASE = NA, 
+                          MASE.adj = NA, MAE.PR = NA, MAE.base = NA, n.eval = 0)
+    }
+    MASE = rbind(MASE, MASE.i)
+  }
+  jstats = apply(abs(Residuals[c("Pred.Res", "Naive.Res")]), 
+                 2, mean)
+  joint = data.frame(Index = "joint", MASE = jstats[1]/jstats[2], 
+                     MAE.PR = jstats[1], MAE.base = jstats[2], MASE.adj = jstats[1]/pmax(jstats[2], 
+                                                                                         naive.min), n.eval = nrow(Residuals))
+  MASE = rbind(MASE, joint)
+  rownames(MASE) <- 1:nrow(MASE)
+  
+  if (!residuals) 
+    return(MASE)
+  
+  rsdl=t(hc[[1]]$residuals)[dim(hc[[1]]$residuals)[2]-((length(hc)-2):0),]
+  if (is.matrix(rsdl))
+    rsdl=melt(data.frame(Year=dimnames(rsdl)[[1]],rsdl),id="Year")
+  else{
+    rsdl=data.frame(Year=names(rsdl),Index=rsdl)
+    names(rsdl)[2]=names(hc[[1]][["inputseries"]]$cpue)[2]
+    rsdl=melt(rsdl,id="Year")}
+  names(rsdl)=c("Year","Index","Model.Res")
+  Residuals=merge(Residuals,rsdl)
+  
+  rsdl=t(hc[[1]]$std.residuals)[dim(hc[[1]]$std.residuals)[2]-((length(hc)-2):0),]
+  if (is.matrix(rsdl))
+    rsdl=melt(data.frame(Year=dimnames(rsdl)[[1]],rsdl),id="Year")
+  else{
+    rsdl=data.frame(Year=names(rsdl),Index=rsdl)
+    names(rsdl)[2]=names(hc[[1]][["inputseries"]]$cpue)[2]
+    rsdl=melt(rsdl,id="Year")}
+  names(rsdl)=c("Year","Index","Model.StdRes")
+  Residuals=merge(Residuals,rsdl)
+  out = list()
+  out$mase = MASE
+  out$resids = Residuals
+  return(out)
+}
+
+
 # Adapted version of JABBA::jbplot_ensemble() (https://github.com/jabbamodel/JABBA)
 # Changes: Allow the function to return data without plotting. 
 # Pending pull request: https://github.com/jabbamodel/JABBA/pull/31.
@@ -509,7 +696,6 @@
 #'   .jbplot_ensemble2(bet)
 #' }
 #' }
-#' @importFrom JABBA addBfrac
 #' @importFrom grDevices adjustcolor dev.off graphics.off png
 #' @importFrom graphics abline arrows axis box legend lines par points polygon
 #' @importFrom stats aggregate
@@ -586,7 +772,7 @@
   subplots = c(subplots,(1:8)[(1:8)%in%subplots==F])[1:6]  
   }
   
-  kb = addBfrac(kb,bfrac=bfrac,bref=bref,quantiles=quantiles)$kb
+  kb = .addBfrac(kb,bfrac=bfrac,bref=bref,quantiles=quantiles)$kb
   
   kbs = aggregate(cbind(stock,harvest,B,H,Bdev,Catch,BB0,BBfrac)~year+run,kb,
                    quantile, c(0.5,quantiles))
@@ -597,8 +783,8 @@
   years         <- unique(kbs$year)
   
   if(is.null(col)){
-    col = ss3col(n,1)
-    shadecol <- ss3col(n,shadealpha)
+    col = .ss3col(n,1)
+    shadecol <- .ss3col(n,shadealpha)
   } else {
     shadecol= adjustcolor(col, alpha.f=shadealpha)
   }
@@ -823,7 +1009,6 @@
 #'   .jbplot_retro2(bet)
 #' }
 #' }
-#' @importFrom JABBA ss3col
 #' @importFrom grDevices dev.off
 .jbplot_retro2 <- function (hc, type = c("B", "F", "BBmsy", "FFmsy", "procB", "SP"), 
     forecast = FALSE, ylabs = NULL, add = F, output.dir = getwd(), 
@@ -872,7 +1057,7 @@
     years = hc$yr
     nyrs = length(years)
     if (is.null(cols)) 
-        cols = c("black", ss3col(length(peels) - 1))
+        cols = c("black", .ss3col(length(peels) - 1))
     if (is.null(xlim)) {
         xlim = range(years)
     }
@@ -1112,6 +1297,48 @@
         return(out)
 }
 
+# Imported function from JABBA used as internal function (jbruns_sig3())
+#' Function to do runs.test and 3 x sigma limits
+#'
+#' runs test is conducted with library(randtests)
+#' @param x residuals from CPUE fits
+#' @param type only c("resid","observations")
+#' @param mixing c("less","greater","two.sided"). Default less is checking for postive autocorrelation only    
+#' @return runs p value and 3 x sigma limits
+#' @noRd
+#' @author Henning Winker (GFCM) and Laurence Kell (Sea++)
+#' @keywords internal
+#' @importFrom randtests runs.test
+.jbruns_sig3 <- function(x,type=NULL,mixing="less") {
+  if(is.null(type)) type="resid"
+  if(type=="resid"){
+    mu = 0}else{mu = mean(x, na.rm = TRUE)}
+  alternative=c("two.sided","left.sided","right.sided")[which(c("two.sided", "less","greater")%in%mixing)]
+  # Average moving range
+  mr  <- abs(diff(x - mu))
+  amr <- mean(mr, na.rm = TRUE)
+  # Upper limit for moving ranges
+  ulmr <- 3.267 * amr
+  # Remove moving ranges greater than ulmr and recalculate amr, Nelson 1982
+  mr  <- mr[mr < ulmr]
+  amr <- mean(mr, na.rm = TRUE)
+  # Calculate standard deviation, Montgomery, 6.33
+  stdev <- amr / 1.128
+  # Calculate control limits
+  lcl <- mu - 3 * stdev
+  ucl <- mu + 3 * stdev
+  if(nlevels(factor(sign(x)))>1){
+    # Make the runs test non-parametric
+    runstest = runs.test(x,threshold = 0,alternative = alternative)
+    if(is.na(runstest$p.value)) p.value =0.001
+    pvalue = round(runstest$p.value,3)} else {
+      pvalue = 0.001
+    }
+  
+  return(list(sig3lim=c(lcl,ucl),p.runs= pvalue))
+}
+
+
 #' Report the origin of a data structure
 #'
 #' Internal helper used by \code{create_report()} to tell where a data
@@ -1251,12 +1478,11 @@
 #' @keywords internal
 #' @noRd
 #' @importFrom dplyr bind_rows everything select
-#' @importFrom JABBA jbmase
 .process_mase <- function(fit_list) {
   temp00 <- lapply(
     fit_list,
     function(fit) {
-      jbmase(fit, verbose = FALSE) %>% 
+      .jbmase(fit, verbose = FALSE) %>% 
         mutate(Scenario = fit[[1]]$scenario)
     }
   )
@@ -1537,6 +1763,30 @@
     }
   )
   result <- bind_rows(temp00)
+}
+
+# Imported function from JABBA used as internal function (ss3col())
+#' .ss3col r4ss color generator 
+#' @param n number of colors
+#' @param alpha transluscency 
+#' @return vector of color codes
+#' @noRd
+#' @keywords internal
+.ss3col <- function(n,alpha=1){
+  if(n>3) col <- rc4(n+1)[-1]
+  if(n<3)  col <- rc4(n)
+  if(n==3) col <- c("blue","red","green3")
+  
+  if(alpha<1){
+    # new approach thanks to Trevor Branch
+    cols <- adjustcolor(col, alpha.f=alpha)
+    if(n==1) cols = "darkgrey"#adjustcolor("darkgrey", alpha.f=alpha)
+  } else {
+    cols=col
+    if(n==1) cols <- "black"
+  }
+  
+  return(cols)
 }
 
 #' Validate index values against available data

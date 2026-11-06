@@ -248,7 +248,6 @@
 #' @importFrom shinyjs disable enable useShinyjs
 #' @importFrom stringr str_split_i
 #' @importFrom grDevices colorRampPalette
-#' @importFrom JABBA ss3col
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom gt render_gt gt_output
 create_report <- function(

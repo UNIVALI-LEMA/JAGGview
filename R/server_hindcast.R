@@ -425,7 +425,7 @@
           annotations <- append(annotations, table$annotations)
         }
 
-        p <- plot_ly(colors = c("black", ss3col(8))) %>%
+        p <- plot_ly(colors = c("black", .ss3col(8))) %>%
           add_ribbons(
             data = filter(data, retro.peels == 0),
             x = ~year,

@@ -78,8 +78,9 @@ trajectories. Points show the observed values (large) and the predicted
 values (small) at the first hindcast year of each run. The MASE of each
 panel is shown in a table.
 
-The colors of the retrospective runs come from \code{JABBA::ss3col()},
-which supports up to 8 runs.
+The colors of the retrospective runs come from internal function
+\code{.ss3col()} imported from \code{JABBA} package, which supports up to 8
+runs.
 
 If \code{zoom = TRUE}, a zoomed view of the hindcast window is inserted in
 the upper right corner of each panel, and the window is marked by a dashed

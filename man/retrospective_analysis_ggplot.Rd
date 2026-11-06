@@ -100,9 +100,9 @@ of biomass, one for each run.
 
 The table in each panel shows the retrospective bias (rho) of the selected
 indicator. The colors of the retrospective runs come from
-\code{JABBA::ss3col()}, which supports up to 8 runs. The axis limits are
-applied with \code{ggplot2::coord_cartesian()}, so they are the same in all
-panels.
+internal function \code{.ss3col()} imported from \code{JABBA} package, which
+supports up to 8 #' runs. The axis limits are applied with
+\code{ggplot2::coord_cartesian()}, so they are the same in all panels.
 }
 \examples{
 \dontrun{

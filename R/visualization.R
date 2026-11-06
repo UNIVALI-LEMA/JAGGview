@@ -295,8 +295,9 @@ fits_ggplot <- function(
 #' values (small) at the first hindcast year of each run. The MASE of each 
 #' panel is shown in a table.
 #' 
-#' The colors of the retrospective runs come from \code{JABBA::ss3col()},
-#' which supports up to 8 runs.
+#' The colors of the retrospective runs come from internal function 
+#' \code{.ss3col()} imported from \code{JABBA} package, which supports up to 8 
+#' runs.
 #' 
 #' If \code{zoom = TRUE}, a zoomed view of the hindcast window is inserted in
 #' the upper right corner of each panel, and the window is marked by a dashed
@@ -371,7 +372,6 @@ fits_ggplot <- function(
 #' geom_rect geom_ribbon ggplot guide_legend guides labs scale_colour_manual 
 #' scale_fill_manual scale_y_continuous theme 
 #' @importFrom dplyr %>% filter mutate select vars
-#' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_plot geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
 hindcast_ggplot <- function(
@@ -483,8 +483,8 @@ hindcast_ggplot <- function(
     labs(x = title_x, y = title_y, colour = "") +
     scale_y_continuous(labels = y_labels) +
     facet_grid(rows = vars(Scenario), cols = vars(Index)) +
-    scale_fill_manual(values = ss3col(8)) +
-    scale_colour_manual(values = c("black", ss3col(8))) +
+    scale_fill_manual(values = .ss3col(8)) +
+    scale_colour_manual(values = c("black", .ss3col(8))) +
     coord_cartesian(xlim = x_lim, ylim = y_lim) +
     .my_theme() +
     theme(legend.position = "bottom") +
@@ -919,9 +919,9 @@ priors_posteriors_ggplot <- function(
 #'
 #' The table in each panel shows the retrospective bias (rho) of the selected
 #' indicator. The colors of the retrospective runs come from
-#' \code{JABBA::ss3col()}, which supports up to 8 runs. The axis limits are
-#' applied with \code{ggplot2::coord_cartesian()}, so they are the same in all
-#' panels.
+#' internal function \code{.ss3col()} imported from \code{JABBA} package, which 
+#' supports up to 8 #' runs. The axis limits are applied with 
+#' \code{ggplot2::coord_cartesian()}, so they are the same in all panels.
 #'
 #' @param df_lists A \code{JAGGdata} list as returned by
 #'   \code{\link{retrospective_analysis_data}()}, with the elements
@@ -998,7 +998,6 @@ priors_posteriors_ggplot <- function(
 #' @importFrom ggplot2 .pt aes coord_cartesian element_text facet_wrap 
 #' geom_hline geom_line geom_ribbon ggplot guide_legend guides labs 
 #' scale_colour_manual scale_x_continuous scale_y_continuous theme
-#' @importFrom JABBA ss3col
 #' @importFrom ggpp geom_table_npc ttheme_gtdefault
 #' @importFrom stringr str_split_i
 retrospective_analysis_ggplot <- function(
@@ -1139,7 +1138,7 @@ retrospective_analysis_ggplot <- function(
       table.theme = ttheme_gtdefault(base_size = text_size * .pt)
     ) +
     facet_wrap(~Scenario, ncol = n_col, scales = "fixed") +
-    scale_colour_manual(values = c("black", ss3col(8))) +
+    scale_colour_manual(values = c("black", .ss3col(8))) +
     coord_cartesian(xlim = x_lim, ylim = y_lim)
 
   if (indicator_name == "MSY") {

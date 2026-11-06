@@ -33,13 +33,13 @@ JABBA fits, and smooths the residuals with LOESS. The result is ready for
 \code{\link{runs_tests_ggplot}()} and \code{\link{cpue_residuals_ggplot}()}.
 }
 \details{
-The runs test is computed with \code{JABBA::jbruns_sig3()} for each index
-and scenario.\code{lcl} and \code{ucl} are it's 3-sigma limits, and
-\code{pvalue} is the runs test p-value. In \code{SE3}, \code{class} is
-\code{"red"} when \code{pvalue < 0.05} (residuals are not random) and
-\code{"green"} otherwise. In \code{cpue_residuals}, \code{class} is
-\code{"red"} when the residual falls outisde the 3-sigma limits and
-\code{"white"} otherwise.
+The runs test is computed with a \code{JABBA} imported function, used as a
+internal function, \code{.jbruns_sig3()} for each index and scenario.
+\code{lcl} and \code{ucl} are it's 3-sigma limits, and \code{pvalue} is the
+runs test p-value. In \code{SE3}, \code{class} is \code{"red"} when
+\code{pvalue < 0.05} (residuals are not random) and \code{"green"}
+otherwise. In \code{cpue_residuals}, \code{class} is \code{"red"} when the
+residual falls outisde the 3-sigma limits and \code{"white"} otherwise.
 
 A single LOESS curve is fitted to the residuals of all indices and scenarios
 together (\code{Res - Year}). The bands (\code{lower} and \code{upper}) are

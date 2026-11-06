@@ -32,8 +32,9 @@ result is ready for \code{\link{hindcast_ggplot}()}.
 }
 \details{
 Hindcast runs are extracted and the retrospective labels are formatted. MASE
-is computed with \code{JABBA::jbmase()}. Indices whose MASE is \code{NA} are
-removed from all returned data frames.
+is computed with internal function \code{.jbmase()}, imported from
+\code{JABBA} package. Indices whose MASE is \code{NA} are removed from all
+returned data frames.
 
 If \code{indices_factor} is supplied, the \code{Index} column is reordered
 following that vector.

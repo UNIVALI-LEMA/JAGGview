@@ -805,7 +805,6 @@
 #' @importFrom dplyr %>% filter
 #' @importFrom ggplot2 aes coord_cartesian geom_line geom_point geom_ribbon 
 #' ggplot labs scale_colour_manual scale_fill_manual scale_y_continuous theme
-#' @importFrom JABBA ss3col
 .make_zoom_plot <- function(df, scen, idx, min_year, max_year, y_labels) {
   zoom_data <- df$data %>%
     filter(year >= min_year, Scenario == scen, Index == idx)
@@ -837,8 +836,8 @@
     geom_point(data = hc_data_1, show.legend = FALSE,
       aes(x = year, y = hat, fill = retro), pch = 21, size = 2) +
     labs(x = "Year", y = "Index", colour = "") +
-    scale_fill_manual(values = ss3col(8)) +
-    scale_colour_manual(values = c("black", ss3col(8))) +
+    scale_fill_manual(values = .ss3col(8)) +
+    scale_colour_manual(values = c("black", .ss3col(8))) +
     scale_y_continuous(labels = y_labels) +
     coord_cartesian(xlim = c(min_year, max_year)) +
     .my_theme() +
