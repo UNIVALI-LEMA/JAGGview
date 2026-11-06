@@ -3,3 +3,4 @@
 ^dev$
 ^cran-comments\.md$
 ^NEWS\.md$
+^CRAN-SUBMISSION$

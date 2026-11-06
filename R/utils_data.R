@@ -2,7 +2,7 @@
 #' .addBfrac()
 #'
 #' add biomass reference to kb ouput as fraction Bmsy or B0, e.g. for Blim or MSST
-#' @param jabba bfrac fraction of Bmsy or B0
+#' @param kb bfrac fraction of Bmsy or B0
 #' @param base defines biomass base "bmsy" or "b0"
 #' @param quantiles default is 95CIs as c(0.025,0.975)
 #' @return ratios in kobe object 
@@ -10,7 +10,7 @@
 #' @keywords internal
 .addBfrac <- function(kb, bfrac=0.5, bref = c("bmsy","b0"),quantiles = c(0.025,0.975)){
   if(!is.null(kb$settings)){ 
-    if(is.null(jabba$kbtrj)) stop("rerun with fit_jabba(...,save.trj = TRUE)")
+    if(is.null(kb$kbtrj)) stop("rerun with fit_jabba(...,save.trj = TRUE)")
     kb = kb$kbtrj
   } 
   if(bref[1]=="bmsy"){
@@ -1701,6 +1701,25 @@
   )
   result <- bind_rows(temp00)
   return(result)
+}
+
+# Imported function from JABBA used as internal function (rc4())
+#' rc4 r4ss color palette 
+#' @param n number of colors
+#' @param alpha transluscency 
+#' @return vector of color codes
+#' @keywords internal
+#' @noRd
+rc4 <- function(n,alpha=1){
+  # a subset of rich.colors by Arni Magnusson from the gregmisc package
+  # a.k.a. rich.colors.short, but put directly in this function
+  # to try to diagnose problem with transparency on one computer
+  x <- seq(0, 1, length = n)
+  r <- 1/(1 + exp(20 - 35 * x))
+  g <- pmin(pmax(0, -0.8 + 6 * x - 5 * x^2), 1)
+  b <- dnorm(x, 0.25, 0.15)/max(dnorm(x, 0.25, 0.15))
+  rgb.m <- matrix(c(r, g, b), ncol = 3)
+  rich.vector <- apply(rgb.m, 1, function(v) rgb(v[1], v[2], v[3], alpha=alpha))
 }
 
 #' Rename data frame columns
