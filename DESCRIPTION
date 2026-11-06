@@ -51,3 +51,5 @@ Imports:
     tools
 Remotes:
     jabbamodel/JABBA
+URL: https://github.com/UNIVALI-LEMA/JAGGview
+BugReports: https://github.com/UNIVALI-LEMA/JAGGview/issues
