@@ -424,7 +424,10 @@
   any(grepl("^-[0-9]{4}$", names(obj)))
 }
 
-#' .jbplot_ensemble2()
+# Adapted version of JABBA::jbplot_ensemble() (https://github.com/jabbamodel/JABBA)
+# Changes: Allow the function to return data without plotting. 
+# Pending pull request: https://github.com/jabbamodel/JABBA/pull/31.
+#' .jbplot_ensemble2() 
 #'
 #' Plots plots JABBA ensemble models + projections - joint or by run  
 #' 
@@ -785,6 +788,10 @@
   if(kbout) return(kb)
 } 
 
+# Adapted version of JABBA::jbplot_retro() (https://github.com/jabbamodel/JABBA)
+# Changes: Update logic to ganle new parameters and improve plotting 
+# functionality by decoupling the data processing from plotting
+# Pending pull request: https://github.com/jabbamodel/JABBA/pull/32.
 #' .jbplot_retro2() to plot retrospective pattern
 #'
 #' Plots retrospective pattern of B, F, BBmsy, FFmsy, BB0 and SP #'

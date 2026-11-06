@@ -1,8 +1,13 @@
 # Install JAGGview dependencies
 install.packages(c("remotes", "rjags", "R2jags"), dependencies = TRUE)
 
-# Install JABBA and JAGGview from GitHub
+# Install JABBA from GitHub
 remotes::install_github("jabbamodel/JABBA", dependencies = TRUE)
+
+# Install stable version from CRAN
+install.packages("JAGGview", dependencies = TRUE)
+
+# Install JAGGview from GitHub
 remotes::install_github("UNIVALI-LEMA/JAGGview", dependencies = TRUE)
 
 # Load JAGGview

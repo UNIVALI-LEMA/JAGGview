@@ -7,3 +7,5 @@
 test.R
 *.rdata
 dev/
+/.quarto/
+**/*.quarto_ipynb
