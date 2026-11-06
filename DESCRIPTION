@@ -8,7 +8,7 @@ Authors@R:
         person("Laboratório de Estudos Marinhos Aplicados da Univali", , , "univalilema@gmail.com", role = "cph"),
         person("Henning", "Winker", role = "cph")
     )
-Description: Description: Provides functions to prepare, visualize, and report results from 'JABBA'
+Description: Provides functions to prepare, visualize, and report results from 'JABBA'
     stock assessment models. The package structures data for model fits, hindcasts,
     retrospective analyses, residual runs tests, Kobe plots, prior and posterior
     distributions, and trajectories. Static figures are built with 'ggplot2', and an
